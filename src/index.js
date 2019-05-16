@@ -1,8 +1,7 @@
-import React, { Component } from "react";
+import CoreApp from "./components/CoreApp";
+import ContributedComponent from "./components/ContributedComponent";
+import MainMenuContribution from "./components/MainMenuContribution";
 
-class CoreModule extends Component {
-  static menu = null;
-  static routes = [];
-}
+export default class CoreModule {}
 
-export default CoreModule;
+export { CoreApp, ContributedComponent, MainMenuContribution };

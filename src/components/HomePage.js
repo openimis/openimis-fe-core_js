@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import logo from "../../public/openIMIS.png";
 
-class Home extends Component {
+class HomePage extends Component {
   render() {
     return (
       <div>
@@ -11,4 +11,4 @@ class Home extends Component {
   }
 }
 
-export default Home;
+export default HomePage;

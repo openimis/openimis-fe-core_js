@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import { BrowserRouter as Router, Route } from "react-router-dom";
+import { Router, Route, Redirect, Switch } from "react-router-dom";
 import { fade } from "@material-ui/core/styles/colorManipulator";
 import classNames from "classnames";
 import kebabCase from "lodash/kebabCase";
@@ -18,13 +18,15 @@ import {
 import MenuIcon from "@material-ui/icons/Menu";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import ContributedComponent from "./ContributedComponent";
-import Home from "./Home";
+import Contributions from "./Contributions";
+import history from "./history";
 
-
-const DRAWER_WIDTH = 240;
-const MAIN_MENU_CONTRIBUTION_KEY = "core.MainMenu";
-const ROUTER_CONTRIBUTION_KEY = "core.Router";
+import {
+  DRAWER_WIDTH,
+  MAIN_MENU_CONTRIBUTION_KEY,
+  APP_BAR_CONTRIBUTION_KEY,
+  ROUTER_CONTRIBUTION_KEY
+} from "../index";
 
 const styles = theme => ({
   root: {
@@ -133,9 +135,17 @@ const styles = theme => ({
 });
 
 class CoreApp extends Component {
-  state = {
-    open: false
-  };
+  routerContributions = null;
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      open: false
+    };
+    this.routerContributions = props.modulesManager.getContributions(
+      ROUTER_CONTRIBUTION_KEY
+    );
+  }
 
   handleDrawerOpen = () => {
     this.setState({ open: true });
@@ -146,82 +156,91 @@ class CoreApp extends Component {
   };
 
   render() {
-    const { classes, theme, modulesManager } = this.props;
+    const { classes, theme } = this.props;
     const { open } = this.state;
 
-    let routerContributions = modulesManager.getContributions(
-      ROUTER_CONTRIBUTION_KEY
-    );
     return (
-      <Fragment>
-        <AppBar
-          position="fixed"
-          className={classNames(classes.appBar, {
-            [classes.appBarShift]: open
-          })}
-        >
-          <Toolbar disableGutters={!open}>
-            <IconButton
-              color="inherit"
-              aria-label="Open drawer"
-              onClick={this.handleDrawerOpen}
-              className={classNames(classes.menuButton, open && classes.hide)}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" color="inherit" noWrap>
-              openIMIS
-            </Typography>
-            <div className={classes.grow} />
-          </Toolbar>
-        </AppBar>
+      <Router history={history}>
         <Fragment>
-          <Drawer
-            className={classes.drawer}
-            variant="persistent"
-            anchor="left"
-            open={open}
-            classes={{
-              paper: classes.drawerPaper
-            }}
-          >
-            <div className={classes.drawerHeader}>
-              <IconButton onClick={this.handleDrawerClose}>
-                {theme.direction === "ltr" ? (
-                  <ChevronLeftIcon />
-                ) : (
-                  <ChevronRightIcon />
-                )}
-              </IconButton>
-            </div>
-            <Divider />
-            <ContributedComponent
-              {...this.props}
-              contributionKey={MAIN_MENU_CONTRIBUTION_KEY}
-            />
-          </Drawer>
-          <main
-            className={classNames(classes.content, {
-              [classes.contentShift]: open
+          <AppBar
+            position="fixed"
+            className={classNames(classes.appBar, {
+              [classes.appBarShift]: open
             })}
           >
-            <div className={classes.drawerHeader} />
-            <div>
-              <Router basename={"/"}>
-                <Route exact path="/" component={Home} />
-                {routerContributions.map((route, index) => (
+            <Toolbar disableGutters={!open}>
+              <IconButton
+                color="inherit"
+                aria-label="Open drawer"
+                onClick={this.handleDrawerOpen}
+                className={classNames(classes.menuButton, open && classes.hide)}
+              >
+                <MenuIcon />
+              </IconButton>
+              <Typography
+                variant="h6"
+                color="inherit"
+                noWrap
+                onClick={e => history.push("/home")}
+              >
+                openIMIS {`${process.env.PUBLIC_URL || ''}/aaa`}
+              </Typography>
+              <Contributions
+                {...this.props}
+                contributionKey={APP_BAR_CONTRIBUTION_KEY}
+              >
+                <div className={classes.grow} />
+              </Contributions>
+            </Toolbar>
+          </AppBar>
+
+          <Fragment>
+            <Drawer
+              className={classes.drawer}
+              variant="persistent"
+              anchor="left"
+              open={open}
+              classes={{
+                paper: classes.drawerPaper
+              }}
+            >
+              <Contributions
+                {...this.props}
+                contributionKey={MAIN_MENU_CONTRIBUTION_KEY}
+              >
+                <div className={classes.drawerHeader}>
+                  <IconButton onClick={this.handleDrawerClose}>
+                    {theme.direction === "ltr" ? (
+                      <ChevronLeftIcon />
+                    ) : (
+                      <ChevronRightIcon />
+                    )}
+                  </IconButton>
+                </div>
+                <Divider />
+              </Contributions>
+            </Drawer>
+            <main
+              className={classNames(classes.content, {
+                [classes.contentShift]: open
+              })}
+            >
+              <div className={classes.drawerHeader} />
+              <Switch>
+                <Route exact path={`${process.env.PUBLIC_URL || ''}/`} render={() => <Redirect to={`${process.env.PUBLIC_URL || ''}/home`} />} />
+                {this.routerContributions.map((route, index) => (
                   <Route
                     exact
                     key={`route_${kebabCase(route.path)}_${index}`}
-                    path={route.path}
+                    path={`${process.env.PUBLIC_URL || ''}/${route.path}`}
                     component={route.component}
                   />
                 ))}
-              </Router>
-            </div>
-          </main>
+              </Switch>
+            </main>
+          </Fragment>
         </Fragment>
-      </Fragment>
+      </Router>
     );
   }
 }

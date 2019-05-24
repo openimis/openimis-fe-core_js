@@ -1,7 +1,5 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-
 
 
 class ProxyPage extends Component {
@@ -18,14 +16,10 @@ class ProxyPage extends Component {
     }
     return (
       <div>
-        <iframe title={url} src={url} scrolling="no" />
+        <iframe title={url} src={url} scrolling="no" style={styles} />
       </div>
     );
   }
 }
-
-ProxyPage.propTypes = {
-  url: PropTypes.url.isRequired
-};
 
 export default ProxyPage;

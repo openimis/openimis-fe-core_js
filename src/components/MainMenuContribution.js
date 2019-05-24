@@ -7,8 +7,14 @@ import ListItemText from "@material-ui/core/ListItemText";
 import { Divider } from "@material-ui/core";
 
 class MainMenuContribution extends Component {
+
+  redirect(route) {
+    this.props.history.push(route);
+  }
+
   render() {
-    const { header, entries, history } = this.props;
+    const { header, entries } = this.props;
+
     return (
       <Fragment>
         <ListItem>
@@ -18,9 +24,7 @@ class MainMenuContribution extends Component {
           <ListItem
             button
             key={entry.text}
-            onClick={e => {
-              history.push(entry.route);
-            }}
+            onClick={(e) => {this.redirect(entry.route)}}
           >
             <ListItemIcon>{entry.icon}</ListItemIcon>
             <ListItemText primary={entry.text} />
@@ -34,7 +38,7 @@ class MainMenuContribution extends Component {
 
 MainMenuContribution.propTypes = {
   header: PropTypes.string.isRequired,
-  entries: PropTypes.object.isRequired,
+  entries: PropTypes.array.isRequired,
   history: PropTypes.object.isRequired
 };
 

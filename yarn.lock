@@ -745,10 +745,6 @@
     prop-types "^15.6.0"
     react-is "^16.6.3"
 
-"@openimis/fe-core@^0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@openimis/fe-core/-/fe-core-0.0.3.tgz#e8b53f6f179370471eec8d8aad30ecfa0aefaed6"
-
 "@svgr/core@^2.4.1":
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/@svgr/core/-/core-2.4.1.tgz#03a407c28c4a1d84305ae95021e8eabfda8fa731"

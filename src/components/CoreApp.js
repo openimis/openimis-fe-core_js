@@ -21,12 +21,11 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import Contributions from "./Contributions";
 import history from "./history";
 
-import {
-  DRAWER_WIDTH,
-  MAIN_MENU_CONTRIBUTION_KEY,
-  APP_BAR_CONTRIBUTION_KEY,
-  ROUTER_CONTRIBUTION_KEY
-} from "../index";
+export const DRAWER_WIDTH = 240;
+export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
+export const MAIN_MENU_CONTRIBUTION_KEY = "core.MainMenu";
+export const ROUTER_CONTRIBUTION_KEY = "core.Router";
+export const MAIN_SEARCHER_CONTRIBUTION_KEY = "core.MainSearcher";
 
 const styles = theme => ({
   root: {
@@ -135,7 +134,6 @@ const styles = theme => ({
 });
 
 class CoreApp extends Component {
-  routerContributions = null;
 
   constructor(props) {
     super(props);
@@ -156,7 +154,7 @@ class CoreApp extends Component {
   };
 
   render() {
-    const { classes, theme } = this.props;
+    const { classes, theme, ...others } = this.props;
     const { open } = this.state;
 
     return (
@@ -183,10 +181,10 @@ class CoreApp extends Component {
                 noWrap
                 onClick={e => history.push("/home")}
               >
-                openIMIS {`${process.env.PUBLIC_URL || ''}/aaa`}
+                openIMIS
               </Typography>
               <Contributions
-                {...this.props}
+                {...others}
                 contributionKey={APP_BAR_CONTRIBUTION_KEY}
               >
                 <div className={classes.grow} />
@@ -205,18 +203,10 @@ class CoreApp extends Component {
               }}
             >
               <Contributions
-                {...this.props}
+                {...others}
                 contributionKey={MAIN_MENU_CONTRIBUTION_KEY}
               >
-                <div className={classes.drawerHeader}>
-                  <IconButton onClick={this.handleDrawerClose}>
-                    {theme.direction === "ltr" ? (
-                      <ChevronLeftIcon />
-                    ) : (
-                      <ChevronRightIcon />
-                    )}
-                  </IconButton>
-                </div>
+                <div className={classes.drawerHeader} onClick={this.handleDrawerClose}/>
                 <Divider />
               </Contributions>
             </Drawer>
@@ -251,4 +241,5 @@ CoreApp.propTypes = {
   modulesManager: PropTypes.object.isRequired
 };
 
-export default withStyles(styles, { withTheme: true })(CoreApp);
+// export default withStyles(styles, { withTheme: true })(CoreApp);
+export default withStyles(styles)(CoreApp);

@@ -11,7 +11,7 @@ import {
   FormControl,
   FormGroup
 } from "@material-ui/core";
-import { MAIN_SEARCHER_CONTRIBUTION_KEY, DRAWER_WIDTH } from "../index";
+import { MAIN_SEARCHER_CONTRIBUTION_KEY, DRAWER_WIDTH } from "./CoreApp";
 
 const styles = theme => ({
   formControl: {
@@ -128,8 +128,6 @@ const styles = theme => ({
 });
 
 class MainSearcher extends Component {
-
-  searcherContribs = null;
 
   constructor(props) {
     super(props);

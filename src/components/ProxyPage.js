@@ -9,7 +9,7 @@ class ProxyPage extends Component {
         width: "1px",
         minWidth: "100%",
         height: "100vh",
-        marginTop: marginTop || "-80px",
+        marginTop: marginTop || "-68px",
         marginBottom: marginBottom || "0px",
         marginLeft: marginLeft || "-48px",
         marginRight: marginRight || "-48px"

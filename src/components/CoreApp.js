@@ -12,16 +12,13 @@ import {
   IconButton,
   Typography,
   Drawer,
-  Divider,
-  List
+  Divider
 } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
-import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import Contributions from "./Contributions";
 import history from "./history";
 
-export const DRAWER_WIDTH = 240;
+export const DRAWER_WIDTH = 300;
 export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
 export const MAIN_MENU_CONTRIBUTION_KEY = "core.MainMenu";
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";

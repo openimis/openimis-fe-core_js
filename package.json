@@ -1,6 +1,6 @@
 {
   "name": "@openimis/fe-core",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "openIMIS Frontend Core reference module",
   "license": "AGPL-3.0-only",
   "repository": "openimis/openimis-fe-core_js",
@@ -23,6 +23,7 @@
   "peerDependencies": {
     "@material-ui/core": "^3.9.3",
     "@material-ui/icons": "^3.0.2",
+    "@openimis/fe-core": "^0.0.3",
     "prop-types": "^15.5.4",
     "react": "^15.0.0 || ^16.0.0",
     "react-dom": "^15.0.0 || ^16.0.0",
@@ -31,6 +32,7 @@
   "devDependencies": {
     "@material-ui/core": "^3.9.3",
     "@material-ui/icons": "^3.0.2",
+    "@openimis/fe-core": "^0.0.3",    
     "@svgr/rollup": "^2.4.1",
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.2.5",
@@ -58,7 +60,8 @@
     "rollup-plugin-node-resolve": "^3.3.0",
     "rollup-plugin-peer-deps-external": "^2.2.0",
     "rollup-plugin-postcss": "^1.6.2",
-    "rollup-plugin-url": "^1.4.0"
+    "rollup-plugin-url": "^1.4.0",
+    "prop-types": "^15.5.4"
   },
   "files": [
     "dist"

@@ -9,7 +9,7 @@ import { withStyles } from "@material-ui/core/styles";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
-import { List, IconButton } from "@material-ui/core";
+import { Divider, List, IconButton } from "@material-ui/core";
 
 const styles = theme => ({
   panel: {
@@ -18,7 +18,7 @@ const styles = theme => ({
   heading: {
     fontSize: theme.typography.pxToRem(20),
     color: theme.palette.text.primary,
-    paddingTop: '10px'
+    paddingTop: "10px"
   },
   secondaryHeading: {
     fontSize: theme.typography.pxToRem(15),
@@ -60,16 +60,19 @@ class MainMenuContribution extends Component {
           <ExpansionPanelDetails>
             <List component="nav">
               {entries.map(entry => (
-                <ListItem
-                  button
-                  key={`${header}_${entry.text}`}
-                  onClick={e => {
-                    this.redirect(entry.route);
-                  }}
-                >
-                  <ListItemIcon>{entry.icon}</ListItemIcon>
-                  <ListItemText primary={entry.text} />
-                </ListItem>
+                <Fragment>
+                  <ListItem
+                    button
+                    key={`${header}_${entry.text}`}
+                    onClick={e => {
+                      this.redirect(entry.route);
+                    }}
+                  >
+                    <ListItemIcon>{entry.icon}</ListItemIcon>
+                    <ListItemText primary={entry.text} />
+                  </ListItem>
+                  {entry.withDivider && <Divider />}
+                </Fragment>
               ))}
             </List>
           </ExpansionPanelDetails>

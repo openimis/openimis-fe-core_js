@@ -43,27 +43,26 @@ class MainMenuContribution extends Component {
     const { classes, header, icon, entries } = this.props;
 
     return (
-      <Fragment>
-        <ExpansionPanel
-          className={classes.panel}
-          expanded={this.state.expanded}
-          onChange={this.toggleExpanded}
+      <ExpansionPanel
+        className={classes.panel}
+        expanded={this.state.expanded}
+        onChange={this.toggleExpanded}
+      >
+        <ExpansionPanelSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls={`${header}-content`}
+          id={`${header}-header`}
         >
-          <ExpansionPanelSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls={`${header}-content`}
-            id={`${header}-header`}
-          >
-            <IconButton>{icon}</IconButton>
-            <Typography className={classes.heading}>{header}</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails>
+          <IconButton>{icon}</IconButton>
+          <Typography className={classes.heading}>{header}</Typography>
+        </ExpansionPanelSummary>
+        <ExpansionPanelDetails>
             <List component="nav">
               {entries.map(entry => (
-                <Fragment>
+                <Fragment key={`${header}_${entry.text}`}>
                   <ListItem
                     button
-                    key={`${header}_${entry.text}`}
+                    key={`${header}_${entry.text}_item`}
                     onClick={e => {
                       this.redirect(entry.route);
                     }}
@@ -71,13 +70,12 @@ class MainMenuContribution extends Component {
                     <ListItemIcon>{entry.icon}</ListItemIcon>
                     <ListItemText primary={entry.text} />
                   </ListItem>
-                  {entry.withDivider && <Divider />}
+                  {entry.withDivider && <Divider key={`${header}_${entry.text}_divider`}/>}
                 </Fragment>
               ))}
             </List>
           </ExpansionPanelDetails>
-        </ExpansionPanel>
-      </Fragment>
+      </ExpansionPanel>
     );
   }
 }

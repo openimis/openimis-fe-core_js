@@ -1,6 +1,7 @@
 import React, { Component } from "react";
+import { withRouter } from "react-router-dom";
 import { withStyles } from "@material-ui/core/styles";
-import { IconButton, ListItemSecondaryAction } from "@material-ui/core";
+import { IconButton } from "@material-ui/core";
 import { ExitToApp } from "@material-ui/icons";
 
 const styles = theme => ({
@@ -10,13 +11,15 @@ const styles = theme => ({
 })
 
 class Logout extends Component {
-
-    logout = e => {
-        this.props.history.push("/Logout.aspx");
+    
+    logout = () => {
+        this.props.history.push("/logout");
+        window.location.reload();
     }
 
     render() {
         const { classes } = this.props;
+        
         return (
             <IconButton className={classes.button} aria-label="Logout" onClick={this.logout}>
                 <ExitToApp />

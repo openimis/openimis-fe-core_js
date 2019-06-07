@@ -11,7 +11,7 @@ import {
   FormControl,
   FormGroup
 } from "@material-ui/core";
-import { MAIN_SEARCHER_CONTRIBUTION_KEY, DRAWER_WIDTH } from "./CoreApp";
+import { MAIN_SEARCHER_CONTRIBUTION_KEY, DRAWER_WIDTH } from "./AppWrapper";
 
 const styles = theme => ({
   formControl: {

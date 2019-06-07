@@ -30,4 +30,3 @@ Contributions.propTypes = {
 };
 
 export default withRouter(Contributions);
-// export default Contributions;

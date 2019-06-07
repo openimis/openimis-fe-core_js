@@ -1,4 +1,5 @@
-import CoreApp from "./components/CoreApp";
+
+import App from "./components/App";
 import Contributions from "./components/Contributions";
 import MainMenuContribution from "./components/MainMenuContribution";
 import MainSearcher from "./components/MainSearcher";
@@ -11,4 +12,4 @@ const CoreModule = {
   "core.AppBar": [MainSearcher, Logout]
 };
 
-export { CoreModule, CoreApp, Contributions, MainMenuContribution, ProxyPage };
+export { App, CoreModule, Contributions, MainMenuContribution, ProxyPage };

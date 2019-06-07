@@ -1,10 +1,10 @@
 import React, { Component, Fragment } from "react";
+import { Route, Router, Switch } from "react-router-dom";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import { Router, Route, Redirect, Switch } from "react-router-dom";
 import { fade } from "@material-ui/core/styles/colorManipulator";
 import classNames from "classnames";
-import kebabCase from "lodash/kebabCase";
+import history from "../helpers/history";
 
 import {
   AppBar,
@@ -16,12 +16,10 @@ import {
 } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
 import Contributions from "./Contributions";
-import history from "./history";
 
 export const DRAWER_WIDTH = 300;
 export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
 export const MAIN_MENU_CONTRIBUTION_KEY = "core.MainMenu";
-export const ROUTER_CONTRIBUTION_KEY = "core.Router";
 export const MAIN_SEARCHER_CONTRIBUTION_KEY = "core.MainSearcher";
 
 const styles = theme => ({
@@ -64,7 +62,8 @@ const styles = theme => ({
     alignItems: "center",
     padding: "0 8px",
     ...theme.mixins.toolbar,
-    justifyContent: "flex-end"
+    justifyContent: "flex-end",
+    minHeight: "80px !important"
   },
   content: {
     flexGrow: 1,
@@ -130,16 +129,12 @@ const styles = theme => ({
   }
 });
 
-class CoreApp extends Component {
-
+class AppWrapper extends Component {
   constructor(props) {
     super(props);
     this.state = {
       open: false
     };
-    this.routerContributions = props.modulesManager.getContributions(
-      ROUTER_CONTRIBUTION_KEY
-    );
   }
 
   handleDrawerOpen = () => {
@@ -151,7 +146,7 @@ class CoreApp extends Component {
   };
 
   render() {
-    const { classes, theme, ...others } = this.props;
+    const { classes, ...others } = this.props;
     const { open } = this.state;
 
     return (
@@ -203,27 +198,20 @@ class CoreApp extends Component {
                 {...others}
                 contributionKey={MAIN_MENU_CONTRIBUTION_KEY}
               >
-                <div className={classes.drawerHeader} onClick={this.handleDrawerClose}/>
+                <div
+                  className={classes.drawerHeader}
+                  onClick={this.handleDrawerClose}
+                />
                 <Divider />
               </Contributions>
             </Drawer>
+            <div className={classes.drawerHeader} />
             <main
               className={classNames(classes.content, {
                 [classes.contentShift]: open
               })}
             >
-              <div className={classes.drawerHeader} />
-              <Switch>
-                <Route exact path={`${process.env.PUBLIC_URL || ''}/`} render={() => <Redirect to={`${process.env.PUBLIC_URL || ''}/home`} />} />
-                {this.routerContributions.map((route, index) => (
-                  <Route
-                    exact
-                    key={`route_${kebabCase(route.path)}_${index}`}
-                    path={`${process.env.PUBLIC_URL || ''}/${route.path}`}
-                    component={route.component}
-                  />
-                ))}
-              </Switch>
+              {this.props.children}
             </main>
           </Fragment>
         </Fragment>
@@ -232,11 +220,4 @@ class CoreApp extends Component {
   }
 }
 
-CoreApp.propTypes = {
-  classes: PropTypes.object.isRequired,
-  theme: PropTypes.object.isRequired,
-  modulesManager: PropTypes.object.isRequired
-};
-
-// export default withStyles(styles, { withTheme: true })(CoreApp);
-export default withStyles(styles)(CoreApp);
+export default withStyles(styles)(AppWrapper);

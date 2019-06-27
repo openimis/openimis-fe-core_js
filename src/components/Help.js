@@ -6,7 +6,7 @@ import { HelpOutline } from "@material-ui/icons";
 const styles = theme => ({
     button: {
         margin: theme.spacing(2),
-        color: "white",
+        color: theme.palette.secondary.main,
     }
 })
 

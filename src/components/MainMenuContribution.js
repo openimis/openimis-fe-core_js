@@ -1,82 +1,205 @@
 import React, { Component, Fragment } from "react";
 import PropTypes from "prop-types";
-import ExpansionPanel from "@material-ui/core/ExpansionPanel";
-import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
-import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
+import MuiExpansionPanel from "@material-ui/core/ExpansionPanel";
+import MuiExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
+import MuiExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Typography from "@material-ui/core/Typography";
-import { withStyles } from "@material-ui/core/styles";
+import { withTheme, withStyles } from "@material-ui/core/styles";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
-import { Divider, List, IconButton } from "@material-ui/core";
+import { Divider, List, IconButton, MenuList, MenuItem, Menu, Select, Button, Popper, Grow, Paper, ClickAwayListener } from "@material-ui/core";
 
 const styles = theme => ({
   panel: {
-    margin: "0px"
+    margin: "0 !important",
+    padding: 0,
   },
-  heading: {
-    fontSize: theme.typography.pxToRem(20),
+  drawerHeading: {
+    fontSize: theme.menu.drawer.fontSize,
     color: theme.palette.text.primary,
-    paddingTop: "10px"
+    paddingTop: theme.menu.drawer.fontSize / 2
   },
-  secondaryHeading: {
-    fontSize: theme.typography.pxToRem(15),
-    color: theme.palette.text.secondary
+  drawerDivider: {
+    // width: 100
+  },
+  menuHeading: {
+    fontSize: theme.menu.appBar.fontSize,
+    color: theme.palette.text.secondary,
+    paddingTop: theme.menu.appBar.fontSize / 2,
+    textTransform: "none"
+  },
+  appBarMenuPaper: {
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+  },
+  popper: {
+    zIndex: 1200
   }
 });
 
+const ExpansionPanel = withStyles({
+  root: {
+    border: '1px solid rgba(0, 0, 0, .125)',
+    boxShadow: 'none',
+    '&:not(:last-child)': {
+      borderBottom: 0,
+    },
+    '&:before': {
+      display: 'none',
+    },
+    '&$expanded': {
+      margin: 'auto',
+    },
+  },
+  expanded: {},
+})(MuiExpansionPanel);
+
+const ExpansionPanelSummary = withStyles({
+  root: {
+    backgroundColor: 'rgba(0, 0, 0, .03)',
+    borderBottom: '1px solid rgba(0, 0, 0, .125)',
+    marginBottom: -1,
+    minHeight: 56,
+    '&$expanded': {
+      minHeight: 56,
+    },
+  },
+  content: {
+    '&$expanded': {
+      margin: '12px 0',
+    },
+  },
+  expanded: {},
+})(MuiExpansionPanelSummary);
+
+const ExpansionPanelDetails = withStyles(theme => ({
+  root: {
+    padding: theme.spacing(2),
+    display: "block"
+  },
+}))(MuiExpansionPanelDetails);
+
 class MainMenuContribution extends Component {
   state = {
-    expanded: false
+    expanded: false,
+    anchorRef: React.createRef(),
   };
 
   toggleExpanded = event => {
     this.setState({ expanded: !this.state.expanded });
   };
 
+  handleMenuClose = event => {
+    if (this.state.anchorRef.current && this.state.anchorRef.current.contains(event.target)) {
+      return;
+    }
+    this.toggleExpanded(event);
+  }
+
+  handleMenuSelect = (e, route) => {
+    e.stopPropagation();
+    e.preventDefault();
+    this.redirect(route);
+  }
+
   redirect(route) {
     this.props.history.push(`${process.env.PUBLIC_URL || ""}${route}`);
   }
 
-  render() {
-    const { classes, header, icon, entries } = this.props;
+  appBarMenu = () => {
+    return (
+      <Fragment>
+        <Button
+          ref={this.state.anchorRef}
+          onClick={this.toggleExpanded}
+          className={this.props.classes.menuHeading}
+        >
+          {this.props.header}
+          <ExpandMoreIcon />
+        </Button>
+        <Popper className={this.props.classes.popper} open={this.state.expanded} anchorEl={this.state.anchorRef.current} transition>
+          {({ TransitionProps, placement }) => (
+            <Grow
+              {...TransitionProps}
+              style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}
+            >
+              <Paper className={this.props.classes.appBarMenuPaper} id={`${this.props.header}-menu-list`}>
+                <ClickAwayListener onClickAway={this.handleMenuClose}>
+                  <MenuList>
+                    {this.props.entries.map(entry => (
+                      <Fragment key={`${this.props.header}_${entry.text}_item`}>
+                        <MenuItem onClick={(e) => this.handleMenuSelect(e, entry.route)}>
+                          <ListItemIcon>{entry.icon}</ListItemIcon>
+                          <ListItemText primary={entry.text} />
+                        </MenuItem>
+                        {entry.withDivider && (
+                          <Divider
+                            key={`${this.props.header}_${entry.text}_divider`}
+                            className={this.props.classes.drawerDivider} />
+                        )
+                        }
+                      </Fragment>
+                    ))}
+                  </MenuList>
+                </ClickAwayListener>
+              </Paper>
+            </Grow>
+          )}
+        </Popper>
+      </Fragment>
+    );
+  }
 
+  drawerMenu = () => {
     return (
       <ExpansionPanel
-        className={classes.panel}
+        className={this.props.classes.panel}
         expanded={this.state.expanded}
         onChange={this.toggleExpanded}
       >
         <ExpansionPanelSummary
           expandIcon={<ExpandMoreIcon />}
-          aria-controls={`${header}-content`}
-          id={`${header}-header`}
+          id={`${this.props.header}-header`}
         >
-          <IconButton>{icon}</IconButton>
-          <Typography className={classes.heading}>{header}</Typography>
+          <IconButton>{this.props.icon}</IconButton>
+          <Typography className={this.props.classes.drawerHeading}>{this.props.header}</Typography>
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
-            <List component="nav">
-              {entries.map(entry => (
-                <Fragment key={`${header}_${entry.text}`}>
-                  <ListItem
-                    button
-                    key={`${header}_${entry.text}_item`}
-                    onClick={e => {
-                      this.redirect(entry.route);
-                    }}
-                  >
-                    <ListItemIcon>{entry.icon}</ListItemIcon>
-                    <ListItemText primary={entry.text} />
-                  </ListItem>
-                  {entry.withDivider && <Divider key={`${header}_${entry.text}_divider`}/>}
-                </Fragment>
-              ))}
-            </List>
-          </ExpansionPanelDetails>
+          <List component="nav">
+            {this.props.entries.map(entry => (
+              <Fragment key={`${this.props.header}_${entry.text}`}>
+                <ListItem
+                  button
+                  key={`${this.props.header}_${entry.text}_item`}
+                  onClick={e => {
+                    this.redirect(entry.route);
+                  }}
+                >
+                  <ListItemIcon>{entry.icon}</ListItemIcon>
+                  <ListItemText primary={entry.text} />
+                </ListItem>
+                {entry.withDivider && (
+                  <Divider
+                    key={`${this.props.header}_${entry.text}_divider`}
+                    className={this.props.classes.drawerDivider} />
+                )}
+              </Fragment>
+            ))}
+          </List>
+        </ExpansionPanelDetails>
       </ExpansionPanel>
     );
+  }
+
+  render() {
+    const { menuVariant } = this.props;
+    if (menuVariant === 'AppBar') {
+      return this.appBarMenu();
+    } else {
+      return this.drawerMenu();
+    }
   }
 }
 
@@ -86,4 +209,4 @@ MainMenuContribution.propTypes = {
   history: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(MainMenuContribution);
+export default withTheme(withStyles(styles)(MainMenuContribution));

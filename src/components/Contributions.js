@@ -3,15 +3,19 @@ import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 
 class Contributions extends Component {
-  createComponents(contributions) {
-    return contributions.map((Comp, index) => {
+  createComponents(contributions, reverse) {
+    var contribs =  contributions.map((Comp, index) => {
       let k = `${this.props.contributionKey}_${index}`;
       return <Comp {...this.props} key_index={k} key={k} />
     });
+    if (reverse) {
+      return contribs.reverse();
+    }
+    return contribs;
   }
 
   render() {
-    const { modulesManager, contributionKey } = this.props;
+    const { modulesManager, contributionKey, reverse } = this.props;
 
     const contributions = modulesManager.getContributions(
       contributionKey
@@ -19,7 +23,7 @@ class Contributions extends Component {
 
     return [
           this.props.children,
-          ...this.createComponents(contributions, history)
+          ...this.createComponents(contributions, history, reverse)
         ];
   }
 }

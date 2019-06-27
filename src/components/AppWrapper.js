@@ -1,10 +1,11 @@
 import React, { Component, Fragment } from "react";
-import { Route, Router, Switch } from "react-router-dom";
-import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
+import { Router } from "react-router-dom";
+import withWidth from '@material-ui/core/withWidth';
+import { withTheme, withStyles } from "@material-ui/core/styles";
+import { Button, Grid, Hidden, ClickAwayListener } from "@material-ui/core";
 import { fade } from "@material-ui/core/styles/colorManipulator";
-import classNames from "classnames";
 import history from "../helpers/history";
+import classNames from 'classnames';
 
 import {
   AppBar,
@@ -12,22 +13,28 @@ import {
   IconButton,
   Typography,
   Drawer,
-  Divider
+  Divider,
+  Tooltip
 } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
 import Contributions from "./Contributions";
+import FormattedMessage from "./FormattedMessage";
 
-export const DRAWER_WIDTH = 300;
 export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
 export const MAIN_MENU_CONTRIBUTION_KEY = "core.MainMenu";
 export const MAIN_SEARCHER_CONTRIBUTION_KEY = "core.MainSearcher";
 
 const styles = theme => ({
   root: {
-    display: "flex"
+    display: 'flex',
   },
   grow: {
     flexGrow: 1
+  },
+  logo: {
+    verticalAlign: "middle",
+    margin: theme.typography.title.fontSize / 2,
+    maxHeight: theme.typography.title.fontSize * 2,
   },
   appBar: {
     transition: theme.transitions.create(["margin", "width"], {
@@ -36,55 +43,66 @@ const styles = theme => ({
     })
   },
   appBarShift: {
-    width: `calc(100% - ${DRAWER_WIDTH}px)`,
-    marginLeft: DRAWER_WIDTH,
+    width: `calc(100% - ${theme.menu.drawer.width})`,
+    marginLeft: theme.menu.drawer.width,
     transition: theme.transitions.create(["margin", "width"], {
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen
     })
   },
   menuButton: {
-    marginLeft: 12,
-    marginRight: 20
+    margin: theme.spacing(0, 1, 0, 1),
+    padding: 0,
   },
-  hide: {
-    display: "none"
+  autoHideMenuButton: {
+    [theme.breakpoints.up('md')]: {
+      display: 'none',
+    },
   },
+  toolbar: theme.mixins.toolbar,
   drawer: {
-    width: DRAWER_WIDTH,
-    flexShrink: 0
-  },
-  drawerPaper: {
-    width: DRAWER_WIDTH
+    [theme.breakpoints.up('sm')]: {
+      width: theme.menu.drawer.width,
+      flexShrink: 0,
+    },
   },
   drawerHeader: {
-    display: "flex",
-    alignItems: "center",
-    padding: "0 8px",
     ...theme.mixins.toolbar,
-    justifyContent: "flex-end",
-    minHeight: "80px !important"
+    margin: theme.spacing(1, 0, 1, 0),
+  },
+  drawerPaper: {
+    width: theme.menu.drawer.width,
   },
   content: {
     flexGrow: 1,
-    padding: theme.spacing.unit * 3,
+    padding: theme.spacing(3),
     transition: theme.transitions.create("margin", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen
-    })
+    }),
   },
   contentShift: {
     transition: theme.transitions.create("margin", {
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen
     }),
-    marginLeft: DRAWER_WIDTH
+    marginLeft: theme.menu.drawer.width
   },
-  title: {
-    display: "none",
-    [theme.breakpoints.up("sm")]: {
-      display: "block"
-    }
+  appName: {
+    color: theme.palette.secondary.main,
+    textTransform: "none",
+    fontSize: theme.typography.title.fontSize
+  },
+  appVersionsBox: {
+    padding: 0,
+    margin: 0,
+    minWidth: theme.typography.title.fontSize / 2,
+  },
+  appVersions: {
+    color: theme.palette.secondary.main,
+    fontSize: theme.typography.title.fontSize / 2,
+    verticalAlign: "text-bottom",
+    marginRight: theme.spacing(2)
   },
   search: {
     position: "relative",
@@ -96,12 +114,12 @@ const styles = theme => ({
     marginLeft: 0,
     width: "100%",
     [theme.breakpoints.up("sm")]: {
-      marginLeft: theme.spacing.unit,
+      marginLeft: theme.spacing(1),
       width: "auto"
     }
   },
   searchIcon: {
-    width: theme.spacing.unit * 9,
+    width: theme.spacing(9),
     height: "100%",
     position: "absolute",
     pointerEvents: "none",
@@ -114,10 +132,7 @@ const styles = theme => ({
     width: "100%"
   },
   inputInput: {
-    paddingTop: theme.spacing.unit,
-    paddingRight: theme.spacing.unit,
-    paddingBottom: theme.spacing.unit,
-    paddingLeft: theme.spacing.unit * 10,
+    padding: theme.spacing(1, 1, 1, 10),
     transition: theme.transitions.create("width"),
     width: "100%",
     [theme.breakpoints.up("sm")]: {
@@ -137,16 +152,24 @@ class AppWrapper extends Component {
     };
   }
 
-  handleDrawerOpen = () => {
+  isAppBarMenu = () => {
+    return this.props.theme.menu.variant.toUpperCase() === 'APPBAR';
+  }
+
+  isShifted = () => {
+    return this.state.open && this.props.theme.breakpoints.up('md');
+  }
+
+  handleOpen = () => {
     this.setState({ open: true });
   };
 
-  handleDrawerClose = () => {
+  handleClose = () => {
     this.setState({ open: false });
   };
 
   render() {
-    const { classes, ...others } = this.props;
+    const { classes, modulesManager, ...others } = this.props;
     const { open } = this.state;
 
     return (
@@ -155,69 +178,95 @@ class AppWrapper extends Component {
           <AppBar
             position="fixed"
             className={classNames(classes.appBar, {
-              [classes.appBarShift]: open
+              [classes.appBarShift]: this.isShifted()
             })}
           >
-            <Toolbar disableGutters={!open}>
+            <Toolbar>
               <IconButton
                 color="inherit"
-                aria-label="Open drawer"
-                onClick={this.handleDrawerOpen}
-                className={classNames(classes.menuButton, open && classes.hide)}
+                onClick={this.handleOpen}
+                className={classNames(classes.menuButton,
+                  this.isAppBarMenu() && classes.autoHideMenuButton,
+                  open && classes.hide)}
               >
                 <MenuIcon />
               </IconButton>
-              <Typography
-                variant="h6"
-                color="inherit"
-                noWrap
-                onClick={e => history.push("/home")}
-              >
-                openIMIS
-              </Typography>
+              <Button
+                className={classes.appName}
+                onClick={e => history.push("/home")}>
+                {this.isAppBarMenu() && (
+                  <Hidden smDown implementation="css">
+                    <img className={classes.logo} src={this.props.logo} />
+                  </Hidden>
+                )}
+                <FormattedMessage module="core" id="appName"
+                  defaultMessage={<FormattedMessage id="root.appName" />} />
+              </Button>
+              <Hidden smDown implementation="css">
+                <Tooltip title={modulesManager.getModulesVersions().join(", ")}>
+                  <Typography variant="caption" className={classes.appVersions}>
+                    {modulesManager.getOpenIMISVersion()}
+                  </Typography>
+                </Tooltip>
+              </Hidden>
+              {this.isAppBarMenu() && (
+                <Hidden smDown implementation="css">
+                  <Contributions
+                    {...others}
+                    menuVariant='AppBar'
+                    modulesManager={modulesManager}
+                    contributionKey={MAIN_MENU_CONTRIBUTION_KEY}
+                  >
+                    <div onClick={this.handleClose} />
+                  </Contributions>
+                </Hidden>
+              )}
               <Contributions
                 {...others}
+                modulesManager={modulesManager}
                 contributionKey={APP_BAR_CONTRIBUTION_KEY}
+                reverse={true}
               >
                 <div className={classes.grow} />
               </Contributions>
             </Toolbar>
           </AppBar>
-
-          <Fragment>
-            <Drawer
-              className={classes.drawer}
-              variant="persistent"
-              anchor="left"
-              open={open}
-              classes={{
-                paper: classes.drawerPaper
-              }}
-            >
-              <Contributions
-                {...others}
-                contributionKey={MAIN_MENU_CONTRIBUTION_KEY}
-              >
-                <div
-                  className={classes.drawerHeader}
-                  onClick={this.handleDrawerClose}
-                />
-                <Divider />
-              </Contributions>
-            </Drawer>
-            <div className={classes.drawerHeader} />
-            <main
-              className={classNames(classes.content, {
-                [classes.contentShift]: open
-              })}
-            >
-              {this.props.children}
-            </main>
-          </Fragment>
+          {open && (
+            <ClickAwayListener onClickAway={this.handleClose}>
+              <nav className={classes.drawer}>
+                <Drawer
+                  className={classes.drawer}
+                  variant="persistent"
+                  anchor="left"
+                  open={open}
+                  classes={{
+                    paper: classes.drawerPaper
+                  }}
+                >
+                  <Contributions
+                    {...others}
+                    modulesManager={modulesManager}
+                    contributionKey={MAIN_MENU_CONTRIBUTION_KEY}
+                    menuVariant="Drawer"
+                  >
+                    <Divider />
+                  </Contributions>
+                </Drawer>
+              </nav>
+            </ClickAwayListener>
+          )}
+          <div className={classes.toolbar} />
+          <main
+            className={classNames(classes.content, {
+              [classes.contentShift]: this.isShifted()
+            })}
+          >
+            {this.props.children}
+          </main>
         </Fragment>
-      </Router>
+      </Router >
     );
   }
 }
 
-export default withStyles(styles)(AppWrapper);
+export default withWidth()(withTheme(withStyles(styles)(AppWrapper)));

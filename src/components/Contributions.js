@@ -23,7 +23,7 @@ class Contributions extends Component {
 
     return [
           this.props.children,
-          ...this.createComponents(contributions, history, reverse)
+          ...this.createComponents(contributions, reverse)
         ];
   }
 }

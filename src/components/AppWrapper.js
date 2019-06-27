@@ -3,6 +3,8 @@ import { Router } from "react-router-dom";
 import withWidth from '@material-ui/core/withWidth';
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { Button, Grid, Hidden, ClickAwayListener } from "@material-ui/core";
+import Logout from "./Logout";
+import Help from "./Help";
 import { fade } from "@material-ui/core/styles/colorManipulator";
 import history from "../helpers/history";
 import classNames from 'classnames';
@@ -225,10 +227,11 @@ class AppWrapper extends Component {
                 {...others}
                 modulesManager={modulesManager}
                 contributionKey={APP_BAR_CONTRIBUTION_KEY}
-                reverse={true}
               >
                 <div className={classes.grow} />
               </Contributions>
+              <Logout/>
+              <Help/>
             </Toolbar>
           </AppBar>
           {open && (

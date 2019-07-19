@@ -1,7 +1,11 @@
-function headers(store) {
-  return new Headers({
+export function apiHeaders() {
+  let headers = {
     "Content-Type": "application/json",
-  });
+  }
+  if (process.env.NODE_ENV === 'development') {
+    headers['remote-user'] = "admin";
+  }
+  return headers;  
 }
 
 function handleJsonResponse(response) {
@@ -46,4 +50,4 @@ export function destroy(name, opts, params = {}) {
   }).then(handleJsonResponse);
 }
 
-export const baseApiUrl = "/iapi";
+export const baseApiUrl = process.env.NODE_ENV === 'development' ? "/api" : "/iapi";

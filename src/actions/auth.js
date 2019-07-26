@@ -1,14 +1,12 @@
 import { RSAA } from "redux-api-middleware";
-import { baseApiUrl } from "./api";
+import { baseApiUrl, apiHeaders } from "./api";
 
 export function auth() {
     return {
       [RSAA]: {
         endpoint: `${baseApiUrl}/core/users/current_user`,
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: apiHeaders(),
         types: [
           'CORE_USERS_CURRENT_USER_REQ',
           'CORE_USERS_CURRENT_USER_RESP',

@@ -1,0 +1,58 @@
+import React, { Component, Fragment } from "react";
+import { injectIntl } from 'react-intl';
+import { withTheme, withStyles } from "@material-ui/core/styles";
+import { Typography, Divider, Table, TableRow, TableHead, TableBody, TableCell } from "@material-ui/core";
+import FormattedMessage from "./FormattedMessage";
+
+const styles = theme => ({
+    paperHeader: {
+        padding: theme.spacing(1)
+    },    
+    tableHeader: theme.table.header,
+    tableRow: theme.table.row,
+});
+
+class SmallTable extends Component {
+    render() {
+        const { classes, module, header, headers, items, itemFormatters } = this.props;
+        return (
+            <Fragment>
+                {header &&
+                    <Fragment>
+                        <Typography className={classes.paperHeader}>
+                            <FormattedMessage module={module} id={header} />
+                        </Typography>
+                        <Divider />
+                    </Fragment>
+                }
+                <Table className={classes.table} size="small">
+                    <TableHead>
+                        <TableRow>
+                            {headers && headers.map((h,idx) => (
+                                <TableCell className={classes.tableHeader} key={`h-${idx}`}>
+                                    <FormattedMessage module={module} id={h} />
+                                </TableCell>
+                            ))}
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {items && items.map((i, iidx) => (
+                            <TableRow key={iidx}>
+                                {itemFormatters && itemFormatters.map((f, fidx) => (
+                                    <TableCell className={classes.tableRow} key={`v-${iidx}-${fidx}`}>
+                                        {f(i)}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </Fragment>
+        )
+    }
+
+}
+
+export default injectIntl(withTheme(
+    withStyles(styles)(SmallTable)
+));

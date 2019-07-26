@@ -22,9 +22,11 @@ function auth(
             return {
                 ...state,
                 authenticating: false,
-                fatalError: action.payload.status,
-                fatalErrorMessage: action.payload.statusText,
-                fatalErrorDetail: !!action.payload.response ? action.payload.response.detail : null,
+                error: {
+                    code: action.payload.status,
+                    message: action.payload.statusText,
+                    detail: !!action.payload.response ? action.payload.response.detail : null,
+                }
             };
         default:
             return state;

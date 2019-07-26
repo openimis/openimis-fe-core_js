@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
+import { withModulesManager } from "../helpers/withModulesManager";
 
 class Contributions extends Component {
   createComponents(contributions, reverse) {
@@ -29,8 +30,7 @@ class Contributions extends Component {
 }
 
 Contributions.propTypes = {
-  modulesManager: PropTypes.object.isRequired,
   contributionKey: PropTypes.string.isRequired
 };
 
-export default withRouter(Contributions);
+export default withModulesManager(withRouter(Contributions));

@@ -15,14 +15,14 @@ const styles = theme => ({
 });
 
 function Error(props) {
-  const { classes, code, message, detail } = props;
+  const { classes, error } = props;
   return (
     <div className={classes.error}>
-      <Typography variant="h6" className={classes.errorHeader}>{code}: {message}</Typography>
-      {detail && (
+      <Typography variant="h6" className={classes.errorHeader}>{error.code}: {error.message}</Typography>
+      {!!error.detail && (
         <Fragment>
           <Divider />
-          <Typography variant="body1" className={classes.errorCode}>{detail}</Typography>
+          <Typography variant="body1" className={classes.errorCode}>{error.detail}</Typography>
         </Fragment>
       )}
     </div>

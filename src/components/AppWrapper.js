@@ -216,7 +216,6 @@ class AppWrapper extends Component {
                   <Contributions
                     {...others}
                     menuVariant='AppBar'
-                    modulesManager={modulesManager}
                     contributionKey={MAIN_MENU_CONTRIBUTION_KEY}
                   >
                     <div onClick={this.handleClose} />
@@ -225,7 +224,6 @@ class AppWrapper extends Component {
               )}
               <Contributions
                 {...others}
-                modulesManager={modulesManager}
                 contributionKey={APP_BAR_CONTRIBUTION_KEY}
               >
                 <div className={classes.grow} />
@@ -248,7 +246,6 @@ class AppWrapper extends Component {
                 >
                   <Contributions
                     {...others}
-                    modulesManager={modulesManager}
                     contributionKey={MAIN_MENU_CONTRIBUTION_KEY}
                     menuVariant="Drawer"
                   >

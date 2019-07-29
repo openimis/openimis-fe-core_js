@@ -9,7 +9,7 @@ import { withTheme, withStyles } from "@material-ui/core/styles";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
-import { Divider, List, IconButton, MenuList, MenuItem, Menu, Select, Button, Popper, Grow, Paper, ClickAwayListener } from "@material-ui/core";
+import { Divider, List, IconButton, MenuList, MenuItem, Button, Popper, Grow, Paper, ClickAwayListener } from "@material-ui/core";
 
 const styles = theme => ({
   panel: {

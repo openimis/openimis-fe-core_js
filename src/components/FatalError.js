@@ -22,14 +22,14 @@ const styles = theme => ({
 });
 
 function FatalError(props) {
-  const { classes, code, message, detail } = props;
+  const { classes, error } = props;
   return (
     <div className={classes.fatal}>
-      <Typography variant="h6" className={classes.fatalHeader}>{code}: {message}</Typography>
-      {detail && (
+      <Typography variant="h6" className={classes.fatalHeader}>{error.code}: {error.message}</Typography>
+      {!!error.detail && (
         <Fragment>
           <Divider />
-          <Typography variant="body1" className={classes.fatalCode}>{detail}</Typography>
+          <Typography variant="body1" className={classes.fatalCode}>{error.detail}</Typography>
         </Fragment>
       )}
     </div>

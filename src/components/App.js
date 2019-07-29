@@ -5,10 +5,11 @@ import { Redirect, Route, Router, Switch } from "react-router-dom";
 import { CssBaseline, CircularProgress } from "@material-ui/core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import history from "../helpers/history";
+import withModulesManager from "../helpers/modules";
 import AppWrapper from "./AppWrapper";
 import FatalError from './FatalError';
 import kebabCase from "lodash/kebabCase";
-import { auth } from "../actions/auth";
+import { auth } from "../actions";
 
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";
 export const TRANSLATION_CONTRIBUTION_KEY = "translations";
@@ -43,12 +44,9 @@ class RootApp extends Component {
   }
 
   render() {
-    const { classes, fatalError, user, messages, ...others } = this.props;
-    if (fatalError) {
-      return <FatalError
-        code={this.props.fatalError}
-        message={this.props.fatalErrorMessage}
-        detail={this.props.fatalErrorDetail} />;
+    const { classes, error, user, messages, ...others } = this.props;
+    if (error) {
+      return <FatalError error={error} />;
     }
 
     if (!user) {
@@ -101,12 +99,10 @@ function mapStateToProps(state) {
   return {
     authenticating: state.core.authenticating,
     user: state.core.user,
-    fatalError: state.core.fatalError,
-    fatalErrorMessage: state.core.fatalErrorMessage,
-    fatalErrorDetail: state.core.fatalErrorDetail,
+    error: state.core.error
   }
 };
 
 export default connect(mapStateToProps, { auth })(
-  withTheme(withStyles(styles)(RootApp)),
+  withModulesManager(withTheme(withStyles(styles)(RootApp))),
 );

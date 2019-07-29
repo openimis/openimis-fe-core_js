@@ -1,13 +1,24 @@
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
-import { withModulesManager } from "../helpers/withModulesManager";
+import withModulesManager from "../helpers/modules";
+import _ from "lodash";
 
 class Contributions extends Component {
   createComponents(contributions, reverse) {
-    var contribs =  contributions.map((Comp, index) => {
+    const { modulesManager } = this.props;
+    var contribs = contributions.map((Comp, index) => {
       let k = `${this.props.contributionKey}_${index}`;
-      return <Comp {...this.props} key_index={k} key={k} />
+      let keys= {
+        "key_index":k,
+        "key":k
+      }      
+      if (_.isString(Comp)) {
+        var C = modulesManager.getComponent(Comp);
+        return <C {...this.props} {...keys} />
+      } else {
+        return <Comp {...this.props} {...keys} />
+      }
     });
     if (reverse) {
       return contribs.reverse();
@@ -23,9 +34,9 @@ class Contributions extends Component {
     );
 
     return [
-          this.props.children,
-          ...this.createComponents(contributions, reverse)
-        ];
+      this.props.children,
+      ...this.createComponents(contributions, reverse)
+    ];
   }
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "@openimis/fe-core",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "openIMIS Frontend Core reference module",
   "license": "AGPL-3.0-only",
   "repository": "openimis/openimis-fe-core_js",
@@ -26,6 +26,7 @@
     "history": "^4.9.0",
     "prop-types": "^15.5.4",
     "react": "^16.8.6",
+    "react-autosuggest": "^9.4.3",
     "react-dom": "^16.8.6",
     "react-intl": "^2.9.0",
     "react-redux": "^7.0.3",
@@ -60,6 +61,7 @@
     "history": "^4.9.0",
     "prop-types": "^15.5.4",
     "react": "^16.8.6",
+    "react-autosuggest": "^9.4.3",
     "react-dom": "^16.8.6",
     "react-intl": "^2.9.0",
     "react-redux": "^7.0.3",

@@ -5,11 +5,11 @@ import { Redirect, Route, Router, Switch } from "react-router-dom";
 import { CssBaseline, CircularProgress } from "@material-ui/core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import history from "../helpers/history";
-import { withModulesManager } from "../helpers/withModulesManager";
+import withModulesManager from "../helpers/modules";
 import AppWrapper from "./AppWrapper";
 import FatalError from './FatalError';
 import kebabCase from "lodash/kebabCase";
-import { auth } from "../actions/auth";
+import { auth } from "../actions";
 
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";
 export const TRANSLATION_CONTRIBUTION_KEY = "translations";

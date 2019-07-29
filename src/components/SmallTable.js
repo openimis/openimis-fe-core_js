@@ -5,9 +5,7 @@ import { Typography, Divider, Table, TableRow, TableHead, TableBody, TableCell }
 import FormattedMessage from "./FormattedMessage";
 
 const styles = theme => ({
-    paperHeader: {
-        padding: theme.spacing(1)
-    },    
+    tableTitle: theme.table.title,
     tableHeader: theme.table.header,
     tableRow: theme.table.row,
 });
@@ -19,22 +17,24 @@ class SmallTable extends Component {
             <Fragment>
                 {header &&
                     <Fragment>
-                        <Typography className={classes.paperHeader}>
+                        <Typography className={classes.tableTitle}>
                             <FormattedMessage module={module} id={header} />
                         </Typography>
                         <Divider />
                     </Fragment>
                 }
                 <Table className={classes.table} size="small">
-                    <TableHead>
-                        <TableRow>
-                            {headers && headers.map((h,idx) => (
-                                <TableCell className={classes.tableHeader} key={`h-${idx}`}>
-                                    <FormattedMessage module={module} id={h} />
-                                </TableCell>
-                            ))}
-                        </TableRow>
-                    </TableHead>
+                    {!!headers && (
+                        <TableHead>
+                            <TableRow>
+                                {headers.map((h, idx) => (
+                                    <TableCell className={classes.tableHeader} key={`h-${idx}`}>
+                                        <FormattedMessage module={module} id={h} />
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        </TableHead>
+                    )}
                     <TableBody>
                         {items && items.map((i, iidx) => (
                             <TableRow key={iidx}>

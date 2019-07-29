@@ -1,4 +1,4 @@
-function auth(
+function reducer(
     state = {
         authenticating: false,
         user: null,
@@ -33,4 +33,4 @@ function auth(
     }
 }
 
-export default auth;
+export default reducer;

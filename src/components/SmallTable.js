@@ -3,6 +3,7 @@ import { injectIntl } from 'react-intl';
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { Typography, Divider, Table, TableRow, TableHead, TableBody, TableCell } from "@material-ui/core";
 import FormattedMessage from "./FormattedMessage";
+import withModulesManager from "../helpers/modules";
 
 const styles = theme => ({
     tableTitle: theme.table.title,
@@ -12,7 +13,14 @@ const styles = theme => ({
 
 class SmallTable extends Component {
     render() {
-        const { classes, module, header, headers, items, itemFormatters } = this.props;
+        const { modulesManager, classes, module, header, headers, items, itemFormatters } = this.props;
+        var i = !!headers && headers.length
+        while (!!headers && i--) {
+            if (modulesManager.skipControl(module, headers[i])) {
+                headers.splice(i, 1);
+                itemFormatters.splice(i, 1);
+            }
+        }
         return (
             <Fragment>
                 {header &&
@@ -50,9 +58,8 @@ class SmallTable extends Component {
             </Fragment>
         )
     }
-
 }
 
-export default injectIntl(withTheme(
+export default withModulesManager(injectIntl(withTheme(
     withStyles(styles)(SmallTable)
-));
+)));

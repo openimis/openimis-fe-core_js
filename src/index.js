@@ -1,6 +1,7 @@
 import App from "./components/App";
 import AutoSuggestion from "./components/AutoSuggestion";
 import Contributions from "./components/Contributions";
+import ControlledField from "./components/ControlledField";
 import Error from "./components/Error";
 import FatalError from "./components/FatalError";
 import FieldLabel from "./components/FieldLabel";
@@ -21,12 +22,12 @@ const DEFAULT_CONFIG = {
 }
 
 export const CoreModule = (cfg) => {
-  return { ...DEFAULT_CONFIG, ...(cfg && cfg['fe-core'] || {}) };
+  return { ...DEFAULT_CONFIG, ...cfg };
 }
 
 export {
   baseApiUrl, apiHeaders, graphql, 
   formatMessage, formatServerError, formatGraphQLError, withModulesManager,
-  App, AutoSuggestion, Contributions, Error, FatalError, FieldLabel, FormattedMessage,
+  App, AutoSuggestion, Contributions, ControlledField, Error, FatalError, FieldLabel, FormattedMessage,
   MainMenuContribution, ProgressOrError, ProxyPage, PublishedComponent, SmallTable
 };

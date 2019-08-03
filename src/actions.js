@@ -12,20 +12,28 @@ export function apiHeaders() {
     return headers;
 }
 
-export function graphql(payload, type) {
+export function graphql(payload, type, params = {}) {
     return {
-      [RSAA]: {
-        endpoint: `${baseApiUrl}/graphql`,
-        method: "POST",
-        headers: apiHeaders(),
-        body: JSON.stringify({ "query": payload }),
-        types: [
-          type+'_REQ',
-          type+'_RESP',
-          type+'_ERR'
-        ],
-      },
-    };    
+        [RSAA]: {
+            endpoint: `${baseApiUrl}/graphql`,
+            method: "POST",
+            headers: apiHeaders(),
+            body: JSON.stringify({ "query": payload }),
+            types: [
+                {
+                    type: type + '_REQ',
+                    meta: params,
+                }, {
+                    type: type + '_RESP',
+                    meta: params,
+                }, {
+
+                    type: type + '_ERR',
+                    meta: params,
+                }
+            ],
+        },
+    };
 }
 
 export function auth() {

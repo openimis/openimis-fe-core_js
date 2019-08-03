@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import { injectIntl } from 'react-intl';
 import Autosuggest from "react-autosuggest";
 import { withTheme, withStyles } from "@material-ui/core/styles";
@@ -63,11 +64,10 @@ function renderInputComponent(inputProps) {
 
 
 class AutoSuggestion extends Component {
-    constructor() {
-        super();
-
+    constructor(props) {
+        super(props);
         this.state = {
-            value: '',
+            value: props.value || '',
             suggestions: []
         };
     }
@@ -115,7 +115,7 @@ class AutoSuggestion extends Component {
 
     render() {
         const { intl, classes, getSuggestionValue, renderSuggestion, onSuggestionSelected } = this.props;
-        const { value, suggestions } = this.state;
+        const { suggestions, value } = this.state;
         const inputProps = {
             className: classes.suggestionInputField,
             placeholder: formatMessage(intl, "policy", "insureeEligibility.service.search"),

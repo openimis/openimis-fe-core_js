@@ -1,4 +1,6 @@
-function formatMessage(intl, module, id, values) {
+import moment from "moment";
+
+export function formatMessage(intl, module, id, values) {
     if (!!intl.messages[`overwrite.${module}.${id}`]) {
         return intl.formatMessage({id: `overwrite.${module}.${id}`}, values);
     } else if (!!intl.messages[`${module}.${id}`]) {
@@ -8,5 +10,17 @@ function formatMessage(intl, module, id, values) {
     }
 };
 
-export default formatMessage;
+export function formatAmount(intl, amount) {
+    return `${intl.formatMessage({id: "currency"})} ${intl.formatNumber(amount)}`;
+}
 
+export function formatDateFromIso(intl, date) {
+    return intl.formatDate(moment(date));
+}
+
+export function chipSelect(intl, module, i, v) {
+    return `${formatMessage(intl, module, i)} = ${formatMessage(intl, module, `${i}.${v}`)}`;
+}
+export function chipText(intl, module, i, v) {
+    return `${formatMessage(intl, module, i)} = ${v}`;
+}

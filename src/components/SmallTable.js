@@ -1,7 +1,8 @@
 import React, { Component, Fragment } from "react";
+import classNames from "classnames";
 import { injectIntl } from 'react-intl';
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { Typography, Divider, Table, TableRow, TableHead, TableBody, TableCell } from "@material-ui/core";
+import { Typography, Divider, Table, TableRow, TableHead, TableBody, TableCell, TableFooter, TablePagination } from "@material-ui/core";
 import FormattedMessage from "./FormattedMessage";
 import withModulesManager from "../helpers/modules";
 
@@ -9,11 +10,20 @@ const styles = theme => ({
     tableTitle: theme.table.title,
     tableHeader: theme.table.header,
     tableRow: theme.table.row,
+    left: {
+        textAlign: "left",
+    },
+    right: {
+        textAlign:"right",
+    },
+    center: {
+        textAlign: "center",
+    }
 });
 
 class SmallTable extends Component {
     render() {
-        const { modulesManager, classes, module, header, headers, items, itemFormatters } = this.props;
+        const { modulesManager, classes, module, header, headers, aligns = [], items, itemFormatters, page, pageSize, count, onChangePage } = this.props;
         var i = !!headers && headers.length
         while (!!headers && i--) {
             if (modulesManager.skipControl(module, headers[i])) {
@@ -47,13 +57,32 @@ class SmallTable extends Component {
                         {items && items.map((i, iidx) => (
                             <TableRow key={iidx}>
                                 {itemFormatters && itemFormatters.map((f, fidx) => (
-                                    <TableCell className={classes.tableRow} key={`v-${iidx}-${fidx}`}>
+                                    <TableCell
+                                        className={classNames(
+                                            classes.tableRow,
+                                            classes[`${aligns.length > fidx && !!aligns[fidx] ? aligns[fidx] : "left"}`]
+                                        )}
+                                        key={`v-${iidx}-${fidx}`}>
                                         {f(i)}
                                     </TableCell>
                                 ))}
                             </TableRow>
                         ))}
                     </TableBody>
+                    {!!page && !!pageSize && !!count && (
+                        <TableFooter>
+                            <TableRow>
+                                <TablePagination
+                                    className={classes.pager}
+                                    count={2}
+                                    page={0}
+                                    rowsPerPage={10}
+                                    rowsPerPageOptions={[10]}
+                                    onChangePage={onChangePage}
+                                />
+                            </TableRow>
+                        </TableFooter>
+                    )}
                 </Table>
             </Fragment>
         )

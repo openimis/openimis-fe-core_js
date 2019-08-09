@@ -2,19 +2,23 @@ import App from "./components/App";
 import AutoSuggestion from "./components/AutoSuggestion";
 import Contributions from "./components/Contributions";
 import ControlledField from "./components/ControlledField";
+import DatePicker from "./components/DatePicker";
 import Error from "./components/Error";
 import FatalError from "./components/FatalError";
 import FieldLabel from "./components/FieldLabel";
 import FormattedMessage from "./components/FormattedMessage";
+import InputSelect from "./components/InputSelect";
+import InputText from "./components/InputText";
 import MainMenuContribution from "./components/MainMenuContribution";
 import ProgressOrError from "./components/ProgressOrError";
 import ProxyPage from "./components/ProxyPage";
 import PublishedComponent from "./components/PublishedComponent";
 import SmallTable from "./components/SmallTable";
+import Searcher from "./components/Searcher";
 import reducer from "./reducer";
 import { baseApiUrl, apiHeaders, graphql } from './actions';
-import formatMessage from './helpers/i18n';
-import { formatServerError, formatGraphQLError } from './helpers/api';
+import { formatMessage, formatDateFromIso, formatAmount, chipSelect, chipText } from './helpers/i18n';
+import { formatQuery, formatPageQuery, parseData, formatServerError, formatGraphQLError } from './helpers/api';
 import withModulesManager from './helpers/modules';
 
 const DEFAULT_CONFIG = {
@@ -27,7 +31,11 @@ export const CoreModule = (cfg) => {
 
 export {
   baseApiUrl, apiHeaders, graphql, 
-  formatMessage, formatServerError, formatGraphQLError, withModulesManager,
-  App, AutoSuggestion, Contributions, ControlledField, Error, FatalError, FieldLabel, FormattedMessage,
-  MainMenuContribution, ProgressOrError, ProxyPage, PublishedComponent, SmallTable
+  formatQuery, formatPageQuery, parseData, formatServerError, formatGraphQLError, withModulesManager,
+  formatMessage, formatDateFromIso, formatAmount, chipSelect, chipText,
+  App, AutoSuggestion, Contributions, ControlledField, Error, FatalError, 
+  InputSelect, InputText,
+  FieldLabel, FormattedMessage,
+  MainMenuContribution, ProgressOrError, ProxyPage, PublishedComponent, SmallTable, Searcher,
+  DatePicker
 };

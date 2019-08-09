@@ -1,11 +1,8 @@
 import React, { Component } from "react";
-import { connect } from "react-redux";
-import { injectIntl } from 'react-intl';
 import Autosuggest from "react-autosuggest";
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { FormControl, Input, InputAdornment } from "@material-ui/core";
+import { FormControl, Input, InputAdornment, TextField } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
-import formatMessage from "../helpers/i18n";
 import _ from "lodash";
 
 const styles = theme => ({
@@ -14,6 +11,9 @@ const styles = theme => ({
         marginLeft: 0,
     },
     header: theme.table.title,
+    label: {
+        color: theme.palette.primary.main
+    },
     suggestionContainer: {
         flexGrow: 1,
         position: "relative",
@@ -50,18 +50,6 @@ const styles = theme => ({
 function escapeRegexCharacters(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
-
-function renderInputComponent(inputProps) {
-    return (
-        <FormControl fullWidth>
-            <Input
-                {...inputProps}
-                startAdornment={<InputAdornment position="start"><SearchIcon /></InputAdornment>}
-            />
-        </FormControl>
-    );
-}
-
 
 class AutoSuggestion extends Component {
     constructor(props) {
@@ -103,7 +91,8 @@ class AutoSuggestion extends Component {
         });
     };
 
-    _getSuggestions(value) {
+    _getSuggestions = (value) => {
+        if (!this.props.items || !value || !value.trim()) return [];
         const escapedValue = escapeRegexCharacters(value.trim());
 
         if (escapedValue === '') {
@@ -113,13 +102,31 @@ class AutoSuggestion extends Component {
         return this.props.items.filter(i => regex.test(this.props.lookup(i)));
     }
 
+    renderInputComponent = (inputProps) => {
+        const { classes } = this.props;
+        return (
+            <FormControl fullWidth>
+                <TextField
+                    InputLabelProps={{
+                        className: classes.label
+                    }}
+                    {...inputProps}
+                    InputProps={{
+                        startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment>
+                    }}
+                />
+            </FormControl>
+        );
+    }
+
     render() {
-        const { intl, classes, getSuggestionValue, renderSuggestion, onSuggestionSelected } = this.props;
+        const { classes, label, placeholder, getSuggestionValue, renderSuggestion, onSuggestionSelected } = this.props;
         const { suggestions, value } = this.state;
         const inputProps = {
             className: classes.suggestionInputField,
-            placeholder: formatMessage(intl, "policy", "insureeEligibility.service.search"),
+            placeholder,
             value,
+            label,
             onChange: this.onChange
         };
         return (
@@ -131,17 +138,17 @@ class AutoSuggestion extends Component {
                     suggestion: classes.suggestion,
                     suggestionHighlighted: classes.suggestionHighlighted,
                 }}
+                renderInputComponent={this.renderInputComponent}
                 inputProps={inputProps}
                 suggestions={suggestions}
-                onSuggestionSelected={(e,i) => onSuggestionSelected(i.suggestion)}
+                onSuggestionSelected={(e, i) => onSuggestionSelected(i.suggestion)}
                 onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
                 onSuggestionsClearRequested={this.onSuggestionsClearRequested}
                 getSuggestionValue={getSuggestionValue}
                 renderSuggestion={renderSuggestion}
-                renderInputComponent={renderInputComponent}
             />
         )
     }
 }
 
-export default injectIntl(withTheme(withStyles(styles)(AutoSuggestion)));
+export default withTheme(withStyles(styles)(AutoSuggestion));

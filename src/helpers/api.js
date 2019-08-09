@@ -1,3 +1,33 @@
+export function formatQuery(entity, filters, projections) {
+  return `
+  {
+    ${entity}${!!filters && filters.length ? `(${filters.join(',')})` : ""}
+    {
+      ${projections.join(',')}
+    }
+  }`
+}
+
+export function formatPageQuery(entity, filters, projections) {
+    return `
+    {
+      ${entity}${!!filters && filters.length ? `(${filters.join(',')})` : ""}
+      {
+        edges
+        {
+          node
+          {
+            ${projections.join(',')}
+          }
+        }
+      }
+    }`
+}
+
+export function parseData(data) {
+    return data['edges'].map(e => e['node']);
+}
+
 export function formatServerError(payload) {
     return {
         code: payload.status,

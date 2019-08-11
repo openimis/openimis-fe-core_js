@@ -6,15 +6,15 @@ import FormattedMessage from "./FormattedMessage";
 
 const styles = theme => ({
     label: {
-        color: theme.palette.primary.main
+        color: theme.palette.primary.main,
     }
 });
 
 class InputSelect extends Component {
     render() {
-        const { classes, module, label, name, options, value, onChange } = this.props;
+        const { classes, module, label, name, options, value, onChange, disabled=false } = this.props;
         return (
-            <FormControl fullWidth={true}>
+            <FormControl fullWidth>
                 <InputLabel htmlFor={`${module}-${label}`} className={classes.label}>
                     <FormattedMessage module={module} id={label} />
                 </InputLabel>
@@ -25,6 +25,7 @@ class InputSelect extends Component {
                     }}
                     value={value || "null"}
                     onChange={e => onChange(e.target.value)}
+                    disabled={disabled}
                 >
                     {!!options && options.map((option, idx) =>
                         <MenuItem key={`${module}-${name}-option-${idx}`} value={option.value}>

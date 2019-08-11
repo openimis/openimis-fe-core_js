@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from "react";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import {
+    Button,
     Chip,
     Grid,
     Paper,
@@ -8,6 +9,7 @@ import {
     IconButton,
 } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
+import FormattedMessage from "./FormattedMessage";
 
 const styles = theme => ({
     paperHeader: theme.paper.header,
@@ -22,35 +24,49 @@ const styles = theme => ({
 class Searcher extends Component {
 
     render() {
-        const { classes, title, filters, del, open } = this.props;
+        const { classes, module, filterPane, filters, del, open } = this.props;
         return (
             <Fragment>
                 <Paper>
                     <Grid container className={classes.paperHeader}>
-                        <Grid item xs={8} className={classes.paperHeaderTitle}>
-                            {title}
+                        <Grid item xs={!filterPane ? 8 : 12} className={classes.paperHeaderTitle}>
+                            <FormattedMessage module={module} id="search.title" />
                         </Grid>
-                        <Grid item xs={4}>
-                            <Grid container justify="flex-end">
-                                <Grid item className={classes.paperHeaderAction}>
-                                    <IconButton onClick={open}>
-                                        <SearchIcon />
-                                    </IconButton>
+                        {!filterPane &&
+                            <Grid item xs={4}>
+                                <Grid container justify="flex-end">
+                                    <Grid item className={classes.paperHeaderAction}>
+                                        <IconButton onClick={open}>
+                                            <SearchIcon />
+                                        </IconButton>
+                                    </Grid>
                                 </Grid>
                             </Grid>
-                        </Grid>
-                        <Grid item xs={12} className={classes.paperDivider}>
-                            <Divider />
-                        </Grid>
-                        <Grid item xs={12}>
-                            {!!filters && Object.keys(filters).map((filter, idx) => (
-                                <Chip key={`searcher_filter_${idx}`}
-                                    label={filters[filter].chip}
-                                    onDelete={e => del(filter)}
-                                    className={classes.chip}
-                                />
-                            ))}
-                        </Grid>
+                        }
+                        {!!filterPane &&
+                            <Fragment>
+                                <Grid item xs={12} className={classes.paperDivider}>
+                                    <Divider />
+                                </Grid>
+                                {filterPane}
+                            </Fragment>
+                        }
+                        {!filterPane &&
+                            <Fragment>
+                                <Grid item xs={12} className={classes.paperDivider}>
+                                    <Divider />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    {!!filters && Object.keys(filters).map((filter, idx) => (
+                                        <Chip key={`searcher_filter_${idx}`}
+                                            label={filters[filter].chip}
+                                            onDelete={e => del(filter)}
+                                            className={classes.chip}
+                                        />
+                                    ))}
+                                </Grid>
+                            </Fragment>
+                        }
                     </Grid>
                 </Paper>
             </Fragment>

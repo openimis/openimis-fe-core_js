@@ -147,12 +147,8 @@ const styles = theme => ({
 });
 
 class AppWrapper extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      open: false
-    };
-  }
+
+  state = { open: false }
 
   isAppBarMenu = () => {
     return this.props.theme.menu.variant.toUpperCase() === 'APPBAR';
@@ -228,8 +224,8 @@ class AppWrapper extends Component {
               >
                 <div className={classes.grow} />
               </Contributions>
-              <Logout/>
-              <Help/>
+              <Logout />
+              <Help />
             </Toolbar>
           </AppBar>
           {open && (

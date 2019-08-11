@@ -18,9 +18,6 @@ export function formatDateFromIso(intl, date) {
     return intl.formatDate(moment(date));
 }
 
-export function chipSelect(intl, module, i, v) {
-    return `${formatMessage(intl, module, i)} = ${formatMessage(intl, module, `${i}.${v}`)}`;
-}
-export function chipText(intl, module, i, v) {
+export function chip(intl, module, i, v) {
     return `${formatMessage(intl, module, i)} = ${v}`;
 }

@@ -14,7 +14,7 @@ class Contributions extends Component {
         "key":k
       }      
       if (_.isString(Comp)) {
-        var C = modulesManager.getComponent(Comp);
+        var C = modulesManager.getRef(Comp);
         return <C {...this.props} {...keys} />
       } else {
         return <Comp {...this.props} {...keys} />
@@ -29,7 +29,7 @@ class Contributions extends Component {
   render() {
     const { modulesManager, contributionKey, reverse } = this.props;
 
-    const contributions = modulesManager.getContributions(
+    const contributions = modulesManager.getContribs(
       contributionKey
     );
 

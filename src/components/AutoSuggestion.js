@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import Autosuggest from "react-autosuggest";
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { FormControl, Input, InputAdornment, TextField } from "@material-ui/core";
+import { FormControl, IconButton, InputAdornment, TextField } from "@material-ui/core";
+import ClearIcon from "@material-ui/icons/Clear";
 import SearchIcon from "@material-ui/icons/Search";
 import _ from "lodash";
 
@@ -19,7 +20,7 @@ const styles = theme => ({
         position: "relative",
     },
     suggestionInputField: {
-        margin: 10,
+        margin: 0,
         border: 0,
     },
     suggestionsContainerOpen: {
@@ -29,7 +30,8 @@ const styles = theme => ({
         margin: 0,
         width: "100%",
         backgroundColor: theme.palette.text.secondary,
-        border: "solid 1px grey"
+        border: "solid 1px grey",
+        zIndex: theme.zIndex.modal,
     },
     suggestion: {
         display: "block",
@@ -52,12 +54,18 @@ function escapeRegexCharacters(str) {
 }
 
 class AutoSuggestion extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            value: props.value || '',
-            suggestions: []
-        };
+
+    state = {
+        value: '',
+        suggestions: []
+    }
+
+    componentDidMount() {
+        if (!!this.props.initValue) {
+            this.setState({
+                value: this.props.getSuggestionValue(this.props.initValue)
+            })
+        }
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -67,6 +75,19 @@ class AutoSuggestion extends Component {
                 suggestions: items
             })
         }
+        if (!_.isEqual(prevProps.initValue, this.props.initValue)) {
+            this.setState({
+                value: this.props.getSuggestionValue(this.props.initValue) || ''
+            })
+        }
+    }
+
+    onClear = e => {
+        this.setState({
+            value: ''
+        },
+            e => this.props.onSuggestionSelected(null)
+        );
     }
 
     onChange = (event, { newValue, method }) => {
@@ -99,11 +120,15 @@ class AutoSuggestion extends Component {
             return [];
         }
         const regex = new RegExp(escapedValue, 'gi');
-        return this.props.items.filter(i => regex.test(this.props.lookup(i)));
+        let lookup = this.props.lookup;
+        if (!lookup) {
+            lookup = i => this.props.getSuggestionValue(i);
+        }
+        return this.props.items.filter(i => regex.test(lookup(i)));
     }
 
     renderInputComponent = (inputProps) => {
-        const { classes } = this.props;
+        const { classes, withClear } = this.props;
         return (
             <FormControl fullWidth>
                 <TextField
@@ -112,7 +137,12 @@ class AutoSuggestion extends Component {
                     }}
                     {...inputProps}
                     InputProps={{
-                        startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment>
+                        startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment>,
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton onClick={this.onClear}><ClearIcon /></IconButton>
+                            </InputAdornment>
+                        ),
                     }}
                 />
             </FormControl>
@@ -120,15 +150,20 @@ class AutoSuggestion extends Component {
     }
 
     render() {
-        const { classes, label, placeholder, getSuggestionValue, renderSuggestion, onSuggestionSelected } = this.props;
+        const { classes, label, disabled=false, placeholder, getSuggestionValue, onSuggestionSelected } = this.props;
         const { suggestions, value } = this.state;
         const inputProps = {
             className: classes.suggestionInputField,
             placeholder,
             value,
             label,
-            onChange: this.onChange
+            disabled,
+            onChange: this.onChange,
         };
+        let render = this.props.renderSuggestion
+        if (!render) {
+            render = s => <span>{getSuggestionValue(s)}</span>
+        }
         return (
             <Autosuggest
                 theme={{
@@ -145,7 +180,7 @@ class AutoSuggestion extends Component {
                 onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
                 onSuggestionsClearRequested={this.onSuggestionsClearRequested}
                 getSuggestionValue={getSuggestionValue}
-                renderSuggestion={renderSuggestion}
+                renderSuggestion={render}
             />
         )
     }

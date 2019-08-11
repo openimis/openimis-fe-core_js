@@ -24,20 +24,21 @@ const styles = theme => ({
 });
 
 class RootApp extends Component {
+
   constructor(props) {
     super(props);
-    this.routerContributions = props.modulesManager.getContributions(
+    this.routerContributions = props.modulesManager.getContribs(
       ROUTER_CONTRIBUTION_KEY
     );
   }
-  
+
   componentDidMount() {
     this.props.auth();
   }
 
   buildMessages(messages, lang) {
     var msgs = this.props.modulesManager
-      .getContributions(TRANSLATION_CONTRIBUTION_KEY)
+      .getContribs(TRANSLATION_CONTRIBUTION_KEY)
       .filter(msgs => msgs.key === lang)
       .reduce((allmsgs, msgs) => Object.assign(allmsgs, msgs.messages), {})
     return { ...messages, ...msgs };
@@ -57,7 +58,7 @@ class RootApp extends Component {
       );
     } else {
       return (
-        <IntlProvider 
+        <IntlProvider
           locale={this.props.localesManager.getLocale(user.language)}
           messages={this.buildMessages(messages, user.language)}
         >

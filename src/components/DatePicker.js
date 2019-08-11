@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { injectIntl } from 'react-intl';
+import { FormControl } from "@material-ui/core";
 import { KeyboardDatePicker } from "@material-ui/pickers";
 import { formatMessage } from "../helpers/i18n";
 
@@ -8,6 +9,7 @@ const styles = theme => ({
     label: {
         color: theme.palette.primary.main
     },
+
 });
 
 class DatePicker extends Component {
@@ -18,15 +20,18 @@ class DatePicker extends Component {
 
     render() {
         const { intl, classes, module, label } = this.props;
-        return (<KeyboardDatePicker
-            InputLabelProps={{
-                className: classes.label
-            }}
-            margin="normal"
-            id={`${module}-${label}-date-picker`}
-            label={formatMessage(intl, module, label)}
-            onChange={this.dateChange}
-        />)
+        return (
+            <FormControl fullWidth>
+                <KeyboardDatePicker
+                    InputLabelProps={{
+                        className: classes.label
+                    }}
+                    id={`${module}-${label}-date-picker`}
+                    label={formatMessage(intl, module, label)}
+                    onChange={this.dateChange}
+                />
+            </FormControl>
+        )
     }
 }
 

@@ -17,8 +17,8 @@ import SmallTable from "./components/SmallTable";
 import Searcher from "./components/Searcher";
 import reducer from "./reducer";
 import { baseApiUrl, apiHeaders, graphql } from './actions';
-import { formatMessage, formatDateFromIso, formatAmount, chip } from './helpers/i18n';
-import { decodeId, encodeId, formatQuery, formatPageQuery, parseData, formatServerError, formatGraphQLError } from './helpers/api';
+import { formatMessage, formatDateFromIso, formatAmount, chip, toISODate } from './helpers/i18n';
+import { decodeId, encodeId, formatQuery, formatPageQuery, formatPageQueryWithCount, parseData, pageInfo, formatServerError, formatGraphQLError } from './helpers/api';
 import withModulesManager from './helpers/modules';
 
 const DEFAULT_CONFIG = {
@@ -31,7 +31,9 @@ export const CoreModule = (cfg) => {
 
 export {
   baseApiUrl, apiHeaders, graphql, 
-  decodeId, encodeId, formatQuery, formatPageQuery, parseData, formatServerError, formatGraphQLError, withModulesManager,
+  decodeId, encodeId, toISODate,
+  withModulesManager,
+  formatQuery, formatPageQuery, formatPageQueryWithCount, parseData, pageInfo, formatServerError, formatGraphQLError,
   formatMessage, formatDateFromIso, formatAmount, chip,
   App, AutoSuggestion, Contributions, ControlledField, Error, FatalError, 
   InputSelect, InputText,

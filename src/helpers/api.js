@@ -1,27 +1,48 @@
 import _ from "lodash";
 
+function _entityAndFilters(entity, filters) {
+  return `${entity}${!!filters && filters.length ? `(${filters.join(',')})` : ""}`
+}
+
+function _pageAndEdges(projections) {
+  return `
+    pageInfo { hasNextPage, hasPreviousPage, startCursor, endCursor}
+    edges
+    {
+      node
+      {
+        ${projections.join(',')}
+      }
+    }`
+}
+
 export function formatQuery(entity, filters, projections) {
   return `
-  {
-    ${entity}${!!filters && filters.length ? `(${filters.join(',')})` : ""}
     {
-      ${projections.join(',')}
-    }
-  }`
+      ${_entityAndFilters(entity, filters)}
+      {
+        ${projections.join(',')}
+      }
+    }`
 }
 
 export function formatPageQuery(entity, filters, projections) {
   return `
     {
-      ${entity}${!!filters && filters.length ? `(${filters.join(',')})` : ""}
+      ${_entityAndFilters(entity, filters)}
       {
-        edges
-        {
-          node
-          {
-            ${projections.join(',')}
-          }
-        }
+        ${_pageAndEdges(projections)}
+      }
+    }`
+}
+
+export function formatPageQueryWithCount(entity, filters, projections) {
+  return `
+    {
+      ${_entityAndFilters(entity, filters)}
+      {
+        totalCount
+        ${_pageAndEdges(projections)}
       }
     }`
 }
@@ -37,6 +58,10 @@ export function encodeId(modulesManager, type, id) {
 
 export function parseData(data) {
   return data['edges'].map(e => e['node']);
+}
+
+export function pageInfo(data) {
+  return {totalCount: data['totalCount'], ...data['pageInfo']};
 }
 
 export function formatServerError(payload) {

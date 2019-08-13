@@ -12,7 +12,7 @@ const styles = theme => ({
 
 class InputText extends Component {
     render() {
-        const { intl, classes, module, label, value, onChange} = this.props;
+        const { intl, classes, module, label, value, onChange, type="text"} = this.props;
         return (
             <FormControl fullWidth={true}>
                 <TextField
@@ -20,6 +20,7 @@ class InputText extends Component {
                     InputLabelProps={{
                         className: classes.label
                     }}
+                    type={type}
                     onChange={e => onChange(e.target.value)}
                     defaultValue={value}
                 />

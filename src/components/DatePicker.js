@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { injectIntl } from 'react-intl';
 import { FormControl } from "@material-ui/core";
-import { KeyboardDatePicker } from "@material-ui/pickers";
+import { DatePicker as MUIDatePicker} from "@material-ui/pickers";
 import { formatMessage } from "../helpers/i18n";
 
 const styles = theme => ({
@@ -14,15 +14,27 @@ const styles = theme => ({
 
 class DatePicker extends Component {
 
+    state = { value: null }
+
+    componentDidMount() {
+        this.setState({ value: this.props.value })
+    }
+
     dateChange = e => {
-        this.props.onChange(e.toDate())
+        this.setState(
+            { value: e },
+            i => this.props.onChange(!!e? e.toDate() : null)
+        );
     }
 
     render() {
-        const { intl, classes, module, label } = this.props;
+        const { intl, classes, module, label, onChange } = this.props;
         return (
             <FormControl fullWidth>
-                <KeyboardDatePicker
+                <MUIDatePicker
+                    format="YYYY-MM-DD"
+                    clearable
+                    value={this.state.value}
                     InputLabelProps={{
                         className: classes.label
                     }}

@@ -31,25 +31,27 @@ class SmallTable extends Component {
         selection: {}
     }
 
-    _atom = (a) => a.reduce(
+    _atom = (a) => !!a && a.reduce(
         (m, i) => { m[this.props.itemIdentifier(i)] = i; return m },
         {}
     )
 
     componentDidMount() {
-        this.setState({
-            selection: this._atom(this.props.selection)
-        })
+        if (this.props.withSelection) {
+            this.setState({
+                selection: this._atom(this.props.selection)
+            })
+        }
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if (prevProps.selectAll !== this.props.selectAll) {
+        if (this.props.withSelection && prevProps.selectAll !== this.props.selectAll) {
             this.setState(
                 { selection: _.merge(this.state.selection, this._atom(this.props.items)) },
                 e => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection))
             )
         }
-        if (prevProps.clearAll !== this.props.clearAll) {
+        if (this.props.withSelection && prevProps.clearAll !== this.props.clearAll) {
             this.setState(
                 { selection: {} },
                 e => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection))

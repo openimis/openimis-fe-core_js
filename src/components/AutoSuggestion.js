@@ -15,6 +15,9 @@ const styles = theme => ({
     label: {
         color: theme.palette.primary.main
     },
+    textField: {
+        width: "100%",
+    },
     suggestionContainer: {
         flexGrow: 1,
         position: "relative",
@@ -29,7 +32,7 @@ const styles = theme => ({
         padding: 0,
         margin: 0,
         width: "100%",
-        backgroundColor: theme.palette.text.secondary,
+        backgroundColor: theme.palette.text.second,
         border: "solid 1px grey",
         zIndex: theme.zIndex.modal,
     },
@@ -44,7 +47,7 @@ const styles = theme => ({
         padding: 0,
     },
     suggestionHighlighted: {
-        color: theme.palette.text.secondary,
+        color: theme.palette.text.second,
         backgroundColor: theme.palette.text.primary,
     },
 });
@@ -61,9 +64,9 @@ class AutoSuggestion extends Component {
     }
 
     componentDidMount() {
-        if (!!this.props.initValue) {
+        if (!!this.props.value) {
             this.setState({
-                value: this.props.getSuggestionValue(this.props.initValue)
+                value: this.props.getSuggestionValue(this.props.value)
             })
         }
     }
@@ -75,9 +78,9 @@ class AutoSuggestion extends Component {
                 suggestions: items
             })
         }
-        if (!_.isEqual(prevProps.initValue, this.props.initValue)) {
+        if (!_.isEqual(prevProps.value, this.props.value)) {
             this.setState({
-                value: this.props.getSuggestionValue(this.props.initValue) || ''
+                value: this.props.getSuggestionValue(this.props.value)
             })
         }
     }
@@ -150,12 +153,15 @@ class AutoSuggestion extends Component {
     }
 
     render() {
-        const { classes, label, disabled=false, placeholder, getSuggestionValue, onSuggestionSelected } = this.props;
+        const {
+            classes, label, readOnly = false, disabled = false, placeholder,
+            getSuggestionValue, onSuggestionSelected
+        } = this.props;
         const { suggestions, value } = this.state;
         const inputProps = {
             className: classes.suggestionInputField,
             placeholder,
-            value,
+            value: value,
             label,
             disabled,
             onChange: this.onChange,
@@ -163,6 +169,15 @@ class AutoSuggestion extends Component {
         let render = this.props.renderSuggestion
         if (!render) {
             render = s => <span>{getSuggestionValue(s)}</span>
+        }
+        if (!!readOnly) {
+            return (
+                <TextField
+                    className={classes.textField}
+                    readOnly
+                    value={getSuggestionValue(value)}
+                />
+            )
         }
         return (
             <Autosuggest

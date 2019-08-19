@@ -25,7 +25,7 @@ const styles = theme => ({
     }
 });
 
-class SmallTable extends Component {
+class ResultTable extends Component {
 
     state = {
         selection: {}
@@ -99,7 +99,7 @@ class SmallTable extends Component {
                     </Fragment>
                 }
                 <Table className={classes.table} size="small">
-                    {!!headers && (
+                    {!!headers && headers.length > 0 && (
                         <TableHead>
                             <TableRow>
                                 {headers.map((h, idx) => (
@@ -111,7 +111,7 @@ class SmallTable extends Component {
                         </TableHead>
                     )}
                     <TableBody>
-                        {items && items.map((i, iidx) => (
+                        {items && items.length > 0 && items.map((i, iidx) => (
                             <TableRow key={iidx}
                                 selected={this.isSelected(i)}
                                 onClick={e => this.select(i)}
@@ -135,7 +135,7 @@ class SmallTable extends Component {
                             <TableRow>
                                 <TablePagination
                                     className={classes.pager}
-                                    colSpan={headers.length}
+                                    colSpan={itemFormatters.length}
                                     labelRowsPerPage={formatMessage(intl, "core", "rowsPerPage")}
                                     labelDisplayedRows={({ from, to, count }) => `${from}-${to} ${formatMessage(intl, "core", "ofPages")} ${count}`}
                                     count={count}
@@ -155,5 +155,5 @@ class SmallTable extends Component {
 }
 
 export default withModulesManager(injectIntl(withTheme(
-    withStyles(styles)(SmallTable)
+    withStyles(styles)(ResultTable)
 )));

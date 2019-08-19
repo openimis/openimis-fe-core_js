@@ -6,19 +6,25 @@ import DatePicker from "./components/DatePicker";
 import Error from "./components/Error";
 import FatalError from "./components/FatalError";
 import FieldLabel from "./components/FieldLabel";
+import Form from "./components/Form";
+import FormTable from "./components/FormTable";
 import FormattedMessage from "./components/FormattedMessage";
-import InputSelect from "./components/InputSelect";
-import InputText from "./components/InputText";
+import SelectInput from "./components/SelectInput";
+import TextInput from "./components/TextInput";
+import AmountInput from "./components/AmountInput";
+import NumberInput from "./components/NumberInput";
 import MainMenuContribution from "./components/MainMenuContribution";
 import ProgressOrError from "./components/ProgressOrError";
 import ProxyPage from "./components/ProxyPage";
 import PublishedComponent from "./components/PublishedComponent";
-import SmallTable from "./components/SmallTable";
+import Picker from "./components/Picker";
+import ResultTable from "./components/ResultTable";
 import Searcher from "./components/Searcher";
 import reducer from "./reducer";
 import { baseApiUrl, apiHeaders, graphql } from './actions';
-import { formatMessage, formatDateFromIso, formatAmount, chip, toISODate } from './helpers/i18n';
-import { decodeId, encodeId, formatQuery, formatPageQuery, formatPageQueryWithCount, parseData, pageInfo, formatServerError, formatGraphQLError } from './helpers/api';
+import { formatMessage, formatDateFromIso, formatAmount, chip, toISODate, fromISODate } from './helpers/i18n';
+import { decodeId, formatQuery, formatPageQuery, formatPageQueryWithCount, parseData, pageInfo, formatServerError, formatGraphQLError } from './helpers/api';
+import withHistory, { historyPush } from "./helpers/history";
 import withModulesManager from './helpers/modules';
 
 const DEFAULT_CONFIG = {
@@ -30,14 +36,14 @@ export const CoreModule = (cfg) => {
 }
 
 export {
-  baseApiUrl, apiHeaders, graphql, 
-  decodeId, encodeId, toISODate,
+  baseApiUrl, apiHeaders, graphql, withHistory, historyPush,
+  decodeId, toISODate, fromISODate,
   withModulesManager,
   formatQuery, formatPageQuery, formatPageQueryWithCount, parseData, pageInfo, formatServerError, formatGraphQLError,
   formatMessage, formatDateFromIso, formatAmount, chip,
-  App, AutoSuggestion, Contributions, ControlledField, Error, FatalError, 
-  InputSelect, InputText,
-  FieldLabel, FormattedMessage,
-  MainMenuContribution, ProgressOrError, ProxyPage, PublishedComponent, SmallTable, Searcher,
+  App, AutoSuggestion, Contributions, ControlledField, Error, FatalError, Picker,
+  SelectInput, TextInput, AmountInput,
+  Form, FormTable, FieldLabel, FormattedMessage, NumberInput,
+  MainMenuContribution, ProgressOrError, ProxyPage, PublishedComponent, ResultTable, Searcher,
   DatePicker
 };

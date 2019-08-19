@@ -10,6 +10,7 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import { Divider, List, IconButton, MenuList, MenuItem, Button, Popper, Grow, Paper, ClickAwayListener } from "@material-ui/core";
+import { historyPush } from '../helpers/history';
 
 const styles = theme => ({
   panel: {
@@ -26,7 +27,7 @@ const styles = theme => ({
   },
   menuHeading: {
     fontSize: theme.menu.appBar.fontSize,
-    color: theme.palette.text.secondary,
+    color: theme.palette.text.second,
     paddingTop: theme.menu.appBar.fontSize / 2,
     textTransform: "none"
   },
@@ -105,7 +106,7 @@ class MainMenuContribution extends Component {
   }
 
   redirect(route) {
-    this.props.history.push(`${process.env.PUBLIC_URL || ""}${route}`);
+    historyPush(this.props.history, route);
   }
 
   appBarMenu = () => {
@@ -128,15 +129,15 @@ class MainMenuContribution extends Component {
               <Paper className={this.props.classes.appBarMenuPaper} id={`${this.props.header}-menu-list`}>
                 <ClickAwayListener onClickAway={this.handleMenuClose}>
                   <MenuList>
-                    {this.props.entries.map(entry => (
-                      <Fragment key={`${this.props.header}_${entry.text}_item`}>
+                    {this.props.entries.map((entry, idx) => (
+                      <Fragment key={`${this.props.header}_${idx}_item`}>
                         <MenuItem onClick={(e) => this.handleMenuSelect(e, entry.route)}>
                           <ListItemIcon>{entry.icon}</ListItemIcon>
                           <ListItemText primary={entry.text} />
                         </MenuItem>
                         {entry.withDivider && (
                           <Divider
-                            key={`${this.props.header}_${entry.text}_divider`}
+                            key={`${this.props.header}_${idx}_divider`}
                             className={this.props.classes.drawerDivider} />
                         )
                         }
@@ -168,11 +169,11 @@ class MainMenuContribution extends Component {
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
           <List component="nav">
-            {this.props.entries.map(entry => (
-              <Fragment key={`${this.props.header}_${entry.text}`}>
+            {this.props.entries.map((entry, idx) => (
+              <Fragment key={`${this.props.header}_${idx}`}>
                 <ListItem
                   button
-                  key={`${this.props.header}_${entry.text}_item`}
+                  key={`${this.props.header}_${idx}_item`}
                   onClick={e => {
                     this.redirect(entry.route);
                   }}
@@ -182,7 +183,7 @@ class MainMenuContribution extends Component {
                 </ListItem>
                 {entry.withDivider && (
                   <Divider
-                    key={`${this.props.header}_${entry.text}_divider`}
+                    key={`${this.props.header}_${idx}_divider`}
                     className={this.props.classes.drawerDivider} />
                 )}
               </Fragment>

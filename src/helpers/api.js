@@ -52,9 +52,9 @@ export function decodeId(id) {
   else return atob(id).split(':')[1];
 }
 
-export function encodeId(modulesManager, type, id) {
-  return btoa(`${modulesManager.getRef(type)}:${id}`);
-}
+// export function encodeId(modulesManager, type, id) {
+//   return btoa(`${modulesManager.getConf(type)}:${id}`);
+// }
 
 export function parseData(data) {
   return data['edges'].map(e => e['node']);

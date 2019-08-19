@@ -22,6 +22,11 @@ export function chip(intl, module, i, v) {
     return `${formatMessage(intl, module, i)} = ${v}`;
 }
 
+export function fromISODate(s) {
+    if (!s) return null;
+    return moment(s).toDate();
+}
+
 export function toISODate(d) {
     if (!d) return null;
     return d.toISOString().substring(0, 10);

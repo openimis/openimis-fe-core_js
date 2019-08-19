@@ -10,15 +10,16 @@ const styles = theme => ({
     }
 });
 
-class InputSelect extends Component {
+class SelectInput extends Component {
     render() {
-        const { classes, module, label, name, options, value, onChange, disabled=false } = this.props;
+        const { classes, module, label, name, options, value, onChange, disabled=false, readOnly = false } = this.props;
         return (
             <FormControl fullWidth>
-                <InputLabel htmlFor={`${module}-${label}`} className={classes.label}>
+                <InputLabel className={classes.label}>
                     <FormattedMessage module={module} id={label} />
                 </InputLabel>
                 <Select
+                    readOnly={readOnly}
                     inputProps={{
                         name: name,
                         id: `${module}-${label}-input`
@@ -38,4 +39,4 @@ class InputSelect extends Component {
     }
 }
 
-export default injectIntl(withTheme(withStyles(styles)(InputSelect)));
+export default injectIntl(withTheme(withStyles(styles)(SelectInput)));

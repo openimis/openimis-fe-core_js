@@ -6,7 +6,7 @@ import { Button, Grid, Hidden, ClickAwayListener } from "@material-ui/core";
 import Logout from "./Logout";
 import Help from "./Help";
 import { fade } from "@material-ui/core/styles/colorManipulator";
-import history from "../helpers/history";
+import withHistory from "../helpers/history";
 import classNames from 'classnames';
 
 import {
@@ -167,7 +167,7 @@ class AppWrapper extends Component {
   };
 
   render() {
-    const { classes, modulesManager, ...others } = this.props;
+    const { history, classes, modulesManager, ...others } = this.props;
     const { open } = this.state;
 
     return (
@@ -265,4 +265,4 @@ class AppWrapper extends Component {
   }
 }
 
-export default withWidth()(withTheme(withStyles(styles)(AppWrapper)));
+export default withHistory(withWidth()(withTheme(withStyles(styles)(AppWrapper))));

@@ -4,7 +4,7 @@ import { IntlProvider } from 'react-intl';
 import { Redirect, Route, Router, Switch } from "react-router-dom";
 import { CssBaseline, CircularProgress } from "@material-ui/core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import history from "../helpers/history";
+import withHistory from "../helpers/history";
 import withModulesManager from "../helpers/modules";
 import AppWrapper from "./AppWrapper";
 import FatalError from './FatalError';
@@ -45,7 +45,7 @@ class RootApp extends Component {
   }
 
   render() {
-    const { classes, error, user, messages, ...others } = this.props;
+    const { history, classes, error, user, messages, ...others } = this.props;
     if (error) {
       return <FatalError error={error} />;
     }
@@ -63,6 +63,7 @@ class RootApp extends Component {
           messages={this.buildMessages(messages, user.language)}
         >
           <div className="App">
+            <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
             <CssBaseline />
             <Router history={history}>
               <Switch>
@@ -80,11 +81,12 @@ class RootApp extends Component {
                       exact
                       key={`route_${kebabCase(route.path)}_${index}`}
                       path={`${process.env.PUBLIC_URL || ""}/${route.path}`}
-                    >
-                      <AppWrapper {...others}>
-                        <Comp {...others} />
-                      </AppWrapper>
-                    </Route>
+                      render={props => (
+                        <AppWrapper {...props} {...others}>
+                          <Comp {...props} {...others} />
+                        </AppWrapper>
+                      )}
+                    />
                   );
                 })}
               </Switch>
@@ -104,6 +106,6 @@ function mapStateToProps(state) {
   }
 };
 
-export default connect(mapStateToProps, { auth })(
+export default withHistory(connect(mapStateToProps, { auth })(
   withModulesManager(withTheme(withStyles(styles)(RootApp))),
-);
+));

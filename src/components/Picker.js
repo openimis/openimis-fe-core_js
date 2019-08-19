@@ -9,7 +9,7 @@ import { formatMessage } from "../helpers/i18n";
 import ClearIcon from "@material-ui/icons/Clear";
 import SearchIcon from "@material-ui/icons/Search";
 import FormattedMessage from "./FormattedMessage";
-import ResultTable from "./ResultTable";
+import Table from "./Table";
 
 const styles = theme => ({
     label: {
@@ -51,7 +51,7 @@ class RawPickerDialog extends Component {
                 <DialogContent className={classes.dialogContent}>
                     {filter}
                     <Divider />
-                    <ResultTable
+                    <Table
                         items={suggestions}
                         itemFormatters={[suggestionFormatter]}
                         withPagination={count > pageSize}

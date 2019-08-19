@@ -7,7 +7,6 @@ import Error from "./components/Error";
 import FatalError from "./components/FatalError";
 import FieldLabel from "./components/FieldLabel";
 import Form from "./components/Form";
-import FormTable from "./components/FormTable";
 import FormattedMessage from "./components/FormattedMessage";
 import SelectInput from "./components/SelectInput";
 import TextInput from "./components/TextInput";
@@ -18,7 +17,7 @@ import ProgressOrError from "./components/ProgressOrError";
 import ProxyPage from "./components/ProxyPage";
 import PublishedComponent from "./components/PublishedComponent";
 import Picker from "./components/Picker";
-import ResultTable from "./components/ResultTable";
+import Table from "./components/Table";
 import Searcher from "./components/Searcher";
 import reducer from "./reducer";
 import { baseApiUrl, apiHeaders, graphql } from './actions';
@@ -43,7 +42,7 @@ export {
   formatMessage, formatDateFromIso, formatAmount, chip,
   App, AutoSuggestion, Contributions, ControlledField, Error, FatalError, Picker,
   SelectInput, TextInput, AmountInput,
-  Form, FormTable, FieldLabel, FormattedMessage, NumberInput,
-  MainMenuContribution, ProgressOrError, ProxyPage, PublishedComponent, ResultTable, Searcher,
+  Form, FieldLabel, FormattedMessage, NumberInput,
+  MainMenuContribution, ProgressOrError, ProxyPage, PublishedComponent, Table, Searcher,
   DatePicker
 };

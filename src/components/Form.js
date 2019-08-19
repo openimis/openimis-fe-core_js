@@ -24,12 +24,12 @@ class Form extends Component {
     }
 
     componentDidMount() {
-        this.setState({edited: this.props.edited})
+        this.setState({ edited: this.props.edited })
     }
 
     componentDidUpdate(prevProps, preState, snapshot) {
         if (!_.isEqual(prevProps.edited, this.props.edited)) {
-            this.setState({edited: this.props.edited})
+            this.setState({ edited: this.props.edited })
         }
     }
 
@@ -87,14 +87,15 @@ class Form extends Component {
                                 </Grid>
                             </Paper>
                         </Grid>
-                        {!!Panels && Panels.map((P, idx) => (
-                            <Grid key={`form_pannel_${idx}`} item xs={12}>
-                                <Paper className={classes.paper}>
-                                    <P edited={this.state.edited} updateAttribute={this.updateAttribute} />
-                                </Paper>
-                            </Grid>
-                        ))}
                     </Grid>
+                    {!!Panels && Panels.map((P, idx) => (
+                        <Grid key={`form_pannel_${idx}`} item xs={12}>
+                            <Paper className={classes.paper}>
+                                <P edited={this.state.edited} updateAttribute={this.updateAttribute} />
+                            </Paper>
+                        </Grid>
+                    ))}
+
                 </form >
                 {!this.state.dirty && (
                     <Fab color="primary"

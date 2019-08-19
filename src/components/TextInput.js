@@ -25,7 +25,7 @@ class TextInput extends Component {
     _onChange = e => {
         this.setState(
             { value: e.target.value },
-            e => this.props.onChange(e.target.value)
+            e => this.props.onChange(this.state.value)
         );
     }    
     render() {

@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { injectIntl } from 'react-intl';
 import _ from "lodash";
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { Typography, Divider, Table, TableRow, TableHead, TableBody, TableCell, TableFooter, TablePagination } from "@material-ui/core";
+import { Typography, Divider, Table as MUITable, TableRow, TableHead, TableBody, TableCell, TableFooter, TablePagination } from "@material-ui/core";
 import FormattedMessage from "./FormattedMessage";
 import withModulesManager from "../helpers/modules";
 import { formatMessage } from "../helpers/i18n";
@@ -25,7 +25,7 @@ const styles = theme => ({
     }
 });
 
-class ResultTable extends Component {
+class Table extends Component {
 
     state = {
         selection: {}
@@ -78,7 +78,7 @@ class ResultTable extends Component {
     }
 
     render() {
-        const { intl, modulesManager, classes, module, header, headers, aligns = [], items, itemFormatters,
+        const { intl, modulesManager, classes, module, header, headerValues = null, headers, aligns = [], items, itemFormatters,
             withPagination = false, page, pageSize, count, rowsPerPageOptions = [10, 20, 50],
             onChangeRowsPerPage, onChangePage, onDoubleClick } = this.props;
         var i = !!headers && headers.length
@@ -93,12 +93,12 @@ class ResultTable extends Component {
                 {header &&
                     <Fragment>
                         <Typography className={classes.tableTitle}>
-                            <FormattedMessage module={module} id={header} />
+                            <FormattedMessage module={module} id={header} values={headerValues} />
                         </Typography>
                         <Divider />
                     </Fragment>
                 }
-                <Table className={classes.table} size="small">
+                <MUITable className={classes.table} size="small">
                     {!!headers && headers.length > 0 && (
                         <TableHead>
                             <TableRow>
@@ -124,7 +124,7 @@ class ResultTable extends Component {
                                             classes[`${aligns.length > fidx && !!aligns[fidx] ? aligns[fidx] : "left"}`]
                                         )}
                                         key={`v-${iidx}-${fidx}`}>
-                                        {f(i)}
+                                        {f(i, iidx)}
                                     </TableCell>
                                 ))}
                             </TableRow>
@@ -148,12 +148,12 @@ class ResultTable extends Component {
                             </TableRow>
                         </TableFooter>
                     )}
-                </Table>
+                </MUITable>
             </Fragment>
         )
     }
 }
 
 export default withModulesManager(injectIntl(withTheme(
-    withStyles(styles)(ResultTable)
+    withStyles(styles)(Table)
 )));

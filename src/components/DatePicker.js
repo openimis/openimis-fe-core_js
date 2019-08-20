@@ -26,10 +26,19 @@ class DatePicker extends Component {
         }
     }
 
-    dateChange = e => {
+    toSimpleDateString = d => {
+        if (!d) return null;
+        const a = d.toArray().slice(0,3);
+        a[0] = ('0000' + a[0]).slice(-4);
+        a[1] = ('00' + (a[1]+1)).slice(-2);
+        a[2] = ('00' + a[2]).slice(-2);
+        return a.join('-');
+    }
+
+    dateChange = d => {
         this.setState(
-            { value: e },
-            i => this.props.onChange(!!e ? e.toArray().slice(0,3).join('-') : null)
+            { value: d },
+            i => this.props.onChange(this.toSimpleDateString(d))
         );
     }
 

@@ -21,7 +21,7 @@ import Table from "./components/Table";
 import Searcher from "./components/Searcher";
 import reducer from "./reducer";
 import { baseApiUrl, apiHeaders, graphql } from './actions';
-import { formatMessage, formatDateFromIso, formatAmount, chip, toISODate, fromISODate } from './helpers/i18n';
+import { formatMessage, formatMessageWithValues, formatDateFromIso, formatAmount, chip, toISODate, fromISODate } from './helpers/i18n';
 import { decodeId, formatQuery, formatPageQuery, formatPageQueryWithCount, parseData, pageInfo, formatServerError, formatGraphQLError } from './helpers/api';
 import withHistory, { historyPush } from "./helpers/history";
 import withModulesManager from './helpers/modules';
@@ -39,7 +39,7 @@ export {
   decodeId, toISODate, fromISODate,
   withModulesManager,
   formatQuery, formatPageQuery, formatPageQueryWithCount, parseData, pageInfo, formatServerError, formatGraphQLError,
-  formatMessage, formatDateFromIso, formatAmount, chip,
+  formatMessage, formatMessageWithValues, formatDateFromIso, formatAmount, chip,
   App, AutoSuggestion, Contributions, ControlledField, Error, FatalError, Picker,
   SelectInput, TextInput, AmountInput,
   Form, FieldLabel, FormattedMessage, NumberInput,

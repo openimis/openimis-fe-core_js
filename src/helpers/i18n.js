@@ -1,6 +1,17 @@
 import moment from "moment";
 
-export function formatMessage(intl, module, id, values) {
+//formatting with values is expansive.. so let's have separated methids
+export function formatMessage(intl, module, id) {
+    if (!!intl.messages[`overwrite.${module}.${id}`]) {
+        return intl.formatMessage({ id: `overwrite.${module}.${id}` });
+    } else if (!!intl.messages[`${module}.${id}`]) {
+        return intl.formatMessage({ id: `${module}.${id}` });
+    } else {
+        return intl.formatMessage({ id: `${id}` });
+    }
+};
+
+export function formatMessageWithValues(intl, module, id, values) {
     if (!!intl.messages[`overwrite.${module}.${id}`]) {
         return intl.formatMessage({ id: `overwrite.${module}.${id}` }, values);
     } else if (!!intl.messages[`${module}.${id}`]) {
@@ -9,6 +20,7 @@ export function formatMessage(intl, module, id, values) {
         return intl.formatMessage({ id: `${id}` }, values);
     }
 };
+
 
 export function formatAmount(intl, amount) {
     return `${intl.formatMessage({ id: "currency" })} ${intl.formatNumber(amount)}`;

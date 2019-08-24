@@ -2,7 +2,6 @@ import React, { Component, Fragment } from "react";
 import { Router } from "react-router-dom";
 import withWidth from '@material-ui/core/withWidth';
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { Button, Grid, Hidden, ClickAwayListener } from "@material-ui/core";
 import Logout from "./Logout";
 import Help from "./Help";
 import { fade } from "@material-ui/core/styles/colorManipulator";
@@ -16,11 +15,15 @@ import {
   Typography,
   Drawer,
   Divider,
-  Tooltip
+  Tooltip,
+  Button,
+  Hidden,
+  ClickAwayListener
 } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
 import Contributions from "./Contributions";
 import FormattedMessage from "./FormattedMessage";
+import JournalDrawer from "./JournalDrawer";
 
 export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
 export const MAIN_MENU_CONTRIBUTION_KEY = "core.MainMenu";
@@ -39,6 +42,7 @@ const styles = theme => ({
     maxHeight: theme.typography.title.fontSize * 2,
   },
   appBar: {
+    paddingRight: theme.jrnlDrawer.close.width,
     transition: theme.transitions.create(["margin", "width"], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen
@@ -78,6 +82,7 @@ const styles = theme => ({
   content: {
     flexGrow: 1,
     padding: theme.spacing(3),
+    paddingRight: theme.jrnlDrawer.close.width,
     transition: theme.transitions.create("margin", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen
@@ -143,12 +148,16 @@ const styles = theme => ({
         width: 200
       }
     }
-  }
+  },
+
 });
 
 class AppWrapper extends Component {
 
-  state = { open: false }
+  state = {
+    open: false,
+    jrnlOpen: false,
+  }
 
   isAppBarMenu = () => {
     return this.props.theme.menu.variant.toUpperCase() === 'APPBAR';
@@ -160,15 +169,23 @@ class AppWrapper extends Component {
 
   handleOpen = () => {
     this.setState({ open: true });
-  };
+  }
 
   handleClose = () => {
     this.setState({ open: false });
-  };
+  }
+
+  isJrnlShifted = () => {
+    return this.state.jrnlOpen;
+  }
+
+  handleJrnlDrawer = () => {
+    this.setState({ jrnlOpen: !this.state.jrnlOpen });
+  }
 
   render() {
     const { history, classes, modulesManager, ...others } = this.props;
-    const { open } = this.state;
+    const { open, jrnlOpen } = this.state;
 
     return (
       <Router history={history}>
@@ -251,10 +268,14 @@ class AppWrapper extends Component {
               </nav>
             </ClickAwayListener>
           )}
+          <JournalDrawer
+            open={this.state.jrnlOpen}
+            handleDrawer={this.handleJrnlDrawer}
+          />
           <div className={classes.toolbar} />
           <main
             className={classNames(classes.content, {
-              [classes.contentShift]: this.isShifted()
+              [classes.jrnlContentShift]: this.isJrnlShifted()
             })}
           >
             {this.props.children}

@@ -1,4 +1,4 @@
-import _ from "lodash";
+import _ from "lodash-uuid";
 
 function _entityAndFilters(entity, filters) {
   return `${entity}${!!filters && filters.length ? `(${filters.join(',')})` : ""}`
@@ -47,8 +47,25 @@ export function formatPageQueryWithCount(entity, filters, projections) {
     }`
 }
 
+export function formatMutation(service, input) {
+  const clientMutationId = _.uuid();
+  const payload = `
+    mutation {
+      ${service}(
+        input: {
+          clientMutationId: "${clientMutationId}"
+          ${input}
+        }
+      ) {
+        clientMutationId
+        internalId
+      }
+    }`
+  return { clientMutationId, payload }
+}
+
 export function decodeId(id) {
-  if (/\d+/.test(id)) return id
+  if (/^\d+$/.test(id)) return id
   else return atob(id).split(':')[1];
 }
 
@@ -61,7 +78,7 @@ export function parseData(data) {
 }
 
 export function pageInfo(data) {
-  return {totalCount: data['totalCount'], ...data['pageInfo']};
+  return { totalCount: data['totalCount'], ...data['pageInfo'] };
 }
 
 export function formatServerError(payload) {

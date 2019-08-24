@@ -20,14 +20,20 @@ import Picker from "./components/Picker";
 import Table from "./components/Table";
 import Searcher from "./components/Searcher";
 import reducer from "./reducer";
-import { baseApiUrl, apiHeaders, graphql } from './actions';
+import { baseApiUrl, apiHeaders, graphql, journalize } from './actions';
 import { formatMessage, formatMessageWithValues, formatDateFromIso, formatAmount, chip, toISODate, fromISODate } from './helpers/i18n';
-import { decodeId, formatQuery, formatPageQuery, formatPageQueryWithCount, parseData, pageInfo, formatServerError, formatGraphQLError } from './helpers/api';
+import {
+  decodeId, formatQuery, formatPageQuery, formatPageQueryWithCount,
+  parseData, pageInfo, formatServerError, formatGraphQLError, formatMutation
+} from './helpers/api';
 import withHistory, { historyPush } from "./helpers/history";
 import withModulesManager from './helpers/modules';
 
 const DEFAULT_CONFIG = {
   "reducers": [{ key: 'core', reducer: reducer }],
+  "refs": [
+    { key: "core.JournalDrawer.pollInterval", ref: 2000 },
+  ],
 }
 
 export const CoreModule = (cfg) => {
@@ -35,10 +41,11 @@ export const CoreModule = (cfg) => {
 }
 
 export {
-  baseApiUrl, apiHeaders, graphql, withHistory, historyPush,
+  baseApiUrl, apiHeaders, graphql, journalize,
+  withHistory, historyPush,
   decodeId, toISODate, fromISODate,
   withModulesManager,
-  formatQuery, formatPageQuery, formatPageQueryWithCount, parseData, pageInfo, formatServerError, formatGraphQLError,
+  formatQuery, formatPageQuery, formatPageQueryWithCount, formatMutation, parseData, pageInfo, formatServerError, formatGraphQLError,
   formatMessage, formatMessageWithValues, formatDateFromIso, formatAmount, chip,
   App, AutoSuggestion, Contributions, ControlledField, Error, FatalError, Picker,
   SelectInput, TextInput, AmountInput,

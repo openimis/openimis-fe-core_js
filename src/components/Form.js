@@ -20,16 +20,28 @@ const styles = theme => ({
 class Form extends Component {
     state = {
         edited: {},
+        edited_id: null,
         dirty: false,
     }
 
     componentDidMount() {
-        this.setState({ edited: this.props.edited })
+        this.setState({
+            edited: this.props.edited,
+            edited_id: this.props.edited_id,
+        })
     }
 
-    componentDidUpdate(prevProps, preState, snapshot) {
-        if (!_.isEqual(prevProps.edited, this.props.edited)) {
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.edited_id !== this.props.edited_id) {
+            this.setState({
+                edited: this.props.edited,
+                edited_id: this.props.edited_id,
+                dirty: false,
+            })
+        } else if (!_.isEqual(prevProps.edited, this.props.edited)) {
             this.setState({ edited: this.props.edited })
+        } else if (prevProps.reset !== this.props.reset) {
+            this.setState({ dirty: false });
         }
     }
 
@@ -43,7 +55,7 @@ class Form extends Component {
     }
 
     render() {
-        const { classes, module, back = null, save, reload, title, HeadPanel, Panels } = this.props;
+        const { classes, module, back = null, add, save, reload, title, HeadPanel, Panels } = this.props;
         return (
             <Fragment>
                 <form noValidate autoComplete="off">
@@ -67,7 +79,7 @@ class Form extends Component {
                                             )}
                                         </Grid>
                                     </Grid>
-                                    {!!this.state.dirty && (
+                                    {!!reload && !!this.state.dirty && (
                                         <Grid item xs={1} className={classes.paperHeader}>
                                             <Grid container justify="flex-end">
                                                 <Grid item className={classes.paperHeaderAction}>
@@ -83,7 +95,7 @@ class Form extends Component {
                                     <Divider />
                                 </Grid>
                                 <Grid item xs={12}>
-                                    <HeadPanel edited={this.state.edited} updateAttribute={this.updateAttribute} />
+                                    <HeadPanel edited={this.state.edited} edited_id={this.state.edited_id} updateAttribute={this.updateAttribute} />
                                 </Grid>
                             </Paper>
                         </Grid>
@@ -91,7 +103,7 @@ class Form extends Component {
                     {!!Panels && Panels.map((P, idx) => (
                         <Grid key={`form_pannel_${idx}`} item xs={12}>
                             <Paper className={classes.paper}>
-                                <P edited={this.state.edited} updateAttribute={this.updateAttribute} />
+                                <P edited={this.state.edited} edited_id={this.state.edited_id} updateAttribute={this.updateAttribute} />
                             </Paper>
                         </Grid>
                     ))}
@@ -99,7 +111,8 @@ class Form extends Component {
                 </form >
                 {!this.state.dirty && (
                     <Fab color="primary"
-                        className={classes.fab}>
+                        className={classes.fab}
+                        onClick={add}>
                         <AddIcon />
                     </Fab>
                 )}

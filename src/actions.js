@@ -1,4 +1,5 @@
 import { RSAA } from "redux-api-middleware";
+import { formatQuery } from "./helpers/api";
 
 export const baseApiUrl = process.env.NODE_ENV === 'development' ? "/api" : "/iapi";
 
@@ -12,13 +13,20 @@ export function apiHeaders() {
     return headers;
 }
 
+export function journalize(mutation) {
+    return dispatch => {
+        mutation.status = 0;
+        dispatch({ type: 'CORE_MUTATION_ADD', payload: mutation })
+    }
+}
+
 export function graphql(payload, type, params = {}) {
     return {
         [RSAA]: {
             endpoint: `${baseApiUrl}/graphql`,
             method: "POST",
             headers: apiHeaders(),
-            body: JSON.stringify({ "query": payload }),
+            body: JSON.stringify({ query: payload }),
             types: [
                 {
                     type: type + '_REQ',
@@ -27,7 +35,6 @@ export function graphql(payload, type, params = {}) {
                     type: type + '_RESP',
                     meta: params,
                 }, {
-
                     type: type + '_ERR',
                     meta: params,
                 }
@@ -49,4 +56,12 @@ export function auth() {
             ],
         },
     };
+}
+
+export function fetchMutations(ids) {
+    const payload = formatQuery("coreMutations",
+    [`ids: ["${ids.join("\",\"")}"]`],
+    ["internalId, status"]
+  );
+  return graphql(payload, 'CORE_MUTATIONS');
 }

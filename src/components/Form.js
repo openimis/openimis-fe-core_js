@@ -7,7 +7,7 @@ import SaveIcon from "@material-ui/icons/SaveAlt";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ReplayIcon from "@material-ui/icons/Replay"
 import FormattedMessage from "./FormattedMessage";
-import withHistory, { historyPush } from "../helpers/history";
+import withHistory from "../helpers/history";
 import _ from "lodash";
 
 const styles = theme => ({
@@ -55,7 +55,7 @@ class Form extends Component {
     }
 
     render() {
-        const { classes, module, back = null, add, save, reload, title, HeadPanel, Panels } = this.props;
+        const { classes, module, withBack = true, add, save, reload, title, HeadPanel, Panels } = this.props;
         return (
             <Fragment>
                 <form noValidate autoComplete="off">
@@ -65,9 +65,9 @@ class Form extends Component {
                                 <Grid container alignItems="center" direction="row">
                                     <Grid item xs={11}>
                                         <Grid container alignItems="center">
-                                            {!!back && (
+                                            {!!withBack && (
                                                 <Grid item className={classes.paperHeader}>
-                                                    <IconButton onClick={e => historyPush(this.props.history, back)}>
+                                                    <IconButton onClick={e =>this.props.history.goBack()}>
                                                         <ChevronLeftIcon />
                                                     </IconButton>
                                                 </Grid>

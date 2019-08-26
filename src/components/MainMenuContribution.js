@@ -10,7 +10,7 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import { Divider, List, IconButton, MenuList, MenuItem, Button, Popper, Grow, Paper, ClickAwayListener } from "@material-ui/core";
-import { historyPush } from '../helpers/history';
+import { _historyPush } from '../helpers/history';
 
 const styles = theme => ({
   panel: {
@@ -106,7 +106,7 @@ class MainMenuContribution extends Component {
   }
 
   redirect(route) {
-    historyPush(this.props.history, route);
+    _historyPush(this.props.history, route);
   }
 
   appBarMenu = () => {

@@ -1,7 +1,6 @@
 import React, { Component, Fragment } from "react";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import {
-    Button,
     Chip,
     Grid,
     Paper,

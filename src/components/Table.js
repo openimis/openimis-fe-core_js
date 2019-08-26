@@ -120,7 +120,7 @@ class Table extends Component {
                             <TableRow key={iidx}
                                 selected={this.isSelected(i)}
                                 onClick={e => this.select(i)}
-                                onDoubleClick={e => onDoubleClick(i)}
+                                onDoubleClick={e => !!onDoubleClick && onDoubleClick(i)}
                             >
                                 {itemFormatters && itemFormatters.map((f, fidx) => {
                                     if (colSpans.length > fidx && !colSpans[fidx]) return null;

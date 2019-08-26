@@ -12,6 +12,8 @@ import SelectInput from "./components/SelectInput";
 import TextInput from "./components/TextInput";
 import AmountInput from "./components/AmountInput";
 import NumberInput from "./components/NumberInput";
+import YearPicker from "./components/YearPicker";
+import MonthPicker from "./components/MonthPicker";
 import MainMenuContribution from "./components/MainMenuContribution";
 import ProgressOrError from "./components/ProgressOrError";
 import ProxyPage from "./components/ProxyPage";
@@ -48,7 +50,7 @@ export {
   formatQuery, formatPageQuery, formatPageQueryWithCount, formatMutation, parseData, pageInfo, formatServerError, formatGraphQLError,
   formatMessage, formatMessageWithValues, formatDateFromIso, formatAmount, chip,
   App, AutoSuggestion, Contributions, ControlledField, Error, FatalError, Picker,
-  SelectInput, TextInput, AmountInput,
+  SelectInput, TextInput, AmountInput, YearPicker, MonthPicker,
   Form, FieldLabel, FormattedMessage, NumberInput,
   MainMenuContribution, ProgressOrError, ProxyPage, PublishedComponent, Table, Searcher,
   DatePicker

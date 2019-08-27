@@ -26,10 +26,11 @@ class AmountInput extends Component {
         );
     }
     render() {
-        const { intl, module, label } = this.props;
+        const { intl, module, label, readOnly = false } = this.props;
         return (
             <FormControl fullWidth={true}>
                 <TextField
+                    disabled={readOnly}
                     label={!!label && formatMessage(intl, module, label)}
                     value={this.state.value}
                     type="number"

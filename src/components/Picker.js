@@ -104,25 +104,27 @@ class Picker extends Component {
             onChangeRowsPerPage, onChangePage, value, readOnly = false } = this.props;
         return (
             <FormControl fullWidth>
-                <PickerDialog
-                    open={this.state.open}
-                    onClose={this.onClose}
-                    onSelect={this._onSelect}
-                    module={module}
-                    title={dialogTitle}
-                    close={dialogClose}
-                    select={dialogSelect}
-                    filter={filter}
-                    suggestions={suggestions}
-                    suggestionFormatter={suggestionFormatter}
-                    count={count}
-                    pageSize={pageSize}
-                    page={page}
-                    onChangeRowsPerPage={onChangeRowsPerPage}
-                    onChangePage={onChangePage}
-                />
+                {!readOnly && (
+                    <PickerDialog
+                        open={this.state.open}
+                        onClose={this.onClose}
+                        onSelect={this._onSelect}
+                        module={module}
+                        title={dialogTitle}
+                        close={dialogClose}
+                        select={dialogSelect}
+                        filter={filter}
+                        suggestions={suggestions}
+                        suggestionFormatter={suggestionFormatter}
+                        count={count}
+                        pageSize={pageSize}
+                        page={page}
+                        onChangeRowsPerPage={onChangeRowsPerPage}
+                        onChangePage={onChangePage}
+                    />
+                )}
                 <TextField className={classes.picker}
-                    readOnly={readOnly}
+                    disabled={readOnly}
                     label={formatMessage(intl, module, label)}
                     onClick={e => this.setState({ open: true })}
                     value={suggestionFormatter(value)}
@@ -130,8 +132,12 @@ class Picker extends Component {
                         className: classes.label
                     }}
                     InputProps={{
-                        startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment>,
-                        endAdornment: (
+                        startAdornment: !readOnly && (
+                            <InputAdornment position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        ),
+                        endAdornment: !readOnly && (
                             <InputAdornment position="end">
                                 <IconButton onClick={this.onClear}><ClearIcon /></IconButton>
                             </InputAdornment>

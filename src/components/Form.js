@@ -55,7 +55,7 @@ class Form extends Component {
     }
 
     render() {
-        const { classes, module, withBack = true, add, save, reload, title, HeadPanel, Panels } = this.props;
+        const { classes, module, withBack = true, add, save, reload, title, titleParams = [], HeadPanel, Panels, ...others } = this.props;
         return (
             <Fragment>
                 <form noValidate autoComplete="off">
@@ -67,14 +67,14 @@ class Form extends Component {
                                         <Grid container alignItems="center">
                                             {!!withBack && (
                                                 <Grid item className={classes.paperHeader}>
-                                                    <IconButton onClick={e =>this.props.history.goBack()}>
+                                                    <IconButton onClick={e => this.props.history.goBack()}>
                                                         <ChevronLeftIcon />
                                                     </IconButton>
                                                 </Grid>
                                             )}
                                             {!!title && (
                                                 <Grid item className={classes.paperHeader}>
-                                                    <Typography variant="h6"><FormattedMessage module={module} id={title} /></Typography>
+                                                    <Typography variant="h6"><FormattedMessage module={module} id={title} values={titleParams}/></Typography>
                                                 </Grid>
                                             )}
                                         </Grid>
@@ -95,7 +95,12 @@ class Form extends Component {
                                     <Divider />
                                 </Grid>
                                 <Grid item xs={12}>
-                                    <HeadPanel edited={this.state.edited} edited_id={this.state.edited_id} updateAttribute={this.updateAttribute} />
+                                    <HeadPanel
+                                        edited={this.state.edited}
+                                        edited_id={this.state.edited_id}
+                                        updateAttribute={this.updateAttribute}
+                                        {...others}
+                                    />
                                 </Grid>
                             </Paper>
                         </Grid>
@@ -103,20 +108,25 @@ class Form extends Component {
                     {!!Panels && Panels.map((P, idx) => (
                         <Grid key={`form_pannel_${idx}`} item xs={12}>
                             <Paper className={classes.paper}>
-                                <P edited={this.state.edited} edited_id={this.state.edited_id} updateAttribute={this.updateAttribute} />
+                                <P
+                                    edited={this.state.edited}
+                                    edited_id={this.state.edited_id}
+                                    updateAttribute={this.updateAttribute}
+                                    {...others}
+                                />
                             </Paper>
                         </Grid>
                     ))}
 
                 </form >
-                {!this.state.dirty && (
+                {!this.state.dirty && !!add && (
                     <Fab color="primary"
                         className={classes.fab}
                         onClick={add}>
                         <AddIcon />
                     </Fab>
                 )}
-                {!!this.state.dirty && (
+                {!!this.state.dirty && !!save && (
                     <Fab color="primary"
                         className={classes.fab}
                         onClick={e => save(this.state.edited)}>

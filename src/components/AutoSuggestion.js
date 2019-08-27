@@ -173,9 +173,10 @@ class AutoSuggestion extends Component {
         if (!!readOnly) {
             return (
                 <TextField
+                    label={label}
                     className={classes.textField}
-                    readOnly
-                    value={getSuggestionValue(value)}
+                    disabled
+                    value={value}
                 />
             )
         }

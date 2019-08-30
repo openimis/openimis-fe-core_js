@@ -23,13 +23,13 @@ const styles = theme => ({
 class Searcher extends Component {
 
     render() {
-        const { classes, module, filterPane, filters, del, open } = this.props;
+        const { classes, module, title = "search.title", filterPane, filters, del, open } = this.props;
         return (
             <Fragment>
                 <Paper>
                     <Grid container className={classes.paperHeader}>
                         <Grid item xs={!filterPane ? 8 : 12} className={classes.paperHeaderTitle}>
-                            <FormattedMessage module={module} id="search.title" />
+                            <FormattedMessage module={module} id={title} />
                         </Grid>
                         {!filterPane &&
                             <Grid item xs={4}>

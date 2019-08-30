@@ -15,11 +15,11 @@ class TextInput extends Component {
         value: ""
     }
     componentDidMount() {
-        this.setState({ value: !this.props.value && !this.props.value === 0 ? "" : this.props.value })
+        this.setState({ value: this.props.value || "" })
     }
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.value !== this.props.value) {
-            this.setState({ value: this.props.value === null && !this.props.value === 0 ? "" : this.props.value })
+            this.setState({ value: this.props.value || "" })
         }
     }
     _onChange = e => {
@@ -30,7 +30,7 @@ class TextInput extends Component {
     }
     render() {
         const { intl, classes, module, label, autofocus = false, inputProps, readOnly = false,
-            startAdornment = null, endAdornment = null } = this.props;
+            startAdornment = null, endAdornment = null, onClick } = this.props;
         return (
             <FormControl fullWidth={true}>
                 <TextField
@@ -44,6 +44,7 @@ class TextInput extends Component {
                     inputProps={inputProps}
                     onChange={this._onChange}
                     value={this.state.value}
+                    onClick={onClick}
                 />
             </FormControl>
         )

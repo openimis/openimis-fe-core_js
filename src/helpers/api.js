@@ -1,4 +1,4 @@
-import _ from "lodash-uuid";
+import _uuid from "lodash-uuid";
 
 function _entityAndFilters(entity, filters) {
   return `${entity}${!!filters && filters.length ? `(${filters.join(',')})` : ""}`
@@ -48,7 +48,7 @@ export function formatPageQueryWithCount(entity, filters, projections) {
 }
 
 export function formatMutation(service, input) {
-  const clientMutationId = _.uuid();
+  const clientMutationId = _uuid();
   const payload = `
     mutation {
       ${service}(

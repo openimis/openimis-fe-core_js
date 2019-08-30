@@ -2,7 +2,6 @@ import App from "./components/App";
 import AutoSuggestion from "./components/AutoSuggestion";
 import Contributions from "./components/Contributions";
 import ControlledField from "./components/ControlledField";
-import DatePicker from "./components/DatePicker";
 import Error from "./components/Error";
 import FatalError from "./components/FatalError";
 import FieldLabel from "./components/FieldLabel";
@@ -12,15 +11,17 @@ import SelectInput from "./components/SelectInput";
 import TextInput from "./components/TextInput";
 import AmountInput from "./components/AmountInput";
 import NumberInput from "./components/NumberInput";
-import YearPicker from "./components/YearPicker";
-import MonthPicker from "./components/MonthPicker";
 import MainMenuContribution from "./components/MainMenuContribution";
 import ProgressOrError from "./components/ProgressOrError";
 import ProxyPage from "./components/ProxyPage";
 import PublishedComponent from "./components/PublishedComponent";
-import Picker from "./components/Picker";
 import Table from "./components/Table";
 import Searcher from "./components/Searcher";
+import DatePicker from "./pickers/DatePicker";
+import Picker from "./pickers/Picker";
+import ConstantBasedPicker from "./pickers/ConstantBasedPicker";
+import YearPicker from "./pickers/YearPicker";
+import MonthPicker from "./pickers/MonthPicker";
 import reducer from "./reducer";
 import { baseApiUrl, apiHeaders, graphql, journalize } from './actions';
 import { formatMessage, formatMessageWithValues, formatDateFromIso, formatAmount, chip, toISODate, fromISODate } from './helpers/i18n';
@@ -53,5 +54,5 @@ export {
   SelectInput, TextInput, AmountInput, YearPicker, MonthPicker,
   Form, FieldLabel, FormattedMessage, NumberInput,
   MainMenuContribution, ProgressOrError, ProxyPage, PublishedComponent, Table, Searcher,
-  DatePicker
+  DatePicker, ConstantBasedPicker
 };

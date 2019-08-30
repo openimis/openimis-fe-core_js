@@ -43,9 +43,9 @@ class DatePicker extends Component {
     }
 
     render() {
-        const { intl, classes, module, label, readOnly = false } = this.props;
+        const { intl, classes, module, label, readOnly = false, fullWidth = true } = this.props;
         return (
-            <FormControl fullWidth>
+            <FormControl fullWidth={fullWidth}>
                 <MUIDatePicker
                     format="YYYY-MM-DD"
                     disabled={readOnly}

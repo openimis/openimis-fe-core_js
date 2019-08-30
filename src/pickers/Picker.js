@@ -8,8 +8,8 @@ import {
 import { formatMessage } from "../helpers/i18n";
 import ClearIcon from "@material-ui/icons/Clear";
 import SearchIcon from "@material-ui/icons/Search";
-import FormattedMessage from "./FormattedMessage";
-import Table from "./Table";
+import FormattedMessage from "../components/FormattedMessage";
+import Table from "../components/Table";
 
 const styles = theme => ({
     label: {

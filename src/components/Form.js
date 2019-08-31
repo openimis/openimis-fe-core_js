@@ -45,9 +45,12 @@ class Form extends Component {
         }
     }
 
-    updateAttribute = (attr, value) => {
+    updateAttribute = (attr, value, str) => {
         const edited = this.state.edited;
         edited[attr] = value;
+        if (str !== undefined) {
+            edited[`${attr}_str`] = str;
+        }
         this.setState({
             dirty: true,
             edited,
@@ -74,7 +77,7 @@ class Form extends Component {
                                             )}
                                             {!!title && (
                                                 <Grid item className={classes.paperHeader}>
-                                                    <Typography variant="h6"><FormattedMessage module={module} id={title} values={titleParams}/></Typography>
+                                                    <Typography variant="h6"><FormattedMessage module={module} id={title} values={titleParams} /></Typography>
                                                 </Grid>
                                             )}
                                         </Grid>

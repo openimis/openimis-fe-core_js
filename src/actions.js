@@ -1,5 +1,5 @@
 import { RSAA } from "redux-api-middleware";
-import { formatQuery } from "./helpers/api";
+import { formatPageQuery } from "./helpers/api";
 
 export const baseApiUrl = process.env.NODE_ENV === 'development' ? "/api" : "/iapi";
 
@@ -58,10 +58,18 @@ export function auth() {
     };
 }
 
-export function fetchMutations(ids) {
-    const payload = formatQuery("coreMutations",
-    [`ids: ["${ids.join("\",\"")}"]`],
-    ["internalId, status"]
+export function fetchMutation(id) {
+    const payload = formatPageQuery("mutationLogs",
+    [`id: "${id}"`],
+    ["id", "status", "error", "clientMutationLabel", "requestDateTime"]
   );
-  return graphql(payload, 'CORE_MUTATIONS');
+  return graphql(payload, 'CORE_MUTATION');
+}
+
+export function fetchHistoricalMutations() {
+    const payload = formatPageQuery("mutationLogs",
+    null,
+    ["id", "status", "error", "clientMutationLabel", "requestDateTime"]
+  );
+  return graphql(payload, 'CORE_HISTORICAL_MUTATIONS');
 }

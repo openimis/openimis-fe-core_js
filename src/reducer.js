@@ -1,8 +1,11 @@
+import { parseData, decodeId } from './helpers/api';
+
 function reducer(
     state = {
         authenticating: false,
         user: null,
         fatalError: null,
+        fetchingHistoricalMutations: false,
         fetchingMutations: false,
         mutations: [],
     },
@@ -37,18 +40,18 @@ function reducer(
                 ...state,
                 mutations,
             }
-        case 'CORE_MUTATIONS_REQ':
+        case 'CORE_MUTATION_REQ':
             return {
                 ...state,
                 fetchingMutations: true
             }
-        case 'CORE_MUTATIONS_RESP':
+        case 'CORE_MUTATION_RESP':
             var mutations = [...state.mutations];
-            var res = action.payload.data.coreMutations.filter(m => m.status !== 0);
+            var res = parseData(action.payload.data.mutationLogs).filter(m => m.status !== 0);
             if (!!res.length) {
                 res.forEach(r => {
                     for (const m of mutations) {
-                        if (m.internalId === r.internalId) {
+                        if (m.id === decodeId(r.id)) {
                             m.status = r.status;
                             break;
                         }
@@ -60,10 +63,26 @@ function reducer(
                 fetchingMutations: false,
                 mutations,
             }
-        case 'CORE_MUTATIONS_ERR':
+        case 'CORE_MUTATION_ERR':
             return {
                 ...state,
                 fetchingMutations: false
+            }
+        case 'CORE_HISTORICAL_MUTATIONS_REQ':
+            return {
+                ...state,
+                fetchingHistoricalMutations: true
+            }
+        case 'CORE_HISTORICAL_MUTATIONS_RESP':
+            return {
+                ...state,
+                fetchingHistoricalMutations: false,
+                mutations: parseData(action.payload.data.mutationLogs)
+            }
+        case 'CORE_HISTORICAL_MUTATIONS_ERR':
+            return {
+                ...state,
+                fetchingHistoricalMutations: false
             }
         default:
             return state;

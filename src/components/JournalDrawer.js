@@ -8,8 +8,9 @@ import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import CheckIcon from "@material-ui/icons/CheckCircleOutline";
 import ErrorIcon from "@material-ui/icons/ErrorOutline";
-import { fetchMutations } from "../actions";
+import { fetchMutation, fetchHistoricalMutations } from "../actions";
 import withModulesManager from "../helpers/modules";
+import moment from "moment";
 
 const styles = theme => ({
     toolbar: {
@@ -38,7 +39,9 @@ const styles = theme => ({
             width: theme.spacing(9) + 1,
         },
     },
-    jrnlItem: {},
+    jrnlItem: {
+        paddingLeft: 24
+    },
     jrnlErrorItem: {
         color: theme.palette.error.main
     },
@@ -49,6 +52,7 @@ const styles = theme => ({
 
 class JournalDrawer extends Component {
     componentDidMount() {
+        this.props.fetchHistoricalMutations();
         this.setState({
             timeoutId: setInterval(
                 this.checkProcessing,
@@ -64,11 +68,9 @@ class JournalDrawer extends Component {
         if (!!this.props.fetchingMutations) {
             return;
         }
-        var ids = this.props.mutations.filter(m => m.status === 0).map(m => m.internalId);
-        if (!ids.length) {
-            return;
-        }
-        this.props.fetchMutations(ids);
+        var ids = this.props.mutations.filter(m => m.status === 0).map(m => m.id);
+        //TODO: change for a "fetchMutationS(ids)"  > requires id_In backend implementation
+        ids.forEach(id => this.props.fetchMutation(id));
     }
 
     render() {
@@ -101,20 +103,23 @@ class JournalDrawer extends Component {
                         <Divider />
                         <List>
                             {mutations.map((m, idx) => (
-                                <ListItem key={`mutation${idx}`}>
+                                <ListItem key={`mutation${idx}`} className={classes.jrnlItem}>
                                     {m.status === 0 && (
                                         <ListItemIcon>
                                             <CircularProgress size={theme.jrnlDrawer.iconSize} />
                                         </ListItemIcon>)}
                                     {m.status === 1 && (
-                                        <ListItemIcon>
-                                            <CheckIcon />
-                                        </ListItemIcon>)}
-                                    {m.status === 2 && (
                                         <ListItemIcon className={classes.jrnlErrorIcon}>
                                             <ErrorIcon />
                                         </ListItemIcon>)}
-                                    <ListItemText className={m.status === 2 ? classes.jrnlErrorItem : classes.jrnlItem} primary={m.label} secondary={m.detail} />
+                                    {m.status === 2 && (
+                                        <ListItemIcon>
+                                            <CheckIcon />
+                                        </ListItemIcon>)}
+                                    <ListItemText 
+                                        className={m.status === 1 ? classes.jrnlErrorItem : classes.jrnlItem}
+                                        primary={m.clientMutationLabel} 
+                                        secondary={moment(m.requestDateTime).format("YYYY-MM-DD h:mm")} />
                                 </ListItem>
                             ))}
                         </List>
@@ -132,7 +137,7 @@ const mapStateToProps = (state, props) => ({
 });
 
 const mapDispatchToProps = dispatch => {
-    return bindActionCreators({ fetchMutations }, dispatch);
+    return bindActionCreators({ fetchMutation, fetchHistoricalMutations }, dispatch);
 };
 
 

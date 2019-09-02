@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import clsx from 'clsx';
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { CircularProgress, ClickAwayListener, List, ListItem, ListItemText, ListItemIcon, Drawer, Divider, IconButton, Grid } from "@material-ui/core";
+import { CircularProgress, ClickAwayListener, List, ListItem, ListItemText, ListItemIcon, Drawer, Divider, IconButton, Grid, Tooltip } from "@material-ui/core";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import CheckIcon from "@material-ui/icons/CheckCircleOutline";
@@ -40,13 +40,15 @@ const styles = theme => ({
         },
     },
     jrnlItem: {
-        paddingLeft: 24
+    },
+    jrnlIcon: {
+        paddingLeft: theme.spacing(1),
     },
     jrnlErrorItem: {
-        color: theme.palette.error.main
+        color: theme.palette.error.main,
     },
     jrnlErrorIcon: {
-        color: theme.palette.error.main
+        color: theme.palette.error.main,
     },
 });
 
@@ -105,20 +107,22 @@ class JournalDrawer extends Component {
                             {mutations.map((m, idx) => (
                                 <ListItem key={`mutation${idx}`} className={classes.jrnlItem}>
                                     {m.status === 0 && (
-                                        <ListItemIcon>
+                                        <ListItemIcon className={classes.jrnlIcon}>
                                             <CircularProgress size={theme.jrnlDrawer.iconSize} />
                                         </ListItemIcon>)}
                                     {m.status === 1 && (
-                                        <ListItemIcon className={classes.jrnlErrorIcon}>
-                                            <ErrorIcon />
-                                        </ListItemIcon>)}
+                                        <Tooltip title={m.error} className={classes.jrnlIcon}>
+                                            <ListItemIcon className={classes.jrnlErrorIcon}>
+                                                <ErrorIcon />
+                                            </ListItemIcon>
+                                        </Tooltip>)}
                                     {m.status === 2 && (
-                                        <ListItemIcon>
+                                        <ListItemIcon className={classes.jrnlIcon}>
                                             <CheckIcon />
                                         </ListItemIcon>)}
-                                    <ListItemText 
+                                    <ListItemText
                                         className={m.status === 1 ? classes.jrnlErrorItem : classes.jrnlItem}
-                                        primary={m.clientMutationLabel} 
+                                        primary={m.clientMutationLabel}
                                         secondary={moment(m.requestDateTime).format("YYYY-MM-DD h:mm")} />
                                 </ListItem>
                             ))}

@@ -21,6 +21,12 @@ export function journalize(mutation) {
 }
 
 export function graphql(payload, type, params = {}) {
+    let req = type + '_REQ';
+    let resp = type + '_RESP';
+    let err = type + '_ERR';
+    if (Array.isArray(type)) {
+        [req, resp, err] = type;
+    }
     return {
         [RSAA]: {
             endpoint: `${baseApiUrl}/graphql`,
@@ -29,13 +35,13 @@ export function graphql(payload, type, params = {}) {
             body: JSON.stringify({ query: payload }),
             types: [
                 {
-                    type: type + '_REQ',
+                    type: req,
                     meta: params,
                 }, {
-                    type: type + '_RESP',
+                    type: resp,
                     meta: params,
                 }, {
-                    type: type + '_ERR',
+                    type: err,
                     meta: params,
                 }
             ],
@@ -60,16 +66,20 @@ export function auth() {
 
 export function fetchMutation(id) {
     const payload = formatPageQuery("mutationLogs",
-    [`id: "${id}"`],
-    ["id", "status", "error", "clientMutationLabel", "requestDateTime"]
-  );
-  return graphql(payload, 'CORE_MUTATION');
+        [`id: "${id}"`],
+        ["id", "status", "error", "clientMutationLabel", "requestDateTime"]
+    );
+    return graphql(payload, 'CORE_MUTATION');
 }
 
-export function fetchHistoricalMutations() {
+export function fetchHistoricalMutations(pageSize, afterCursor) {
+    let filters = [`first: ${pageSize}`]
+    if (!!afterCursor) {
+        filters.push(`after: "${afterCursor}"`)
+    }
     const payload = formatPageQuery("mutationLogs",
-    null,
-    ["id", "status", "error", "clientMutationLabel", "requestDateTime"]
-  );
-  return graphql(payload, 'CORE_HISTORICAL_MUTATIONS');
+        filters,
+        ["id", "status", "error", "clientMutationLabel", "requestDateTime"]
+    );
+    return graphql(payload, 'CORE_HISTORICAL_MUTATIONS');
 }

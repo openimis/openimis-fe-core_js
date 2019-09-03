@@ -12,8 +12,15 @@ const styles = theme => ({
 });
 
 class SelectInput extends Component {
+
+    _onChange = e => {
+        if (this.props.value !== e.target.value) {
+            this.props.onChange(e.target.value)
+        }
+    }
+
     render() {
-        const { classes, module, label, name, options, value, onChange, disabled = false, readOnly = false } = this.props;
+        const { classes, module, label, name, options, value, disabled = false, readOnly = false } = this.props;
         let valueStr = options.filter(o => o.value === value).map(o => o.label);
         return (
             <Fragment>
@@ -32,7 +39,7 @@ class SelectInput extends Component {
                                 id: `${module}-${label}-input`
                             }}
                             value={value || "null"}
-                            onChange={e => onChange(e.target.value)}
+                            onChange={this._onChange}
                             disabled={disabled}
                         >
                             {!!options && options.map((option, idx) =>

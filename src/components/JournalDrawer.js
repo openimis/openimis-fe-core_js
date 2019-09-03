@@ -6,11 +6,13 @@ import { withTheme, withStyles } from "@material-ui/core/styles";
 import { CircularProgress, ClickAwayListener, List, ListItem, ListItemText, ListItemIcon, Drawer, Divider, IconButton, Grid, Tooltip } from "@material-ui/core";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import MoreIcon from "@material-ui/icons/KeyboardArrowDown";
 import CheckIcon from "@material-ui/icons/CheckCircleOutline";
 import ErrorIcon from "@material-ui/icons/ErrorOutline";
 import { fetchMutation, fetchHistoricalMutations } from "../actions";
 import withModulesManager from "../helpers/modules";
 import moment from "moment";
+import _ from "lodash";
 
 const styles = theme => ({
     toolbar: {
@@ -53,8 +55,20 @@ const styles = theme => ({
 });
 
 class JournalDrawer extends Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            pageSize: props.modulesManager.getConf("fe-core", "journalDrawer.pageSize", 5),
+            afterCursor: null,
+            hasNextPage: false,
+            displayedMutations: [],
+        }
+
+    }
+
     componentDidMount() {
-        this.props.fetchHistoricalMutations();
+        this.props.fetchHistoricalMutations(this.state.pageSize, this.state.afterCursor);
         this.setState({
             timeoutId: setInterval(
                 this.checkProcessing,
@@ -62,6 +76,18 @@ class JournalDrawer extends Component {
             ),
         });
     }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (!_.isEqual(prevProps.mutationsPageInfo, this.props.mutationsPageInfo)) {
+            this.setState({
+                displayedMutations: [...this.state.displayedMutations, ...this.props.mutations],
+                afterCursor: this.props.mutationsPageInfo.endCursor,
+                hasNextPage: this.props.mutationsPageInfo.hasNextPage
+            })
+        }
+
+    }
+
     componentWillUnmount() {
         clearTimeout(this.state.timeoutId);
     }
@@ -70,9 +96,13 @@ class JournalDrawer extends Component {
         if (!!this.props.fetchingMutations) {
             return;
         }
-        var ids = this.props.mutations.filter(m => m.status === 0).map(m => m.id);
+        var ids = this.state.displayedMutations.filter(m => m.status === 0).map(m => m.id);
         //TODO: change for a "fetchMutationS(ids)"  > requires id_In backend implementation
         ids.forEach(id => this.props.fetchMutation(id));
+    }
+
+    more = e => {
+        this.props.fetchHistoricalMutations(this.state.pageSize, this.state.afterCursor);
     }
 
     render() {
@@ -104,7 +134,7 @@ class JournalDrawer extends Component {
                         </Grid>
                         <Divider />
                         <List>
-                            {mutations.map((m, idx) => (
+                            {this.state.displayedMutations.map((m, idx) => (
                                 <ListItem key={`mutation${idx}`} className={classes.jrnlItem}>
                                     {m.status === 0 && (
                                         <ListItemIcon className={classes.jrnlIcon}>
@@ -126,7 +156,13 @@ class JournalDrawer extends Component {
                                         secondary={moment(m.requestDateTime).format("YYYY-MM-DD h:mm")} />
                                 </ListItem>
                             ))}
+                            {!!this.state.hasNextPage && (
+                                <ListItem key={`more`} className={classes.jrnlItem}>
+                                    <IconButton onClick={this.more} className={classes.jrnlIcon}><MoreIcon /></IconButton>
+                                </ListItem>
+                            )}
                         </List>
+
                     </Drawer>
                 </nav>
             </ClickAwayListener>
@@ -138,6 +174,7 @@ class JournalDrawer extends Component {
 const mapStateToProps = (state, props) => ({
     fetchingMutations: state.core.fetchingMutations,
     mutations: state.core.mutations,
+    mutationsPageInfo: state.core.mutationsPageInfo,
 });
 
 const mapDispatchToProps = dispatch => {

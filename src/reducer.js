@@ -1,4 +1,4 @@
-import { parseData, decodeId } from './helpers/api';
+import { parseData, decodeId, pageInfo } from './helpers/api';
 
 function reducer(
     state = {
@@ -33,6 +33,11 @@ function reducer(
                     detail: !!action.payload.response ? action.payload.response.detail : null,
                 }
             };
+        case 'CORE_USER_HEALTH_FACILITY_RESP':
+            return {
+                ...state,
+                userHealthFacility: parseData(action.payload.data.healthFacilities)[0]
+            }
         case 'CORE_MUTATION_ADD':
             var mutations = [...state.mutations];
             mutations.unshift(action.payload);
@@ -77,7 +82,8 @@ function reducer(
             return {
                 ...state,
                 fetchingHistoricalMutations: false,
-                mutations: parseData(action.payload.data.mutationLogs)
+                mutations: parseData(action.payload.data.mutationLogs),
+                mutationsPageInfo: pageInfo(action.payload.data.mutationLogs),
             }
         case 'CORE_HISTORICAL_MUTATIONS_ERR':
             return {

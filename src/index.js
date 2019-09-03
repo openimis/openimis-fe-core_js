@@ -26,8 +26,9 @@ import reducer from "./reducer";
 import { baseApiUrl, apiHeaders, graphql, journalize } from './actions';
 import { formatMessage, formatMessageWithValues, formatDateFromIso, formatAmount, chip, toISODate, fromISODate } from './helpers/i18n';
 import {
-  decodeId, formatQuery, formatPageQuery, formatPageQueryWithCount,
-  parseData, pageInfo, formatServerError, formatGraphQLError, formatMutation
+  decodeId, encodeId, formatQuery, formatPageQuery, formatPageQueryWithCount,
+  parseData, pageInfo, formatServerError, formatGraphQLError, formatMutation,
+  dispatchMutationReq, dispatchMutationResp, dispatchMutationErr,
 } from './helpers/api';
 import withHistory, { historyPush } from "./helpers/history";
 import withModulesManager from './helpers/modules';
@@ -46,9 +47,11 @@ export const CoreModule = (cfg) => {
 export {
   baseApiUrl, apiHeaders, graphql, journalize,
   withHistory, historyPush,
-  decodeId, toISODate, fromISODate,
+  decodeId, encodeId, toISODate, fromISODate,
   withModulesManager,
-  formatQuery, formatPageQuery, formatPageQueryWithCount, formatMutation, parseData, pageInfo, formatServerError, formatGraphQLError,
+  formatQuery, formatPageQuery, formatPageQueryWithCount, formatMutation,
+  dispatchMutationReq, dispatchMutationResp, dispatchMutationErr,
+  parseData, pageInfo, formatServerError, formatGraphQLError,
   formatMessage, formatMessageWithValues, formatDateFromIso, formatAmount, chip,
   App, AutoSuggestion, Contributions, ControlledField, Error, FatalError, Picker,
   SelectInput, TextInput, AmountInput, YearPicker, MonthPicker,

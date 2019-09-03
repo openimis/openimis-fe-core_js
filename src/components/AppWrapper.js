@@ -25,6 +25,7 @@ import Contributions from "./Contributions";
 import FormattedMessage from "./FormattedMessage";
 import JournalDrawer from "./JournalDrawer";
 
+export const APP_BOOT_CONTRIBUTION_KEY = "core.Boot";
 export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
 export const MAIN_MENU_CONTRIBUTION_KEY = "core.MainMenu";
 export const MAIN_SEARCHER_CONTRIBUTION_KEY = "core.MainSearcher";
@@ -81,7 +82,8 @@ const styles = theme => ({
   },
   content: {
     flexGrow: 1,
-    padding: theme.spacing(3),
+    paddingTop: theme.spacing(3),
+    paddingLeft: theme.spacing(1),
     paddingRight: theme.jrnlDrawer.close.width,
     transition: theme.transitions.create("margin", {
       easing: theme.transitions.easing.sharp,
@@ -185,11 +187,15 @@ class AppWrapper extends Component {
 
   render() {
     const { history, classes, modulesManager, ...others } = this.props;
-    const { open, jrnlOpen } = this.state;
+    const { open } = this.state;
 
     return (
       <Router history={history}>
         <Fragment>
+          <Contributions
+            modulesManager={modulesManager}
+            contributionKey={APP_BOOT_CONTRIBUTION_KEY}
+          />
           <AppBar
             position="fixed"
             className={classNames(classes.appBar, {

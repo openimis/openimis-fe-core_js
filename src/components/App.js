@@ -101,7 +101,7 @@ class RootApp extends Component {
 function mapStateToProps(state) {
   return {
     authenticating: state.core.authenticating,
-    user: state.core.user,
+    user: !!state.core.user && state.core.user.i_user,
     error: state.core.error
   }
 };

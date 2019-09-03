@@ -24,12 +24,13 @@ class ConstantBasedPicker extends Component {
     )
 
     render() {
-        const { module, label, constants, name, value, withNull = true, readOnly = false } = this.props;
+        const { module, label, constants, name, value,
+            filtered = [], withNull = true, readOnly = false } = this.props;
         const options = withNull ? [{
             value: null,
             label: this._formatValue(null)
         }] : [];
-        options.push(...constants.map(v => ({
+        options.push(...constants.filter(c => !filtered.includes(c) || value === c).map(v => ({
             value: v,
             label: this._formatValue(v)
         })));

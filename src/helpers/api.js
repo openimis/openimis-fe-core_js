@@ -70,12 +70,36 @@ export function decodeId(id) {
   else return atob(id).split(':')[1];
 }
 
-// export function encodeId(modulesManager, type, id) {
-//   return btoa(`${modulesManager.getConf(type)}:${id}`);
-// }
+export function encodeId(modulesManager, type, id) {
+  return btoa(`${modulesManager.getConf(type)}:${id}`);
+}
 
 export function parseData(data) {
   return data['edges'].map(e => e['node']);
+}
+
+export function dispatchMutationReq(state, action) {
+  return {
+    ...state,
+    submittingMutation: true,
+    mutation: action.meta,
+  }
+}
+
+export function dispatchMutationResp(state, service, action) {
+  var mutation = state.mutation;
+  mutation.id = action.payload.data[service].internalId;
+  return {
+    ...state,
+    submittingMutation: false,
+    mutation,
+  }
+}
+
+export function dispatchMutationErr(state, action) {
+  return {
+    ...state,
+  }
 }
 
 export function pageInfo(data) {

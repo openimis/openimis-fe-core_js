@@ -23,7 +23,7 @@ export function formatMessageWithValues(intl, module, id, values) {
 
 
 export function formatAmount(intl, amount) {
-    return `${intl.formatMessage({ id: "currency" })} ${intl.formatNumber(amount)}`;
+    return `${intl.formatMessage({ id: "currency" })} ${amount || 0}`;
 }
 
 export function formatDateFromIso(intl, date) {

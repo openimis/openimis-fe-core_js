@@ -1,5 +1,5 @@
 import { RSAA } from "redux-api-middleware";
-import { formatPageQuery } from "./helpers/api";
+import { formatPageQuery, decodeId } from "./helpers/api";
 
 export const baseApiUrl = process.env.NODE_ENV === 'development' ? "/api" : "/iapi";
 

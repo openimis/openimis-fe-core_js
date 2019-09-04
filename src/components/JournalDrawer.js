@@ -85,6 +85,13 @@ class JournalDrawer extends Component {
                 hasNextPage: this.props.mutationsPageInfo.hasNextPage
             })
         }
+        if (!_.isEqual(prevProps.mutations, this.props.mutations)) {
+            let prevMutationIds = prevProps.mutations.map(m => m.id);
+            let new_mutations = [...this.props.mutations].filter(m => !prevMutationIds.includes(m.id))
+            this.setState({
+                displayedMutations: [...new_mutations, ...this.state.displayedMutations]
+            })
+        }
 
     }
 
@@ -106,7 +113,7 @@ class JournalDrawer extends Component {
     }
 
     render() {
-        const { theme, classes, open, handleDrawer, mutations } = this.props;
+        const { theme, classes, open, handleDrawer } = this.props;
         return (
             <ClickAwayListener onClickAway={e => open && handleDrawer()}>
                 <nav className={classes.drawer}>
@@ -153,7 +160,7 @@ class JournalDrawer extends Component {
                                     <ListItemText
                                         className={m.status === 1 ? classes.jrnlErrorItem : classes.jrnlItem}
                                         primary={m.clientMutationLabel}
-                                        secondary={moment(m.requestDateTime).format("YYYY-MM-DD h:mm")} />
+                                        secondary={moment(m.requestDateTime).format("YYYY-MM-DD HH:mm")} />
                                 </ListItem>
                             ))}
                             {!!this.state.hasNextPage && (

@@ -82,7 +82,7 @@ function reducer(
             return {
                 ...state,
                 fetchingHistoricalMutations: false,
-                mutations: parseData(action.payload.data.mutationLogs),
+                mutations: parseData(action.payload.data.mutationLogs).map(m => { return { ...m, id: decodeId(m.id) } }),
                 mutationsPageInfo: pageInfo(action.payload.data.mutationLogs),
             }
         case 'CORE_HISTORICAL_MUTATIONS_ERR':

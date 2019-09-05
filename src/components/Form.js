@@ -46,7 +46,7 @@ class Form extends Component {
     }
 
     updateAttribute = (attr, value, str) => {
-        const edited = this.state.edited;
+        const edited = {...this.state.edited};
         edited[attr] = value;
         if (str !== undefined) {
             edited[`${attr}_str`] = str;
@@ -58,7 +58,7 @@ class Form extends Component {
     }
 
     render() {
-        const { classes, module, withBack = true, add, save, reload, title, titleParams = [], HeadPanel, Panels, ...others } = this.props;
+        const { classes, module, withBack = true, add, save, canSave, reload, title, titleParams = [], HeadPanel, Panels, ...others } = this.props;
         return (
             <Fragment>
                 <form noValidate autoComplete="off">
@@ -131,6 +131,7 @@ class Form extends Component {
                 )}
                 {!!this.state.dirty && !!save && (
                     <Fab color="primary"
+                        disabled={!!canSave && !canSave()}
                         className={classes.fab}
                         onClick={e => save(this.state.edited)}>
                         <SaveIcon />

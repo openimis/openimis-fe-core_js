@@ -6,6 +6,22 @@ import { formatMessage } from "../helpers/i18n";
 
 class ConstantBasedPicker extends Component {
 
+    state = {
+        value: null
+    }
+
+    componentDidMount() {
+        if (!!this.props.value) {
+            this.setState({ value: this.props.value });
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.value !== this.props.value) {
+            this.setState({ value: this.props.value })
+        }
+    }
+
     _formatValue = v => v === null ?
         formatMessage(
             this.props.intl,
@@ -18,14 +34,22 @@ class ConstantBasedPicker extends Component {
             `${this.props.label}.${v}`
         )
 
-    _onChange = v => this.props.onChange(
-        v,
-        this._formatValue(v)
-    )
+    _onChange = v => {
+        this.setState(
+            { value: v },
+            e => {
+                this.props.onChange(
+                    v,
+                    this._formatValue(v)
+                )
+            }
+        )
+    }
 
     render() {
-        const { module, label, constants, name, value,
+        const { module, label, constants, name,
             filtered = [], withNull = true, readOnly = false } = this.props;
+        const { value } = this.state;
         const options = withNull ? [{
             value: null,
             label: this._formatValue(null)

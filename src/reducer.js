@@ -58,6 +58,7 @@ function reducer(
                     for (const m of mutations) {
                         if (m.id === decodeId(r.id)) {
                             m.status = r.status;
+                            m.error = r.error;
                             break;
                         }
                     }

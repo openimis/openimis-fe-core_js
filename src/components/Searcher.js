@@ -23,7 +23,7 @@ const styles = theme => ({
 class Searcher extends Component {
 
     _search = e => {
-        if (!!this.props.filterPane) {
+        if (!this.props.filterPane) {
             this.props.open();
         } else {
             this.props.refresh()

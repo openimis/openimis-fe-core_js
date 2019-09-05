@@ -71,7 +71,7 @@ export function decodeId(id) {
 }
 
 export function encodeId(modulesManager, module, type, id) {
-  return btoa(`${modulesManager.getConf(module, type)}:${id}`);
+  return btoa(`${modulesManager.getConf(`fe-${module}`, type)}:${id}`);
 }
 
 export function parseData(data) {

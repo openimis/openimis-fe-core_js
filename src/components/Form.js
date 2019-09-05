@@ -24,29 +24,29 @@ class Form extends Component {
         dirty: false,
     }
 
-    componentDidMount() {
+    _resetState() {
         this.setState({
-            edited: this.props.edited,
+            edited: {...this.props.edited},
             edited_id: this.props.edited_id,
-        })
+            dirty: false,
+        });
+    }
+
+    componentDidMount() {
+        this._resetState();
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if (prevProps.edited_id !== this.props.edited_id) {
-            this.setState({
-                edited: this.props.edited,
-                edited_id: this.props.edited_id,
-                dirty: false,
-            })
-        } else if (!_.isEqual(prevProps.edited, this.props.edited)) {
-            this.setState({ edited: this.props.edited })
-        } else if (prevProps.reset !== this.props.reset) {
-            this.setState({ dirty: false });
+        if (prevProps.edited_id !== this.props.edited_id ||
+            !_.isEqual(prevProps.edited, this.props.edited) ||
+            prevProps.reset !== this.props.reset ||
+            prevProps.update !== this.props.update) {
+            this._resetState();
         }
     }
 
     updateAttribute = (attr, value, str) => {
-        const edited = {...this.state.edited};
+        const edited = { ...this.state.edited };
         edited[attr] = value;
         if (str !== undefined) {
             edited[`${attr}_str`] = str;
@@ -58,7 +58,7 @@ class Form extends Component {
     }
 
     render() {
-        const { classes, module, withBack = true, add, save, canSave, reload, title, titleParams = [], HeadPanel, Panels, ...others } = this.props;
+        const { classes, module, back, add, save, canSave, reload, title, titleParams = [], HeadPanel, Panels, ...others } = this.props;
         return (
             <Fragment>
                 <form noValidate autoComplete="off">
@@ -68,9 +68,9 @@ class Form extends Component {
                                 <Grid container alignItems="center" direction="row">
                                     <Grid item xs={11}>
                                         <Grid container alignItems="center">
-                                            {!!withBack && (
+                                            {!!back && (
                                                 <Grid item className={classes.paperHeader}>
-                                                    <IconButton onClick={e => this.props.history.goBack()}>
+                                                    <IconButton onClick={back}>
                                                         <ChevronLeftIcon />
                                                     </IconButton>
                                                 </Grid>
@@ -131,7 +131,7 @@ class Form extends Component {
                 )}
                 {!!this.state.dirty && !!save && (
                     <Fab color="primary"
-                        disabled={!!canSave && !canSave()}
+                        disabled={!!canSave && !canSave(this.state.edited)}
                         className={classes.fab}
                         onClick={e => save(this.state.edited)}>
                         <SaveIcon />

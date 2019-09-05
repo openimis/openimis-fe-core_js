@@ -78,21 +78,19 @@ class JournalDrawer extends Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if (!_.isEqual(prevProps.mutationsPageInfo, this.props.mutationsPageInfo)) {
+        if (prevProps.fetchingHistoricalMutations && !this.props.fetchingHistoricalMutations) {
             this.setState({
                 displayedMutations: [...this.state.displayedMutations, ...this.props.mutations],
                 afterCursor: this.props.mutationsPageInfo.endCursor,
                 hasNextPage: this.props.mutationsPageInfo.hasNextPage
             })
-        }
-        if (!_.isEqual(prevProps.mutations, this.props.mutations)) {
+        } else if (!_.isEqual(prevProps.mutations, this.props.mutations)) {
             let prevMutationIds = prevProps.mutations.map(m => m.id);
             let new_mutations = [...this.props.mutations].filter(m => !prevMutationIds.includes(m.id))
             this.setState({
                 displayedMutations: [...new_mutations, ...this.state.displayedMutations]
             })
         }
-
     }
 
     componentWillUnmount() {
@@ -180,6 +178,7 @@ class JournalDrawer extends Component {
 
 const mapStateToProps = (state, props) => ({
     fetchingMutations: state.core.fetchingMutations,
+    fetchingHistoricalMutations: state.core.fetchingHistoricalMutations,
     mutations: state.core.mutations,
     mutationsPageInfo: state.core.mutationsPageInfo,
 });

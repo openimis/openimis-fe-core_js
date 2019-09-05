@@ -22,26 +22,32 @@ const styles = theme => ({
 
 class Searcher extends Component {
 
+    _search = e => {
+        if (!!this.props.filterPane) {
+            this.props.open();
+        } else {
+            this.props.refresh()
+        }
+    }
+
     render() {
-        const { classes, module, title = "search.title", filterPane, filters, del, open } = this.props;
+        const { classes, module, title = "search.title", filterPane, filters, del } = this.props;
         return (
             <Fragment>
                 <Paper>
                     <Grid container className={classes.paperHeader}>
-                        <Grid item xs={!filterPane ? 8 : 12} className={classes.paperHeaderTitle}>
+                        <Grid item xs={8} className={classes.paperHeaderTitle}>
                             <FormattedMessage module={module} id={title} />
                         </Grid>
-                        {!filterPane &&
-                            <Grid item xs={4}>
-                                <Grid container justify="flex-end">
-                                    <Grid item className={classes.paperHeaderAction}>
-                                        <IconButton onClick={open}>
-                                            <SearchIcon />
-                                        </IconButton>
-                                    </Grid>
+                        <Grid item xs={4}>
+                            <Grid container justify="flex-end">
+                                <Grid item className={classes.paperHeaderAction}>
+                                    <IconButton onClick={this._search}>
+                                        <SearchIcon />
+                                    </IconButton>
                                 </Grid>
                             </Grid>
-                        }
+                        </Grid>
                         {!!filterPane &&
                             <Fragment>
                                 <Grid item xs={12} className={classes.paperDivider}>

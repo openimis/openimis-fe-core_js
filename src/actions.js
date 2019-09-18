@@ -8,7 +8,8 @@ export function apiHeaders() {
         "Content-Type": "application/json",
     }
     if (process.env.NODE_ENV === 'development') {
-        headers['remote-user'] = "admin";
+        // headers['remote-user'] = "admin";
+        headers['remote-user'] = "user";
     }
     return headers;
 }

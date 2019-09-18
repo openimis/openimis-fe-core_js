@@ -78,13 +78,14 @@ class Table extends Component {
     }
 
     render() {
-        const { intl, modulesManager, classes, module, header, headerValues = {}, headers, aligns = [], headerSpans = [], colSpans = [],
+        const { intl, modulesManager, classes, module, header, headerValues = {}, preHeaders, headers, aligns = [], headerSpans = [], colSpans = [],
             items, itemFormatters,
             withPagination = false, page, pageSize, count, rowsPerPageOptions = [10, 20, 50],
             onChangeRowsPerPage, onChangePage, onDoubleClick } = this.props;
         var i = !!headers && headers.length
         while (!!headers && i--) {
             if (modulesManager.skipControl(module, headers[i])) {
+                if (!!preHeaders) preHeaders.splice(i, 1);
                 headers.splice(i, 1);
                 itemFormatters.splice(i, 1);
             }
@@ -100,6 +101,20 @@ class Table extends Component {
                     </Fragment>
                 }
                 <MUITable className={classes.table} size="small">
+                    {!!preHeaders && preHeaders.length > 0 && (
+                        <TableHead>
+                            <TableRow>
+                                {preHeaders.map((h, idx) => {
+                                    if (headerSpans.length > idx && !headerSpans[idx]) return null;
+                                    return <TableCell
+                                        colSpan={headerSpans.length > idx ? headerSpans[idx] : 1}
+                                        className={classes.tableHeader} key={`preh-${idx}`}>
+                                        {!!h && h}
+                                    </TableCell>
+                                })}
+                            </TableRow>
+                        </TableHead>
+                    )}
                     {!!headers && headers.length > 0 && (
                         <TableHead>
                             <TableRow>

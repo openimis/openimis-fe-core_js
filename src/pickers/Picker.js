@@ -94,7 +94,7 @@ class Picker extends Component {
         this.setState({
             value: ''
         },
-            e => this.props.onChange(null)
+            e => this.props.onSelect(null)
         );
     }
 

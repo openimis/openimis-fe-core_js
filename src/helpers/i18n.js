@@ -1,4 +1,5 @@
-import moment from "moment";
+import { formatDateFromISO as adFormateDateFromISO } from "../pickers/AdDateFormatter";
+import { formatDateFromISO as neFormateDateFromISO } from "../pickers/NeDateFormatter";
 
 //formatting with values is expansive.. so let's have separated methids
 export function formatMessage(intl, module, id) {
@@ -26,20 +27,13 @@ export function formatAmount(intl, amount) {
     return `${intl.formatMessage({ id: "currency" })} ${amount || 0}`;
 }
 
-export function formatDateFromIso(intl, date) {
-    return intl.formatDate(moment(date));
+export function formatDateFromISO(mm, intl, date) {
+    if (mm.getConf("fe-core", "datePicker") === "ne") {
+        return neFormateDateFromISO(date);
+    }
+    return adFormateDateFromISO(intl, date);
 }
 
 export function chip(intl, module, i, v) {
     return `${formatMessage(intl, module, i)} = ${v}`;
-}
-
-export function fromISODate(s) {
-    if (!s) return null;
-    return moment(s).toDate();
-}
-
-export function toISODate(d) {
-    if (!d) return null;
-    return d.toISOString().substring(0, 10);
 }

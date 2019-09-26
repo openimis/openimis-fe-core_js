@@ -15,9 +15,6 @@ const styles = theme => ({
     paperHeaderTitle: theme.paper.title,
     paperHeaderAction: theme.paper.action,
     paperDivider: theme.paper.divider,
-    chip: {
-        margin: theme.spacing(1)
-    },
 })
 
 class Searcher extends Component {
@@ -54,22 +51,6 @@ class Searcher extends Component {
                                     <Divider />
                                 </Grid>
                                 {filterPane}
-                            </Fragment>
-                        }
-                        {!filterPane &&
-                            <Fragment>
-                                <Grid item xs={12} className={classes.paperDivider}>
-                                    <Divider />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    {!!filters && Object.keys(filters).map((filter, idx) => (
-                                        <Chip key={`searcher_filter_${idx}`}
-                                            label={filters[filter].chip}
-                                            onDelete={e => del(filter)}
-                                            className={classes.chip}
-                                        />
-                                    ))}
-                                </Grid>
                             </Fragment>
                         }
                     </Grid>

@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { IntlProvider } from 'react-intl';
 import { Redirect, Route, Router, Switch } from "react-router-dom";
-import { CssBaseline, CircularProgress } from "@material-ui/core";
+import { CssBaseline, CircularProgress, Dialog } from "@material-ui/core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import withHistory from "../helpers/history";
 import withModulesManager from "../helpers/modules";
@@ -10,6 +10,7 @@ import AppWrapper from "./AppWrapper";
 import FatalError from './FatalError';
 import kebabCase from "lodash/kebabCase";
 import { auth } from "../actions";
+import AlertDialog from "./AlertDialog";
 
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";
 export const TRANSLATION_CONTRIBUTION_KEY = "translations";
@@ -45,11 +46,10 @@ class RootApp extends Component {
   }
 
   render() {
-    const { history, classes, error, user, messages, ...others } = this.props;
+    const { history, classes, error, alert, user, messages, ...others } = this.props;
     if (error) {
       return <FatalError error={error} />;
     }
-
     if (!user) {
       return (
         <div>
@@ -65,6 +65,7 @@ class RootApp extends Component {
           <div className="App">
             <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
             <CssBaseline />
+            <AlertDialog alert={alert} />
             <Router history={history}>
               <Switch>
                 <Route
@@ -102,7 +103,8 @@ function mapStateToProps(state) {
   return {
     authenticating: state.core.authenticating,
     user: !!state.core.user && state.core.user.i_user,
-    error: state.core.error
+    error: state.core.error,
+    alert: state.core.alert
   }
 };
 

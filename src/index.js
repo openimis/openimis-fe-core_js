@@ -25,8 +25,8 @@ import ConstantBasedPicker from "./pickers/ConstantBasedPicker";
 import YearPicker from "./pickers/YearPicker";
 import MonthPicker from "./pickers/MonthPicker";
 import reducer from "./reducer";
-import { baseApiUrl, apiHeaders, graphql, journalize } from './actions';
-import { formatMessage, formatMessageWithValues, formatDateFromISO, formatAmount, chip } from './helpers/i18n';
+import { baseApiUrl, apiHeaders, graphql, journalize, coreAlert } from './actions';
+import { formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount } from './helpers/i18n';
 import {
   decodeId, encodeId, formatQuery, formatPageQuery, formatPageQueryWithCount,
   parseData, pageInfo, formatServerError, formatGraphQLError, formatMutation,
@@ -55,14 +55,14 @@ export const CoreModule = (cfg) => {
 }
 
 export {
-  baseApiUrl, apiHeaders, graphql, journalize,
+  baseApiUrl, apiHeaders, graphql, journalize, coreAlert,
   withHistory, historyPush,
   decodeId, encodeId,
   withModulesManager,
   formatQuery, formatPageQuery, formatPageQueryWithCount, formatMutation,
   dispatchMutationReq, dispatchMutationResp, dispatchMutationErr,
   parseData, pageInfo, formatServerError, formatGraphQLError,
-  formatMessage, formatMessageWithValues, formatDateFromISO, formatAmount, chip,
+  formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount,
   App, AutoSuggestion, Contributions, ControlledField, Error, FatalError, Picker,
   SelectInput, TextInput, AmountInput, YearPicker, MonthPicker,
   Form, FieldLabel, FormattedMessage, NumberInput,

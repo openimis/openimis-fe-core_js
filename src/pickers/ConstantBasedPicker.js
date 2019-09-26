@@ -3,12 +3,13 @@ import { injectIntl } from "react-intl";
 import SelectInput from "../components/SelectInput";
 import { formatMessage } from "../helpers/i18n";
 
+const INIT_STATE = {
+    value: null,
+}
 
 class ConstantBasedPicker extends Component {
 
-    state = {
-        value: null
-    }
+    state = INIT_STATE;
 
     componentDidMount() {
         if (!!this.props.value) {
@@ -17,7 +18,8 @@ class ConstantBasedPicker extends Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if (prevProps.value !== this.props.value) {
+        if (prevProps.reset !== this.props.reset ||
+            prevProps.value !== this.props.value) {
             this.setState({ value: this.props.value })
         }
     }
@@ -47,7 +49,7 @@ class ConstantBasedPicker extends Component {
     }
 
     render() {
-        const { module, withLabel=true, label, constants, name,
+        const { module, withLabel = true, label, constants, name,
             filtered = [], withNull = true, readOnly = false } = this.props;
         const { value } = this.state;
         const options = withNull ? [{

@@ -4,21 +4,12 @@ import { injectIntl } from 'react-intl';
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { FormControl, TextField, IconButton, Grid } from "@material-ui/core";
 import ClearIcon from "@material-ui/icons/Clear";
-import { formatMessage } from "../helpers/i18n";
+import { formatMessage, toISODate } from "../helpers/i18n";
 import { formatDateFromISO } from "./NeDateFormatter";
 import withModulesManager from "../helpers/modules.js";
 
 const styles = theme => ({
 });
-
-function toISODate(d) {
-    if (!d) return null;
-    const a = moment(d).toArray().slice(0, 3);
-    a[0] = ('0000' + a[0]).slice(-4);
-    a[1] = ('00' + (a[1] + 1)).slice(-2);
-    a[2] = ('00' + a[2]).slice(-2);
-    return a.join('-');
-}
 
 class NeDatePicker extends Component {
 

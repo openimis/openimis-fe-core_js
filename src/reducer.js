@@ -12,6 +12,15 @@ function reducer(
     action,
 ) {
     switch (action.type) {
+        case 'CORE_ALERT':
+            return {
+                ...state,
+                alert: action.payload,
+            };
+        case 'CORE_ALERT_CLEAR':
+            let s = {...state};
+            delete(s.alert);
+            return s;
         case 'CORE_USERS_CURRENT_USER_REQ':
             return {
                 ...state,

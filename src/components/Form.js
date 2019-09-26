@@ -24,37 +24,31 @@ class Form extends Component {
         dirty: false,
     }
 
-    _resetState() {
+    _resetState(dirty) {
         this.setState({
-            edited: {...this.props.edited},
+            edited: { ...this.props.edited },
             edited_id: this.props.edited_id,
-            dirty: false,
+            dirty
         });
     }
 
     componentDidMount() {
-        this._resetState();
+        this._resetState(false);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if (prevProps.edited_id !== this.props.edited_id ||
-            !_.isEqual(prevProps.edited, this.props.edited) ||
-            prevProps.reset !== this.props.reset ||
-            prevProps.update !== this.props.update) {
-            this._resetState();
+        if (prevProps.reset !== this.props.reset ||
+            prevProps.edited_id !== this.props.edited_id) {
+            this._resetState(false);
+        } else if (!_.isEqual(prevProps.edited, this.props.edited)) {
+            this._resetState(this.state.dirty);
         }
     }
 
-    updateAttribute = (attr, value, str) => {
-        const edited = { ...this.state.edited };
-        edited[attr] = value;
-        if (str !== undefined) {
-            edited[`${attr}_str`] = str;
-        }
-        this.setState({
-            dirty: true,
-            edited,
-        });
+    onEditedChanged = data => {
+        this.setState({ dirty: true },
+            e => this.props.onEditedChanged(data)
+        )
     }
 
     render() {
@@ -101,8 +95,8 @@ class Form extends Component {
                                     <HeadPanel
                                         edited={this.state.edited}
                                         edited_id={this.state.edited_id}
-                                        updateAttribute={this.updateAttribute}
                                         {...others}
+                                        onEditedChanged={this.onEditedChanged}
                                     />
                                 </Grid>
                             </Paper>
@@ -114,8 +108,8 @@ class Form extends Component {
                                 <P
                                     edited={this.state.edited}
                                     edited_id={this.state.edited_id}
-                                    updateAttribute={this.updateAttribute}
                                     {...others}
+                                    onEditedChanged={this.onEditedChanged}
                                 />
                             </Paper>
                         </Grid>

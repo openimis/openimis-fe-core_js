@@ -56,32 +56,41 @@ function escapeRegexCharacters(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+const INIT_STATE = {
+    value: '',
+    suggestions: [],
+}
+
 class AutoSuggestion extends Component {
 
-    state = {
-        value: '',
-        suggestions: []
-    }
+    state = INIT_STATE;
 
     componentDidMount() {
         if (!!this.props.value) {
             this.setState({
-                value: this.props.getSuggestionValue(this.props.value)
+                value: this.props.getSuggestionValue(this.props.value),
+                reset: this.state.reset + 1,
             })
         }
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        let items = this.props.items || [];
-        if (!_.isEqual(prevState.suggestions, items)) {
+        if (prevProps.reset !== this.props.reset) {
             this.setState({
-                suggestions: items
-            })
-        }
-        if (!_.isEqual(prevProps.value, this.props.value)) {
-            this.setState({
+                suggestions: this.props.items || [],
                 value: this.props.getSuggestionValue(this.props.value)
-            })
+            });
+        } else {
+            if (!_.isEqual(prevProps.items, this.props.items)) {
+                this.setState({
+                    suggestions: this.props.items || []
+                })
+            }
+            if (!_.isEqual(prevProps.value, this.props.value)) {
+                this.setState({
+                    value: this.props.getSuggestionValue(this.props.value)
+                })
+            }
         }
     }
 
@@ -104,7 +113,7 @@ class AutoSuggestion extends Component {
             this.props.getSuggestions(value);
         } else {
             this.setState({
-                suggestions: this._getSuggestions(value)
+                suggestions: this._getSuggestions(value),
             });
         }
     };
@@ -122,7 +131,7 @@ class AutoSuggestion extends Component {
         if (escapedValue === '') {
             return [];
         }
-        const regex = new RegExp(escapedValue, 'gi');
+        const regex = new RegExp(escapedValue, 'i');
         let lookup = this.props.lookup;
         if (!lookup) {
             lookup = i => this.props.getSuggestionValue(i);
@@ -131,7 +140,7 @@ class AutoSuggestion extends Component {
     }
 
     renderInputComponent = (inputProps) => {
-        const { classes, withClear } = this.props;
+        const { classes } = this.props;
         return (
             <FormControl fullWidth>
                 <TextField

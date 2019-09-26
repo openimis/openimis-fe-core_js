@@ -70,8 +70,8 @@ export function decodeId(id) {
   else return atob(id).split(':')[1];
 }
 
-export function encodeId(modulesManager, module, type, id) {
-  return btoa(`${modulesManager.getConf(`fe-${module}`, type)}:${id}`);
+export function encodeId(modulesManager, type, id) {
+  return btoa(`${modulesManager.getRef(type)}:${id}`);
 }
 
 export function parseData(data) {

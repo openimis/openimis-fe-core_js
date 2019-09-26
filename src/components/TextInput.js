@@ -18,7 +18,7 @@ class TextInput extends Component {
         this.setState({ value: this.props.value || "" })
     }
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if (prevProps.value !== this.props.value) {
+        if (prevProps.reset !== this.props.reset || prevProps.value !== this.props.value) {
             this.setState({ value: this.props.value || "" })
         }
     }

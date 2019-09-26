@@ -4,7 +4,7 @@ import { withTheme, withStyles } from "@material-ui/core/styles";
 import { injectIntl } from 'react-intl';
 import { FormControl } from "@material-ui/core";
 import { DatePicker as MUIDatePicker } from "@material-ui/pickers";
-import { formatMessage } from "../helpers/i18n";
+import { formatMessage, toISODate } from "../helpers/i18n";
 
 const styles = theme => ({
     label: {
@@ -18,21 +18,12 @@ function fromISODate(s) {
     return moment(s).toDate();
 }
 
-function toISODate(d) {
-    if (!d) return null;
-    const a = d.toArray().slice(0, 3);
-    a[0] = ('0000' + a[0]).slice(-4);
-    a[1] = ('00' + (a[1] + 1)).slice(-2);
-    a[2] = ('00' + a[2]).slice(-2);
-    return a.join('-');
-}
-
 class AdDatePicker extends Component {
 
     state = { value: null }
 
     componentDidMount() {
-        this.setState({ value: this.props.value })
+        this.setState({ value: this.props.value || null})
     }
 
     componentDidUpdate(prevState, prevProps, snapshot) {

@@ -1,5 +1,5 @@
 import { RSAA } from "redux-api-middleware";
-import { formatPageQuery, decodeId } from "./helpers/api";
+import { formatPageQuery } from "./helpers/api";
 
 export const baseApiUrl = process.env.NODE_ENV === 'development' ? "/api" : "/iapi";
 
@@ -78,9 +78,22 @@ export function fetchHistoricalMutations(pageSize, afterCursor) {
     if (!!afterCursor) {
         filters.push(`after: "${afterCursor}"`)
     }
+    filters.push(`orderBy: "-request_date_time"`);
     const payload = formatPageQuery("mutationLogs",
         filters,
         ["id", "status", "error", "clientMutationLabel", "requestDateTime"]
     );
     return graphql(payload, 'CORE_HISTORICAL_MUTATIONS');
+}
+
+export function coreAlert(title, message) {
+    return dispatch => {
+        dispatch({ type: 'CORE_ALERT', payload: { title, message } })
+    }
+}
+
+export function clearAlert(title, message) {
+    return dispatch => {
+        dispatch({ type: 'CORE_ALERT_CLEAR' })
+    }
 }

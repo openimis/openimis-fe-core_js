@@ -1,3 +1,4 @@
+import moment from "moment";
 import { formatDateFromISO as adFormateDateFromISO } from "../pickers/AdDateFormatter";
 import { formatDateFromISO as neFormateDateFromISO } from "../pickers/NeDateFormatter";
 
@@ -34,6 +35,11 @@ export function formatDateFromISO(mm, intl, date) {
     return adFormateDateFromISO(intl, date);
 }
 
-export function chip(intl, module, i, v) {
-    return `${formatMessage(intl, module, i)} = ${v}`;
+export function toISODate(d) {
+    if (!d) return null;
+    const a = moment(d).toArray().slice(0, 3);
+    a[0] = ('0000' + a[0]).slice(-4);
+    a[1] = ('00' + (a[1] + 1)).slice(-2);
+    a[2] = ('00' + a[2]).slice(-2);
+    return a.join('-');
 }

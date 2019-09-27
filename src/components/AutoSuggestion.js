@@ -59,6 +59,7 @@ function escapeRegexCharacters(str) {
 const INIT_STATE = {
     value: '',
     suggestions: [],
+    selected: null,
 }
 
 class AutoSuggestion extends Component {
@@ -161,10 +162,21 @@ class AutoSuggestion extends Component {
         );
     }
 
+    _shouldRenderSuggestions = () => {
+        return this.state.value !== this.state.selected;
+    }
+
+    _onSuggestionSelected = (e, i) => {
+        this.setState(
+            { selected: this.props.getSuggestionValue(i.suggestion) },
+            e => this.props.onSuggestionSelected(i.suggestion)
+        )
+    }
+
     render() {
         const {
             classes, label, readOnly = false, disabled = false, placeholder,
-            getSuggestionValue, onSuggestionSelected
+            getSuggestionValue
         } = this.props;
         const { suggestions, value } = this.state;
         const inputProps = {
@@ -201,11 +213,12 @@ class AutoSuggestion extends Component {
                 renderInputComponent={this.renderInputComponent}
                 inputProps={inputProps}
                 suggestions={suggestions}
-                onSuggestionSelected={(e, i) => onSuggestionSelected(i.suggestion)}
+                onSuggestionSelected={this._onSuggestionSelected}
                 onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
                 onSuggestionsClearRequested={this.onSuggestionsClearRequested}
                 getSuggestionValue={getSuggestionValue}
                 renderSuggestion={render}
+                shouldRenderSuggestions={this._shouldRenderSuggestions}
             />
         )
     }

@@ -78,7 +78,7 @@ class Table extends Component {
     }
 
     render() {
-        const { intl, modulesManager, classes, module, header, headerValues = {}, preHeaders, headers, aligns = [], headerSpans = [], colSpans = [],
+        const { intl, modulesManager, classes, module, header, preHeaders, headers, aligns = [], headerSpans = [], colSpans = [],
             items, itemFormatters,
             withPagination = false, page, pageSize, count, rowsPerPageOptions = [10, 20, 50],
             onChangeRowsPerPage, onChangePage, onDoubleClick } = this.props;
@@ -95,7 +95,7 @@ class Table extends Component {
                 {header &&
                     <Fragment>
                         <Typography className={classes.tableTitle}>
-                            <FormattedMessage module={module} id={header} values={headerValues} />
+                            {header}
                         </Typography>
                         <Divider />
                     </Fragment>

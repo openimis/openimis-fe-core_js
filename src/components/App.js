@@ -11,6 +11,7 @@ import FatalError from './FatalError';
 import kebabCase from "lodash/kebabCase";
 import { auth } from "../actions";
 import AlertDialog from "./AlertDialog";
+import ConfirmDialog from "./ConfirmDialog";
 
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";
 export const TRANSLATION_CONTRIBUTION_KEY = "translations";
@@ -46,7 +47,7 @@ class RootApp extends Component {
   }
 
   render() {
-    const { history, classes, error, alert, user, messages, ...others } = this.props;
+    const { history, classes, error, alert, confirm, user, messages, ...others } = this.props;
     if (error) {
       return <FatalError error={error} />;
     }
@@ -66,6 +67,7 @@ class RootApp extends Component {
             <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
             <CssBaseline />
             <AlertDialog alert={alert} />
+            <ConfirmDialog confirm={confirm} />
             <Router history={history}>
               <Switch>
                 <Route
@@ -104,7 +106,8 @@ function mapStateToProps(state) {
     authenticating: state.core.authenticating,
     user: !!state.core.user && state.core.user.i_user,
     error: state.core.error,
-    alert: state.core.alert
+    alert: state.core.alert,
+    confirm: state.core.confirm,
   }
 };
 

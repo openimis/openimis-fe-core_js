@@ -18,8 +18,21 @@ function reducer(
                 alert: action.payload,
             };
         case 'CORE_ALERT_CLEAR':
-            let s = {...state};
-            delete(s.alert);
+            var s = { ...state };
+            delete (s.alert);
+            return s;
+        case 'CORE_CONFIRM':
+            return {
+                ...state,
+                confirm: action.payload,
+                confirmed: null,
+            };
+        case 'CORE_CONFIRM_CLEAR':
+            var s = {
+                ...state,
+                confirmed: action.payload
+            };
+            delete (s.confirm);
             return s;
         case 'CORE_USERS_CURRENT_USER_REQ':
             return {

@@ -1,7 +1,6 @@
 import React, { Component, Fragment } from "react";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import {
-    Chip,
     Grid,
     Paper,
     Divider,
@@ -30,32 +29,30 @@ class Searcher extends Component {
     render() {
         const { classes, module, title = "search.title", filterPane, filters, del } = this.props;
         return (
-            <Fragment>
-                <Paper>
-                    <Grid container className={classes.paperHeader}>
-                        <Grid item xs={8} className={classes.paperHeaderTitle}>
-                            <FormattedMessage module={module} id={title} />
-                        </Grid>
-                        <Grid item xs={4}>
-                            <Grid container justify="flex-end">
-                                <Grid item className={classes.paperHeaderAction}>
-                                    <IconButton onClick={this._search}>
-                                        <SearchIcon />
-                                    </IconButton>
-                                </Grid>
+            <Paper>
+                <Grid container className={classes.paperHeader}>
+                    <Grid item xs={8} className={classes.paperHeaderTitle}>
+                        <FormattedMessage module={module} id={title} />
+                    </Grid>
+                    <Grid item xs={4}>
+                        <Grid container justify="flex-end">
+                            <Grid item className={classes.paperHeaderAction}>
+                                <IconButton onClick={this._search}>
+                                    <SearchIcon />
+                                </IconButton>
                             </Grid>
                         </Grid>
-                        {!!filterPane &&
-                            <Fragment>
-                                <Grid item xs={12} className={classes.paperDivider}>
-                                    <Divider />
-                                </Grid>
-                                {filterPane}
-                            </Fragment>
-                        }
                     </Grid>
-                </Paper>
-            </Fragment>
+                    {!!filterPane &&
+                        <Fragment>
+                            <Grid item xs={12} className={classes.paperDivider}>
+                                <Divider />
+                            </Grid>
+                            {filterPane}
+                        </Fragment>
+                    }
+                </Grid>
+            </Paper>
         )
     }
 }

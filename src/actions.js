@@ -92,8 +92,20 @@ export function coreAlert(title, message) {
     }
 }
 
-export function clearAlert(title, message) {
+export function clearAlert() {
     return dispatch => {
         dispatch({ type: 'CORE_ALERT_CLEAR' })
+    }
+}
+
+export function coreConfirm(title, message) {
+    return dispatch => {
+        dispatch({ type: 'CORE_CONFIRM', payload: { title, message } })
+    }
+}
+
+export function clearConfirm(confirmed) {
+    return dispatch => {
+        dispatch({ type: 'CORE_CONFIRM_CLEAR', payload: confirmed })
     }
 }

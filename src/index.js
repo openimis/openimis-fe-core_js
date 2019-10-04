@@ -25,12 +25,12 @@ import ConstantBasedPicker from "./pickers/ConstantBasedPicker";
 import YearPicker from "./pickers/YearPicker";
 import MonthPicker from "./pickers/MonthPicker";
 import reducer from "./reducer";
-import { baseApiUrl, apiHeaders, graphql, journalize, coreAlert } from './actions';
+import { baseApiUrl, apiHeaders, graphql, journalize, coreAlert, coreConfirm } from './actions';
 import { formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount } from './helpers/i18n';
 import {
   decodeId, encodeId, formatQuery, formatPageQuery, formatPageQueryWithCount,
   parseData, pageInfo, formatServerError, formatGraphQLError, formatMutation,
-  dispatchMutationReq, dispatchMutationResp, dispatchMutationErr,
+  dispatchMutationReq, dispatchMutationResp, dispatchMutationErr, openBlob
 } from './helpers/api';
 import withHistory, { historyPush } from "./helpers/history";
 import withModulesManager from './helpers/modules';
@@ -39,6 +39,8 @@ const DEFAULT_CONFIG = {
   "reducers": [{ key: 'core', reducer: reducer }],
   "refs": [
     { key: "core.JournalDrawer.pollInterval", ref: 2000 },
+    { key: "core.YearPicker", ref: YearPicker },
+    { key: "core.MonthPicker", ref: MonthPicker },
   ],
 }
 
@@ -55,7 +57,7 @@ export const CoreModule = (cfg) => {
 }
 
 export {
-  baseApiUrl, apiHeaders, graphql, journalize, coreAlert,
+  baseApiUrl, apiHeaders, graphql, journalize, coreAlert, coreConfirm, openBlob,
   withHistory, historyPush,
   decodeId, encodeId,
   withModulesManager,

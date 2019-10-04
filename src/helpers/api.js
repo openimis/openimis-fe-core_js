@@ -124,4 +124,18 @@ export function formatGraphQLError(payload) {
   }
 }
 
+export function openBlob(data, filename, mime) {
+  var a = document.createElement('a');
+  a.style = "display: none";
+  var blob = new Blob([data], { type: `application/${mime}` });
+  var url = window.URL.createObjectURL(blob);
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function () {
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }, 100);
+}
 

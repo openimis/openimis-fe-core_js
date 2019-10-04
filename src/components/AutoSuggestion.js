@@ -66,6 +66,12 @@ class AutoSuggestion extends Component {
 
     state = INIT_STATE;
 
+    _allItems = () => {
+        var items = [...this.props.items]
+        items.unshift(...(this.props.preValues || []))
+        return items
+    }
+
     componentDidMount() {
         if (!!this.props.value) {
             this.setState({
@@ -78,13 +84,13 @@ class AutoSuggestion extends Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.reset !== this.props.reset) {
             this.setState({
-                suggestions: this.props.items || [],
+                suggestions: this._allItems(),
                 value: this.props.getSuggestionValue(this.props.value)
             });
         } else {
             if (!_.isEqual(prevProps.items, this.props.items)) {
                 this.setState({
-                    suggestions: this.props.items || []
+                    suggestions: this._allItems()
                 })
             }
             if (!_.isEqual(prevProps.value, this.props.value)) {
@@ -126,7 +132,7 @@ class AutoSuggestion extends Component {
     };
 
     _getSuggestions = (value) => {
-        if (!this.props.items || !value || !value.trim()) return [];
+        if (!value || !value.trim()) return [];
         const escapedValue = escapeRegexCharacters(value.trim());
 
         if (escapedValue === '') {
@@ -137,7 +143,7 @@ class AutoSuggestion extends Component {
         if (!lookup) {
             lookup = i => this.props.getSuggestionValue(i);
         }
-        return this.props.items.filter(i => regex.test(lookup(i)));
+        return this._allItems().filter(i => regex.test(lookup(i)));
     }
 
     renderInputComponent = (inputProps) => {

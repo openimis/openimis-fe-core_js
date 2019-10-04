@@ -154,7 +154,7 @@ class Table extends Component {
                             </TableRow>
                         ))}
                     </TableBody>
-                    {!!withPagination && (
+                    {!!withPagination && !!count && (
                         <TableFooter className={classes.tableFooter}>
                             <TableRow>
                                 <TablePagination

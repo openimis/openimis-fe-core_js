@@ -10,7 +10,7 @@ class YearPicker extends Component {
         const { intl, name, value, module, label, nullLabel = "year.null", onChange, min, max, withNull = true } = this.props;
         const options = withNull ? [{
             value: null,
-            label: formatMessage(intl, module, `${nullLabel}`)
+            label: formatMessage(intl, module, nullLabel)
         }] : [];
         options.push(..._.range(min, max).map(v => ({
             value: v,

@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import moment from "moment";
 import { injectIntl } from 'react-intl';
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { FormControl, TextField, IconButton, Grid } from "@material-ui/core";

@@ -6,6 +6,7 @@ import AddIcon from "@material-ui/icons/Add";
 import SaveIcon from "@material-ui/icons/SaveAlt";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ReplayIcon from "@material-ui/icons/Replay"
+import PrintIcon from "@material-ui/icons/ListAlt";
 import FormattedMessage from "./FormattedMessage";
 import withHistory from "../helpers/history";
 import _ from "lodash";
@@ -52,7 +53,7 @@ class Form extends Component {
     }
 
     render() {
-        const { classes, module, back, add, save, canSave, reload, title, titleParams = [], HeadPanel, Panels, ...others } = this.props;
+        const { classes, module, back, add, save, canSave, reload, print, title, titleParams = [], HeadPanel, Panels, ...others } = this.props;
         return (
             <Fragment>
                 <form noValidate autoComplete="off">
@@ -82,6 +83,17 @@ class Form extends Component {
                                                 <Grid item className={classes.paperHeaderAction}>
                                                     <IconButton onClick={reload}>
                                                         <ReplayIcon />
+                                                    </IconButton>
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                    )}
+                                    {!!print && !this.state.dirty && (
+                                        <Grid item xs={1} className={classes.paperHeader}>
+                                            <Grid container justify="flex-end">
+                                                <Grid item className={classes.paperHeaderAction}>
+                                                    <IconButton onClick={print}>
+                                                        <PrintIcon />
                                                     </IconButton>
                                                 </Grid>
                                             </Grid>

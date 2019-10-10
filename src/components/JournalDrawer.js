@@ -1,14 +1,18 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import clsx from 'clsx';
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { CircularProgress, ClickAwayListener, List, ListItem, ListItemText, ListItemIcon, Drawer, Divider, IconButton, Grid, Tooltip } from "@material-ui/core";
+import {
+    CircularProgress, ClickAwayListener, List, ListItem, ListItemText, ListItemIcon,
+    Drawer, Divider, IconButton, Grid, Popover, Paper, Typography, ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails
+} from "@material-ui/core";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import MoreIcon from "@material-ui/icons/KeyboardArrowDown";
 import CheckIcon from "@material-ui/icons/CheckCircleOutline";
 import ErrorIcon from "@material-ui/icons/ErrorOutline";
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { fetchMutation, fetchHistoricalMutations } from "../actions";
 import withModulesManager from "../helpers/modules";
 import moment from "moment";
@@ -50,9 +54,96 @@ const styles = theme => ({
         color: theme.palette.error.main,
     },
     jrnlErrorIcon: {
+        paddingLeft: theme.spacing(1),
         color: theme.palette.error.main,
     },
+    errorPopover: {
+        width: 350
+    },
+    errorPanel: {
+        width: "100%",
+        color: theme.palette.error.main,
+    }
 });
+
+class ErrorDetail extends Component {
+
+    state = {
+        expanded: false
+    }
+
+    handleChange = panel => (event, newExpanded) => {
+        event.stopPropagation();
+        this.setState({
+            expanded: newExpanded ? panel : false
+        })
+    }
+
+    formatError = (error, idx) => {
+        if (error.hasOwnProperty("code") &&
+            error.hasOwnProperty("message")) {
+            return (
+                <ExpansionPanel key={`error-${idx}-panel`}
+                    expanded={error.hasOwnProperty("detail") && this.state.expanded === `error-${idx}`}
+                    onChange={this.handleChange(`error-${idx}`)}
+                    className={this.props.classes.errorPanel}
+                >
+                    <ExpansionPanelSummary
+                        id={`error-${idx}-header`}
+                        expandIcon={error.hasOwnProperty("detail") && <ExpandMoreIcon />}
+                    >
+                        <Typography variant="caption">{error.code}: {error.message}</Typography>
+                    </ExpansionPanelSummary>
+                    {error.hasOwnProperty("detail") &&
+                        <ExpansionPanelDetails>
+                            <Typography variant="caption">
+                                {error.detail}
+                            </Typography>
+                        </ExpansionPanelDetails>
+                    }
+                </ExpansionPanel>
+            )
+        } else {
+            return <Grid item>{JSON.stringify(error)}</Grid>
+        }
+    }
+
+    render() {
+        const { classes, anchorEl, onClick, errors } = this.props;
+        if (!errors) return null;
+        let errs = [errors]
+        try {
+            errs = JSON.parse(errors);
+            if (!Array.isArray(errs)) {
+                errs = [errs]
+            }
+        } catch (err) {
+            //let's keep the raw errors then
+        }
+        return (
+            <Popover
+                open={!!anchorEl}
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                    vertical: 'center',
+                    horizontal: 'left',
+                }}
+                transformOrigin={{
+                    vertical: 'center',
+                    horizontal: 'right',
+                }}
+                onClick={onClick}
+                PaperProps={{ className: classes.errorPopover }}
+            >
+                <Grid container>
+                    {errs.map((error, idx) => this.formatError(error, idx))}
+                </Grid>
+            </Popover>
+        )
+    }
+}
+
+const StyledErrorDetail = withTheme(withStyles(styles)(ErrorDetail));
 
 class JournalDrawer extends Component {
 
@@ -63,8 +154,8 @@ class JournalDrawer extends Component {
             afterCursor: null,
             hasNextPage: false,
             displayedMutations: [],
+            errorAnchor: null,
         }
-
     }
 
     componentDidMount() {
@@ -110,11 +201,27 @@ class JournalDrawer extends Component {
         this.props.fetchHistoricalMutations(this.state.pageSize, this.state.afterCursor);
     }
 
+    showError = (e, m) => {
+        this.setState({
+            errorAnchor: e.currentTarget,
+            errors: m.error
+        })
+    }
+
+    hideError = e => {
+        this.setState({ errorAnchor: null })
+    }
+
     render() {
         const { theme, classes, open, handleDrawer } = this.props;
         return (
             <ClickAwayListener onClickAway={e => open && handleDrawer()}>
                 <nav className={classes.drawer}>
+                    <StyledErrorDetail
+                        anchorEl={this.state.errorAnchor}
+                        errors={this.state.errors}
+                        onClick={this.hideError}
+                    />
                     <Drawer
                         variant="permanent"
                         anchor="right"
@@ -146,11 +253,13 @@ class JournalDrawer extends Component {
                                             <CircularProgress size={theme.jrnlDrawer.iconSize} />
                                         </ListItemIcon>)}
                                     {m.status === 1 && (
-                                        <Tooltip title={m.error} className={classes.jrnlIcon}>
-                                            <ListItemIcon className={classes.jrnlErrorIcon}>
-                                                <ErrorIcon />
-                                            </ListItemIcon>
-                                        </Tooltip>)}
+                                        <ListItemIcon
+                                            className={classes.jrnlErrorIcon}
+                                            onMouseEnter={e => this.showError(e, m)}
+                                            onClick={this.hideError}
+                                        >
+                                            <ErrorIcon />
+                                        </ListItemIcon>)}
                                     {m.status === 2 && (
                                         <ListItemIcon className={classes.jrnlIcon}>
                                             <CheckIcon />

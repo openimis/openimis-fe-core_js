@@ -125,7 +125,7 @@ class Picker extends Component {
                 )}
                 <TextField className={classes.picker}
                     disabled={readOnly}
-                    label={formatMessage(intl, module, label)}
+                    label={!!label && formatMessage(intl, module, label)}
                     onClick={e => this.setState({ open: true })}
                     value={suggestionFormatter(value)}
                     InputLabelProps={{

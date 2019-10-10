@@ -12,6 +12,8 @@ const styles = theme => ({
     tableTitle: theme.table.title,
     tableHeader: theme.table.header,
     tableRow: theme.table.row,
+    tableHighlightedRow: theme.table.highlightedRow,
+    tableHighlightedAltRow: theme.table.highlightedAltRow,
     tableFooter: theme.table.footer,
     pager: theme.table.pager,
     left: {
@@ -79,7 +81,7 @@ class Table extends Component {
 
     render() {
         const { intl, modulesManager, classes, module, header, preHeaders, headers, aligns = [], headerSpans = [], colSpans = [],
-            items, itemFormatters,
+            items, itemFormatters, rowHighlighted = null, rowHighlightedAlt = null,
             withPagination = false, page, pageSize, count, rowsPerPageOptions = [10, 20, 50],
             onChangeRowsPerPage, onChangePage, onDoubleClick } = this.props;
         var i = !!headers && headers.length
@@ -143,7 +145,8 @@ class Table extends Component {
                                         <TableCell
                                             colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
                                             className={classNames(
-                                                classes.tableRow,
+                                                !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedRow : null,
+                                                !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltRow : null,
                                                 classes[`${aligns.length > fidx && !!aligns[fidx] ? aligns[fidx] : "left"}`]
                                             )}
                                             key={`v-${iidx}-${fidx}`}>

@@ -39,9 +39,10 @@ class RootApp extends Component {
   }
 
   buildMessages(messages, lang) {
+    let file = this.props.localesManager.getFileNameByLang(lang)
     var msgs = this.props.modulesManager
       .getContribs(TRANSLATION_CONTRIBUTION_KEY)
-      .filter(msgs => msgs.key === lang)
+      .filter(msgs => msgs.key === file)
       .reduce((allmsgs, msgs) => Object.assign(allmsgs, msgs.messages), {})
     return { ...messages, ...msgs };
   }

@@ -4,9 +4,7 @@ import { formatDateFromISO as neFormateDateFromISO } from "../pickers/NeDateForm
 
 //formatting with values is expansive.. so let's have separated methids
 export function formatMessage(intl, module, id) {
-    if (!!intl.messages[`overwrite.${module}.${id}`]) {
-        return intl.formatMessage({ id: `overwrite.${module}.${id}` });
-    } else if (!!intl.messages[`${module}.${id}`]) {
+    if (!!intl.messages[`${module}.${id}`]) {
         return intl.formatMessage({ id: `${module}.${id}` });
     } else {
         return intl.formatMessage({ id: `${id}` });
@@ -14,9 +12,7 @@ export function formatMessage(intl, module, id) {
 };
 
 export function formatMessageWithValues(intl, module, id, values) {
-    if (!!intl.messages[`overwrite.${module}.${id}`]) {
-        return intl.formatMessage({ id: `overwrite.${module}.${id}` }, values);
-    } else if (!!intl.messages[`${module}.${id}`]) {
+    if (!!intl.messages[`${module}.${id}`]) {
         return intl.formatMessage({ id: `${module}.${id}` }, values);
     } else {
         return intl.formatMessage({ id: `${id}` }, values);

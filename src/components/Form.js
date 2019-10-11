@@ -53,7 +53,7 @@ class Form extends Component {
     }
 
     render() {
-        const { classes, module, back, add, save, canSave, reload, print, title, titleParams = [], HeadPanel, Panels, ...others } = this.props;
+        const { classes, module, back, add, openDirty=false, save, canSave, reload, print, title, titleParams = [], HeadPanel, Panels, ...others } = this.props;
         return (
             <Fragment>
                 <form noValidate autoComplete="off">
@@ -135,7 +135,7 @@ class Form extends Component {
                         <AddIcon />
                     </Fab>
                 )}
-                {!!this.state.dirty && !!save && (
+                {(!!this.state.dirty || !! openDirty) && !!save && (
                     <Fab color="primary"
                         disabled={!!canSave && !canSave(this.state.edited)}
                         className={classes.fab}

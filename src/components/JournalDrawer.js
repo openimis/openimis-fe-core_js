@@ -104,7 +104,7 @@ class ErrorDetail extends Component {
                 </ExpansionPanel>
             )
         } else {
-            return <Grid item>{JSON.stringify(error)}</Grid>
+            return <Grid key={`error-${idx}-panel`} item>{JSON.stringify(error)}</Grid>
         }
     }
 

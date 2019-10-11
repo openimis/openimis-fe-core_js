@@ -75,6 +75,7 @@ export function encodeId(modulesManager, type, id) {
 }
 
 export function parseData(data) {
+  if (!data) return [];
   return data['edges'].map(e => e['node']);
 }
 
@@ -103,6 +104,7 @@ export function dispatchMutationErr(state, action) {
 }
 
 export function pageInfo(data) {
+  if (!data) return {};
   return { totalCount: data['totalCount'], ...data['pageInfo'] };
 }
 

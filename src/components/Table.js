@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { injectIntl } from 'react-intl';
 import _ from "lodash";
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { Typography, Divider, Table as MUITable, TableRow, TableHead, TableBody, TableCell, TableFooter, TablePagination } from "@material-ui/core";
+import { Typography, Divider, Table as MUITable, TableRow, TableHead, TableBody, TableCell, TableFooter, TablePagination, Grid } from "@material-ui/core";
 import FormattedMessage from "./FormattedMessage";
 import withModulesManager from "../helpers/modules";
 import { formatMessage, formatMessageWithValues } from "../helpers/i18n";
@@ -79,8 +79,11 @@ class Table extends Component {
 
     }
 
+    headerAction = a => <Grid item>{a()}</Grid>
+
     render() {
-        const { intl, modulesManager, classes, module, header, preHeaders, headers, aligns = [], headerSpans = [], colSpans = [],
+        const { intl, modulesManager, classes, module, header, preHeaders, headers,
+            aligns = [], headerSpans = [], headerActions = [], colSpans = [],
             items, itemFormatters, rowHighlighted = null, rowHighlightedAlt = null,
             withPagination = false, page, pageSize, count, rowsPerPageOptions = [10, 20, 50],
             onChangeRowsPerPage, onChangePage, onDoubleClick } = this.props;
@@ -124,8 +127,15 @@ class Table extends Component {
                                     if (headerSpans.length > idx && !headerSpans[idx]) return null;
                                     return (<TableCell
                                         colSpan={headerSpans.length > idx ? headerSpans[idx] : 1}
-                                        className={classes.tableHeader} key={`h-${idx}`}>
-                                        {!!h && <FormattedMessage module={module} id={h} />}
+                                        key={`h-${idx}`}>
+                                        {!!h && (
+                                            <Grid container className={classes.tableHeader} alignItems="center">
+                                                <Grid item>
+                                                    <FormattedMessage module={module} id={h} />
+                                                </Grid>
+                                                {headerActions.length > idx ? this.headerAction(headerActions[idx]) : null}
+                                            </Grid>
+                                        )}
                                     </TableCell>
                                     )
                                 })}

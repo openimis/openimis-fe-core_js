@@ -23,6 +23,7 @@ class Form extends Component {
         edited: {},
         edited_id: null,
         dirty: false,
+        saving: false,
     }
 
     _resetState(dirty) {
@@ -52,8 +53,15 @@ class Form extends Component {
         )
     }
 
+    save = data => {
+        this.setState(
+            { saving: true },
+            this.props.save(data)
+        )
+    }
+
     render() {
-        const { classes, module, back, add, openDirty=false, save, canSave, reload, print, title, titleParams = [], HeadPanel, Panels, ...others } = this.props;
+        const { classes, module, back, add, openDirty = false, save, canSave, reload, print, title, titleParams = [], HeadPanel, Panels, ...others } = this.props;
         return (
             <Fragment>
                 <form noValidate autoComplete="off">
@@ -135,11 +143,11 @@ class Form extends Component {
                         <AddIcon />
                     </Fab>
                 )}
-                {(!!this.state.dirty || !! openDirty) && !!save && (
+                {(!!this.state.dirty || !!openDirty) && !!save && (
                     <Fab color="primary"
-                        disabled={!!canSave && !canSave(this.state.edited)}
+                        disabled={!!this.state.saving || (!!canSave && !canSave(this.state.edited))}
                         className={classes.fab}
-                        onClick={e => save(this.state.edited)}>
+                        onClick={e => this.save(this.state.edited)}>
                         <SaveIcon />
                     </Fab>
                 )}

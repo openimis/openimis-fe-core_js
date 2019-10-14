@@ -80,8 +80,7 @@ class ErrorDetail extends Component {
     }
 
     formatError = (error, idx) => {
-        if (error.hasOwnProperty("code") &&
-            error.hasOwnProperty("message")) {
+        if (error.hasOwnProperty("message")) {
             return (
                 <ExpansionPanel key={`error-${idx}-panel`}
                     expanded={error.hasOwnProperty("detail") && this.state.expanded === `error-${idx}`}
@@ -92,7 +91,7 @@ class ErrorDetail extends Component {
                         id={`error-${idx}-header`}
                         expandIcon={error.hasOwnProperty("detail") && <ExpandMoreIcon />}
                     >
-                        <Typography variant="caption">{error.code}: {error.message}</Typography>
+                        <Typography variant="caption">{error.hasOwnProperty("code") ? `${error.code}: ` : ""}{error.message}</Typography>
                     </ExpansionPanelSummary>
                     {error.hasOwnProperty("detail") &&
                         <ExpansionPanelDetails>
@@ -121,24 +120,26 @@ class ErrorDetail extends Component {
             //let's keep the raw errors then
         }
         return (
-            <Popover
-                open={!!anchorEl}
-                anchorEl={anchorEl}
-                anchorOrigin={{
-                    vertical: 'center',
-                    horizontal: 'left',
-                }}
-                transformOrigin={{
-                    vertical: 'center',
-                    horizontal: 'right',
-                }}
-                onClick={onClick}
-                PaperProps={{ className: classes.errorPopover }}
-            >
-                <Grid container>
-                    {errs.map((error, idx) => this.formatError(error, idx))}
-                </Grid>
-            </Popover>
+            <ClickAwayListener onClickAway={onClick}>
+                <Popover
+                    open={!!anchorEl}
+                    anchorEl={anchorEl}
+                    anchorOrigin={{
+                        vertical: 'center',
+                        horizontal: 'left',
+                    }}
+                    transformOrigin={{
+                        vertical: 'center',
+                        horizontal: 'right',
+                    }}
+                    onClick={onClick}
+                    PaperProps={{ className: classes.errorPopover }}
+                >
+                    <Grid container>
+                        {errs.map((error, idx) => this.formatError(error, idx))}
+                    </Grid>
+                </Popover>
+            </ClickAwayListener>
         )
     }
 }
@@ -209,7 +210,10 @@ class JournalDrawer extends Component {
     }
 
     hideError = e => {
-        this.setState({ errorAnchor: null })
+        this.setState({
+            errorAnchor: null,
+            errors: null,
+        })
     }
 
     render() {
@@ -255,8 +259,7 @@ class JournalDrawer extends Component {
                                     {m.status === 1 && (
                                         <ListItemIcon
                                             className={classes.jrnlErrorIcon}
-                                            onMouseEnter={e => this.showError(e, m)}
-                                            onClick={this.hideError}
+                                            onClick={e => this.showError(e, m)}
                                         >
                                             <ErrorIcon />
                                         </ListItemIcon>)}

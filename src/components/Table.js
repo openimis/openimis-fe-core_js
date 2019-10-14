@@ -3,7 +3,10 @@ import classNames from "classnames";
 import { injectIntl } from 'react-intl';
 import _ from "lodash";
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { Typography, Divider, Table as MUITable, TableRow, TableHead, TableBody, TableCell, TableFooter, TablePagination, Grid } from "@material-ui/core";
+import {
+    Typography, Divider, Box,
+    Table as MUITable, TableRow, TableHead, TableBody, TableCell, TableFooter, TablePagination
+} from "@material-ui/core";
 import FormattedMessage from "./FormattedMessage";
 import withModulesManager from "../helpers/modules";
 import { formatMessage, formatMessageWithValues } from "../helpers/i18n";
@@ -79,7 +82,7 @@ class Table extends Component {
 
     }
 
-    headerAction = a => <Grid item>{a()}</Grid>
+    headerAction = a => <Box flexGrow={1}><Box display="flex" justifyContent="flex-end">{a()}</Box></Box>
 
     render() {
         const { intl, modulesManager, classes, module, header, preHeaders, headers,
@@ -129,12 +132,14 @@ class Table extends Component {
                                         colSpan={headerSpans.length > idx ? headerSpans[idx] : 1}
                                         key={`h-${idx}`}>
                                         {!!h && (
-                                            <Grid container className={classes.tableHeader} alignItems="center">
-                                                <Grid item>
-                                                    <FormattedMessage module={module} id={h} />
-                                                </Grid>
-                                                {headerActions.length > idx ? this.headerAction(headerActions[idx]) : null}
-                                            </Grid>
+                                            <div style={{ width: '100%' }}>
+                                                <Box display="flex" className={classes.tableHeader} alignItems="center">
+                                                    <Box>
+                                                        <FormattedMessage module={module} id={h} />
+                                                    </Box>
+                                                    {headerActions.length > idx ? this.headerAction(headerActions[idx]) : null}
+                                                </Box>
+                                            </div>
                                         )}
                                     </TableCell>
                                     )

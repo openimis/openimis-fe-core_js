@@ -91,7 +91,7 @@ class ErrorDetail extends Component {
                         id={`error-${idx}-header`}
                         expandIcon={error.hasOwnProperty("detail") && <ExpandMoreIcon />}
                     >
-                        <Typography variant="caption">{error.hasOwnProperty("code") ? `${error.code}: ` : ""}{error.message}</Typography>
+                        <Typography variant="caption">{error.hasOwnProperty("code") ? `[${error.code}] ` : ""}{error.message}</Typography>
                     </ExpansionPanelSummary>
                     {error.hasOwnProperty("detail") &&
                         <ExpansionPanelDetails>

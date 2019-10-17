@@ -1,5 +1,6 @@
 import React from "react";
 import App from "./components/App";
+import KeepLegacyAlive from "./components/KeepLegacyAlive";
 import AutoSuggestion from "./components/AutoSuggestion";
 import Contributions from "./components/Contributions";
 import ControlledField from "./components/ControlledField";
@@ -39,9 +40,11 @@ const DEFAULT_CONFIG = {
   "reducers": [{ key: 'core', reducer: reducer }],
   "refs": [
     { key: "core.JournalDrawer.pollInterval", ref: 2000 },
+    { key: "core.KeepLegacyAlive.pollInterval", ref: 300000 },
     { key: "core.YearPicker", ref: YearPicker },
     { key: "core.MonthPicker", ref: MonthPicker },
   ],
+  "core.Boot": [KeepLegacyAlive],
 }
 
 export const CoreModule = (cfg) => {

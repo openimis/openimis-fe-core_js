@@ -8,6 +8,8 @@ const styles = theme => ({
         display: "block",
         marginLeft: "auto",
         marginRight: "auto",       
+        marginTop: theme.spacing(1),
+        marginBottom: theme.spacing(1),
     }
 });
 

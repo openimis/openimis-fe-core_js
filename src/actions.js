@@ -53,7 +53,7 @@ export function graphql(payload, type, params = {}) {
 export function auth() {
     return {
         [RSAA]: {
-            endpoint: `${baseApiUrl}/core/users/current_user`,
+            endpoint: `${baseApiUrl}/core/users/current_user/`,
             method: "GET",
             headers: apiHeaders(),
             types: [

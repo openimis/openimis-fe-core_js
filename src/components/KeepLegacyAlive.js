@@ -18,7 +18,7 @@ class KeepLegacyAlive extends Component {
     }
 
     keepLegacyAlive = () => {
-        fetch(`${window.location.origin}${baseApiUrl}/keepLegacyAlive`);
+        fetch(`${window.location.origin}/keepLegacyAlive`);
     }
 
     render() {        

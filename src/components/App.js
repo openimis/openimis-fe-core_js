@@ -75,7 +75,7 @@ class RootApp extends Component {
                   exact
                   path={`${process.env.PUBLIC_URL || ""}/`}
                   render={() => (
-                    <Redirect to={`${process.env.PUBLIC_URL || ""}/front/home`} />
+                    <Redirect to={`${process.env.PUBLIC_URL || ""}/home`} />
                   )}
                 />
                 {this.routerContributions.map((route, index) => {

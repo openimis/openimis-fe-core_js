@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { IconButton } from "@material-ui/core";
 import { HelpOutline } from "@material-ui/icons";
+import withHistory from "../helpers/history";
 
 const styles = theme => ({
     button: {
@@ -28,4 +29,4 @@ class Logout extends Component {
 
 }
 
-export default withStyles(styles)(Logout);
+export default withHistory(withStyles(styles)(Logout));

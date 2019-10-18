@@ -214,7 +214,7 @@ class AppWrapper extends Component {
               </IconButton>
               <Button
                 className={classes.appName}
-                onClick={e => history.push("/home")}>
+                onClick={e => window.location.href = "/home"}>
                 {this.isAppBarMenu() && (
                   <Hidden smDown implementation="css">
                     <img className={classes.logo} src={this.props.logo} />

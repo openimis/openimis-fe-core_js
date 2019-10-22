@@ -20,30 +20,16 @@ const styles = theme => ({
 
 class Form extends Component {
     state = {
-        edited: {},
-        edited_id: null,
         dirty: false,
         saving: false,
-    }
-
-    _resetState(dirty) {
-        this.setState({
-            edited: { ...this.props.edited },
-            edited_id: this.props.edited_id,
-            dirty
-        });
-    }
-
-    componentDidMount() {
-        this._resetState(false);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.reset !== this.props.reset ||
             prevProps.edited_id !== this.props.edited_id) {
-            this._resetState(false);
-        } else if (!_.isEqual(prevProps.edited, this.props.edited)) {
-            this._resetState(this.state.dirty);
+            this.setState({ dirty: false, saving: false });
+        } else if (prevProps.update !== this.props.update) {
+            this.setState({ saving: false });
         }
     }
 
@@ -113,8 +99,8 @@ class Form extends Component {
                                 </Grid>
                                 <Grid item xs={12}>
                                     <HeadPanel
-                                        edited={this.state.edited}
-                                        edited_id={this.state.edited_id}
+                                        edited={this.props.edited}
+                                        edited_id={this.props.edited_id}
                                         {...others}
                                         onEditedChanged={this.onEditedChanged}
                                     />
@@ -126,8 +112,8 @@ class Form extends Component {
                         <Grid key={`form_pannel_${idx}`} item xs={12}>
                             <Paper className={classes.paper}>
                                 <P
-                                    edited={this.state.edited}
-                                    edited_id={this.state.edited_id}
+                                    edited={this.props.edited}
+                                    edited_id={this.props.edited_id}
                                     {...others}
                                     onEditedChanged={this.onEditedChanged}
                                 />
@@ -145,9 +131,9 @@ class Form extends Component {
                 )}
                 {(!!this.state.dirty || !!openDirty) && !!save && (
                     <Fab color="primary"
-                        disabled={!!this.state.saving || (!!canSave && !canSave(this.state.edited))}
+                        disabled={!!this.state.saving || (!!canSave && !canSave())}
                         className={classes.fab}
-                        onClick={e => this.save(this.state.edited)}>
+                        onClick={e => this.save(this.props.edited)}>
                         <SaveIcon />
                     </Fab>
                 )}

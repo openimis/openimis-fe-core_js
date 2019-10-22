@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { injectIntl } from "react-intl";
-import SelectInput from "../components/SelectInput";
+import SelectInput from "./SelectInput";
 import { formatMessage } from "../helpers/i18n";
 
 const INIT_STATE = {

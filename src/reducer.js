@@ -55,11 +55,6 @@ function reducer(
                     detail: !!action.payload.response ? action.payload.response.detail : null,
                 }
             };
-        case 'CORE_USER_HEALTH_FACILITY_RESP':
-            return {
-                ...state,
-                userHealthFacility: parseData(action.payload.data.healthFacilities)[0]
-            }
         case 'CORE_MUTATION_ADD':
             var mutations = [...state.mutations];
             mutations.unshift(action.payload);

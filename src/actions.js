@@ -8,8 +8,8 @@ export function apiHeaders() {
         "Content-Type": "application/json",
     }
     if (process.env.NODE_ENV === 'development') {
-        // headers['remote-user'] = "admin";
-        headers['remote-user'] = "user";
+        headers['remote-user'] = "Admin";
+        // headers['remote-user'] = "user";
     }
     return headers;
 }
@@ -33,7 +33,7 @@ export function graphql(payload, type, params = {}) {
             endpoint: `${baseApiUrl}/graphql`,
             method: "POST",
             headers: apiHeaders(),
-            body: JSON.stringify({ query: payload }),
+            body: JSON.stringify({ query: payload.replace(/\n/g, '').replace(/\r/g, '') }),
             types: [
                 {
                     type: req,

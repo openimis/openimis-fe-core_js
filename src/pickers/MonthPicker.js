@@ -1,8 +1,7 @@
 import React, { Component } from "react";
 import { injectIntl } from 'react-intl';
 import _ from "lodash";
-import ConstantBasedPicker from "./ConstantBasedPicker";
-import { formatMessage } from "../helpers/i18n";
+import ConstantBasedPicker from "../components/ConstantBasedPicker";
 
 class MonthPicker extends Component {
 

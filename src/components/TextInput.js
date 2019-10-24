@@ -30,11 +30,12 @@ class TextInput extends Component {
     }
     render() {
         const { intl, classes, module, label, autofocus = false, inputProps, readOnly = false,
-            startAdornment = null, endAdornment = null, onClick } = this.props;
+            startAdornment = null, endAdornment = null, onClick, required = false } = this.props;
         return (
             <FormControl fullWidth={true}>
                 <TextField
                     disabled={readOnly}
+                    required={required}
                     autoFocus={autofocus}
                     label={!!label && formatMessage(intl, module, label)}
                     InputLabelProps={{

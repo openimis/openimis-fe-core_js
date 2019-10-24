@@ -20,13 +20,14 @@ class SelectInput extends Component {
     }
 
     render() {
-        const { classes, module, label, name, options, value, disabled = false, readOnly = false } = this.props;
+        const { classes, module, label, name, options, value,
+            disabled = false, readOnly = false, required = false } = this.props;
         let valueStr = options.filter(o => o.value === value).map(o => o.label);
         return (
             <Fragment>
                 {!readOnly && (
 
-                    <FormControl fullWidth>
+                    <FormControl required={required} fullWidth>
                         {!!label && (
                             <InputLabel className={classes.label}>
                                 <FormattedMessage module={module} id={label} />
@@ -34,9 +35,10 @@ class SelectInput extends Component {
                         )}
                         <Select
                             readOnly={readOnly}
+
                             inputProps={{
                                 name: name,
-                                id: `${module}-${label}-input`
+                                id: `${module}-${label}-input`,
                             }}
                             value={value || "null"}
                             onChange={this._onChange}

@@ -33,7 +33,7 @@ export function graphql(payload, type, params = {}) {
             endpoint: `${baseApiUrl}/graphql`,
             method: "POST",
             headers: apiHeaders(),
-            body: JSON.stringify({ query: payload.replace(/\n/g, '').replace(/\r/g, '') }),
+            body: JSON.stringify({ query: payload }),
             types: [
                 {
                     type: req,

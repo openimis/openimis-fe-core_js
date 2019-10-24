@@ -50,7 +50,7 @@ class ConstantBasedPicker extends Component {
 
     render() {
         const { module, withLabel = true, label, constants, name,
-            filtered = [], withNull = true, readOnly = false } = this.props;
+            filtered = [], withNull = true, readOnly = false, required = false } = this.props;
         const { value } = this.state;
         const options = withNull ? [{
             value: null,
@@ -69,6 +69,7 @@ class ConstantBasedPicker extends Component {
                 value={value}
                 onChange={this._onChange}
                 readOnly={readOnly}
+                required={required}
             />
         );
     }

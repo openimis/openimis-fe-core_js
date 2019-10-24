@@ -11,12 +11,20 @@ class AmountInput extends Component {
     state = {
         value: ""
     }
+
+    setValue() {
+        var value = this.props.value;
+        if (!value && this.props.value !== 0) {
+            value = "";
+        }
+        this.setState({ value })
+    }
     componentDidMount() {
-        this.setState({ value: this.props.value || "" })
+        this.setValue();
     }
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.value !== this.props.value) {
-            this.setState({ value: this.props.value || "" })
+            this.setValue();
         }
     }
     _onChange = e => {

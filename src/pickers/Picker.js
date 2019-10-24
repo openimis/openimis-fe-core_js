@@ -101,7 +101,7 @@ class Picker extends Component {
     render() {
         const { intl, classes, module, label, dialogTitle, dialogClose, dialogSelect, filter,
             suggestions, suggestionFormatter, count, page, pageSize,
-            onChangeRowsPerPage, onChangePage, value, readOnly = false } = this.props;
+            onChangeRowsPerPage, onChangePage, value, readOnly = false, required = false } = this.props;
         return (
             <FormControl fullWidth>
                 {!readOnly && (
@@ -125,6 +125,7 @@ class Picker extends Component {
                 )}
                 <TextField className={classes.picker}
                     disabled={readOnly}
+                    required={required}
                     label={!!label && formatMessage(intl, module, label)}
                     onClick={e => this.setState({ open: true })}
                     value={suggestionFormatter(value)}

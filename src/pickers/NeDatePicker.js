@@ -63,7 +63,7 @@ class NeDatePicker extends Component {
     }    
 
     render() {
-        const { intl, classes, module, label, readOnly = false, fullWidth = true } = this.props;
+        const { intl, classes, module, label, readOnly = false, required = false, fullWidth = true } = this.props;
         return (
             <FormControl fullWidth={fullWidth}>
                 <Grid container direction="row" alignItems="center" alignContent="center">
@@ -71,6 +71,7 @@ class NeDatePicker extends Component {
                         <TextField
                             value={this.state.strValue}
                             readOnly={readOnly}
+                            required={required}
                             label={!!label ? formatMessage(intl, module, label) : null}
                             ref={el => this.el = el}
                         />

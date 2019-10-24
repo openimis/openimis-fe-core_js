@@ -182,8 +182,8 @@ class AutoSuggestion extends Component {
 
     render() {
         const {
-            classes, label, readOnly = false, disabled = false, placeholder,
-            getSuggestionValue
+            classes, label, readOnly = false, disabled = false, required = false,
+            placeholder, getSuggestionValue
         } = this.props;
         const { suggestions, value } = this.state;
         const inputProps = {
@@ -193,6 +193,7 @@ class AutoSuggestion extends Component {
             label,
             disabled,
             onChange: this.onChange,
+            required,
         };
         let render = this.props.renderSuggestion
         if (!render) {

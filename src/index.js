@@ -13,6 +13,7 @@ import SelectInput from "./components/SelectInput";
 import TextInput from "./components/TextInput";
 import AmountInput from "./components/AmountInput";
 import NumberInput from "./components/NumberInput";
+import FakeInput from "./components/FakeInput";
 import MainMenuContribution from "./components/MainMenuContribution";
 import ProgressOrError from "./components/ProgressOrError";
 import ProxyPage from "./components/ProxyPage";
@@ -69,7 +70,7 @@ export {
   parseData, pageInfo, formatServerError, formatGraphQLError,
   formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount,
   App, AutoSuggestion, Contributions, ControlledField, Error, FatalError, Picker,
-  SelectInput, TextInput, AmountInput, YearPicker, MonthPicker,
+  SelectInput, TextInput, AmountInput, FakeInput, YearPicker, MonthPicker,
   Form, FieldLabel, FormattedMessage, NumberInput,
   MainMenuContribution, ProgressOrError, ProxyPage, PublishedComponent, Table, Searcher,
   ConstantBasedPicker

@@ -10,6 +10,7 @@ import ClearIcon from "@material-ui/icons/Clear";
 import SearchIcon from "@material-ui/icons/Search";
 import FormattedMessage from "../components/FormattedMessage";
 import Table from "../components/Table";
+import FakeInput from "../components/FakeInput";
 
 const styles = theme => ({
     label: {
@@ -84,23 +85,24 @@ class Picker extends Component {
     _onSelect = v => {
         this.setState(
             { open: false },
-            this.props.onSelect(v)
+            e => this.props.onSelect(v)
         )
     }
 
     onClose = e => this.setState({ open: false });
 
     onClear = e => {
-        this.setState({
-            value: ''
-        },
+        this.setState(
+            { value: '' },
             e => this.props.onSelect(null)
         );
     }
 
+    _suggestionFormatter = a => <FakeInput onSelect={e => this._onSelect(a)} value={this.props.suggestionFormatter(a)} />
+
     render() {
         const { intl, classes, module, label, dialogTitle, dialogClose, dialogSelect, filter,
-            suggestions, suggestionFormatter, count, page, pageSize,
+            suggestions, suggestionFormatter, suggestionTxtFormatter, count, page, pageSize,
             onChangeRowsPerPage, onChangePage, value, readOnly = false, required = false } = this.props;
         return (
             <FormControl fullWidth>
@@ -115,7 +117,7 @@ class Picker extends Component {
                         select={dialogSelect}
                         filter={filter}
                         suggestions={suggestions}
-                        suggestionFormatter={suggestionFormatter}
+                        suggestionFormatter={this._suggestionFormatter}
                         count={count}
                         pageSize={pageSize}
                         page={page}

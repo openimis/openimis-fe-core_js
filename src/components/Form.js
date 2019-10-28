@@ -6,7 +6,6 @@ import AddIcon from "@material-ui/icons/Add";
 import SaveIcon from "@material-ui/icons/SaveAlt";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ReplayIcon from "@material-ui/icons/Replay"
-import PrintIcon from "@material-ui/icons/ListAlt";
 import FormattedMessage from "./FormattedMessage";
 import withHistory from "../helpers/history";
 import _ from "lodash";
@@ -47,7 +46,9 @@ class Form extends Component {
     }
 
     render() {
-        const { classes, module, back, add, openDirty = false, save, canSave, reload, print, title, titleParams = [], HeadPanel, Panels, ...others } = this.props;
+        const { classes, module, back, add, openDirty = false,
+            save, canSave, reload, actions = [],
+            title, titleParams = [], HeadPanel, Panels, ...others } = this.props;
         return (
             <Fragment>
                 <form noValidate autoComplete="off">
@@ -82,14 +83,18 @@ class Form extends Component {
                                             </Grid>
                                         </Grid>
                                     )}
-                                    {!!print && !this.state.dirty && (
-                                        <Grid item xs={1} className={classes.paperHeader}>
+                                    {!!actions && !this.state.dirty && (
+                                        <Grid item xs={1}>
                                             <Grid container justify="flex-end">
-                                                <Grid item className={classes.paperHeaderAction}>
-                                                    <IconButton onClick={print}>
-                                                        <PrintIcon />
-                                                    </IconButton>
-                                                </Grid>
+                                                {actions.map((a, idx) =>
+                                                    <Grid item key={`form-action-${idx}`} className={classes.paperHeader}>
+                                                        <Grid item className={classes.paperHeaderAction}>
+                                                            <IconButton onClick={a.doIt}>
+                                                                {a.icon}
+                                                            </IconButton>
+                                                        </Grid>
+                                                    </Grid>
+                                                )}
                                             </Grid>
                                         </Grid>
                                     )}

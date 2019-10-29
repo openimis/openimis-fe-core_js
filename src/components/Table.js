@@ -94,6 +94,10 @@ class Table extends Component {
         while (!!headers && i--) {
             if (modulesManager.hideField(module, headers[i])) {
                 if (!!preHeaders) preHeaders.splice(i, 1);
+                if (!!aligns && aligns.length > i) aligns.splice(i, 1);
+                if (!!headerSpans && headerSpans.length > i) headerSpans.splice(i, 1);
+                if (!!headerActions && headerActions.length > i) headerActions.splice(i, 1);
+                if (!!colSpans && colSpans.length > i) colSpans.splice(i, 1);
                 headers.splice(i, 1);
                 itemFormatters.splice(i, 1);
             }

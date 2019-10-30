@@ -14,10 +14,10 @@ export function apiHeaders() {
     return headers;
 }
 
-export function journalize(mutation) {
+export function journalize(mutation, meta) {
     return dispatch => {
         mutation.status = 0;
-        dispatch({ type: 'CORE_MUTATION_ADD', payload: mutation })
+        dispatch({ type: 'CORE_MUTATION_ADD', payload: mutation, meta })
     }
 }
 
@@ -68,7 +68,7 @@ export function auth() {
 export function fetchMutation(id) {
     const payload = formatPageQuery("mutationLogs",
         [`id: "${id}"`],
-        ["id", "status", "error", "clientMutationLabel", "requestDateTime"]
+        ["id", "status", "error", "clientMutationId", "clientMutationLabel", "requestDateTime"]
     );
     return graphql(payload, 'CORE_MUTATION');
 }

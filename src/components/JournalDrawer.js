@@ -252,7 +252,7 @@ class JournalDrawer extends Component {
                         <List>
                             {this.state.displayedMutations.map((m, idx) => (
                                 <ListItem key={`mutation${idx}`} className={classes.jrnlItem}>
-                                    {m.status === 0 && (
+                                    {m.status == 0 && (
                                         <ListItemIcon className={classes.jrnlIcon}>
                                             <CircularProgress size={theme.jrnlDrawer.iconSize} />
                                         </ListItemIcon>)}

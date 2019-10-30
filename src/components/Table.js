@@ -15,8 +15,12 @@ const styles = theme => ({
     tableTitle: theme.table.title,
     tableHeader: theme.table.header,
     tableRow: theme.table.row,
+    tableLockedRow: theme.table.lockedRow,
+    tableLockedCell: theme.table.lockedCell,
     tableHighlightedRow: theme.table.highlightedRow,
+    tableHighlightedCell: theme.table.highlightedCell,
     tableHighlightedAltRow: theme.table.highlightedAltRow,
+    tableHighlightedAltCell: theme.table.highlightedAltCell,
     tableFooter: theme.table.footer,
     pager: theme.table.pager,
     left: {
@@ -85,9 +89,10 @@ class Table extends Component {
     headerAction = a => <Box flexGrow={1}><Box display="flex" justifyContent="flex-end">{a()}</Box></Box>
 
     render() {
-        const { intl, modulesManager, classes, module, header, preHeaders, headers,
-            aligns = [], headerSpans = [], headerActions = [], colSpans = [],
-            items, itemFormatters, rowHighlighted = null, rowHighlightedAlt = null,
+        const { intl, modulesManager, classes, module, header,
+            preHeaders, headers, aligns = [], headerSpans = [], headerActions = [], colSpans = [],
+            items, itemFormatters,
+            rowHighlighted = null, rowHighlightedAlt = null, rowLocked = null,
             withPagination = false, page, pageSize, count, rowsPerPageOptions = [10, 20, 50],
             onChangeRowsPerPage, onChangePage, onDoubleClick } = this.props;
         var i = !!headers && headers.length
@@ -157,6 +162,11 @@ class Table extends Component {
                                 selected={this.isSelected(i)}
                                 onClick={e => this.select(i)}
                                 onDoubleClick={e => !!onDoubleClick && onDoubleClick(i)}
+                                className={classNames(
+                                    !!rowLocked && rowLocked(i) ? classes.tableLockedRow : null,
+                                    !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedRow : null,
+                                    !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltRow : null,
+                                )}
                             >
                                 {itemFormatters && itemFormatters.map((f, fidx) => {
                                     if (colSpans.length > fidx && !colSpans[fidx]) return null;
@@ -164,8 +174,9 @@ class Table extends Component {
                                         <TableCell
                                             colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
                                             className={classNames(
-                                                !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedRow : null,
-                                                !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltRow : null,
+                                                !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
+                                                !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
+                                                !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
                                                 classes[`${aligns.length > fidx && !!aligns[fidx] ? aligns[fidx] : "left"}`]
                                             )}
                                             key={`v-${iidx}-${fidx}`}>

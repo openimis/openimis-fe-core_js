@@ -40,7 +40,7 @@ class AdDatePicker extends Component {
     }
 
     render() {
-        const { intl, classes, module, label, readOnly = false, required = false, fullWidth = true } = this.props;
+        const { intl, classes, module, label, readOnly = false, required = false, fullWidth = true, minDate = null, maxDate = null } = this.props;
         return (
             <FormControl fullWidth={fullWidth}>
                 <MUIDatePicker
@@ -55,6 +55,8 @@ class AdDatePicker extends Component {
                     id={`${module}-${label}-date-picker`}
                     label={!!label ? formatMessage(intl, module, label) : null}
                     onChange={this.dateChange}
+                    minDate={minDate || ""}
+                    maxDate={maxDate || ""}
                 />
             </FormControl>
         )

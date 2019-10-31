@@ -27,7 +27,7 @@ class Searcher extends Component {
     }
 
     render() {
-        const { classes, module, title = "search.title", filterPane, filters, del } = this.props;
+        const { classes, module, title = "search.title", filterPane, resultsPane = null } = this.props;
         return (
             <Paper>
                 <Grid container className={classes.paperHeader}>
@@ -49,6 +49,16 @@ class Searcher extends Component {
                                 <Divider />
                             </Grid>
                             {filterPane}
+                        </Fragment>
+                    }
+                    {!!resultsPane &&
+                        <Fragment>
+                            <Grid item xs={12} className={classes.paperDivider}>
+                                <Divider />
+                            </Grid>
+                            <Grid item xs={12}>
+                                {resultsPane}
+                            </Grid>
                         </Fragment>
                     }
                 </Grid>

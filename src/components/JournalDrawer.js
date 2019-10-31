@@ -57,19 +57,36 @@ const styles = theme => ({
         paddingLeft: theme.spacing(1),
         color: theme.palette.error.main,
     },
-    errorPopover: {
+    messagePopover: {
         width: 350
+    },
+    groupMessagePanel: {
+        width: "100%",
+        margin: 0,
+        padding: 0,
     },
     errorPanel: {
         width: "100%",
         color: theme.palette.error.main,
+    },
+    messagePanel: {
+        width: "100%",
+        margin: theme.spacing(1)
     }
 });
 
-class ErrorDetail extends Component {
+class Messages extends Component {
 
     state = {
+        groupExpanded: false,
         expanded: false
+    }
+
+    handleGroupChange = panel => (event, newExpanded) => {
+        event.stopPropagation();
+        this.setState({
+            groupExpanded: newExpanded ? panel : false
+        })
     }
 
     handleChange = panel => (event, newExpanded) => {
@@ -79,45 +96,79 @@ class ErrorDetail extends Component {
         })
     }
 
-    formatError = (error, idx) => {
-        if (error.hasOwnProperty("message")) {
+    formatSingleMessage = (message, idx) => {
+        if (message.hasOwnProperty("message")) {
             return (
-                <ExpansionPanel key={`error-${idx}-panel`}
-                    expanded={error.hasOwnProperty("detail") && this.state.expanded === `error-${idx}`}
-                    onChange={this.handleChange(`error-${idx}`)}
+                <ExpansionPanel key={`message-${idx}-panel`}
+                    expanded={message.hasOwnProperty("detail") && this.state.expanded === `message-${idx}`}
+                    onChange={this.handleChange(`message-${idx}`)}
                     className={this.props.classes.errorPanel}
                 >
                     <ExpansionPanelSummary
-                        id={`error-${idx}-header`}
-                        expandIcon={error.hasOwnProperty("detail") && <ExpandMoreIcon />}
+                        id={`message-${idx}-header`}
+                        expandIcon={message.hasOwnProperty("detail") && <ExpandMoreIcon />}
                     >
-                        <Typography variant="caption">{error.hasOwnProperty("code") ? `[${error.code}] ` : ""}{error.message}</Typography>
+                        <Typography variant="caption">{message.hasOwnProperty("code") ? `[${message.code}] ` : ""}{message.message}</Typography>
                     </ExpansionPanelSummary>
-                    {error.hasOwnProperty("detail") &&
+                    {message.hasOwnProperty("detail") &&
                         <ExpansionPanelDetails>
                             <Typography variant="caption">
-                                {error.detail}
+                                {message.detail}
                             </Typography>
                         </ExpansionPanelDetails>
                     }
-                </ExpansionPanel>
+                </ExpansionPanel >
+            )
+        } else if (message.hasOwnProperty("clientMutationLabel")) {
+            return <Grid key={`message-${idx}-panel`} item className={this.props.classes.messagePanel}>{message.clientMutationLabel}</Grid>
+        } else {
+            return <Grid key={`message-${idx}-panel`} item>{JSON.stringify(message)}</Grid>
+        }
+    }
+
+    formatMessage = (message, idx) => {
+        if (message.hasOwnProperty('title')) {
+            console.log("ARRAY!" + JSON.stringify(message.list));
+            return (
+                <ExpansionPanel key={`groupMessage-${idx}-panel`}
+                    expanded={this.state.groupExpanded === `groupMessage-${idx}`}
+                    onChange={this.handleGroupChange(`groupMessage-${idx}`)}
+                    className={this.props.classes.groupMessagePanel}
+                >
+                    <ExpansionPanelSummary
+                        id={`groupMessage-${idx}-header`}
+                        expandIcon={<ExpandMoreIcon />}
+                    >
+                        <Typography variant="caption">{message.title}</Typography>
+                    </ExpansionPanelSummary>
+                    <ExpansionPanelDetails className={this.props.classes.groupMessagePanel}>
+                        <Grid container spacing={0}>
+                            {message.list.map((m, i) => (
+                                <Grid item xs={12}>
+                                    {this.formatSingleMessage(m, `${idx}.${i}`)}
+                                </Grid>))
+                            }
+                        </Grid>
+                    </ExpansionPanelDetails>
+
+                </ExpansionPanel >
             )
         } else {
-            return <Grid key={`error-${idx}-panel`} item>{JSON.stringify(error)}</Grid>
+            return this.formatSingleMessage(message, idx)
         }
     }
 
     render() {
-        const { classes, anchorEl, onClick, errors } = this.props;
-        if (!errors) return null;
-        let errs = [errors]
+        const { classes, anchorEl, onClick, messages } = this.props;
+        if (!messages) return null;
+        let msgs = [messages]
         try {
-            errs = JSON.parse(errors);
-            if (!Array.isArray(errs)) {
-                errs = [errs]
+            msgs = JSON.parse(messages);
+            if (!Array.isArray(msgs)) {
+                msgs = [msgs]
             }
         } catch (err) {
-            //let's keep the raw errors then
+            //let's keep the raw message then
         }
         return (
             <ClickAwayListener onClickAway={onClick}>
@@ -133,10 +184,10 @@ class ErrorDetail extends Component {
                         horizontal: 'right',
                     }}
                     onClick={onClick}
-                    PaperProps={{ className: classes.errorPopover }}
+                    PaperProps={{ className: classes.messagePopover }}
                 >
                     <Grid container>
-                        {errs.map((error, idx) => this.formatError(error, idx))}
+                        {msgs.map((msg, idx) => this.formatMessage(msg, idx))}
                     </Grid>
                 </Popover>
             </ClickAwayListener>
@@ -144,7 +195,7 @@ class ErrorDetail extends Component {
     }
 }
 
-const StyledErrorDetail = withTheme(withStyles(styles)(ErrorDetail));
+const StyledMessages = withTheme(withStyles(styles)(Messages));
 
 class JournalDrawer extends Component {
 
@@ -155,7 +206,7 @@ class JournalDrawer extends Component {
             afterCursor: null,
             hasNextPage: false,
             displayedMutations: [],
-            errorAnchor: null,
+            messagesAnchor: null,
         }
     }
 
@@ -202,17 +253,17 @@ class JournalDrawer extends Component {
         this.props.fetchHistoricalMutations(this.state.pageSize, this.state.afterCursor);
     }
 
-    showError = (e, m) => {
+    showMessages = (e, m) => {
         this.setState({
-            errorAnchor: e.currentTarget,
-            errors: m.error
+            messagesAnchor: e.currentTarget,
+            messages: m,
         })
     }
 
-    hideError = e => {
+    hideMessages = e => {
         this.setState({
-            errorAnchor: null,
-            errors: null,
+            messagesAnchor: null,
+            messages: null,
         })
     }
 
@@ -221,10 +272,11 @@ class JournalDrawer extends Component {
         return (
             <ClickAwayListener onClickAway={e => open && handleDrawer()}>
                 <nav className={classes.drawer}>
-                    <StyledErrorDetail
-                        anchorEl={this.state.errorAnchor}
-                        errors={this.state.errors}
-                        onClick={this.hideError}
+                    <StyledMessages
+                        anchorEl={this.state.messagesAnchor}
+                        messages={this.state.messages}
+                        error={this.state.Err}
+                        onClick={this.hideMessages}
                     />
                     <Drawer
                         variant="permanent"
@@ -259,12 +311,14 @@ class JournalDrawer extends Component {
                                     {m.status === 1 && (
                                         <ListItemIcon
                                             className={classes.jrnlErrorIcon}
-                                            onClick={e => this.showError(e, m)}
+                                            onClick={e => this.showMessages(e, m.error)}
                                         >
                                             <ErrorIcon />
                                         </ListItemIcon>)}
                                     {m.status === 2 && (
-                                        <ListItemIcon className={classes.jrnlIcon}>
+                                        <ListItemIcon
+                                            className={classes.jrnlIcon}
+                                            onClick={e => this.showMessages(e, m)}>
                                             <CheckIcon />
                                         </ListItemIcon>)}
                                     <ListItemText

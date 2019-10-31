@@ -23,7 +23,7 @@ class AdDatePicker extends Component {
     state = { value: null }
 
     componentDidMount() {
-        this.setState({ value: this.props.value || null})
+        this.setState({ value: this.props.value || null })
     }
 
     componentDidUpdate(prevState, prevProps, snapshot) {
@@ -41,23 +41,72 @@ class AdDatePicker extends Component {
 
     render() {
         const { intl, classes, module, label, readOnly = false, required = false, fullWidth = true, minDate = null, maxDate = null } = this.props;
+        //bug in MUIDatePicker!!
+        let Picker = null
+        if (!!minDate && !!maxDate) {
+            Picker = <MUIDatePicker
+                format="YYYY-MM-DD"
+                disabled={readOnly}
+                required={required}
+                clearable
+                value={this.state.value}
+                InputLabelProps={{
+                    className: classes.label
+                }}
+                id={`${module}-${label}-date-picker`}
+                label={!!label ? formatMessage(intl, module, label) : null}
+                onChange={this.dateChange}
+                minDate={minDate}
+                maxDate={maxDate}
+            />
+        } else if (!!minDate) {
+            Picker = <MUIDatePicker
+                format="YYYY-MM-DD"
+                disabled={readOnly}
+                required={required}
+                clearable
+                value={this.state.value}
+                InputLabelProps={{
+                    className: classes.label
+                }}
+                id={`${module}-${label}-date-picker`}
+                label={!!label ? formatMessage(intl, module, label) : null}
+                onChange={this.dateChange}
+                minDate={minDate}
+            />
+        } else if (!!maxDate) {
+            Picker = <MUIDatePicker
+                format="YYYY-MM-DD"
+                disabled={readOnly}
+                required={required}
+                clearable
+                value={this.state.value}
+                InputLabelProps={{
+                    className: classes.label
+                }}
+                id={`${module}-${label}-date-picker`}
+                label={!!label ? formatMessage(intl, module, label) : null}
+                onChange={this.dateChange}
+                maxDate={maxDate}           
+                />
+        } else {
+            Picker = <MUIDatePicker
+                format="YYYY-MM-DD"
+                disabled={readOnly}
+                required={required}
+                clearable
+                value={this.state.value}
+                InputLabelProps={{
+                    className: classes.label
+                }}
+                id={`${module}-${label}-date-picker`}
+                label={!!label ? formatMessage(intl, module, label) : null}
+                onChange={this.dateChange}
+                />            
+        }
         return (
             <FormControl fullWidth={fullWidth}>
-                <MUIDatePicker
-                    format="YYYY-MM-DD"
-                    disabled={readOnly}
-                    required={required}
-                    clearable
-                    value={this.state.value}
-                    InputLabelProps={{
-                        className: classes.label
-                    }}
-                    id={`${module}-${label}-date-picker`}
-                    label={!!label ? formatMessage(intl, module, label) : null}
-                    onChange={this.dateChange}
-                    minDate={minDate || ""}
-                    maxDate={maxDate || ""}
-                />
+                {Picker}
             </FormControl>
         )
     }

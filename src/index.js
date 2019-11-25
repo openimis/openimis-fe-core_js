@@ -6,6 +6,7 @@ import Contributions from "./components/Contributions";
 import ControlledField from "./components/ControlledField";
 import Error from "./components/Error";
 import FatalError from "./components/FatalError";
+import AlertForwarder from "./components/AlertForwarder";
 import FieldLabel from "./components/FieldLabel";
 import Form from "./components/Form";
 import FormattedMessage from "./components/FormattedMessage";
@@ -69,7 +70,8 @@ export {
   dispatchMutationReq, dispatchMutationResp, dispatchMutationErr,
   parseData, pageInfo, formatServerError, formatGraphQLError,
   formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount,
-  App, AutoSuggestion, Contributions, ControlledField, Error, FatalError, Picker,
+  App, AutoSuggestion, Contributions, ControlledField, Picker,
+  Error, FatalError, AlertForwarder,
   SelectInput, TextInput, AmountInput, FakeInput, YearPicker, MonthPicker,
   Form, FieldLabel, FormattedMessage, NumberInput,
   MainMenuContribution, ProgressOrError, ProxyPage, PublishedComponent, Table, Searcher,

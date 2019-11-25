@@ -5,7 +5,6 @@ import { Fab, Grid, Paper, IconButton, Typography, Divider } from "@material-ui/
 import AddIcon from "@material-ui/icons/Add";
 import SaveIcon from "@material-ui/icons/SaveAlt";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import ReplayIcon from "@material-ui/icons/Replay"
 import FormattedMessage from "./FormattedMessage";
 import withHistory from "../helpers/history";
 import _ from "lodash";
@@ -47,7 +46,7 @@ class Form extends Component {
 
     render() {
         const { classes, module, back, add, openDirty = false,
-            save, canSave, reload, actions = [],
+            save, canSave, actions = [],
             title, titleParams = [], HeadPanel, Panels, ...others } = this.props;
         return (
             <Fragment>
@@ -72,29 +71,20 @@ class Form extends Component {
                                             )}
                                         </Grid>
                                     </Grid>
-                                    {!!reload && !!this.state.dirty && (
-                                        <Grid item xs={1} className={classes.paperHeader}>
-                                            <Grid container justify="flex-end">
-                                                <Grid item className={classes.paperHeaderAction}>
-                                                    <IconButton onClick={reload}>
-                                                        <ReplayIcon />
-                                                    </IconButton>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
-                                    )}
-                                    {!!actions && !this.state.dirty && (
+                                    {!!actions && (
                                         <Grid item xs={1}>
                                             <Grid container justify="flex-end">
-                                                {actions.map((a, idx) =>
-                                                    <Grid item key={`form-action-${idx}`} className={classes.paperHeader}>
-                                                        <Grid item className={classes.paperHeaderAction}>
+                                                {actions.map((a, idx) => {
+                                                    if (!!a.onlyIfDirty && !this.state.dirty) return null;
+                                                    if (!!a.onlyIfNotDirty && !!this.state.dirty) return null;
+                                                    return (
+                                                        <Grid item key={`form-action-${idx}`} className={classes.paperHeaderAction}>
                                                             <IconButton onClick={a.doIt}>
                                                                 {a.icon}
                                                             </IconButton>
                                                         </Grid>
-                                                    </Grid>
-                                                )}
+                                                    )
+                                                })}
                                             </Grid>
                                         </Grid>
                                     )}

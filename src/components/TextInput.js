@@ -30,7 +30,7 @@ class TextInput extends Component {
     }
     render() {
         const { intl, classes, module, label, autofocus = false, inputProps, readOnly = false,
-            startAdornment = null, endAdornment = null, onClick, required = false } = this.props;
+            startAdornment = null, endAdornment = null, onClick, required = false, error = null } = this.props;
         return (
             <FormControl fullWidth={true}>
                 <TextField
@@ -46,6 +46,8 @@ class TextInput extends Component {
                     onChange={this._onChange}
                     value={this.state.value}
                     onClick={onClick}
+                    error={!!error}
+                    helperText={error}
                 />
             </FormControl>
         )

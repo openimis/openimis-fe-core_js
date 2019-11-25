@@ -5,13 +5,16 @@ import clsx from 'clsx';
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import {
     CircularProgress, ClickAwayListener, List, ListItem, ListItemText, ListItemIcon,
-    Drawer, Divider, IconButton, Grid, Popover, Paper, Typography, ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails
+    Drawer, Divider, IconButton, Grid, Popover, Typography,
+    Collapse,
+    ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails
 } from "@material-ui/core";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import MoreIcon from "@material-ui/icons/KeyboardArrowDown";
 import CheckIcon from "@material-ui/icons/CheckCircleOutline";
 import ErrorIcon from "@material-ui/icons/ErrorOutline";
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { fetchMutation, fetchHistoricalMutations } from "../actions";
 import withModulesManager from "../helpers/modules";
@@ -45,8 +48,9 @@ const styles = theme => ({
             width: theme.spacing(9) + 1,
         },
     },
-    jrnlItem: {
-    },
+    jrnlItem: theme.jrnlDrawer.item,
+    jrnlItemDetail: theme.jrnlDrawer.itemDetail,
+    jrnlItemDetailText: theme.jrnlDrawer.itemDetailText,
     jrnlIcon: {
         paddingLeft: theme.spacing(1),
     },
@@ -79,7 +83,7 @@ class Messages extends Component {
 
     state = {
         groupExpanded: false,
-        expanded: false
+        expanded: false,
     }
 
     handleGroupChange = panel => (event, newExpanded) => {
@@ -128,7 +132,6 @@ class Messages extends Component {
 
     formatMessage = (message, idx) => {
         if (message.hasOwnProperty('title')) {
-            console.log("ARRAY!" + JSON.stringify(message.list));
             return (
                 <ExpansionPanel key={`groupMessage-${idx}-panel`}
                     expanded={this.state.groupExpanded === `groupMessage-${idx}`}
@@ -207,6 +210,7 @@ class JournalDrawer extends Component {
             hasNextPage: false,
             displayedMutations: [],
             messagesAnchor: null,
+            expanded: false,
         }
     }
 
@@ -267,6 +271,13 @@ class JournalDrawer extends Component {
         })
     }
 
+    handleChange = (event, newExpanded) => {
+        event.stopPropagation();
+        this.setState({
+            expanded: newExpanded
+        })
+    }
+
     render() {
         const { theme, classes, open, handleDrawer } = this.props;
         return (
@@ -303,29 +314,48 @@ class JournalDrawer extends Component {
                         <Divider />
                         <List>
                             {this.state.displayedMutations.map((m, idx) => (
-                                <ListItem key={`mutation${idx}`} className={classes.jrnlItem}>
-                                    {m.status == 0 && (
-                                        <ListItemIcon className={classes.jrnlIcon}>
-                                            <CircularProgress size={theme.jrnlDrawer.iconSize} />
-                                        </ListItemIcon>)}
-                                    {m.status === 1 && (
-                                        <ListItemIcon
-                                            className={classes.jrnlErrorIcon}
-                                            onClick={e => this.showMessages(e, m.error)}
-                                        >
-                                            <ErrorIcon />
-                                        </ListItemIcon>)}
-                                    {m.status === 2 && (
-                                        <ListItemIcon
-                                            className={classes.jrnlIcon}
-                                            onClick={e => this.showMessages(e, m)}>
-                                            <CheckIcon />
-                                        </ListItemIcon>)}
-                                    <ListItemText
-                                        className={m.status === 1 ? classes.jrnlErrorItem : classes.jrnlItem}
-                                        primary={m.clientMutationLabel}
-                                        secondary={moment(m.requestDateTime).format("YYYY-MM-DD HH:mm")} />
-                                </ListItem>
+                                <Fragment key={`mutation${idx}`}>
+                                    <ListItem key={`mutation-label${idx}`} className={classes.jrnlItem}>
+                                        {m.status == 0 && (
+                                            <ListItemIcon className={classes.jrnlIcon}>
+                                                <CircularProgress size={theme.jrnlDrawer.iconSize} />
+                                            </ListItemIcon>)}
+                                        {m.status === 1 && (
+                                            <ListItemIcon
+                                                className={classes.jrnlErrorIcon}
+                                                onClick={e => this.showMessages(e, m.error)}
+                                            >
+                                                <ErrorIcon />
+                                            </ListItemIcon>)}
+                                        {m.status === 2 && (
+                                            <ListItemIcon
+                                                className={classes.jrnlIcon}
+                                                onClick={e => this.showMessages(e, m)}>
+                                                <CheckIcon />
+                                            </ListItemIcon>)}
+                                        <ListItemText
+                                            className={m.status === 1 ? classes.jrnlErrorItem : classes.jrnlItem}
+                                            primary={m.clientMutationLabel}
+                                            secondary={moment(m.requestDateTime).format("YYYY-MM-DD HH:mm")}
+                                        />
+                                        {!!m.clientMutationDetails && this.state.expanded === `detail-${idx}` && <IconButton onClick={e => this.handleChange(e, false)}><ExpandLessIcon /></IconButton>}
+                                        {!!m.clientMutationDetails && this.state.expanded !== `detail-${idx}` && <IconButton onClick={e => this.handleChange(e, `detail-${idx}`)}><ExpandMoreIcon /></IconButton>}
+                                    </ListItem>
+                                    {!!m.clientMutationDetails && (
+                                        <Collapse key={`mutation-detail${idx}`} in={!!m.clientMutationDetails && this.state.expanded === `detail-${idx}`} timeout="auto" unmountOnExit>
+                                            <List component="div" disablePadding>
+                                                {JSON.parse(m.clientMutationDetails).map((d, di) =>
+                                                    <ListItemText
+                                                        className={classes.jrnlItemDetail}
+                                                        key={`mdet-${di}`}
+                                                        primary={d}
+                                                        primaryTypographyProps={{class: classes.jrnlItemDetailText}}
+                                                    />
+                                                )}
+                                            </List>
+                                        </Collapse>
+                                    )}
+                                </Fragment>
                             ))}
                             {!!this.state.hasNextPage && (
                                 <ListItem key={`more`} className={classes.jrnlItem}>

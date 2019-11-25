@@ -1,4 +1,5 @@
 import _ from "lodash-uuid";
+import { formatMessage } from "./i18n";
 
 function _entityAndFilters(entity, filters) {
   return `${entity}${!!filters && filters.length ? `(${filters.join(',')})` : ""}`
@@ -47,7 +48,7 @@ export function formatPageQueryWithCount(entity, filters, projections) {
     }`
 }
 
-export function formatMutation(service, input, clientMutationLabel) {
+export function formatMutation(service, input, clientMutationLabel, clientMutationDetails) {
   const clientMutationId = _.uuid();
   const payload = `
     mutation {
@@ -55,6 +56,7 @@ export function formatMutation(service, input, clientMutationLabel) {
         input: {
           clientMutationId: "${clientMutationId}"
           clientMutationLabel: "${clientMutationLabel}"
+          ${!!clientMutationDetails ? `clientMutationDetails: ${JSON.stringify(clientMutationDetails)}` : ""}
           ${input.trim()}
         }
       ) {
@@ -100,6 +102,7 @@ export function dispatchMutationResp(state, service, action) {
 export function dispatchMutationErr(state, action) {
   return {
     ...state,
+    alert: JSON.stringify(action.payload),
   }
 }
 

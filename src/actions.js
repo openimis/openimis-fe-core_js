@@ -68,7 +68,7 @@ export function auth() {
 export function fetchMutation(id) {
     const payload = formatPageQuery("mutationLogs",
         [`id: "${id}"`],
-        ["id", "status", "error", "clientMutationId", "clientMutationLabel", "requestDateTime"]
+        ["id", "status", "error", "clientMutationId", "clientMutationLabel", "clientMutationDetails", "requestDateTime"]
     );
     return graphql(payload, 'CORE_MUTATION');
 }
@@ -81,14 +81,14 @@ export function fetchHistoricalMutations(pageSize, afterCursor) {
     filters.push(`orderBy: "-request_date_time"`);
     const payload = formatPageQuery("mutationLogs",
         filters,
-        ["id", "status", "error", "clientMutationLabel", "requestDateTime"]
+        ["id", "status", "error", "clientMutationLabel", "clientMutationDetails", "requestDateTime"]
     );
     return graphql(payload, 'CORE_HISTORICAL_MUTATIONS');
 }
 
-export function coreAlert(title, message) {
+export function coreAlert(title, message, detail) {
     return dispatch => {
-        dispatch({ type: 'CORE_ALERT', payload: { title, message } })
+        dispatch({ type: 'CORE_ALERT', payload: { title, message, detail } })
     }
 }
 

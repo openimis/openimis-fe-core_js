@@ -9,12 +9,12 @@ class ProxyPage extends Component {
         height: "100vh",
         marginTop: marginTop || "-68px",
         marginBottom: marginBottom || "0px",
-        marginLeft: marginLeft || "-48px",
-        marginRight: marginRight || "-48px"
+        marginLeft: marginLeft || "0px",
+        marginRight: marginRight || "0px",
     }
     return (
       <div>
-        <iframe title={url} src={url} scrolling="no" style={styles} />
+        <iframe title={url} src={url} style={styles} />
       </div>
     );
   }

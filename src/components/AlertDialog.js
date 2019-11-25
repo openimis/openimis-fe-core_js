@@ -8,12 +8,22 @@ import {
     DialogActions,
     DialogContent,
     DialogContentText,
-    DialogTitle
+    DialogTitle,
+    Typography,
+    Collapse
 } from '@material-ui/core';
 import { clearAlert } from "../actions";
 import { formatMessage } from "../helpers/i18n";
 
 class AlertDialog extends Component {
+
+    state = {
+        expanded: false,
+    }
+
+    toggleOpen = () => {
+        this.setState({ expanded: !this.state.expanded })
+    };
 
     handleClose = () => {
         this.props.clearAlert();
@@ -30,7 +40,10 @@ class AlertDialog extends Component {
                     {!!alert && !!alert.title && <DialogTitle>{alert.title}</DialogTitle>}
                     {!!alert && !!alert.message &&
                         <DialogContent>
-                            <DialogContentText>{alert.message}</DialogContentText>
+                            <DialogContentText onClick={this.toggleOpen}>{alert.message}</DialogContentText>
+                            {!!alert.detail && this.state.expanded && (
+                                <Typography>{alert.detail}</Typography>
+                            )}
                         </DialogContent>
                     }
                     <DialogActions>

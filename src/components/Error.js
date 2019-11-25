@@ -22,7 +22,7 @@ function Error(props) {
       {!!error.detail && (
         <Fragment>
           <Divider />
-          <Typography variant="body1" className={classes.errorCode}>{error.detail}</Typography>
+          <Typography variant="body1" className={classes.errorDetail}>{error.detail}</Typography>
         </Fragment>
       )}
     </div>

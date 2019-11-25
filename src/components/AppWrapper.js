@@ -66,7 +66,10 @@ const styles = theme => ({
       display: 'none',
     },
   },
-  toolbar: theme.mixins.toolbar,
+  toolbar: {
+    ...theme.mixins.toolbar,
+    marginTop: theme.spacing(2),
+  },
   drawer: {
     [theme.breakpoints.up('sm')]: {
       width: theme.menu.drawer.width,
@@ -82,9 +85,7 @@ const styles = theme => ({
   },
   content: {
     flexGrow: 1,
-    paddingTop: theme.spacing(3),
-    paddingLeft: theme.spacing(1),
-    paddingRight: theme.jrnlDrawer.close.width,
+    paddingRight: theme.jrnlDrawer.close.width - theme.spacing(1),
     transition: theme.transitions.create("margin", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen

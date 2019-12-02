@@ -18,30 +18,33 @@ const styles = theme => ({
 
 class Searcher extends Component {
 
-    _search = e => {
-        if (!this.props.filterPane) {
-            this.props.open();
-        } else {
-            this.props.refresh()
-        }
-    }
-
     render() {
-        const { classes, module, title = "search.title", filterPane, resultsPane = null } = this.props;
+        const { classes, module, title = "search.title", split= 8, titleStr = null, filterPane, resultsPane = null, refresh, actions } = this.props;
         return (
             <Paper>
                 <Grid container className={classes.paperHeader}>
-                    <Grid item xs={8} className={classes.paperHeaderTitle}>
+                    <Grid item xs={split} className={classes.paperHeaderTitle}>
                         <FormattedMessage module={module} id={title} />
                     </Grid>
-                    <Grid item xs={4}>
-                        <Grid container justify="flex-end">
-                            <Grid item className={classes.paperHeaderAction}>
-                                <IconButton onClick={this._search}>
-                                    <SearchIcon />
-                                </IconButton>
+                    <Grid item xs={12 - split}>
+                        {(!!actions || !!refresh) && (
+                            <Grid container justify="flex-end">
+                                {!!actions && actions.map((a, idx) =>
+                                    <Grid item key={`action-${idx}`} className={classes.paperHeaderAction}>
+                                        <IconButton onClick={a.action}>
+                                            {a.icon}
+                                        </IconButton>
+                                    </Grid>
+                                )}
+                                {!!refresh &&
+                                    <Grid item key={`action-refresh`} className={classes.paperHeaderAction}>
+                                        <IconButton onClick={refresh}>
+                                            <SearchIcon />
+                                        </IconButton>
+                                    </Grid>
+                                }
                             </Grid>
-                        </Grid>
+                        )}
                     </Grid>
                     {!!filterPane &&
                         <Fragment>

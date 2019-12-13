@@ -16,10 +16,10 @@ const styles = theme => ({
     paperDivider: theme.paper.divider,
 })
 
-class Searcher extends Component {
+class SearcherPane extends Component {
 
     render() {
-        const { classes, module, title = "search.title", split= 8, titleStr = null, filterPane, resultsPane = null, refresh, actions } = this.props;
+        const { classes, module, title = "search.title", split= 8, filterPane, resultsPane = null, refresh, actions } = this.props;
         return (
             <Paper>
                 <Grid container className={classes.paperHeader}>
@@ -70,4 +70,4 @@ class Searcher extends Component {
     }
 }
 
-export default withTheme(withStyles(styles)(Searcher));
+export default withTheme(withStyles(styles)(SearcherPane));

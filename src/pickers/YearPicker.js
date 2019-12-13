@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { injectIntl } from "react-intl";
-import SelectInput from "../components/SelectInput";
+import SelectInput from "../components/inputs/SelectInput";
 import { formatMessage } from "../helpers/i18n";
 import _ from "lodash";
 

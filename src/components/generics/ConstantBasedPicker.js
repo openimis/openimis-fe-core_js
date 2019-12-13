@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { injectIntl } from "react-intl";
-import SelectInput from "./SelectInput";
-import { formatMessage } from "../helpers/i18n";
+import SelectInput from "../inputs/SelectInput";
+import { formatMessage } from "../../helpers/i18n";
 
 const INIT_STATE = {
     value: null,

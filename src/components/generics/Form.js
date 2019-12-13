@@ -6,7 +6,7 @@ import AddIcon from "@material-ui/icons/Add";
 import SaveIcon from "@material-ui/icons/SaveAlt";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import FormattedMessage from "./FormattedMessage";
-import withHistory from "../helpers/history";
+import withHistory from "../../helpers/history";
 import _ from "lodash";
 
 const styles = theme => ({
@@ -105,14 +105,12 @@ class Form extends Component {
                     </Grid>
                     {!!Panels && Panels.map((P, idx) => (
                         <Grid key={`form_pannel_${idx}`} item xs={12}>
-                            <Paper className={classes.paper}>
-                                <P
-                                    edited={this.props.edited}
-                                    edited_id={this.props.edited_id}
-                                    {...others}
-                                    onEditedChanged={this.onEditedChanged}
-                                />
-                            </Paper>
+                            <P
+                                edited={this.props.edited}
+                                edited_id={this.props.edited_id}
+                                {...others}
+                                onEditedChanged={this.onEditedChanged}
+                            />
                         </Grid>
                     ))}
 

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
-import withModulesManager from "../helpers/modules";
+import withModulesManager from "../../helpers/modules";
 import _ from "lodash";
 
 class Contributions extends Component {

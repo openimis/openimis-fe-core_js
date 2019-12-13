@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { injectIntl } from 'react-intl';
 import { bindActionCreators } from "redux";
-import { formatMessage } from "../helpers/i18n";
-import { coreAlert } from "../actions";
+import { formatMessage } from "../../helpers/i18n";
+import { coreAlert } from "../../actions";
 
 class AlertForwarder extends Component {
     componentDidUpdate(prevProps, prevState, snapshot) {

@@ -11,9 +11,9 @@ const styles = theme => ({
     }
 })
 
-class Logout extends Component {
+class Help extends Component {
     
-    logout = () => {
+    help = () => {
         this.props.history.push("/Manual/IMIS_manual.pdf");
         window.location.reload();
     }
@@ -21,7 +21,7 @@ class Logout extends Component {
     render() {
         const { classes } = this.props;
         return (
-            <IconButton className={classes.button} onClick={this.logout}>
+            <IconButton className={classes.button} onClick={this.help}>
                 <HelpOutline />
             </IconButton>
         )
@@ -29,4 +29,4 @@ class Logout extends Component {
 
 }
 
-export default withHistory(withStyles(styles)(Logout));
+export default withHistory(withStyles(styles)(Help));

@@ -7,11 +7,11 @@ import { withTheme, withStyles } from "@material-ui/core/styles";
 import withHistory from "../helpers/history";
 import withModulesManager from "../helpers/modules";
 import AppWrapper from "./AppWrapper";
-import FatalError from './FatalError';
+import FatalError from './generics/FatalError';
 import kebabCase from "lodash/kebabCase";
 import { auth } from "../actions";
-import AlertDialog from "./AlertDialog";
-import ConfirmDialog from "./ConfirmDialog";
+import AlertDialog from "./dialogs/AlertDialog";
+import ConfirmDialog from "./dialogs/ConfirmDialog";
 
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";
 export const TRANSLATION_CONTRIBUTION_KEY = "translations";

@@ -6,11 +6,7 @@ class FormattedMessage extends Component {
 
     render() {
         const { intl, module, id, values } = this.props;
-        if (!!intl.messages[`overwrite.${module}.${id}`]) {
-            return <IntlFormattedMessage id={`overwrite.${module}.${id}`} values={values}>
-                {this.props.children}
-            </IntlFormattedMessage>;
-        } else if (!!intl.messages[`${module}.${id}`]) {
+        if (!!intl.messages[`${module}.${id}`]) {
             return <IntlFormattedMessage id={`${module}.${id}`} values={values}>
                 {this.props.children}
             </IntlFormattedMessage>;

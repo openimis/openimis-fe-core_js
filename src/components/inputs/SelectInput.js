@@ -2,7 +2,7 @@ import React, { Component, Fragment } from "react";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { injectIntl } from 'react-intl';
 import { FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
-import FormattedMessage from "./FormattedMessage";
+import FormattedMessage from "../generics/FormattedMessage";
 import TextInput from "./TextInput";
 
 const styles = theme => ({
@@ -15,18 +15,22 @@ class SelectInput extends Component {
 
     _onChange = e => {
         if (this.props.value !== e.target.value) {
-            this.props.onChange(e.target.value)
+            this.props.onChange(JSON.parse(e.target.value))
         }
     }
 
     render() {
         const { classes, module, label, name, options, value,
-            disabled = false, readOnly = false, required = false } = this.props;
-        let valueStr = options.filter(o => o.value === value).map(o => o.label);
+            disabled = false, readOnly = false, required = false,
+        } = this.props;
+        if (!options) return null;
+        let valueStr = null;
+        if (!!readOnly) {
+            valueStr = options.filter(o => JSON.stringify(o.value) === JSON.stringify(value)).map(o => o.label);
+        }
         return (
             <Fragment>
                 {!readOnly && (
-
                     <FormControl required={required} fullWidth>
                         {!!label && (
                             <InputLabel className={classes.label}>
@@ -40,12 +44,12 @@ class SelectInput extends Component {
                                 name: name,
                                 id: `${module}-${label}-input`,
                             }}
-                            value={value || "null"}
+                            value={!!value ? JSON.stringify(value) : "null"}
                             onChange={this._onChange}
                             disabled={disabled}
                         >
                             {!!options && options.map((option, idx) =>
-                                <MenuItem key={`${module}-${name}-option-${idx}`} value={option.value}>
+                                <MenuItem key={`${module}-${name}-option-${idx}`} value={JSON.stringify(option.value)}>
                                     {option.label}
                                 </MenuItem>
                             )}
@@ -54,6 +58,7 @@ class SelectInput extends Component {
                 )}
                 {!!readOnly && (
                     <TextInput
+                        fullWidth={true}
                         module={module}
                         label={label}
                         value={valueStr}

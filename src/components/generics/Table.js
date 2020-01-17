@@ -8,8 +8,8 @@ import {
     Table as MUITable, TableRow, TableHead, TableBody, TableCell, TableFooter, TablePagination
 } from "@material-ui/core";
 import FormattedMessage from "./FormattedMessage";
-import withModulesManager from "../helpers/modules";
-import { formatMessage, formatMessageWithValues } from "../helpers/i18n";
+import withModulesManager from "../../helpers/modules";
+import { formatMessage, formatMessageWithValues } from "../../helpers/i18n";
 
 const styles = theme => ({
     tableTitle: theme.table.title,
@@ -21,6 +21,8 @@ const styles = theme => ({
     tableHighlightedCell: theme.table.highlightedCell,
     tableHighlightedAltRow: theme.table.highlightedAltRow,
     tableHighlightedAltCell: theme.table.highlightedAltCell,
+    tableDisabledRow: theme.table.disabledRow,
+    tableDisabledCell: theme.table.disabledCell,
     tableFooter: theme.table.footer,
     pager: theme.table.pager,
     left: {
@@ -92,7 +94,7 @@ class Table extends Component {
         const { intl, modulesManager, classes, module, header,
             preHeaders, headers, aligns = [], headerSpans = [], headerActions = [], colSpans = [],
             items, itemFormatters,
-            rowHighlighted = null, rowHighlightedAlt = null, rowLocked = null,
+            rowHighlighted = null, rowHighlightedAlt = null, rowDisabled = null, rowLocked = null,
             withPagination = false, page, pageSize, count, rowsPerPageOptions = [10, 20, 50],
             onChangeRowsPerPage, onChangePage, onDoubleClick } = this.props;
         var i = !!headers && headers.length
@@ -166,6 +168,7 @@ class Table extends Component {
                                     !!rowLocked && rowLocked(i) ? classes.tableLockedRow : null,
                                     !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedRow : null,
                                     !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltRow : null,
+                                    !!rowDisabled && rowDisabled(i) ? classes.tableDisabledRow : null,
                                 )}
                             >
                                 {itemFormatters && itemFormatters.map((f, fidx) => {
@@ -177,6 +180,7 @@ class Table extends Component {
                                                 !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
                                                 !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
                                                 !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
+                                                !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
                                                 classes[`${aligns.length > fidx && !!aligns[fidx] ? aligns[fidx] : "left"}`]
                                             )}
                                             key={`v-${iidx}-${fidx}`}>

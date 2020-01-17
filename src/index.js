@@ -1,30 +1,33 @@
 import React from "react";
 import App from "./components/App";
 import KeepLegacyAlive from "./components/KeepLegacyAlive";
-import AutoSuggestion from "./components/AutoSuggestion";
-import Contributions from "./components/Contributions";
-import ControlledField from "./components/ControlledField";
-import Error from "./components/Error";
-import FatalError from "./components/FatalError";
-import AlertForwarder from "./components/AlertForwarder";
-import FieldLabel from "./components/FieldLabel";
-import Form from "./components/Form";
-import FormattedMessage from "./components/FormattedMessage";
-import SelectInput from "./components/SelectInput";
-import TextInput from "./components/TextInput";
-import AmountInput from "./components/AmountInput";
-import NumberInput from "./components/NumberInput";
-import FakeInput from "./components/FakeInput";
-import MainMenuContribution from "./components/MainMenuContribution";
-import ProgressOrError from "./components/ProgressOrError";
-import ProxyPage from "./components/ProxyPage";
-import PublishedComponent from "./components/PublishedComponent";
-import Table from "./components/Table";
-import Searcher from "./components/Searcher";
+import AutoSuggestion from "./components/inputs/AutoSuggestion";
+import Contributions from "./components/generics/Contributions";
+import ControlledField from "./components/generics/ControlledField";
+import Error from "./components/generics/Error";
+import FatalError from "./components/generics/FatalError";
+import AlertForwarder from "./components/generics/AlertForwarder";
+import FieldLabel from "./components/generics/FieldLabel";
+import Form from "./components/generics/Form";
+import FormPanel from "./components/generics/FormPanel";
+import FormattedMessage from "./components/generics/FormattedMessage";
+import SelectInput from "./components/inputs/SelectInput";
+import TextInput from "./components/inputs/TextInput";
+import TextAreaInput from "./components/inputs/TextAreaInput";
+import AmountInput from "./components/inputs/AmountInput";
+import NumberInput from "./components/inputs/NumberInput";
+import FakeInput from "./components/inputs/FakeInput";
+import MainMenuContribution from "./components/generics/MainMenuContribution";
+import ProgressOrError from "./components/generics/ProgressOrError";
+import ProxyPage from "./components/generics/ProxyPage";
+import PublishedComponent from "./components/generics/PublishedComponent";
+import Table from "./components/generics/Table";
+import Searcher from "./components/generics/Searcher";
+import SearcherPane from "./components/generics/SearcherPane";
 import AdDatePicker from "./pickers/AdDatePicker";
 import NeDatePicker from "./pickers/NeDatePicker";
-import Picker from "./pickers/Picker";
-import ConstantBasedPicker from "./components/ConstantBasedPicker";
+import Picker from "./components/generics/Picker";
+import ConstantBasedPicker from "./components/generics/ConstantBasedPicker";
 import YearPicker from "./pickers/YearPicker";
 import MonthPicker from "./pickers/MonthPicker";
 import reducer from "./reducer";
@@ -72,8 +75,9 @@ export {
   formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount,
   App, AutoSuggestion, Contributions, ControlledField, Picker,
   Error, FatalError, AlertForwarder,
-  SelectInput, TextInput, AmountInput, FakeInput, YearPicker, MonthPicker,
-  Form, FieldLabel, FormattedMessage, NumberInput,
-  MainMenuContribution, ProgressOrError, ProxyPage, PublishedComponent, Table, Searcher,
+  SelectInput, TextInput, TextAreaInput, AmountInput, FakeInput, YearPicker, MonthPicker,
+  Form, FormPanel, FieldLabel, FormattedMessage, NumberInput,
+  MainMenuContribution, ProgressOrError, ProxyPage, PublishedComponent, Table,
+  Searcher, SearcherPane,
   ConstantBasedPicker
 };

@@ -215,7 +215,9 @@ class JournalDrawer extends Component {
     }
 
     componentDidMount() {
-        this.props.fetchHistoricalMutations(this.state.pageSize, this.state.afterCursor);
+        if (!this.props.mutations || !this.props.mutations.length) {
+            this.props.fetchHistoricalMutations(this.state.pageSize, this.state.afterCursor);
+        }
         this.setState({
             timeoutId: setInterval(
                 this.checkProcessing,
@@ -349,7 +351,11 @@ class JournalDrawer extends Component {
                                                         className={classes.jrnlItemDetail}
                                                         key={`mdet-${di}`}
                                                         primary={d}
+<<<<<<< HEAD
                                                         primaryTypographyProps={{class: classes.jrnlItemDetailText}}
+=======
+                                                        primaryTypographyProps={{ class: classes.jrnlItemDetailText }}
+>>>>>>> feature/OMT-77
                                                     />
                                                 )}
                                             </List>

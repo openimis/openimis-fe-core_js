@@ -1,5 +1,4 @@
 import _ from "lodash-uuid";
-import { formatMessage } from "./i18n";
 
 function _entityAndFilters(entity, filters) {
   return `${entity}${!!filters && filters.length ? `(${filters.join(',')})` : ""}`

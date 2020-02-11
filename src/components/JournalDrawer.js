@@ -227,7 +227,8 @@ class JournalDrawer extends Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if (prevProps.fetchingHistoricalMutations && !this.props.fetchingHistoricalMutations) {
+        if ((!this.state.displayedMutations.length &&  !!this.props.mutationsPageInfo) ||
+            (prevProps.fetchingHistoricalMutations && !this.props.fetchingHistoricalMutations)) {
             this.setState({
                 displayedMutations: [...this.state.displayedMutations, ...this.props.mutations],
                 afterCursor: this.props.mutationsPageInfo.endCursor,

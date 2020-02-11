@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from "react";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { injectIntl } from 'react-intl';
-import { Fab, Grid, Paper, IconButton, Typography, Divider } from "@material-ui/core";
+import { Fab, Grid, Paper, IconButton, Typography, Divider, Tooltip } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import SaveIcon from "@material-ui/icons/SaveAlt";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
@@ -47,6 +47,7 @@ class Form extends Component {
     render() {
         const { classes, module, back, add, openDirty = false,
             save, canSave, actions = [],
+            fab = null, fabAction = null, fabTooltip = null,
             title, titleParams = [], HeadPanel, Panels, ...others } = this.props;
         return (
             <Fragment>
@@ -55,7 +56,7 @@ class Form extends Component {
                         <Grid item xs={12}>
                             <Paper className={classes.paper}>
                                 <Grid container alignItems="center" direction="row">
-                                    <Grid item xs={11}>
+                                    <Grid item xs={8}>
                                         <Grid container alignItems="center">
                                             {!!back && (
                                                 <Grid item className={classes.paperHeader}>
@@ -72,7 +73,7 @@ class Form extends Component {
                                         </Grid>
                                     </Grid>
                                     {!!actions && (
-                                        <Grid item xs={1}>
+                                        <Grid item xs={4}>
                                             <Grid container justify="flex-end">
                                                 {actions.map((a, idx) => {
                                                     if (!!a.onlyIfDirty && !this.state.dirty) return null;
@@ -128,6 +129,24 @@ class Form extends Component {
                         className={classes.fab}
                         onClick={e => this.save(this.props.edited)}>
                         <SaveIcon />
+                    </Fab>
+                )}
+                { !this.state.dirty && !!fab && !!fabTooltip && (
+                    <Tooltip title={fabTooltip}>
+                        <Fab color="primary"
+                            disabled={!!this.state.saving || (!!canSave && !canSave())}
+                            className={classes.fab}
+                            onClick={e => fabAction(this.props.edited)}>
+                            {fab}
+                        </Fab>
+                    </Tooltip>
+                )}
+                { !this.state.dirty && !!fab && !fabTooltip && (
+                    <Fab color="primary"
+                        disabled={!!this.state.saving || (!!canSave && !canSave())}
+                        className={classes.fab}
+                        onClick={e => fabAction(e)}>
+                        {fab}
                     </Fab>
                 )}
             </Fragment>

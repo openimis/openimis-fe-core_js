@@ -67,7 +67,6 @@ class AutoSuggestion extends Component {
     state = INIT_STATE;
 
     _allItems = () => {
-
         var items = [...(this.props.items || [])]
         items.unshift(...(this.props.preValues || []))
         return items
@@ -209,7 +208,7 @@ class AutoSuggestion extends Component {
                 />
             )
         }
-        return (
+        return (            
             <Autosuggest
                 theme={{
                     container: classes.suggestionContainer,

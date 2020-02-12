@@ -52,6 +52,7 @@ class ConstantBasedPicker extends Component {
         const { module, withLabel = true, label, constants, name,
             filtered = [], withNull = true, readOnly = false, required = false } = this.props;
         const { value } = this.state;
+        if (!withNull && value === null) return null;
         const options = withNull ? [{
             value: null,
             label: this._formatValue(null)

@@ -20,7 +20,7 @@ class SelectInput extends Component {
     }
 
     render() {
-        const { classes, module, label, name, options, value,
+        const { classes, module, label, strLabel = null, name, options, value,
             disabled = false, readOnly = false, required = false,
         } = this.props;
         if (!options) return null;
@@ -37,12 +37,16 @@ class SelectInput extends Component {
                                 <FormattedMessage module={module} id={label} />
                             </InputLabel>
                         )}
+                        {!!strLabel && (
+                            <InputLabel className={classes.label}>
+                                {strLabel}
+                            </InputLabel>
+                        )}
                         <Select
                             readOnly={readOnly}
-
                             inputProps={{
                                 name: name,
-                                id: `${module}-${label}-input`,
+                                id: `${module}-${label || strLabel}-input`,
                             }}
                             value={!!value ? JSON.stringify(value) : "null"}
                             onChange={this._onChange}

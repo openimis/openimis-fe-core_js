@@ -53,7 +53,6 @@ class AdDatePicker extends Component {
                 InputLabelProps={{
                     className: classes.label
                 }}
-                id={`${module}-${label}-date-picker`}
                 label={!!label ? formatMessage(intl, module, label) : null}
                 onChange={this.dateChange}
                 minDate={minDate}
@@ -69,7 +68,6 @@ class AdDatePicker extends Component {
                 InputLabelProps={{
                     className: classes.label
                 }}
-                id={`${module}-${label}-date-picker`}
                 label={!!label ? formatMessage(intl, module, label) : null}
                 onChange={this.dateChange}
                 minDate={minDate}
@@ -84,7 +82,6 @@ class AdDatePicker extends Component {
                 InputLabelProps={{
                     className: classes.label
                 }}
-                id={`${module}-${label}-date-picker`}
                 label={!!label ? formatMessage(intl, module, label) : null}
                 onChange={this.dateChange}
                 maxDate={maxDate}           
@@ -99,7 +96,6 @@ class AdDatePicker extends Component {
                 InputLabelProps={{
                     className: classes.label
                 }}
-                id={`${module}-${label}-date-picker`}
                 label={!!label ? formatMessage(intl, module, label) : null}
                 onChange={this.dateChange}
                 />            

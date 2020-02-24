@@ -223,6 +223,7 @@ class JournalDrawer extends Component {
                 this.checkProcessing,
                 this.props.modulesManager.getRef("core.JournalDrawer.pollInterval")
             ),
+            displayedMutations: [...this.props.mutations],
         });
     }
 

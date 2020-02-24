@@ -6,6 +6,7 @@ function reducer(
         user: null,
         fatalError: null,
         fetchingHistoricalMutations: false,
+        fetchedHistoricalMutations: false,
         fetchingMutations: false,
         mutations: [],
     },
@@ -100,13 +101,15 @@ function reducer(
             return {
                 ...state,
                 fetchingHistoricalMutations: false,
+                fetchedHistoricalMutations: true,
                 mutations: parseData(action.payload.data.mutationLogs).map(m => { return { ...m, id: decodeId(m.id) } }),
                 mutationsPageInfo: pageInfo(action.payload.data.mutationLogs),
             }
         case 'CORE_HISTORICAL_MUTATIONS_ERR':
             return {
                 ...state,
-                fetchingHistoricalMutations: false
+                fetchingHistoricalMutations: false,
+                fetchedHistoricalMutations: true,
             }
         default:
             return state;

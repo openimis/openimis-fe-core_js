@@ -11,7 +11,6 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import { Divider, List, IconButton, MenuList, MenuItem, Button, Popper, Grow, Paper, ClickAwayListener } from "@material-ui/core";
 import { _historyPush } from '../../helpers/history';
-import _ from "lodash-uuid";
 
 const styles = theme => ({
   panel: {
@@ -103,8 +102,7 @@ class MainMenuContribution extends Component {
   handleMenuSelect = (e, route) => {
     e.stopPropagation();
     e.preventDefault();
-    //rnd to enforce page reload even when selecting the same menu item (necessary for proxy pages cfr. OMT-66)
-    this.redirect(`${route}?rnd=${_.uuid()}`);
+    this.redirect(route);
   }
 
   redirect(route) {

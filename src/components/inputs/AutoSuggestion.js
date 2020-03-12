@@ -90,6 +90,11 @@ class AutoSuggestion extends Component {
                 reset: this.state.reset + 1,
             })
         }
+        if (!!this.props.items) {
+            this.setState({
+                suggestions: this._truncate(this._allItems())
+            })
+        }
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {

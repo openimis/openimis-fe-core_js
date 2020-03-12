@@ -2,8 +2,11 @@ import React, { Component } from "react";
 import Autosuggest from "react-autosuggest";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { FormControl, IconButton, InputAdornment, TextField } from "@material-ui/core";
+import SelectInput from "./SelectInput";
 import ClearIcon from "@material-ui/icons/Clear";
 import SearchIcon from "@material-ui/icons/Search";
+import withModulesManager from "../../helpers/modules";
+import { injectIntl } from 'react-intl';
 import _ from "lodash";
 
 const styles = theme => ({
@@ -62,7 +65,14 @@ const INIT_STATE = {
     selected: null,
 }
 
+const MORE = "__THE_MORE_FAKE_OPTION__";
+
 class AutoSuggestion extends Component {
+
+    constructor(props) {
+        super(props);
+        this.limitDisplay = props.modulesManager.getConf("fe-core", "AutoSuggestion.limitDisplay", 10);
+    }
 
     state = INIT_STATE;
 
@@ -76,6 +86,7 @@ class AutoSuggestion extends Component {
         if (!!this.props.value) {
             this.setState({
                 value: this.props.getSuggestionValue(this.props.value),
+                selected: this.props.getSuggestionValue(this.props.value),
                 reset: this.state.reset + 1,
             })
         }
@@ -84,18 +95,20 @@ class AutoSuggestion extends Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.reset !== this.props.reset) {
             this.setState({
-                suggestions: this._allItems(),
-                value: this.props.getSuggestionValue(this.props.value)
+                suggestions: this._truncate(this._allItems()),
+                value: this.props.getSuggestionValue(this.props.value),
+                selected: this.props.getSuggestionValue(this.props.value),
             });
         } else {
             if (!_.isEqual(prevProps.items, this.props.items)) {
                 this.setState({
-                    suggestions: this._allItems()
+                    suggestions: this._truncate(this._allItems())
                 })
             }
             if (!_.isEqual(prevProps.value, this.props.value)) {
                 this.setState({
-                    value: this.props.getSuggestionValue(this.props.value)
+                    value: this.props.getSuggestionValue(this.props.value),
+                    selected: this.props.getSuggestionValue(this.props.value),
                 })
             }
         }
@@ -103,7 +116,8 @@ class AutoSuggestion extends Component {
 
     onClear = e => {
         this.setState({
-            value: ''
+            value: '',
+            selected: null
         },
             e => this.props.onSuggestionSelected(null)
         );
@@ -131,6 +145,14 @@ class AutoSuggestion extends Component {
         });
     };
 
+    _truncate = (suggestions) => {
+        if (this.limitDisplay > 0 && suggestions.length > this.limitDisplay) {
+            suggestions = suggestions.slice(0, this.limitDisplay);
+            suggestions.push(MORE);
+        }
+        return suggestions
+    }
+
     _getSuggestions = (value) => {
         if (!value || !value.trim()) return [];
         const escapedValue = escapeRegexCharacters(value.trim());
@@ -143,7 +165,7 @@ class AutoSuggestion extends Component {
         if (!lookup) {
             lookup = i => this.props.getSuggestionValue(i);
         }
-        return this._allItems().filter(i => regex.test(lookup(i)));
+        return this._truncate(this._allItems().filter(i => regex.test(lookup(i))));
     }
 
     renderInputComponent = (inputProps) => {
@@ -179,9 +201,68 @@ class AutoSuggestion extends Component {
         )
     }
 
-    render() {
+    _onOptionSelected = (o) => {
+        this.setState(
+            { selected: o },
+            e => this.props.onSuggestionSelected(o)
+        )
+    }
+
+    _render = (s) => {
+        let styleCover = {
+            marginTop: "-10px",
+            marginBottom: "-10px",
+            marginLeft: "-20px",
+            marginRight: "-20px",
+        }
+        let styleRevert = {
+            marginTop: "10px",
+            marginBottom: "10px",
+            marginLeft: "20px",
+            marginRight: "20px",
+        }
+
+        if (s === MORE) {
+            return (
+                <div
+                    style={styleCover}
+                    onClick={(e) => e.stopPropagation()}>
+                    <span
+                        style={styleRevert}
+                        onClick={(e) => e.stopPropagation()}>
+                        {this.props.intl.formatMessage({ id: "autosuggest.more" })}
+                    </span>
+                </div>
+            )
+        }
+        let render = this.props.renderSuggestion
+        if (!render) {
+            render = s => <span>{this.props.getSuggestionValue(s)}</span>
+        }
+        return render(s);
+    }
+
+    renderSelect = () => {
         const {
-            classes, label, readOnly = false, disabled = false, required = false,
+            module, withNull, nullLabel, label, required = false, selectLabel } = this.props;
+        const { suggestions, selected } = this.state;
+        var options = suggestions.map(r => ({ value: r, label: selectLabel(r) }));
+        if (withNull) {
+            options.unshift({ value: null, label: nullLabel })
+        }
+        return <SelectInput
+            module={module}
+            strLabel={label}
+            options={options}
+            value={selected}
+            onChange={this._onOptionSelected}
+            required={required}
+        />
+    }
+
+    renderAutoselect = () => {
+        const {
+            classes, label, disabled = false, required = false,
             placeholder, getSuggestionValue
         } = this.props;
         const { suggestions, value } = this.state;
@@ -194,21 +275,7 @@ class AutoSuggestion extends Component {
             onChange: this.onChange,
             required,
         };
-        let render = this.props.renderSuggestion
-        if (!render) {
-            render = s => <span>{getSuggestionValue(s)}</span>
-        }
-        if (!!readOnly) {
-            return (
-                <TextField
-                    label={label}
-                    className={classes.textField}
-                    disabled
-                    value={value}
-                />
-            )
-        }
-        return (            
+        return (
             <Autosuggest
                 theme={{
                     container: classes.suggestionContainer,
@@ -224,11 +291,37 @@ class AutoSuggestion extends Component {
                 onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
                 onSuggestionsClearRequested={this.onSuggestionsClearRequested}
                 getSuggestionValue={getSuggestionValue}
-                renderSuggestion={render}
+                renderSuggestion={this._render}
                 shouldRenderSuggestions={this._shouldRenderSuggestions}
             />
         )
     }
+
+    render() {
+        const {
+            classes, label, readOnly = false, selectThreshold = null
+        } = this.props;
+        const { value, suggestions } = this.state;
+        if (!!readOnly) {
+            return (
+                <TextField
+                    label={label}
+                    className={classes.textField}
+                    disabled
+                    value={value}
+                />
+            )
+        }
+        if (!value && !!selectThreshold &&
+            !!suggestions &&
+            suggestions.length > 0 &&
+            suggestions.length < selectThreshold
+        ) {
+            return this.renderSelect();
+        } else {
+            return this.renderAutoselect();
+        }
+    }
 }
 
-export default withTheme(withStyles(styles)(AutoSuggestion));
+export default injectIntl(withModulesManager(withTheme(withStyles(styles)(AutoSuggestion))));

@@ -87,7 +87,7 @@ class AutoSuggestion extends Component {
             this.setState({
                 value: this.props.getSuggestionValue(this.props.value),
                 selected: this.props.getSuggestionValue(this.props.value),
-                reset: this.state.reset + 1,
+                suggestions: this._truncate(this._allItems())
             })
         }
         if (!!this.props.items) {
@@ -105,15 +105,15 @@ class AutoSuggestion extends Component {
                 selected: this.props.getSuggestionValue(this.props.value),
             });
         } else {
-            if (!_.isEqual(prevProps.items, this.props.items)) {
-                this.setState({
-                    suggestions: this._truncate(this._allItems())
-                })
-            }
             if (!_.isEqual(prevProps.value, this.props.value)) {
                 this.setState({
+                    suggestions: [],
                     value: this.props.getSuggestionValue(this.props.value),
                     selected: this.props.getSuggestionValue(this.props.value),
+                })
+            } else if (!_.isEqual(prevProps.items, this.props.items)) {
+                this.setState({
+                    suggestions: this._truncate(this._allItems())
                 })
             }
         }
@@ -249,9 +249,9 @@ class AutoSuggestion extends Component {
 
     renderSelect = () => {
         const {
-            module, withNull, nullLabel, label, required = false, selectLabel } = this.props;
+            module, withNull, nullLabel, label, required = false, getSuggestionValue } = this.props;
         const { suggestions, selected } = this.state;
-        var options = suggestions.map(r => ({ value: r, label: selectLabel(r) }));
+        var options = suggestions.map(r => ({ value: r, label: getSuggestionValue(r) }));
         if (withNull) {
             options.unshift({ value: null, label: nullLabel })
         }

@@ -107,7 +107,7 @@ class AutoSuggestion extends Component {
         } else {
             if (!_.isEqual(prevProps.value, this.props.value)) {
                 this.setState({
-                    suggestions: [],
+                    suggestions: !this.props.value ? this._truncate(this._allItems()) : [],
                     value: this.props.getSuggestionValue(this.props.value),
                     selected: this.props.getSuggestionValue(this.props.value),
                 })

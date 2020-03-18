@@ -40,7 +40,7 @@ class AdDatePicker extends Component {
     }
 
     render() {
-        const { intl, classes, module, label, readOnly = false, required = false, fullWidth = true, minDate = null, maxDate = null } = this.props;
+        const { intl, classes, module, label, readOnly = false, required = false, fullWidth = true, minDate = null, maxDate = null, reset } = this.props;
         //bug in MUIDatePicker!!
         let Picker = null
         if (!!minDate && !!maxDate) {
@@ -57,6 +57,7 @@ class AdDatePicker extends Component {
                 onChange={this.dateChange}
                 minDate={minDate}
                 maxDate={maxDate}
+                reset={reset}
             />
         } else if (!!minDate) {
             Picker = <MUIDatePicker
@@ -71,6 +72,7 @@ class AdDatePicker extends Component {
                 label={!!label ? formatMessage(intl, module, label) : null}
                 onChange={this.dateChange}
                 minDate={minDate}
+                reset={reset}
             />
         } else if (!!maxDate) {
             Picker = <MUIDatePicker
@@ -84,8 +86,9 @@ class AdDatePicker extends Component {
                 }}
                 label={!!label ? formatMessage(intl, module, label) : null}
                 onChange={this.dateChange}
-                maxDate={maxDate}           
-                />
+                maxDate={maxDate}
+                reset={reset}
+            />
         } else {
             Picker = <MUIDatePicker
                 format="YYYY-MM-DD"
@@ -98,7 +101,8 @@ class AdDatePicker extends Component {
                 }}
                 label={!!label ? formatMessage(intl, module, label) : null}
                 onChange={this.dateChange}
-                />            
+                reset={reset}
+            />
         }
         return (
             <FormControl fullWidth={fullWidth}>

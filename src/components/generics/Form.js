@@ -22,10 +22,19 @@ class Form extends Component {
         saving: false,
     }
 
+    constructor(props) {
+        super(props)
+        if (!!props.forcedDirty) {
+            this.setState({ dirty: true })
+        }
+    }
+
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.reset !== this.props.reset ||
             prevProps.edited_id !== this.props.edited_id) {
             this.setState({ dirty: false, saving: false });
+        } else if (!this.state.dirty && !!this.props.forcedDirty) {
+            this.setState({ dirty: true })
         } else if (prevProps.update !== this.props.update) {
             this.setState({ saving: false });
         }
@@ -131,7 +140,7 @@ class Form extends Component {
                         <SaveIcon />
                     </Fab>
                 )}
-                { !this.state.dirty && !!fab && !!fabTooltip && (
+                {!this.state.dirty && !!fab && !!fabTooltip && (
                     <Tooltip title={fabTooltip}>
                         <Fab color="primary"
                             disabled={!!this.state.saving || (!!canSave && !canSave())}
@@ -141,7 +150,7 @@ class Form extends Component {
                         </Fab>
                     </Tooltip>
                 )}
-                { !this.state.dirty && !!fab && !fabTooltip && (
+                {!this.state.dirty && !!fab && !fabTooltip && (
                     <Fab color="primary"
                         disabled={!!this.state.saving || (!!canSave && !canSave())}
                         className={classes.fab}

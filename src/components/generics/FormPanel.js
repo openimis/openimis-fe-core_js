@@ -25,18 +25,14 @@ class FormPanel extends Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         this._componentDidUpdate(prevProps, prevState, snapshot);
-    }    
+    }
 
     updateAttributes = updates => {
-        let data = { ...this.state.data };
-        updates.forEach(update => {
-            data[update.attr] = update.v;
-            data[update.attr + "_str"] = update.s;
-        });
+        let data = { ...this.state.data, ...updates };
         this.props.onEditedChanged(data);
     }
 
-    updateAttribute = (attr, v, s) => this.updateAttributes([{ attr, v, s }])    
+    updateAttribute = (attr, v) => this.updateAttributes({ [attr]: v })
 
 }
 

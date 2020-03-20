@@ -17,10 +17,14 @@ function withHistory(C) {
 
 export default withHistory;
 
-export function _historyPush(history, route) {
-    history.push(`${process.env.PUBLIC_URL || ""}${route}`);
+export function _historyPush(history, route, newTab) {
+    if (!!newTab) {
+        window.open(`${process.env.PUBLIC_URL || ""}${route}`);
+    } else {
+        history.push(`${process.env.PUBLIC_URL || ""}${route}`);
+    }
 }
 
-export function historyPush(mm, history, route, params) {
-    _historyPush(history, `/${mm.getRef(route)}${!!params ? "/" + params.join("/"): ""}`);
+export function historyPush(mm, history, route, params, newTab = false) {
+    _historyPush(history, `/${mm.getRef(route)}${!!params ? "/" + params.join("/"): ""}`, newTab);
 }

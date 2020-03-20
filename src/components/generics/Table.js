@@ -12,9 +12,11 @@ import withModulesManager from "../../helpers/modules";
 import { formatMessage, formatMessageWithValues } from "../../helpers/i18n";
 
 const styles = theme => ({
+    table: theme.table,
     tableTitle: theme.table.title,
     tableHeader: theme.table.header,
     tableRow: theme.table.row,
+    tableCell: theme.table.cell,
     tableLockedRow: theme.table.lockedRow,
     tableLockedCell: theme.table.lockedCell,
     tableHighlightedRow: theme.table.highlightedRow,
@@ -119,7 +121,7 @@ class Table extends Component {
                         <Divider />
                     </Fragment>
                 }
-                <MUITable className={classes.table} size="small">
+                <MUITable className={classes.table}>
                     {!!preHeaders && preHeaders.length > 0 && (
                         <TableHead>
                             <TableRow>
@@ -141,6 +143,7 @@ class Table extends Component {
                                     if (headerSpans.length > idx && !headerSpans[idx]) return null;
                                     return (<TableCell
                                         colSpan={headerSpans.length > idx ? headerSpans[idx] : 1}
+                                        className={classes.tableCell}
                                         key={`h-${idx}`}>
                                         {!!h && (
                                             <div style={{ width: '100%' }}>
@@ -177,6 +180,7 @@ class Table extends Component {
                                         <TableCell
                                             colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
                                             className={classNames(
+                                                classes.tableCell,
                                                 !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
                                                 !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
                                                 !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,

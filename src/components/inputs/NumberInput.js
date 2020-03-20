@@ -4,14 +4,13 @@ import { injectIntl } from 'react-intl';
 import { formatMessageWithValues } from "../../helpers/i18n";
 
 class NumberInput extends Component {
-    formatInput = (v) => {
-        if (!v && v !== 0) {
-            return "";
-        }
+    formatInput = (v, displayZero) => {
+        if (v == 0 && displayZero) return "0";
+        if (!v) return "";
         return v;
     }
     render() {
-        const { intl, module = "core", min = null, max = null, value, error } = this.props;
+        const { intl, module = "core", min = null, max = null, value, error, displayZero = false, ...others } = this.props;
         let inputProps = { ...this.props.inputProps }
         inputProps.type = "number";
         let err = error;
@@ -36,10 +35,12 @@ class NumberInput extends Component {
         }
         
         return (
-            <TextInput {...this.props}
+            <TextInput {...others}
+                module={module}
+                value={value}
                 error={err}
                 inputProps={inputProps}
-                formatInput={this.formatInput}
+                formatInput={v => this.formatInput(v, displayZero)}
             />
         )
     }

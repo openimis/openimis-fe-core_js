@@ -58,59 +58,67 @@ class RootApp extends Component {
           <CircularProgress className={classes.fetching} />
         </div>
       );
-    } else {
-      return (
-        <IntlProvider
-          locale={this.props.localesManager.getLocale(user.language)}
-          messages={this.buildMessages(messages, user.language)}
-        >
-          <div className="App">
-            <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-            <CssBaseline />
-            <AlertDialog alert={alert} />
-            <ConfirmDialog confirm={confirm} />
-            <Router history={history}>
-              <Switch>
-                <Route
-                  exact
-                  path={`${process.env.PUBLIC_URL || ""}/`}
-                  render={() => (
-                    <Redirect to={`${process.env.PUBLIC_URL || ""}/home`} />
-                  )}
-                />
-                {this.routerContributions.map((route, index) => {
-                  const Comp = route.component;
-                  return (
-                    <Route
-                      exact
-                      key={`route_${kebabCase(route.path)}_${index}`}
-                      path={`${process.env.PUBLIC_URL || ""}/${route.path}`}
-                      render={props => (
-                        <AppWrapper {...props} {...others}>
-                          <Comp {...props} {...others} />
-                        </AppWrapper>
-                      )}
-                    />
-                  );
-                })}
-              </Switch>
-            </Router>
-          </div>
-        </IntlProvider>
-      );
     }
+    return (
+      <IntlProvider
+        locale={this.props.localesManager.getLocale(user.language)}
+        messages={this.buildMessages(messages, user.language)}
+      >
+        <div className="App">
+          <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+          <CssBaseline />
+          <AlertDialog alert={alert} />
+          <ConfirmDialog confirm={confirm} />
+          <Router history={history}>
+            <Switch>
+              <Route
+                exact
+                path={`${process.env.PUBLIC_URL || ""}/`}
+                render={() => (
+                  <Redirect to={`${process.env.PUBLIC_URL || ""}/home`} />
+                )}
+              />
+              <Route
+                exact
+                path={`${process.env.PUBLIC_URL || ""}/dyn/:dyn`}
+                render={() => {
+                  // normally this.props.match.params.dyn ... but doesn't work
+                  let path = this.props.history.location.pathname.split('/')
+                  return (
+                    <Redirect to={`${atob(path[path.length -1])}`} />
+                  )
+                }}
+              />
+              {this.routerContributions.map((route, index) => {
+                const Comp = route.component;
+                return (
+                  <Route
+                    exact
+                    key={`route_${kebabCase(route.path)}_${index}`}
+                    path={`${process.env.PUBLIC_URL || ""}/${route.path}`}
+                    render={props => (
+                      <AppWrapper {...props} {...others}>
+                        <Comp {...props} {...others} />
+                      </AppWrapper>
+                    )}
+                  />
+                );
+              })}
+            </Switch>
+          </Router>
+        </div>
+      </IntlProvider>
+    );
   }
 }
 
-function mapStateToProps(state) {
-  return {
+const mapStateToProps = (state, props) => ({
     authenticating: state.core.authenticating,
     user: !!state.core.user && state.core.user.i_user,
     error: state.core.error,
     alert: state.core.alert,
     confirm: state.core.confirm,
-  }
-};
+})
 
 export default withHistory(connect(mapStateToProps, { auth })(
   withModulesManager(withTheme(withStyles(styles)(RootApp))),

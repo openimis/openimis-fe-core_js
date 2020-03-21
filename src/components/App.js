@@ -59,8 +59,6 @@ class RootApp extends Component {
         </div>
       );
     }
-    console.log("pathname "+ this.props.history.location.pathname);
-    console.log("PUBLIC_URL "+process.env.PUBLIC_URL);
     return (
       <IntlProvider
         locale={this.props.localesManager.getLocale(user.language)}
@@ -76,13 +74,17 @@ class RootApp extends Component {
               <Route
                 exact
                 path={`${process.env.PUBLIC_URL || ""}/`}
-                render={() => (
-                  <Redirect to={`${process.env.PUBLIC_URL || ""}/home`} />
-                )}
+                render={() => {
+				  let search = this.props.history.location.search;
+				  if (!search) {
+					  return <Redirect to={`${process.env.PUBLIC_URL || ""}/home`} />
+				  } else {
+					  return <Redirect to={`${atob(search.substring(5))}`} />
+				  }
+				}}
               />
               {this.routerContributions.map((route, index) => {
                 const Comp = route.component;
-                console.log("route path " + `${process.env.PUBLIC_URL || ""}/${route.path}`)
                 return (
                   <Route
                     exact

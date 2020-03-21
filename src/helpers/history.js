@@ -19,7 +19,7 @@ export default withHistory;
 
 export function _historyPush(history, route, newTab) {
     if (!!newTab) {
-        window.open(`${process.env.PUBLIC_URL || ""}/${toute}}`);
+        window.open(`${process.env.PUBLIC_URL || ""}/${route}}`);
     } else {
         history.push(`${process.env.PUBLIC_URL || ""}${route}`);
     }

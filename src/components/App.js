@@ -59,6 +59,8 @@ class RootApp extends Component {
         </div>
       );
     }
+    console.log("pathname "+ this.props.history.location.pathname);
+    console.log("PUBLIC_URL "+process.env.PUBLIC_URL);
     return (
       <IntlProvider
         locale={this.props.localesManager.getLocale(user.language)}
@@ -78,19 +80,9 @@ class RootApp extends Component {
                   <Redirect to={`${process.env.PUBLIC_URL || ""}/home`} />
                 )}
               />
-              <Route
-                exact
-                path={`${process.env.PUBLIC_URL || ""}/dyn/:dyn`}
-                render={() => {
-                  // normally this.props.match.params.dyn ... but doesn't work
-                  let path = this.props.history.location.pathname.split('/')
-                  return (
-                    <Redirect to={`${atob(path[path.length -1])}`} />
-                  )
-                }}
-              />
               {this.routerContributions.map((route, index) => {
                 const Comp = route.component;
+                console.log("route path " + `${process.env.PUBLIC_URL || ""}/${route.path}`)
                 return (
                   <Route
                     exact

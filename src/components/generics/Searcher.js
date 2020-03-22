@@ -1,4 +1,6 @@
 import React, { Component, Fragment, useCallback } from "react";
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
 import { injectIntl } from 'react-intl';
 import _ from "lodash";
 import { withTheme, withStyles } from "@material-ui/core/styles";
@@ -24,6 +26,7 @@ import ProgressOrError from "./ProgressOrError";
 import Table from "./Table";
 import withModulesManager from "../../helpers/modules";
 import { formatMessage } from "../../helpers/i18n";
+import { cacheFilters } from "../../actions";
 
 const styles = theme => ({
     root: {
@@ -153,9 +156,10 @@ class Searcher extends Component {
         menuAnchor: null,
     }
 
-    _resetFilters = () => {
+    componentDidMount() {
+        var filters = this.props.filtersCache[this.props.cacheFiltersKey] || this.props.defaultFilters || {}
         this.setState({
-            filters: this.props.defaultFilters || {},
+            filters,
             pageSize: this.props.defaultPageSize || 10,
             orderBy: this.props.defaultOrderBy,
         },
@@ -163,14 +167,8 @@ class Searcher extends Component {
         );
     }
 
-    componentDidMount() {
-        this._resetFilters()
-    }
-
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if (!_.isEqual(prevProps.defaultFilters, this.props.defaultFilters)) {
-            this._resetFilters();
-        } else if (!_.isEqual(prevProps.filtersExt, this.props.filtersExt)) {
+        if (!_.isEqual(prevProps.filtersExt, this.props.filtersExt)) {
             this.applyFilters();
         }
     }
@@ -208,6 +206,16 @@ class Searcher extends Component {
         )
     }
 
+    _cacheAndApply = () => {
+        var filters = this.filtersToQueryParams();
+        if (!!this.props.cacheFiltersKey) {
+            this.props.cacheFilters(this.props.cacheFiltersKey, this.state.filters)
+            this.props.fetch(filters)
+        } else {
+            this.props.fetch(filters)
+        }
+    }
+
     applyFilters = () => {
         this.setState({
             page: 0,
@@ -215,7 +223,7 @@ class Searcher extends Component {
             beforeCursor: null,
             clearAll: this.state.clearAll + 1,
         },
-            e => this.props.fetch(this.filtersToQueryParams())
+            this._cacheAndApply
         )
     }
 
@@ -228,7 +236,7 @@ class Searcher extends Component {
             afterCursor: null,
             beforeCursor: null,
         },
-            e => this.props.fetch(this.filtersToQueryParams())
+            this._cacheAndApply
         )
     }
 
@@ -441,7 +449,17 @@ class Searcher extends Component {
     }
 }
 
+const mapStateToProps = state => ({
+    filtersCache: !!state.core && state.core.filtersCache
+})
+
+const mapDispatchToProps = dispatch => {
+    return bindActionCreators(
+        { cacheFilters },
+        dispatch);
+};
+
 export default withModulesManager(
     injectIntl(withTheme(
-        withStyles(styles)(Searcher)
-    )));
+        withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(Searcher)
+        ))));

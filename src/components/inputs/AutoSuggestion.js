@@ -107,7 +107,7 @@ class AutoSuggestion extends Component {
         } else {
             if (!_.isEqual(prevProps.value, this.props.value)) {
                 this.setState({
-                    suggestions: !this.props.value ? this._truncate(this._allItems()) : [],
+                    suggestions: this._truncate(this._allItems()),
                     value: this.props.getSuggestionValue(this.props.value),
                     selected: this.props.getSuggestionValue(this.props.value),
                 })
@@ -128,7 +128,7 @@ class AutoSuggestion extends Component {
         );
     }
 
-    onChange = (event, { newValue, method }) => {
+    _onAutoselectChange = (event, { newValue, method }) => {
         this.setState({
             value: newValue
         });
@@ -146,7 +146,7 @@ class AutoSuggestion extends Component {
 
     onSuggestionsClearRequested = () => {
         this.setState({
-            suggestions: []
+            suggestions: this._truncate(this._allItems())
         });
     };
 
@@ -159,7 +159,9 @@ class AutoSuggestion extends Component {
     }
 
     _getSuggestions = (value) => {
-        if (!value || !value.trim()) return [];
+        if (!value || !value.trim()) {
+            return this._truncate(this._allItems());
+        }
         const escapedValue = escapeRegexCharacters(value.trim());
 
         if (escapedValue === '') {
@@ -277,7 +279,7 @@ class AutoSuggestion extends Component {
             value: value,
             label,
             disabled,
-            onChange: this.onChange,
+            onChange: this._onAutoselectChange,
             required,
         };
         return (

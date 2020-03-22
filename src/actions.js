@@ -14,6 +14,13 @@ export function apiHeaders() {
     return headers;
 }
 
+
+export function cacheFilters(key, filters) {
+    return dispatch => {
+        dispatch({ type: 'CORE_CACHE_FILTER', payload: { [key]: filters } })
+    }
+}
+
 export function journalize(mutation, meta) {
     return dispatch => {
         mutation.status = 0;

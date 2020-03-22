@@ -9,6 +9,7 @@ function reducer(
         fetchedHistoricalMutations: false,
         fetchingMutations: false,
         mutations: [],
+        filtersCache: {},
     },
     action,
 ) {
@@ -56,6 +57,12 @@ function reducer(
                     detail: !!action.payload.response ? action.payload.response.detail : null,
                 }
             };
+        case 'CORE_CACHE_FILTER':
+            var filtersCache = { ...state.filtersCache, ...action.payload }
+            return {
+                ...state,
+                filtersCache,
+            }
         case 'CORE_MUTATION_ADD':
             var mutations = [...state.mutations];
             mutations.unshift(action.payload);

@@ -6,7 +6,7 @@ import {
     Divider,
     IconButton,
 } from "@material-ui/core";
-import SearchIcon from "@material-ui/icons/Search";
+import DefaultSearchIcon from "@material-ui/icons/Search";
 import FormattedMessage from "./FormattedMessage";
 
 const styles = theme => ({
@@ -19,7 +19,7 @@ const styles = theme => ({
 class SearcherPane extends Component {
 
     render() {
-        const { classes, module, title = "search.title", split= 8, filterPane, resultsPane = null, refresh, actions } = this.props;
+        const { classes, module, title = "search.title", split= 8, filterPane, resultsPane = null, refresh, actions, SearchIcon = null } = this.props;
         return (
             <Paper>
                 <Grid container className={classes.paperHeader}>
@@ -39,7 +39,7 @@ class SearcherPane extends Component {
                                 {!!refresh &&
                                     <Grid item key={`action-refresh`} className={classes.paperHeaderAction}>
                                         <IconButton onClick={refresh}>
-                                            <SearchIcon />
+                                            {!!SearchIcon ? (<SearchIcon />) : (<DefaultSearchIcon />)}
                                         </IconButton>
                                     </Grid>
                                 }

@@ -340,9 +340,9 @@ class Searcher extends Component {
     }
 
     render() {
-        const { intl, classes, module,
+        const { classes, module,
             canSelectAll = null, contributionKey = null,
-            FilterPane, FilterExt,
+            FilterPane, FilterExt, filterPaneContributionsKey = null,
             tableTitle, rowIdentifier, rowsPerPageOptions,
             rowLocked = () => false,
             rowHighlighted = () => false,
@@ -356,7 +356,6 @@ class Searcher extends Component {
             itemFormatters,
             onDoubleClick, actions, processing = false,
         } = this.props;
-
         return (
             <Fragment>
                 {!!FilterPane && (
@@ -370,6 +369,7 @@ class Searcher extends Component {
                                 filters={this.state.filters}
                                 onChangeFilters={this.onChangeFilters}
                                 FilterExt={FilterExt}
+                                filterPaneContributionsKey={filterPaneContributionsKey}
                             />}
                     />
                 )}

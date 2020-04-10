@@ -167,12 +167,6 @@ class Searcher extends Component {
         );
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        if (!_.isEqual(prevProps.filtersExt, this.props.filtersExt)) {
-            this.applyFilters();
-        }
-    }
-
     filtersToQueryParams = () => {
         if (this.props.filtersToQueryParams) return this.props.filtersToQueryParams(this.state);
         let prms = Object.keys(this.state.filters)
@@ -424,7 +418,7 @@ class Searcher extends Component {
                                         rowHighlightedAlt={i => rowHighlightedAlt(this.state.selection, i)}
                                         rowDisabled={i => rowDisabled(this.state.selection, i)}
                                         items={items}
-                                        withPagination={!this.props.filtersExt}
+                                        withPagination={true}
                                         withSelection={true}
                                         itemIdentifier={rowIdentifier}
                                         selection={this.state.selection}

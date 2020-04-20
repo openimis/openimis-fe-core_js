@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import withModulesManager from "../helpers/modules";
+import withModulesManager from "../../helpers/modules";
 
 class PublishedComponent extends Component {
     render() {

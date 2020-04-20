@@ -215,12 +215,15 @@ class JournalDrawer extends Component {
     }
 
     componentDidMount() {
-        this.props.fetchHistoricalMutations(this.state.pageSize, this.state.afterCursor);
+        if (!this.props.fetchedHistoricalMutations) {
+            this.props.fetchHistoricalMutations(this.state.pageSize, this.state.afterCursor);
+        }
         this.setState({
             timeoutId: setInterval(
                 this.checkProcessing,
                 this.props.modulesManager.getRef("core.JournalDrawer.pollInterval")
             ),
+            displayedMutations: [...this.props.mutations],
         });
     }
 
@@ -234,9 +237,11 @@ class JournalDrawer extends Component {
         } else if (!_.isEqual(prevProps.mutations, this.props.mutations)) {
             let prevMutationIds = prevProps.mutations.map(m => m.id);
             let new_mutations = [...this.props.mutations].filter(m => !prevMutationIds.includes(m.id))
-            this.setState({
-                displayedMutations: [...new_mutations, ...this.state.displayedMutations]
-            })
+            if (!!new_mutations.length) {
+                this.setState({
+                    displayedMutations: [...new_mutations, ...this.state.displayedMutations]
+                })
+            }
         }
     }
 
@@ -349,7 +354,7 @@ class JournalDrawer extends Component {
                                                         className={classes.jrnlItemDetail}
                                                         key={`mdet-${di}`}
                                                         primary={d}
-                                                        primaryTypographyProps={{class: classes.jrnlItemDetailText}}
+                                                        primaryTypographyProps={{ class: classes.jrnlItemDetailText }}
                                                     />
                                                 )}
                                             </List>
@@ -375,6 +380,7 @@ class JournalDrawer extends Component {
 const mapStateToProps = (state, props) => ({
     fetchingMutations: state.core.fetchingMutations,
     fetchingHistoricalMutations: state.core.fetchingHistoricalMutations,
+    fetchedHistoricalMutations: state.core.fetchedHistoricalMutations,
     mutations: state.core.mutations,
     mutationsPageInfo: state.core.mutationsPageInfo,
 });

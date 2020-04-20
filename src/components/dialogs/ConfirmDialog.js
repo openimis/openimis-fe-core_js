@@ -10,8 +10,8 @@ import {
     DialogContentText,
     DialogTitle
 } from '@material-ui/core';
-import { clearConfirm } from "../actions";
-import { formatMessage } from "../helpers/i18n";
+import { clearConfirm } from "../../actions";
+import { formatMessage } from "../../helpers/i18n";
 
 class AlertDialog extends Component {
 

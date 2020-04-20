@@ -10,7 +10,7 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import { Divider, List, IconButton, MenuList, MenuItem, Button, Popper, Grow, Paper, ClickAwayListener } from "@material-ui/core";
-import { _historyPush } from '../helpers/history';
+import { _historyPush } from '../../helpers/history';
 
 const styles = theme => ({
   panel: {
@@ -120,28 +120,39 @@ class MainMenuContribution extends Component {
           {this.props.header}
           <ExpandMoreIcon />
         </Button>
-        <Popper className={this.props.classes.popper} open={this.state.expanded} anchorEl={this.state.anchorRef.current} transition>
+        <Popper
+          className={this.props.classes.popper}
+          open={this.state.expanded}
+          anchorEl={this.state.anchorRef.current}
+          transition
+        >
           {({ TransitionProps, placement }) => (
             <Grow
               {...TransitionProps}
-              style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}
+              style={{
+                transformOrigin:
+                  placement === "bottom" ? "center top" : "center bottom"
+              }}
             >
-              <Paper className={this.props.classes.appBarMenuPaper} id={`${this.props.header}-menu-list`}>
+              <Paper
+                className={this.props.classes.appBarMenuPaper}
+                id={`${this.props.header}-menu-list`}
+              >
                 <ClickAwayListener onClickAway={this.handleMenuClose}>
                   <MenuList>
                     {this.props.entries.map((entry, idx) => (
-                      <Fragment key={`${this.props.header}_${idx}_item`}>
-                        <MenuItem onClick={(e) => this.handleMenuSelect(e, entry.route)}>
+                      <div key={`${this.props.header}_${idx}_menuItem`}>
+                        <MenuItem onClick={e => this.handleMenuSelect(e, entry.route)}>
                           <ListItemIcon>{entry.icon}</ListItemIcon>
                           <ListItemText primary={entry.text} />
                         </MenuItem>
                         {entry.withDivider && (
                           <Divider
                             key={`${this.props.header}_${idx}_divider`}
-                            className={this.props.classes.drawerDivider} />
-                        )
-                        }
-                      </Fragment>
+                            className={this.props.classes.drawerDivider}
+                          />
+                        )}
+                      </div>
                     ))}
                   </MenuList>
                 </ClickAwayListener>

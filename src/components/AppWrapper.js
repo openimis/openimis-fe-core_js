@@ -2,8 +2,8 @@ import React, { Component, Fragment } from "react";
 import { Router } from "react-router-dom";
 import withWidth from '@material-ui/core/withWidth';
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import Logout from "./Logout";
-import Help from "./Help";
+import Logout from "../pages/Logout";
+import Help from "../pages/Help";
 import { fade } from "@material-ui/core/styles/colorManipulator";
 import withHistory from "../helpers/history";
 import classNames from 'classnames';
@@ -21,8 +21,8 @@ import {
   ClickAwayListener
 } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
-import Contributions from "./Contributions";
-import FormattedMessage from "./FormattedMessage";
+import Contributions from "./generics/Contributions";
+import FormattedMessage from "./generics/FormattedMessage";
 import JournalDrawer from "./JournalDrawer";
 
 export const APP_BOOT_CONTRIBUTION_KEY = "core.Boot";

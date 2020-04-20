@@ -5,12 +5,12 @@ import {
     Dialog, DialogTitle, Divider, Button, DialogActions, DialogContent,
     FormControl, TextField, InputAdornment, IconButton
 } from "@material-ui/core";
-import { formatMessage } from "../helpers/i18n";
+import { formatMessage } from "../../helpers/i18n";
 import ClearIcon from "@material-ui/icons/Clear";
 import SearchIcon from "@material-ui/icons/Search";
-import FormattedMessage from "../components/FormattedMessage";
-import Table from "../components/Table";
-import FakeInput from "../components/FakeInput";
+import FormattedMessage from "./FormattedMessage";
+import Table from "./Table";
+import FakeInput from "../inputs/FakeInput";
 
 const styles = theme => ({
     label: {

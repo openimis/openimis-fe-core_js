@@ -1,16 +1,15 @@
-import React, { Component } from 'react'
-import { baseApiUrl } from '../actions';
+import { Component } from 'react'
 
 class KeepLegacyAlive extends Component {
 
 
     componentDidMount() {
-        this.setState({
+        this.setState((state, props) => ({
             timeoutId: setInterval(
                 this.keepLegacyAlive,
-                this.props.modulesManager.getRef("core.KeepLegacyAlive.pollInterval")
+                props.modulesManager.getRef("core.KeepLegacyAlive.pollInterval")
             ),
-        });
+        }));
     }
 
     componentWillUnmount() {

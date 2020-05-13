@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import { Component } from "react";
 
 class FormPanel extends Component {
 
@@ -7,17 +7,15 @@ class FormPanel extends Component {
     }
 
     componentDidMount() {
-        this.setState({ data: this.props.edited });
+        this.setState((state, props) => ({ data: props.edited }));
     }
 
     _componentDidUpdate(prevProps, prevState, snapshot) {
         if ((prevProps.edited_id && !this.props.edited_id) ||
-            prevProps.reset !== this.props.reset
+            prevProps.reset !== this.props.reset ||
+            !_.isEqual(prevProps.edited, this.props.edited)
         ) {
-            this.setState({ data: this.props.edited });
-            return true;
-        } else if (!_.isEqual(prevProps.edited, this.props.edited)) {
-            this.setState({ data: this.props.edited })
+            this.setState((state, props) => ({ data: props.edited }));
             return true;
         }
         return false;

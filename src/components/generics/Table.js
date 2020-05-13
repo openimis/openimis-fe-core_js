@@ -51,16 +51,17 @@ class Table extends Component {
 
     componentDidMount() {
         if (this.props.withSelection) {
-            this.setState({
-                selection: this._atom(this.props.selection)
-            })
+            this.setState((state, props) => ({
+                selection: this._atom(props.selection)
+            }))
         }
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (this.props.withSelection && prevProps.selectAll !== this.props.selectAll) {
-            this.setState(
-                { selection: _.merge(this.state.selection, this._atom(this.props.items)) },
+            this.setState((state, props) => ({
+                    selection: _.merge(state.selection, this._atom(props.items)) 
+                }),
                 e => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection))
             )
         }

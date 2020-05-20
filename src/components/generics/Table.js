@@ -102,7 +102,7 @@ class Table extends Component {
             onChangeRowsPerPage, onChangePage, onDoubleClick } = this.props;
         var i = !!headers && headers.length
         while (!!headers && i--) {
-            if (modulesManager.hideField(module, headers[i])) {
+            if (!!modulesManager && modulesManager.hideField(module, headers[i])) {
                 if (!!preHeaders) preHeaders.splice(i, 1);
                 if (!!aligns && aligns.length > i) aligns.splice(i, 1);
                 if (!!headerSpans && headerSpans.length > i) headerSpans.splice(i, 1);

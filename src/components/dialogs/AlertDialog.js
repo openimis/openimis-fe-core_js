@@ -10,7 +10,6 @@ import {
     DialogContentText,
     DialogTitle,
     Typography,
-    Collapse
 } from '@material-ui/core';
 import { clearAlert } from "../../actions";
 import { formatMessage } from "../../helpers/i18n";

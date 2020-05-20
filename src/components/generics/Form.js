@@ -22,10 +22,9 @@ class Form extends Component {
         saving: false,
     }
 
-    constructor(props) {
-        super(props)
-        if (!!props.forcedDirty) {
-            this.setState({ dirty: true })
+    componentDidMount() {
+        if (!!this.props.forcedDirty) {
+            this.setState((state, props) => ({ dirty: true }))
         }
     }
 

@@ -13,14 +13,14 @@ class ConstantBasedPicker extends Component {
 
     componentDidMount() {
         if (!!this.props.value) {
-            this.setState({ value: this.props.value });
+            this.setState((state, props) => ({ value: props.value }));
         }
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.reset !== this.props.reset ||
             prevProps.value !== this.props.value) {
-            this.setState({ value: this.props.value })
+            this.setState((state, props) => ({ value: props.value }))
         }
     }
 

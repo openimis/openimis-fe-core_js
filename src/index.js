@@ -1,4 +1,3 @@
-import React from "react";
 import App from "./components/App";
 import KeepLegacyAlive from "./components/KeepLegacyAlive";
 import AutoSuggestion from "./components/inputs/AutoSuggestion";

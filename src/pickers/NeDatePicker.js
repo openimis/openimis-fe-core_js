@@ -1,14 +1,10 @@
 import React, { Component } from "react";
 import { injectIntl } from 'react-intl';
-import { withTheme, withStyles } from "@material-ui/core/styles";
 import { FormControl, TextField, IconButton, Grid } from "@material-ui/core";
 import ClearIcon from "@material-ui/icons/Clear";
 import { formatMessage, toISODate } from "../helpers/i18n";
 import { formatDateFromISO } from "./NeDateFormatter";
 import withModulesManager from "../helpers/modules.js";
-
-const styles = theme => ({
-});
 
 class NeDatePicker extends Component {
 
@@ -20,21 +16,19 @@ class NeDatePicker extends Component {
             dateFormat: "%y-%m-%d",
             closeOnDateSelect: true,
         });
-        this.setState(
-            {
-                isoValue: this.props.value,
-                strValue: formatDateFromISO(this.props.value),
-            }
-        );
+        this.setState((state, props) => ({
+            isoValue: props.value,
+            strValue: formatDateFromISO(props.value),
+        }));
         this.$el.on('dateSelect', this.dateChange);
     }
 
     componentDidUpdate(prevState, prevProps, snapshot) {
         if (prevState.value !== this.props.value) {
-            this.setState({
-                isoValue: this.props.value,
-                strValue: formatDateFromISO(this.props.value),
-            })
+            this.setState((state, props) => ({
+                isoValue: props.value,
+                strValue: formatDateFromISO(props.value),
+            }))
         }
     }
 
@@ -60,10 +54,10 @@ class NeDatePicker extends Component {
             },
             i => this.props.onChange(null)
         );
-    }    
+    }
 
     render() {
-        const { intl, classes, module, label, readOnly = false, required = false, fullWidth = true } = this.props;
+        const { intl, module, label, readOnly = false, required = false, fullWidth = true } = this.props;
         return (
             <FormControl fullWidth={fullWidth}>
                 <Grid container direction="row" alignItems="center" alignContent="center">
@@ -85,4 +79,4 @@ class NeDatePicker extends Component {
     }
 }
 
-export default withModulesManager(injectIntl(withTheme(withStyles(styles)(NeDatePicker))));
+export default withModulesManager(injectIntl(NeDatePicker));

@@ -51,16 +51,17 @@ class Table extends Component {
 
     componentDidMount() {
         if (this.props.withSelection) {
-            this.setState({
-                selection: this._atom(this.props.selection)
-            })
+            this.setState((state, props) => ({
+                selection: this._atom(props.selection)
+            }))
         }
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (this.props.withSelection && prevProps.selectAll !== this.props.selectAll) {
-            this.setState(
-                { selection: _.merge(this.state.selection, this._atom(this.props.items)) },
+            this.setState((state, props) => ({
+                    selection: _.merge(state.selection, this._atom(props.items)) 
+                }),
                 e => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection))
             )
         }
@@ -101,7 +102,7 @@ class Table extends Component {
             onChangeRowsPerPage, onChangePage, onDoubleClick } = this.props;
         var i = !!headers && headers.length
         while (!!headers && i--) {
-            if (modulesManager.hideField(module, headers[i])) {
+            if (!!modulesManager && modulesManager.hideField(module, headers[i])) {
                 if (!!preHeaders) preHeaders.splice(i, 1);
                 if (!!aligns && aligns.length > i) aligns.splice(i, 1);
                 if (!!headerSpans && headerSpans.length > i) headerSpans.splice(i, 1);

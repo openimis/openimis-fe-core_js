@@ -218,29 +218,29 @@ class JournalDrawer extends Component {
         if (!this.props.fetchedHistoricalMutations) {
             this.props.fetchHistoricalMutations(this.state.pageSize, this.state.afterCursor);
         }
-        this.setState({
+        this.setState((state, props) => ({
             timeoutId: setInterval(
                 this.checkProcessing,
-                this.props.modulesManager.getRef("core.JournalDrawer.pollInterval")
+                props.modulesManager.getRef("core.JournalDrawer.pollInterval")
             ),
-            displayedMutations: [...this.props.mutations],
-        });
+            displayedMutations: [...props.mutations],
+        }));
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.fetchingHistoricalMutations && !this.props.fetchingHistoricalMutations) {
-            this.setState({
-                displayedMutations: [...this.state.displayedMutations, ...this.props.mutations],
-                afterCursor: this.props.mutationsPageInfo.endCursor,
-                hasNextPage: this.props.mutationsPageInfo.hasNextPage
-            })
+            this.setState((state, props) => ({
+                displayedMutations: [...state.displayedMutations, ...props.mutations],
+                afterCursor: props.mutationsPageInfo.endCursor,
+                hasNextPage: props.mutationsPageInfo.hasNextPage
+            }))
         } else if (!_.isEqual(prevProps.mutations, this.props.mutations)) {
             let prevMutationIds = prevProps.mutations.map(m => m.id);
             let new_mutations = [...this.props.mutations].filter(m => !prevMutationIds.includes(m.id))
             if (!!new_mutations.length) {
-                this.setState({
-                    displayedMutations: [...new_mutations, ...this.state.displayedMutations]
-                })
+                this.setState((state, props) => ({
+                    displayedMutations: [...new_mutations, ...state.displayedMutations]
+                }))
             }
         }
     }
@@ -291,7 +291,6 @@ class JournalDrawer extends Component {
                     <StyledMessages
                         anchorEl={this.state.messagesAnchor}
                         messages={this.state.messages}
-                        error={this.state.Err}
                         onClick={this.hideMessages}
                     />
                     <Drawer

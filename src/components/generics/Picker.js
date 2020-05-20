@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react";
+import React, { Component } from "react";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { injectIntl } from 'react-intl';
 import {
@@ -92,17 +92,14 @@ class Picker extends Component {
     onClose = e => this.setState({ open: false });
 
     onClear = e => {
-        this.setState(
-            { value: '' },
-            e => this.props.onSelect(null)
-        );
+        this.props.onSelect(null)
     }
 
     _suggestionFormatter = a => <FakeInput onSelect={e => this._onSelect(a)} value={this.props.suggestionFormatter(a)} />
 
     render() {
         const { intl, classes, module, label, dialogTitle, dialogClose, dialogSelect, filter,
-            suggestions, suggestionFormatter, suggestionTxtFormatter, count, page, pageSize,
+            suggestions, suggestionFormatter, count, page, pageSize,
             onChangeRowsPerPage, onChangePage, value, readOnly = false, required = false } = this.props;
         return (
             <FormControl fullWidth>

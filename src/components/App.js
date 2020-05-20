@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { IntlProvider } from 'react-intl';
 import { Redirect, Route, Router, Switch } from "react-router-dom";
-import { CssBaseline, CircularProgress, Dialog } from "@material-ui/core";
+import { CssBaseline, CircularProgress } from "@material-ui/core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import withHistory from "../helpers/history";
 import withModulesManager from "../helpers/modules";

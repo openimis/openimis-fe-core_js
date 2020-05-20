@@ -1,4 +1,4 @@
-import React, { Component, Fragment, useCallback } from "react";
+import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import { injectIntl } from 'react-intl';
@@ -116,7 +116,9 @@ class SelectionMenu extends Component {
         const { intl, classes, canSelectAll, selection, clearSelected, selectAll, actions = [], processing } = this.props;
         if (!actions.length) return null;
         if (processing) {
-            return <CircularProgress className={classes.processing} size={24} />
+            return (
+                <CircularProgress className={classes.processing} size={24} />
+            )
         }
         let entries = [];
         let selectionCount = selection.length;
@@ -158,11 +160,11 @@ class Searcher extends Component {
 
     componentDidMount() {
         var filters = this.props.filtersCache[this.props.cacheFiltersKey] || this.props.defaultFilters || {}
-        this.setState({
+        this.setState((state, props) => ({
             filters,
-            pageSize: this.props.defaultPageSize || 10,
-            orderBy: this.props.defaultOrderBy,
-        },
+            pageSize: props.defaultPageSize || 10,
+            orderBy: props.defaultOrderBy,
+        }),
             e => this.applyFilters()
         );
     }
@@ -211,12 +213,12 @@ class Searcher extends Component {
     }
 
     applyFilters = () => {
-        this.setState({
+        this.setState((state, props) => ({
             page: 0,
             afterCursor: null,
             beforeCursor: null,
-            clearAll: this.state.clearAll + 1,
-        },
+            clearAll: state.clearAll + 1,
+        }),
             this._cacheAndApply
         )
     }
@@ -235,7 +237,7 @@ class Searcher extends Component {
     }
 
     clearSelected = (e) => {
-        this.setState({ clearAll: this.state.clearAll + 1 })
+        this.setState((state, props) => ({ clearAll: state.clearAll + 1 }))
     }
 
     selectAll = (e) => {
@@ -260,21 +262,19 @@ class Searcher extends Component {
 
     onChangePage = (page, nbr) => {
         if (nbr > this.state.page) {
-            this.setState(
-                {
-                    page: this.state.page + 1,
-                    beforeCursor: null,
-                    afterCursor: this.props.itemsPageInfo.endCursor,
-                },
+            this.setState((state, props) => ({
+                page: state.page + 1,
+                beforeCursor: null,
+                afterCursor: props.itemsPageInfo.endCursor,
+            }),
                 e => this.props.fetch(this.filtersToQueryParams())
             )
         } else if (nbr < this.state.page) {
-            this.setState(
-                {
-                    page: this.state.page - 1,
-                    beforeCursor: this.props.itemsPageInfo.startCursor,
-                    afterCursor: null,
-                },
+            this.setState((state, props) => ({
+                page: state.page - 1,
+                beforeCursor: props.itemsPageInfo.startCursor,
+                afterCursor: null,
+            }),
                 e => this.props.fetch(this.filtersToQueryParams())
             )
         }
@@ -290,11 +290,10 @@ class Searcher extends Component {
 
     triggerAction = a => {
         let s = [...this.state.selection]
-        this.setState(
-            {
-                selection: [],
-                clearAll: this.state.clearAll + 1
-            },
+        this.setState((state, props) => ({
+            selection: [],
+            clearAll: state.clearAll + 1
+        }),
             e => a(s));
     }
 

@@ -52,7 +52,7 @@ class SelectInput extends Component {
                             onChange={this._onChange}
                             disabled={disabled}
                         >
-                            {!!options && options.map((option, idx) =>
+                            {options.map((option, idx) =>
                                 <MenuItem key={`${module}-${name}-option-${idx}`} value={JSON.stringify(option.value)}>
                                     {option.label}
                                 </MenuItem>

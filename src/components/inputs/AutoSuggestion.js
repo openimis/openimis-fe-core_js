@@ -84,11 +84,11 @@ class AutoSuggestion extends Component {
 
     componentDidMount() {
         if (!!this.props.value) {
-            this.setState({
-                value: this.props.getSuggestionValue(this.props.value),
-                selected: this.props.getSuggestionValue(this.props.value),
+            this.setState((state, props) => ({
+                value: props.getSuggestionValue(props.value),
+                selected: props.getSuggestionValue(props.value),
                 suggestions: this._truncate(this._allItems())
-            })
+            }))
         }
         if (!!this.props.items) {
             this.setState({
@@ -99,18 +99,18 @@ class AutoSuggestion extends Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.reset !== this.props.reset) {
-            this.setState({
+            this.setState((state, props) => ({
                 suggestions: this._truncate(this._allItems()),
-                value: this.props.getSuggestionValue(this.props.value),
-                selected: this.props.getSuggestionValue(this.props.value),
-            });
+                value: props.getSuggestionValue(props.value),
+                selected: props.getSuggestionValue(props.value),
+            }));
         } else {
             if (!_.isEqual(prevProps.value, this.props.value)) {
-                this.setState({
+                this.setState((state, props) => ({
                     suggestions: this._truncate(this._allItems()),
-                    value: this.props.getSuggestionValue(this.props.value),
-                    selected: this.props.getSuggestionValue(this.props.value),
-                })
+                    value: props.getSuggestionValue(props.value),
+                    selected: props.getSuggestionValue(props.value),
+                }))
             } else if (!_.isEqual(prevProps.items, this.props.items)) {
                 this.setState({
                     suggestions: this._truncate(this._allItems())
@@ -202,8 +202,9 @@ class AutoSuggestion extends Component {
     }
 
     _onSuggestionSelected = (e, i) => {
-        this.setState(
-            { selected: this.props.getSuggestionValue(i.suggestion) },
+        this.setState((state, props) => ({
+            selected: props.getSuggestionValue(i.suggestion)
+        }),
             e => this.props.onSuggestionSelected(i.suggestion)
         )
     }

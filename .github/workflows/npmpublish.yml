@@ -27,6 +27,7 @@ jobs:
         with:
           node-version: 12
           registry-url: https://registry.npmjs.org/
+          scope: openimis
       - run: yarn install
       - run: yarn build    
       - run: npm publish

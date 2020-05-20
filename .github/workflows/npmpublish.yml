@@ -30,9 +30,9 @@ jobs:
           scope: openimis
       - run: yarn install
       - run: yarn build    
-      - run: npm publish
+      - run: npm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
   publish-gpr:
     needs: build

@@ -9,6 +9,11 @@ export default {
       file: pkg.module,
       format: 'es',
       sourcemap: true
+    },
+    {
+      file: 'dist/index.js',
+      format: 'cjs',
+      sourcemap: true
     }
   ],
   external: [

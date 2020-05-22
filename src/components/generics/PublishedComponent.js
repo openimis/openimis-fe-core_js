@@ -3,8 +3,8 @@ import withModulesManager from "../../helpers/modules";
 
 class PublishedComponent extends Component {
     render() {
-        const { modulesManager, id, ...others } = this.props;
-        var C = modulesManager.getRef(id);
+        const { modulesManager, pubId, ...others } = this.props;
+        var C = modulesManager.getRef(pubId);
         return !!C ? <C {...others} /> : null;
     }
 }

@@ -10,6 +10,7 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import { Divider, List, IconButton, MenuList, MenuItem, Button, Popper, Grow, Paper, ClickAwayListener } from "@material-ui/core";
+import withModulesManager from "../../helpers/modules";
 import { _historyPush } from '../../helpers/history';
 
 const styles = theme => ({
@@ -106,7 +107,8 @@ class MainMenuContribution extends Component {
   }
 
   redirect(route) {
-    _historyPush(this.props.history, route);
+    const { modulesManager, history } = this.props;
+    _historyPush(modulesManager, history, route);
   }
 
   appBarMenu = () => {
@@ -221,4 +223,4 @@ MainMenuContribution.propTypes = {
   history: PropTypes.object.isRequired
 };
 
-export default withTheme(withStyles(styles)(MainMenuContribution));
+export default withModulesManager(withTheme(withStyles(styles)(MainMenuContribution)));

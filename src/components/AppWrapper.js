@@ -1,11 +1,9 @@
 import React, { Component, Fragment } from "react";
-import { Router } from "react-router-dom";
 import withWidth from '@material-ui/core/withWidth';
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import Logout from "../pages/Logout";
 import Help from "../pages/Help";
 import { fade } from "@material-ui/core/styles/colorManipulator";
-import withHistory from "../helpers/history";
 import classNames from 'classnames';
 
 import {
@@ -187,110 +185,108 @@ class AppWrapper extends Component {
   }
 
   render() {
-    const { history, classes, modulesManager, ...others } = this.props;
+    const { classes, modulesManager, ...others } = this.props;
     const { open } = this.state;
 
     return (
-      <Router history={history}>
-        <Fragment>
-          <Contributions
-            modulesManager={modulesManager}
-            contributionKey={APP_BOOT_CONTRIBUTION_KEY}
-          />
-          <AppBar
-            position="fixed"
-            className={classNames(classes.appBar, {
-              [classes.appBarShift]: this.isShifted()
-            })}
-          >
-            <Toolbar>
-              <IconButton
-                color="inherit"
-                onClick={this.handleOpen}
-                className={classNames(classes.menuButton,
-                  this.isAppBarMenu() && classes.autoHideMenuButton,
-                  open && classes.hide)}
-              >
-                <MenuIcon />
-              </IconButton>
-              <Button
-                className={classes.appName}
-                onClick={e => window.location.href = "/home"}>
-                {this.isAppBarMenu() && (
-                  <Hidden smDown implementation="css">
-                    <img className={classes.logo} src={this.props.logo} />
-                  </Hidden>
-                )}
-                <FormattedMessage module="core" id="appName"
-                  defaultMessage={<FormattedMessage id="root.appName" />} />
-              </Button>
-              <Hidden smDown implementation="css">
-                <Tooltip title={modulesManager.getModulesVersions().join(", ")}>
-                  <Typography variant="caption" className={classes.appVersions}>
-                    {modulesManager.getOpenIMISVersion()}
-                  </Typography>
-                </Tooltip>
-              </Hidden>
+      <Fragment>
+        <Contributions
+          modulesManager={modulesManager}
+          contributionKey={APP_BOOT_CONTRIBUTION_KEY}
+        />
+        <AppBar
+          position="fixed"
+          className={classNames(classes.appBar, {
+            [classes.appBarShift]: this.isShifted()
+          })}
+        >
+          <Toolbar>
+            <IconButton
+              color="inherit"
+              onClick={this.handleOpen}
+              className={classNames(classes.menuButton,
+                this.isAppBarMenu() && classes.autoHideMenuButton,
+                open && classes.hide)}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Button
+              className={classes.appName}
+              onClick={e => window.location.href = "/home"}>
               {this.isAppBarMenu() && (
                 <Hidden smDown implementation="css">
-                  <Contributions
-                    {...others}
-                    menuVariant='AppBar'
-                    contributionKey={MAIN_MENU_CONTRIBUTION_KEY}
-                  >
-                    <div onClick={this.handleClose} />
-                  </Contributions>
+                  <img className={classes.logo} src={this.props.logo} />
                 </Hidden>
               )}
-              <Contributions
-                {...others}
-                contributionKey={APP_BAR_CONTRIBUTION_KEY}
-              >
-                <div className={classes.grow} />
-              </Contributions>
-              <Logout />
-              <Help />
-            </Toolbar>
-          </AppBar>
-          {open && (
-            <ClickAwayListener onClickAway={this.handleClose}>
-              <nav className={classes.drawer}>
-                <Drawer
-                  className={classes.drawer}
-                  variant="persistent"
-                  anchor="left"
-                  open={open}
-                  classes={{
-                    paper: classes.drawerPaper
-                  }}
+              <FormattedMessage module="core" id="appName"
+                defaultMessage={<FormattedMessage id="root.appName" />} />
+            </Button>
+            <Hidden smDown implementation="css">
+              <Tooltip title={modulesManager.getModulesVersions().join(", ")}>
+                <Typography variant="caption" className={classes.appVersions}>
+                  {modulesManager.getOpenIMISVersion()}
+                </Typography>
+              </Tooltip>
+            </Hidden>
+            {this.isAppBarMenu() && (
+              <Hidden smDown implementation="css">
+                <Contributions
+                  {...others}
+                  menuVariant='AppBar'
+                  contributionKey={MAIN_MENU_CONTRIBUTION_KEY}
                 >
-                  <Contributions
-                    {...others}
-                    contributionKey={MAIN_MENU_CONTRIBUTION_KEY}
-                    menuVariant="Drawer"
-                  >
-                    <Divider />
-                  </Contributions>
-                </Drawer>
-              </nav>
-            </ClickAwayListener>
-          )}
-          <JournalDrawer
-            open={this.state.jrnlOpen}
-            handleDrawer={this.handleJrnlDrawer}
-          />
-          <div className={classes.toolbar} />
-          <main
-            className={classNames(classes.content, {
-              [classes.jrnlContentShift]: this.isJrnlShifted()
-            })}
-          >
-            {this.props.children}
-          </main>
-        </Fragment>
-      </Router >
+                  <div onClick={this.handleClose} />
+                </Contributions>
+              </Hidden>
+            )}
+            <Contributions
+              {...others}
+              contributionKey={APP_BAR_CONTRIBUTION_KEY}
+            >
+              <div className={classes.grow} />
+            </Contributions>
+            <Logout />
+            <Help />
+          </Toolbar>
+        </AppBar>
+        {open && (
+          <ClickAwayListener onClickAway={this.handleClose}>
+            <nav className={classes.drawer}>
+              <Drawer
+                className={classes.drawer}
+                variant="persistent"
+                anchor="left"
+                open={open}
+                classes={{
+                  paper: classes.drawerPaper
+                }}
+              >
+                <Contributions
+                  {...others}
+                  contributionKey={MAIN_MENU_CONTRIBUTION_KEY}
+                  menuVariant="Drawer"
+                >
+                  <Divider />
+                </Contributions>
+              </Drawer>
+            </nav>
+          </ClickAwayListener>
+        )}
+        <JournalDrawer
+          open={this.state.jrnlOpen}
+          handleDrawer={this.handleJrnlDrawer}
+        />
+        <div className={classes.toolbar} />
+        <main
+          className={classNames(classes.content, {
+            [classes.jrnlContentShift]: this.isJrnlShifted()
+          })}
+        >
+          {this.props.children}
+        </main>
+      </Fragment>
     );
   }
 }
 
-export default withHistory(withWidth()(withTheme(withStyles(styles)(AppWrapper))));
+export default withWidth()(withTheme(withStyles(styles)(AppWrapper)));

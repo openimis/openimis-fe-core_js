@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 import withModulesManager from "../../helpers/modules";
 import _ from "lodash";
@@ -44,4 +43,4 @@ Contributions.propTypes = {
   contributionKey: PropTypes.string.isRequired
 };
 
-export default withModulesManager(withRouter(Contributions));
+export default withModulesManager(Contributions);

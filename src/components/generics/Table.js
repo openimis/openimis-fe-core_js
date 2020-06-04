@@ -169,6 +169,7 @@ class Table extends Component {
                                 onClick={e => this.select(i)}
                                 onDoubleClick={e => !!onDoubleClick && onDoubleClick(i)}
                                 className={classNames(
+                                    classes.tableRow,
                                     !!rowLocked && rowLocked(i) ? classes.tableLockedRow : null,
                                     !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedRow : null,
                                     !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltRow : null,

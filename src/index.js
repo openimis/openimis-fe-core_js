@@ -39,6 +39,7 @@ import {
 } from './helpers/api';
 import withHistory, { historyPush } from "./helpers/history";
 import withModulesManager from './helpers/modules';
+import { formatJsonField } from './helpers/jsonExt';
 
 const DEFAULT_CONFIG = {
   "reducers": [{ key: 'core', reducer: reducer }],
@@ -71,7 +72,7 @@ export {
   formatQuery, formatPageQuery, formatPageQueryWithCount, formatMutation,
   dispatchMutationReq, dispatchMutationResp, dispatchMutationErr,
   parseData, pageInfo, formatServerError, formatGraphQLError,
-  formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount,
+  formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount, formatJsonField,
   App, AutoSuggestion, Contributions, ControlledField, Picker,
   Error, FatalError, AlertForwarder,
   SelectInput, TextInput, TextAreaInput, AmountInput, FakeInput, YearPicker, MonthPicker,

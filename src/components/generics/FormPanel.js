@@ -33,6 +33,16 @@ class FormPanel extends Component {
 
     updateAttribute = (attr, v) => this.updateAttributes({ [attr]: v })
 
+    updateExts = updates => {       
+        let data = { ...this.state.data };
+        updates.forEach(update => {
+            data["ext"][update.attr] = update.v
+        });
+        this.props.onEditedChanged(data);
+    }
+
+    updateExt = (attr, v) => this.updateExts([{ attr: [attr], v }])
+
 }
 
 export default FormPanel

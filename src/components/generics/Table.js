@@ -2,9 +2,10 @@ import React, { Component, Fragment } from "react";
 import classNames from "classnames";
 import { injectIntl } from 'react-intl';
 import _ from "lodash";
+import DeleteIcon from "@material-ui/icons/Delete";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import {
-    Typography, Divider, Box,
+    Typography, Divider, Box, IconButton,
     Table as MUITable, TableRow, TableHead, TableBody, TableCell, TableFooter, TablePagination
 } from "@material-ui/core";
 import FormattedMessage from "./FormattedMessage";
@@ -60,8 +61,8 @@ class Table extends Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (this.props.withSelection && prevProps.selectAll !== this.props.selectAll) {
             this.setState((state, props) => ({
-                    selection: _.merge(state.selection, this._atom(props.items)) 
-                }),
+                selection: _.merge(state.selection, this._atom(props.items))
+            }),
                 e => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection))
             )
         }
@@ -99,18 +100,30 @@ class Table extends Component {
             items, itemFormatters,
             rowHighlighted = null, rowHighlightedAlt = null, rowDisabled = null, rowLocked = null,
             withPagination = false, page, pageSize, count, rowsPerPageOptions = [10, 20, 50],
-            onChangeRowsPerPage, onChangePage, onDoubleClick } = this.props;
+            onChangeRowsPerPage, onChangePage, onDoubleClick, onDelete = null } = this.props;
         var i = !!headers && headers.length
-        while (!!headers && i--) {
-            if (!!modulesManager && modulesManager.hideField(module, headers[i])) {
-                if (!!preHeaders) preHeaders.splice(i, 1);
+        let localHeaders = [...headers];
+        let localPreHeaders = !!preHeaders ? [...preHeaders] : null;
+        let localItemFormatters = [...itemFormatters];
+        while (!!localHeaders && i--) {
+            if (!!modulesManager && modulesManager.hideField(module, localHeaders[i])) {
+                if (!!localPreHeaders) localPreHeaders.splice(i, 1);
                 if (!!aligns && aligns.length > i) aligns.splice(i, 1);
                 if (!!headerSpans && headerSpans.length > i) headerSpans.splice(i, 1);
                 if (!!headerActions && headerActions.length > i) headerActions.splice(i, 1);
                 if (!!colSpans && colSpans.length > i) colSpans.splice(i, 1);
-                headers.splice(i, 1);
-                itemFormatters.splice(i, 1);
+                localHeaders.splice(i, 1);
+                localItemFormatters.splice(i, 1);
             }
+        }
+        if (!!onDelete) {
+            if (!!localPreHeaders) localPreHeaders.push("")
+            localHeaders.push("")
+            localItemFormatters.push(
+                (i, idx) => idx === items.length - (withPagination ? 1 : 0) ?
+                    null :
+                    <IconButton onClick={e => onDelete(idx)}><DeleteIcon /></IconButton>
+            );
         }
         return (
             <Fragment>
@@ -123,10 +136,10 @@ class Table extends Component {
                     </Fragment>
                 }
                 <MUITable className={classes.table}>
-                    {!!preHeaders && preHeaders.length > 0 && (
+                    {!!localPreHeaders && localPreHeaders.length > 0 && (
                         <TableHead>
                             <TableRow>
-                                {preHeaders.map((h, idx) => {
+                                {localPreHeaders.map((h, idx) => {
                                     if (headerSpans.length > idx && !headerSpans[idx]) return null;
                                     return <TableCell
                                         colSpan={headerSpans.length > idx ? headerSpans[idx] : 1}
@@ -137,10 +150,10 @@ class Table extends Component {
                             </TableRow>
                         </TableHead>
                     )}
-                    {!!headers && headers.length > 0 && (
+                    {!!localHeaders && localHeaders.length > 0 && (
                         <TableHead>
                             <TableRow>
-                                {headers.map((h, idx) => {
+                                {localHeaders.map((h, idx) => {
                                     if (headerSpans.length > idx && !headerSpans[idx]) return null;
                                     return (<TableCell
                                         colSpan={headerSpans.length > idx ? headerSpans[idx] : 1}
@@ -176,7 +189,7 @@ class Table extends Component {
                                     !!rowDisabled && rowDisabled(i) ? classes.tableDisabledRow : null,
                                 )}
                             >
-                                {itemFormatters && itemFormatters.map((f, fidx) => {
+                                {localItemFormatters && localItemFormatters.map((f, fidx) => {
                                     if (colSpans.length > fidx && !colSpans[fidx]) return null;
                                     return (
                                         <TableCell
@@ -202,7 +215,7 @@ class Table extends Component {
                             <TableRow>
                                 <TablePagination
                                     className={classes.pager}
-                                    colSpan={itemFormatters.length}
+                                    colSpan={localItemFormatters.length}
                                     labelRowsPerPage={formatMessage(intl, "core", "rowsPerPage")}
                                     labelDisplayedRows={({ from, to, count }) => `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`}
                                     count={count}

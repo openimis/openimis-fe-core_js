@@ -6,6 +6,7 @@ import AddIcon from "@material-ui/icons/Add";
 import SaveIcon from "@material-ui/icons/SaveAlt";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import FormattedMessage from "./FormattedMessage";
+import Contributions from "./Contributions";
 import withHistory from "../../helpers/history";
 import _ from "lodash";
 
@@ -56,7 +57,7 @@ class Form extends Component {
         const { classes, module, back, add, openDirty = false,
             save, canSave, actions = [],
             fab = null, fabAction = null, fabTooltip = null,
-            title, titleParams = [], HeadPanel, Panels, ...others } = this.props;
+            title, titleParams = [], HeadPanel, Panels, contributedPanelsKey = null, ...others } = this.props;
         return (
             <Fragment>
                 <form noValidate autoComplete="off">
@@ -122,6 +123,9 @@ class Form extends Component {
                             />
                         </Grid>
                     ))}
+                    {!!contributedPanelsKey && (
+                        <Contributions {...this.props} contributionKey={contributedPanelsKey}/>
+                    )}
 
                 </form >
                 {!this.state.dirty && !!add && (

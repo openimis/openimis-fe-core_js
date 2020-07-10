@@ -9,6 +9,7 @@ import {
     Table as MUITable, TableRow, TableHead, TableBody, TableCell, TableFooter, TablePagination
 } from "@material-ui/core";
 import FormattedMessage from "./FormattedMessage";
+import ProgressOrError from "./ProgressOrError";
 import withModulesManager from "../../helpers/modules";
 import { formatMessage, formatMessageWithValues } from "../../helpers/i18n";
 
@@ -100,11 +101,12 @@ class Table extends Component {
             items, itemFormatters,
             rowHighlighted = null, rowHighlightedAlt = null, rowDisabled = null, rowLocked = null,
             withPagination = false, page, pageSize, count, rowsPerPageOptions = [10, 20, 50],
-            onChangeRowsPerPage, onChangePage, onDoubleClick, onDelete = null } = this.props;
-        var i = !!headers && headers.length
+            onChangeRowsPerPage, onChangePage, onDoubleClick, onDelete = null,
+            fetching = null, error = null } = this.props;
         let localHeaders = [...headers];
         let localPreHeaders = !!preHeaders ? [...preHeaders] : null;
         let localItemFormatters = [...itemFormatters];
+        var i = !!headers && headers.length
         while (!!localHeaders && i--) {
             if (!!modulesManager && modulesManager.hideField(module, localHeaders[i])) {
                 if (!!localPreHeaders) localPreHeaders.splice(i, 1);
@@ -125,6 +127,7 @@ class Table extends Component {
                     <IconButton onClick={e => onDelete(idx)}><DeleteIcon /></IconButton>
             );
         }
+        var colsCount = (!!localHeaders && localHeaders.length) || (localItemFormatters.length);
         return (
             <Fragment>
                 {header &&
@@ -176,6 +179,11 @@ class Table extends Component {
                         </TableHead>
                     )}
                     <TableBody>
+                        {(!!fetching || !!error) && (
+                            <TableRow>
+                                <TableCell colSpan={colsCount}><ProgressOrError progress={fetching} error={error} /></TableCell>
+                            </TableRow>
+                        )}
                         {items && items.length > 0 && items.map((i, iidx) => (
                             <TableRow key={iidx}
                                 selected={this.isSelected(i)}

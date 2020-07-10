@@ -28,7 +28,7 @@ export function formatDateFromISO(mm, intl, date) {
     if (mm.getConf("fe-core", "datePicker") === "ne") {
         return neFormateDateFromISO(date);
     }
-    return adFormateDateFromISO(intl, date);
+    return adFormateDateFromISO(mm, intl, date);
 }
 
 export function toISODate(d) {

@@ -5,18 +5,18 @@ import _ from "lodash";
 
 class Contributions extends Component {
   createComponents(contributions, reverse) {
-    const { modulesManager } = this.props;
+    const { classes, modulesManager, contributionKey, ...others} = this.props;
     var contribs = contributions.map((Comp, index) => {
-      let k = `${this.props.contributionKey}_${index}`;
+      let k = `${contributionKey}_${index}`;
       let keys= {
         "key_index":k,
         "key":k
       }      
       if (_.isString(Comp)) {
         var C = modulesManager.getRef(Comp);
-        return <C {...this.props} {...keys} />
+        return <C {...others} {...keys} />
       } else {
-        return <Comp {...this.props} {...keys} />
+        return <Comp {...others} {...keys} />
       }
     });
     if (reverse) {

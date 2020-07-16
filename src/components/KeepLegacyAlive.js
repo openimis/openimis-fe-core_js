@@ -1,4 +1,5 @@
 import { Component } from 'react'
+import withModulesManager from "../helpers/modules";
 
 class KeepLegacyAlive extends Component {
 
@@ -25,4 +26,4 @@ class KeepLegacyAlive extends Component {
     }
 }
 
-export default KeepLegacyAlive;
+export default withModulesManager(KeepLegacyAlive);

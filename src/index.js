@@ -10,6 +10,7 @@ import FieldLabel from "./components/generics/FieldLabel";
 import Form from "./components/generics/Form";
 import FormPanel from "./components/generics/FormPanel";
 import FormattedMessage from "./components/generics/FormattedMessage";
+import PagedDataHandler from "./components/generics/PagedDataHandler";
 import SelectInput from "./components/inputs/SelectInput";
 import TextInput from "./components/inputs/TextInput";
 import TextAreaInput from "./components/inputs/TextAreaInput";
@@ -76,7 +77,7 @@ export {
   App, AutoSuggestion, Contributions, ControlledField, Picker,
   Error, FatalError, AlertForwarder,
   SelectInput, TextInput, TextAreaInput, AmountInput, FakeInput, YearPicker, MonthPicker,
-  Form, FormPanel, FieldLabel, FormattedMessage, NumberInput,
+  PagedDataHandler, Form, FormPanel, FieldLabel, FormattedMessage, NumberInput,
   MainMenuContribution, ProgressOrError, ProxyPage, PublishedComponent, Table,
   Searcher, SearcherPane,
   ConstantBasedPicker

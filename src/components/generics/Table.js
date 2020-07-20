@@ -122,9 +122,7 @@ class Table extends Component {
             if (!!localPreHeaders) localPreHeaders.push("")
             localHeaders.push("")
             localItemFormatters.push(
-                (i, idx) => idx === items.length - (withPagination ? 1 : 0) ?
-                    null :
-                    <IconButton onClick={e => onDelete(idx)}><DeleteIcon /></IconButton>
+                (i, idx) => <IconButton onClick={e => onDelete(idx)}><DeleteIcon /></IconButton>
             );
         }
         var colsCount = (!!localHeaders && localHeaders.length) || (localItemFormatters.length);

@@ -14,14 +14,14 @@ class KeepLegacyAlive extends Component {
     }
 
     componentWillUnmount() {
-        clearTimeout(this.state.timeoutId);
+        if (!!this.state.timeoutId) { clearTimeout(this.state.timeoutId) };
     }
 
     keepLegacyAlive = () => {
         fetch(`${window.location.origin}/keepLegacyAlive`);
     }
 
-    render() {        
+    render() {
         return null;
     }
 }

@@ -149,7 +149,7 @@ class Searcher extends Component {
         filters: {},
         orderBy: null,
         page: 0,
-        pageSize: 0,
+        pageSize: this.props.defaultPageSize || 10,
         afterCursor: null,
         beforeCursor: null,
         selection: [],
@@ -162,7 +162,6 @@ class Searcher extends Component {
         var filters = this.props.filtersCache[this.props.cacheFiltersKey] || this.props.defaultFilters || {}
         this.setState((state, props) => ({
             filters,
-            pageSize: props.defaultPageSize || 10,
             orderBy: props.defaultOrderBy,
         }),
             e => this.applyFilters()
@@ -348,6 +347,7 @@ class Searcher extends Component {
             items, itemsPageInfo, fetchingItems, fetchedItems, errorItems,
             itemFormatters,
             onDoubleClick, actions, processing = false,
+            withSelection = null,
         } = this.props;
         return (
             <Fragment>
@@ -418,7 +418,7 @@ class Searcher extends Component {
                                         rowDisabled={i => rowDisabled(this.state.selection, i)}
                                         items={items}
                                         withPagination={true}
-                                        withSelection={true}
+                                        withSelection={withSelection}
                                         itemIdentifier={rowIdentifier}
                                         selection={this.state.selection}
                                         selectAll={this.state.selectAll}

@@ -47,14 +47,14 @@ class Table extends Component {
     }
 
     _atom = (a) => !!a && a.reduce(
-        (m, i) => { m[this.props.itemIdentifier(i)] = i; return m },
+        (m, i) => { m[this.itemIdentifier(i)] = i; return m },
         {}
     )
 
     componentDidMount() {
         if (this.props.withSelection) {
             this.setState((state, props) => ({
-                selection: this._atom(props.selection)
+                selection: this._atom(props.selection || [])
             }))
         }
     }
@@ -75,16 +75,27 @@ class Table extends Component {
         }
     }
 
-    isSelected = i => !!this.props.withSelection && !!this.state.selection[this.props.itemIdentifier(i)]
+    itemIdentifier = (i) => {
+        if (!!this.props.itemIdentifier) {
+            return this.props.itemIdentifier(i);
+        }
+        else {
+            return i.uuid;
+        }
+    }
+
+    isSelected = i => !!this.props.withSelection && !!this.state.selection[this.itemIdentifier(i)]
 
     select = i => {
         if (!this.props.withSelection) return;
         let s = this.state.selection;
-        let id = this.props.itemIdentifier(i);
+        let id = this.itemIdentifier(i);
         if (!!s[id]) {
             delete (s[id]);
-        } else {
+        } else if (this.props.withSelection === "multiple") {
             s[id] = i;
+        } else {
+            s = { [id]: i }
         }
         this.setState(
             { selection: s },

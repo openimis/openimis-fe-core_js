@@ -4,12 +4,12 @@ class PagedDataHandler extends Component {
 
     state = {
         page: 0,
-        pageSize: 0,
+        pageSize: this.props.modulesManager.getConf("fe-core", "core.defaultPageSize", 5),
         afterCursor: null,
         beforeCursor: null,
     }
 
-    query = () => {        
+    query = () => {                
         let prms = this.queryPrms();
         if (!this.state.pageSize || !prms) return;
         prms.push(`first: ${this.state.pageSize}`);

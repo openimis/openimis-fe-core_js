@@ -170,14 +170,16 @@ class Table extends Component {
                                     return (<TableCell
                                         colSpan={headerSpans.length > idx ? headerSpans[idx] : 1}
                                         className={classes.tableCell}
-                                        key={`h-${idx}`}>
+                                        key={`h-${idx}`}
+                                    >
                                         {!!h && (
-                                            <div style={{ width: '100%' }}>
+                                            <div style={{ width: '100%', cursor: headerActions.length > idx && !!headerActions[idx][0] ? 'pointer' : '' }}
+                                                onClick={headerActions.length > idx ? headerActions[idx][0] : null}>
                                                 <Box display="flex" className={classes.tableHeader} alignItems="center">
                                                     <Box>
                                                         <FormattedMessage module={module} id={h} />
                                                     </Box>
-                                                    {headerActions.length > idx ? this.headerAction(headerActions[idx]) : null}
+                                                    {headerActions.length > idx ? this.headerAction(headerActions[idx][1]) : null}
                                                 </Box>
                                             </div>
                                         )}

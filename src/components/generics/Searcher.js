@@ -297,26 +297,34 @@ class Searcher extends Component {
     }
 
 
-    sort = attr => {
-        this.setState({ orderBy: attr },
+    sort = (attr, asc = true) => {
+        let targetSort = null;
+        if (this.state.orderBy === attr) {
+            targetSort = '-' + attr
+        } else if (this.state.orderBy === '-' + attr) {
+            targetSort = attr
+        } else {
+            targetSort = asc ? attr : '-' + attr
+        }
+        this.setState({ orderBy: targetSort },
             e => this.props.fetch(this.filtersToQueryParams()))
     }
 
-    formatSorter = (attr, asc = true) => {
+    formatSorter = (attr, asc) => {
         if (!this.props.sorts) return null;
         if (this.state.orderBy === attr) {
             return (
-                <IconButton size="small" onClick={e => this.sort('-' + attr)}>
+                <IconButton size="small">
                     <SortAscIcon size={24} />
                 </IconButton>)
         } else if (this.state.orderBy === '-' + attr) {
             return (
-                <IconButton size="small" onClick={e => this.sort(attr)} >
+                <IconButton size="small">
                     <SortDescIcon size={24} />
                 </IconButton>)
         } else {
             return (
-                <IconButton size="small" onClick={e => asc ? this.sort(attr) : this.sort('-' + attr)}>
+                <IconButton size="small">
                     <SortIcon size={24} />
                 </IconButton>)
         }
@@ -326,7 +334,7 @@ class Searcher extends Component {
         if (!!this.props.headerActions) return this.props.headerActions(filters);
         if (!!this.props.sorts) {
             return this.props.sorts(filters)
-                .map(s => !!s ? () => this.formatSorter(s[0], s[1]) : () => null);
+                .map(s => !!s ? [() => this.sort(s[0], s[1]), () => this.formatSorter(s[0], s[1])] : [null, () => null]);
         }
         return [];
     }

@@ -36,7 +36,8 @@ import { formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, f
 import {
   decodeId, encodeId, formatQuery, formatPageQuery, formatPageQueryWithCount,
   parseData, pageInfo, formatServerError, formatGraphQLError, formatMutation,
-  dispatchMutationReq, dispatchMutationResp, dispatchMutationErr, openBlob
+  dispatchMutationReq, dispatchMutationResp, dispatchMutationErr, openBlob,
+  sort, formatSorter
 } from './helpers/api';
 import withHistory, { historyPush } from "./helpers/history";
 import withModulesManager from './helpers/modules';
@@ -66,7 +67,7 @@ export const CoreModule = (cfg) => {
 }
 
 export {
-  baseApiUrl, apiHeaders, graphql, journalize, coreAlert, coreConfirm, openBlob,
+  baseApiUrl, apiHeaders, graphql, journalize, coreAlert, coreConfirm, openBlob, sort, formatSorter,
   withHistory, historyPush,
   decodeId, encodeId,
   withModulesManager,

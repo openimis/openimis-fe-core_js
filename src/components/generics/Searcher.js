@@ -8,7 +8,6 @@ import {
     Grid,
     Paper,
     Divider,
-    IconButton,
     Typography,
     Button,
     Menu,
@@ -16,9 +15,6 @@ import {
     CircularProgress,
 } from "@material-ui/core";
 import MoreHoriz from "@material-ui/icons/MoreHoriz";
-import SortIcon from "@material-ui/icons/UnfoldMore";
-import SortAscIcon from "@material-ui/icons/ExpandLess";
-import SortDescIcon from "@material-ui/icons/ExpandMore";
 import SearcherPane from "./SearcherPane";
 import Contributions from "./Contributions";
 import FormattedMessage from "./FormattedMessage";
@@ -26,6 +22,7 @@ import ProgressOrError from "./ProgressOrError";
 import Table from "./Table";
 import withModulesManager from "../../helpers/modules";
 import { formatMessage } from "../../helpers/i18n";
+import { sort, formatSorter } from "../../helpers/api"
 import { cacheFilters } from "../../actions";
 
 const styles = theme => ({
@@ -296,45 +293,14 @@ class Searcher extends Component {
             e => a(s));
     }
 
-
-    sort = (attr, asc = true) => {
-        let targetSort = null;
-        if (this.state.orderBy === attr) {
-            targetSort = '-' + attr
-        } else if (this.state.orderBy === '-' + attr) {
-            targetSort = attr
-        } else {
-            targetSort = asc ? attr : '-' + attr
-        }
-        this.setState({ orderBy: targetSort },
-            e => this.props.fetch(this.filtersToQueryParams()))
-    }
-
-    formatSorter = (attr, asc) => {
-        if (!this.props.sorts) return null;
-        if (this.state.orderBy === attr) {
-            return (
-                <IconButton size="small">
-                    <SortAscIcon size={24} />
-                </IconButton>)
-        } else if (this.state.orderBy === '-' + attr) {
-            return (
-                <IconButton size="small">
-                    <SortDescIcon size={24} />
-                </IconButton>)
-        } else {
-            return (
-                <IconButton size="small">
-                    <SortIcon size={24} />
-                </IconButton>)
-        }
-    }
-
     headerActions = (filters) => {
         if (!!this.props.headerActions) return this.props.headerActions(filters);
         if (!!this.props.sorts) {
             return this.props.sorts(filters)
-                .map(s => !!s ? [() => this.sort(s[0], s[1]), () => this.formatSorter(s[0], s[1])] : [null, () => null]);
+                .map(s => !!s ? [
+                    () => this.setState((state, props) => ({ orderBy: sort(state.orderBy, s[0], s[1]) }), e => this.props.fetch(this.filtersToQueryParams())),
+                    () => formatSorter(this.state.orderBy, s[0], s[1])
+                ] : [null, () => null]);
         }
         return [];
     }

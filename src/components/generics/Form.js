@@ -64,18 +64,18 @@ class Form extends Component {
                     <Grid container>
                         <Grid item xs={12}>
                             <Paper className={classes.paper}>
-                                <Grid container alignItems="center" direction="row">
+                                <Grid container alignItems="center" direction="row" className={classes.paperHeader}>
                                     <Grid item xs={8}>
                                         <Grid container alignItems="center">
                                             {!!back && (
-                                                <Grid item className={classes.paperHeader}>
+                                                <Grid item>
                                                     <IconButton onClick={back}>
                                                         <ChevronLeftIcon />
                                                     </IconButton>
                                                 </Grid>
                                             )}
                                             {!!title && (
-                                                <Grid item className={classes.paperHeader}>
+                                                <Grid item>
                                                     <Typography variant="h6"><FormattedMessage module={module} id={title} values={titleParams} /></Typography>
                                                 </Grid>
                                             )}

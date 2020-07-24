@@ -10,6 +10,7 @@ import DefaultSearchIcon from "@material-ui/icons/Search";
 import FormattedMessage from "./FormattedMessage";
 
 const styles = theme => ({
+    paper: theme.paper.body,
     paperHeader: theme.paper.header,
     paperHeaderTitle: theme.paper.title,
     paperHeaderAction: theme.paper.action,
@@ -21,12 +22,12 @@ class SearcherPane extends Component {
     render() {
         const { classes, module, title = "search.title", split= 8, filterPane, resultsPane = null, refresh, actions, SearchIcon = null } = this.props;
         return (
-            <Paper>
-                <Grid container className={classes.paperHeader}>
+            <Paper className={classes.paper}>
+                <Grid container>
                     <Grid item xs={split} className={classes.paperHeaderTitle}>
                         <FormattedMessage module={module} id={title} />
                     </Grid>
-                    <Grid item xs={12 - split}>
+                    <Grid item xs={12 - split}  className={classes.paperHeader}>
                         {(!!actions || !!refresh) && (
                             <Grid container justify="flex-end">
                                 {!!actions && actions.map((a, idx) =>

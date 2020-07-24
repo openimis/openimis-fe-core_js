@@ -9,6 +9,7 @@ import {
     Paper,
     Divider,
     Typography,
+    IconButton,
     Button,
     Menu,
     MenuItem,
@@ -77,20 +78,22 @@ class SelectionMenu extends Component {
     }
 
     renderButtons = (entries) => (
-        <Fragment>
-            {entries.map((i, idx) => (
-                <Grid key={`selectionsButtons-${idx}`} item className={this.props.classes.paperHeaderAction}>
-                    <Button onClick={e => this.action(i.action)}>{i.text}</Button>
-                </Grid>
-            ))}
-        </Fragment>
+        <Grid item className={this.props.classes.paperHeader}>
+            <Grid container alignItems="center" className={this.props.classes.paperHeaderAction}>
+                {entries.map((i, idx) => (
+                    <Grid key={`selectionsButtons-${idx}`} item className={this.props.classes.paperHeaderAction}>
+                        <Button onClick={e => this.action(i.action)}>{i.text}</Button>
+                    </Grid>
+                ))}
+            </Grid>
+        </Grid>
     )
 
     renderMenu = (entries) => {
         return (
-            <Grid item className={this.props.classes.paperHeaderAction}>
+            <Grid item className={this.props.classes.paperHeader}>
                 <Grid container alignItems="center">
-                    <Grid item className={this.props.classes.paperHeader}>
+                    <Grid item className={this.props.classes.paperHeaderAction}>
                         <IconButton onClick={this.openMenu}><MoreHoriz /></IconButton>
                     </Grid>
                 </Grid>
@@ -346,8 +349,8 @@ class Searcher extends Component {
                         <ProgressOrError progress={fetchingItems} error={errorItems} />
                         {!!fetchedItems && !errorItems && (
                             <Fragment>
-                                <Grid item xs={8}>
-                                    <Grid container alignItems="center" className={classes.paperHeader}>
+                                <Grid item xs={8} className={classes.paperHeader}>
+                                    <Grid container alignItems="center">
                                         <Grid item xs={8} className={classes.paperHeaderTitle}>
                                             {tableTitle}
                                         </Grid>
@@ -360,8 +363,8 @@ class Searcher extends Component {
                                         </Grid>
                                     </Grid>
                                 </Grid>
-                                <Grid item xs={4}>
-                                    <Grid container direction="row" justify="flex-end">
+                                <Grid item xs={4} className={classes.paperHeader}>
+                                    <Grid container direction="row" justify="flex-end" className={classes.paperHeaderAction}>
                                         <StyledSelectionMenu
                                             canSelectAll={canSelectAll}
                                             selection={this.state.selection}

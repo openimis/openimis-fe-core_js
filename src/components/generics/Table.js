@@ -111,7 +111,7 @@ class Table extends Component {
             preHeaders, headers, aligns = [], headerSpans = [], headerActions = [], colSpans = [],
             items, itemFormatters,
             rowHighlighted = null, rowHighlightedAlt = null, rowDisabled = null, rowLocked = null,
-            withPagination = false, page, pageSize, count, rowsPerPageOptions = [10, 20, 50],
+            withPagination = false, page = 0, pageSize, count, rowsPerPageOptions = [10, 20, 50],
             onChangeRowsPerPage, onChangePage, onDoubleClick, onDelete = null,
             fetching = null, error = null } = this.props;
         let localHeaders = [...headers];
@@ -137,6 +137,7 @@ class Table extends Component {
             );
         }
         var colsCount = (!!localHeaders && localHeaders.length) || (localItemFormatters.length);
+        var rowsPerPage = pageSize || rowsPerPageOptions[0]
         return (
             <Fragment>
                 {header &&
@@ -239,7 +240,7 @@ class Table extends Component {
                                     labelDisplayedRows={({ from, to, count }) => `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`}
                                     count={count}
                                     page={page}
-                                    rowsPerPage={pageSize}
+                                    rowsPerPage={rowsPerPage}
                                     rowsPerPageOptions={rowsPerPageOptions}
                                     onChangeRowsPerPage={e => onChangeRowsPerPage(e.target.value)}
                                     onChangePage={onChangePage}

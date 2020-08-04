@@ -4,6 +4,7 @@ import { injectIntl } from 'react-intl';
 import { FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
 import FormattedMessage from "../generics/FormattedMessage";
 import TextInput from "./TextInput";
+import _ from "lodash-uuid";
 
 const styles = theme => ({
     label: {
@@ -46,7 +47,7 @@ class SelectInput extends Component {
                             readOnly={readOnly}
                             inputProps={{
                                 name: name,
-                                id: `${module}-${label || strLabel}-input`,
+                                id: `${_.uuid()}-input`,
                             }}
                             value={!!value ? JSON.stringify(value) : "null"}
                             onChange={this._onChange}

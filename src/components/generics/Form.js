@@ -124,7 +124,7 @@ class Form extends Component {
                         </Grid>
                     ))}
                     {!!contributedPanelsKey && (
-                        <Contributions {...this.props} contributionKey={contributedPanelsKey}/>
+                        <Contributions {...this.props} onEditedChanged={this.onEditedChanged} contributionKey={contributedPanelsKey}/>
                     )}
 
                 </form >

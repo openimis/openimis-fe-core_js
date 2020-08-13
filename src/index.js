@@ -32,7 +32,7 @@ import YearPicker from "./pickers/YearPicker";
 import MonthPicker from "./pickers/MonthPicker";
 import reducer from "./reducer";
 import { baseApiUrl, apiHeaders, graphql, journalize, coreAlert, coreConfirm } from './actions';
-import { formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount } from './helpers/i18n';
+import { formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount, withTooltip } from './helpers/i18n';
 import {
   decodeId, encodeId, formatQuery, formatPageQuery, formatPageQueryWithCount,
   parseData, pageInfo, formatServerError, formatGraphQLError, formatMutation,
@@ -74,7 +74,7 @@ export {
   formatQuery, formatPageQuery, formatPageQueryWithCount, formatMutation,
   dispatchMutationReq, dispatchMutationResp, dispatchMutationErr,
   parseData, pageInfo, formatServerError, formatGraphQLError,
-  formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount, formatJsonField,
+  formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount, formatJsonField, withTooltip,
   App, AutoSuggestion, Contributions, ControlledField, Picker,
   Error, FatalError, AlertForwarder,
   SelectInput, TextInput, TextAreaInput, AmountInput, FakeInput, YearPicker, MonthPicker,

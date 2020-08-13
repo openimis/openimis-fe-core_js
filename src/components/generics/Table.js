@@ -114,7 +114,7 @@ class Table extends Component {
             withPagination = false, page = 0, pageSize, count, rowsPerPageOptions = [10, 20, 50],
             onChangeRowsPerPage, onChangePage, onDoubleClick, onDelete = null,
             fetching = null, error = null } = this.props;
-        let localHeaders = [...headers];
+        let localHeaders = [...(headers || [])];
         let localPreHeaders = !!preHeaders ? [...preHeaders] : null;
         let localItemFormatters = [...itemFormatters];
         var i = !!headers && headers.length

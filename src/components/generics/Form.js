@@ -8,6 +8,7 @@ import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import FormattedMessage from "./FormattedMessage";
 import Contributions from "./Contributions";
 import withHistory from "../../helpers/history";
+import { withTooltip } from "../../helpers/i18n";
 import _ from "lodash";
 
 const styles = theme => ({
@@ -89,9 +90,10 @@ class Form extends Component {
                                                     if (!!a.onlyIfNotDirty && !!this.state.dirty) return null;
                                                     return (
                                                         <Grid item key={`form-action-${idx}`} className={classes.paperHeaderAction}>
-                                                            <IconButton onClick={a.doIt}>
-                                                                {a.icon}
-                                                            </IconButton>
+                                                            {withTooltip(
+                                                                !!a.button ? a.button : <IconButton onClick={a.doIt}>{a.icon}</IconButton>,
+                                                                a.tooltip
+                                                            )}
                                                         </Grid>
                                                     )
                                                 })}
@@ -124,7 +126,7 @@ class Form extends Component {
                         </Grid>
                     ))}
                     {!!contributedPanelsKey && (
-                        <Contributions {...this.props} onEditedChanged={this.onEditedChanged} contributionKey={contributedPanelsKey}/>
+                        <Contributions {...this.props} onEditedChanged={this.onEditedChanged} contributionKey={contributedPanelsKey} />
                     )}
 
                 </form >

@@ -36,7 +36,7 @@ class FormPanel extends Component {
     updateExts = updates => {       
         let data = { ...this.state.data };
         updates.forEach(update => {
-            data["ext"][update.attr] = update.v
+            data["jsonExt"][update.attr] = update.v
         });
         this.props.onEditedChanged(data);
     }

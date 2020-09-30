@@ -8,7 +8,7 @@ import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import FormattedMessage from "./FormattedMessage";
 import Contributions from "./Contributions";
 import withHistory from "../../helpers/history";
-import { withTooltip } from "../../helpers/i18n";
+import { withTooltip, formatMessage } from "../../helpers/i18n";
 import _ from "lodash";
 
 const styles = theme => ({
@@ -55,8 +55,9 @@ class Form extends Component {
     }
 
     render() {
-        const { classes, module, back, add, openDirty = false,
-            save, canSave, actions = [],
+        const { classes, module, back, add, addTooltip,
+            openDirty = false,
+            save, canSave, saveTooltip, actions = [],
             fab = null, fabAction = null, fabTooltip = null,
             title, titleParams = [], HeadPanel, Panels, contributedPanelsKey = null, ...others } = this.props;
         return (
@@ -131,37 +132,38 @@ class Form extends Component {
 
                 </form >
                 {!this.state.dirty && !!add && (
-                    <Fab color="primary"
-                        className={classes.fab}
-                        onClick={add}>
-                        <AddIcon />
-                    </Fab>
+                    withTooltip(
+                        <div className={classes.fab}>
+                            <Fab color="primary"
+                                onClick={add}>
+                                <AddIcon />
+                            </Fab>
+                        </div>,
+                        addTooltip || formatMessage(this.props.intl, module, "addTooltip")
+                    )
                 )}
                 {(!!this.state.dirty || !!openDirty) && !!save && (
-                    <Fab color="primary"
-                        disabled={!!this.state.saving || (!!canSave && !canSave())}
-                        className={classes.fab}
-                        onClick={e => this.save(this.props.edited)}>
-                        <SaveIcon />
-                    </Fab>
+                    withTooltip(
+                        <div className={classes.fab}>
+                            <Fab color="primary"
+                                disabled={!!this.state.saving || (!!canSave && !canSave())}
+                                onClick={e => this.save(this.props.edited)}>
+                                <SaveIcon />
+                            </Fab>
+                        </div>,
+                        saveTooltip || formatMessage(this.props.intl, module, "saveTooltip")
+                    )
                 )}
-                {!this.state.dirty && !!fab && !!fabTooltip && (
-                    <Tooltip title={fabTooltip}>
-                        <Fab color="primary"
-                            disabled={!!this.state.saving || (!!canSave && !canSave())}
-                            className={classes.fab}
-                            onClick={e => fabAction(this.props.edited)}>
-                            {fab}
-                        </Fab>
-                    </Tooltip>
-                )}
-                {!this.state.dirty && !!fab && !fabTooltip && (
-                    <Fab color="primary"
-                        disabled={!!this.state.saving || (!!canSave && !canSave())}
-                        className={classes.fab}
-                        onClick={e => fabAction(e)}>
-                        {fab}
-                    </Fab>
+                {!this.state.dirty && !!fab && (
+                    withTooltip(
+                        <div className={classes.fab}>
+                            <Fab color="primary"
+                                onClick={e => fabAction(this.props.edited)}>
+                                {fab}
+                            </Fab>
+                        </div>,
+                        fabTooltip
+                    )
                 )}
             </Fragment>
         )

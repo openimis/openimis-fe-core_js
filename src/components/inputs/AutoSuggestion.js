@@ -124,7 +124,7 @@ class AutoSuggestion extends Component {
             value: '',
             selected: null
         },
-            e => this.props.onSuggestionSelected(null)
+            e => !!this.props.onClear ? this.props.onClear() : this.props.onSuggestionSelected(null)
         );
     }
 
@@ -209,10 +209,10 @@ class AutoSuggestion extends Component {
         )
     }
 
-    _onOptionSelected = (o) => {
+    _onOptionSelected = (selected) => {
         this.setState(
-            { selected: o },
-            e => this.props.onSuggestionSelected(o)
+            { selected },
+            e => this.props.onSuggestionSelected(selected)
         )
     }
 

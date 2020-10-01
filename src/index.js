@@ -37,7 +37,7 @@ import {
   decodeId, encodeId, formatQuery, formatPageQuery, formatPageQueryWithCount,
   parseData, pageInfo, formatServerError, formatGraphQLError, formatMutation,
   dispatchMutationReq, dispatchMutationResp, dispatchMutationErr, openBlob,
-  sort, formatSorter
+  sort, formatSorter, formatGQLString
 } from './helpers/api';
 import withHistory, { historyPush } from "./helpers/history";
 import withModulesManager from './helpers/modules';
@@ -74,7 +74,7 @@ export {
   formatQuery, formatPageQuery, formatPageQueryWithCount, formatMutation,
   dispatchMutationReq, dispatchMutationResp, dispatchMutationErr,
   parseData, pageInfo, formatServerError, formatGraphQLError,
-  formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount, formatJsonField, withTooltip,
+  formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount, formatGQLString, formatJsonField, withTooltip,
   App, AutoSuggestion, Contributions, ControlledField, Picker,
   Error, FatalError, AlertForwarder,
   SelectInput, TextInput, TextAreaInput, AmountInput, FakeInput, YearPicker, MonthPicker,

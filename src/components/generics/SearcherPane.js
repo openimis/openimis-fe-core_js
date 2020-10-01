@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from "react";
+import { injectIntl } from 'react-intl';
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import {
     Grid,
@@ -6,8 +7,9 @@ import {
     Divider,
     IconButton,
 } from "@material-ui/core";
-import DefaultSearchIcon from "@material-ui/icons/Search";
+import { YoutubeSearchedFor as ResetFilterIcon, Search as DefaultSearchIcon } from "@material-ui/icons";
 import FormattedMessage from "./FormattedMessage";
+import { withTooltip, formatMessage } from "../../helpers/i18n";
 
 const styles = theme => ({
     paper: theme.paper.body,
@@ -20,14 +22,17 @@ const styles = theme => ({
 class SearcherPane extends Component {
 
     render() {
-        const { classes, module, title = "search.title", split= 8, filterPane, resultsPane = null, refresh, actions, SearchIcon = null } = this.props;
+        const { classes, module, title = "search.title", split = 8, filterPane, resultsPane = null,
+            reset, resetTooltip,
+            refresh, refreshTooltip,
+            actions, SearchIcon = null } = this.props;
         return (
             <Paper className={classes.paper}>
                 <Grid container>
                     <Grid item xs={split} className={classes.paperHeaderTitle}>
                         <FormattedMessage module={module} id={title} />
                     </Grid>
-                    <Grid item xs={12 - split}  className={classes.paperHeader}>
+                    <Grid item xs={12 - split} className={classes.paperHeader}>
                         {(!!actions || !!refresh) && (
                             <Grid container justify="flex-end">
                                 {!!actions && actions.map((a, idx) =>
@@ -37,13 +42,24 @@ class SearcherPane extends Component {
                                         </IconButton>
                                     </Grid>
                                 )}
+                                {!!reset &&
+                                    withTooltip(
+                                        <Grid item key={`action-reset`} className={classes.paperHeaderAction}>
+                                            <IconButton onClick={reset}>
+                                                <ResetFilterIcon />
+                                            </IconButton>
+                                        </Grid>,
+                                        resetTooltip || formatMessage(this.props.intl, module, "resetFilterTooltip")
+                                    )}
                                 {!!refresh &&
-                                    <Grid item key={`action-refresh`} className={classes.paperHeaderAction}>
-                                        <IconButton onClick={refresh}>
-                                            {!!SearchIcon ? (<SearchIcon />) : (<DefaultSearchIcon />)}
-                                        </IconButton>
-                                    </Grid>
-                                }
+                                    withTooltip(
+                                        <Grid item key={`action-refresh`} className={classes.paperHeaderAction}>
+                                            <IconButton onClick={refresh}>
+                                                {!!SearchIcon ? (<SearchIcon />) : (<DefaultSearchIcon />)}
+                                            </IconButton>
+                                        </Grid>,
+                                        refreshTooltip || formatMessage(this.props.intl, module, "refreshFilterTooltip")
+                                    )}
                             </Grid>
                         )}
                     </Grid>
@@ -71,4 +87,4 @@ class SearcherPane extends Component {
     }
 }
 
-export default withTheme(withStyles(styles)(SearcherPane));
+export default injectIntl(withTheme(withStyles(styles)(SearcherPane)));

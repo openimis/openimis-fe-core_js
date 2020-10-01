@@ -186,6 +186,15 @@ class Searcher extends Component {
         return prms;
     }
 
+    resetFilters = () => {
+        this.setState((state, props) => ({
+            filters: { ...this.props.defaultFilters },
+            orderBy: props.defaultOrderBy
+        }),
+            e => this.applyFilters()
+        );
+    }
+
     onChangeFilters = (fltrs) => {
         let filters = { ...this.state.filters };
         fltrs.forEach(filter => {
@@ -331,6 +340,7 @@ class Searcher extends Component {
                 {!!FilterPane && (
                     <SearcherPane
                         module={module}
+                        reset={this.resetFilters}
                         refresh={this.applyFilters}
                         del={this.deleteFilter}
                         filters={this.state.filters}

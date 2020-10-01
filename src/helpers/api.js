@@ -53,6 +53,18 @@ export function formatPageQueryWithCount(entity, filters, projections) {
     }`
 }
 
+export function formatGQLString(str) {
+  if (!str) return str;
+  return str.replace(/[\"]/g, '\\"')
+    .replace(/[\\]/g, '\\\\')
+    .replace(/[\/]/g, '\\/')
+    .replace(/[\b]/g, '\\b')
+    .replace(/[\f]/g, '\\f')
+    .replace(/[\n]/g, '\\n')
+    .replace(/[\r]/g, '\\r')
+    .replace(/[\t]/g, '\\t');
+}
+
 export function formatMutation(service, input, clientMutationLabel, clientMutationDetails) {
   const clientMutationId = _.uuid();
   const payload = `

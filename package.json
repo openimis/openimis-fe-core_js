@@ -1,6 +1,7 @@
 {
   "name": "@openimis/fe-core",
   "version": "1.2.0-rc12",
+  "version": "1.2.0-rc9",
   "description": "openIMIS Frontend Core reference module",
   "license": "AGPL-3.0-only",
   "repository": "git://github.com/openimis/openimis-fe-core_js.git",

@@ -162,6 +162,7 @@ class Searcher extends Component {
         var filters = this.props.filtersCache[this.props.cacheFiltersKey] || this.props.defaultFilters || {}
         this.setState((state, props) => ({
             filters,
+            pageSize: props.defaultPageSize || 10,
             orderBy: props.defaultOrderBy,
         }),
             e => this.applyFilters()

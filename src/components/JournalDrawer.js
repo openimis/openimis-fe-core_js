@@ -7,7 +7,7 @@ import {
     CircularProgress, ClickAwayListener, List, ListItem, ListItemText, ListItemIcon,
     Drawer, Divider, IconButton, Grid, Popover, Typography,
     Collapse,
-    ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails
+    Accordion, AccordionSummary, AccordionDetails
 } from "@material-ui/core";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
@@ -103,25 +103,25 @@ class Messages extends Component {
     formatSingleMessage = (message, idx) => {
         if (message.hasOwnProperty("message")) {
             return (
-                <ExpansionPanel key={`message-${idx}-panel`}
+                <Accordion key={`message-${idx}-panel`}
                     expanded={message.hasOwnProperty("detail") && this.state.expanded === `message-${idx}`}
                     onChange={this.handleChange(`message-${idx}`)}
                     className={this.props.classes.errorPanel}
                 >
-                    <ExpansionPanelSummary
+                    <AccordionSummary
                         id={`message-${idx}-header`}
                         expandIcon={message.hasOwnProperty("detail") && <ExpandMoreIcon />}
                     >
                         <Typography variant="caption">{message.hasOwnProperty("code") ? `[${message.code}] ` : ""}{message.message}</Typography>
-                    </ExpansionPanelSummary>
+                    </AccordionSummary>
                     {message.hasOwnProperty("detail") &&
-                        <ExpansionPanelDetails>
+                        <AccordionDetails>
                             <Typography variant="caption">
                                 {message.detail}
                             </Typography>
-                        </ExpansionPanelDetails>
+                        </AccordionDetails>
                     }
-                </ExpansionPanel >
+                </Accordion >
             )
         } else if (message.hasOwnProperty("clientMutationLabel")) {
             return <Grid key={`message-${idx}-panel`} item className={this.props.classes.messagePanel}>{message.clientMutationLabel}</Grid>
@@ -133,18 +133,18 @@ class Messages extends Component {
     formatMessage = (message, idx) => {
         if (message.hasOwnProperty('title')) {
             return (
-                <ExpansionPanel key={`groupMessage-${idx}-panel`}
+                <Accordion key={`groupMessage-${idx}-panel`}
                     expanded={this.state.groupExpanded === `groupMessage-${idx}`}
                     onChange={this.handleGroupChange(`groupMessage-${idx}`)}
                     className={this.props.classes.groupMessagePanel}
                 >
-                    <ExpansionPanelSummary
+                    <AccordionSummary
                         id={`groupMessage-${idx}-header`}
                         expandIcon={<ExpandMoreIcon />}
                     >
                         <Typography variant="caption">{message.title}</Typography>
-                    </ExpansionPanelSummary>
-                    <ExpansionPanelDetails className={this.props.classes.groupMessagePanel}>
+                    </AccordionSummary>
+                    <AccordionDetails className={this.props.classes.groupMessagePanel}>
                         <Grid container spacing={0}>
                             {message.list.map((m, i) => (
                                 <Grid item xs={12}>
@@ -152,9 +152,9 @@ class Messages extends Component {
                                 </Grid>))
                             }
                         </Grid>
-                    </ExpansionPanelDetails>
+                    </AccordionDetails>
 
-                </ExpansionPanel >
+                </Accordion >
             )
         } else {
             return this.formatSingleMessage(message, idx)

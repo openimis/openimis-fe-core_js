@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { injectIntl } from 'react-intl';
 import {
@@ -97,31 +97,17 @@ class Picker extends Component {
 
     _suggestionFormatter = a => <FakeInput onSelect={e => this._onSelect(a)} value={this.props.suggestionFormatter(a)} />
 
-    render() {
+    renderIcon() {
+        const { IconRender, title } = this.props;
+        return <IconButton title={title} onClick={() => this.setState({ open: true })}><IconRender /></IconButton>
+    }
+
+    renderField() {
         const { intl, classes, module, label, dialogTitle, dialogClose, dialogSelect, filter,
             suggestions, suggestionFormatter, count, page, pageSize,
             onChangeRowsPerPage, onChangePage, value, readOnly = false, required = false } = this.props;
         return (
             <FormControl fullWidth>
-                {!readOnly && (
-                    <PickerDialog
-                        open={this.state.open}
-                        onClose={this.onClose}
-                        onSelect={this._onSelect}
-                        module={module}
-                        title={dialogTitle}
-                        close={dialogClose}
-                        select={dialogSelect}
-                        filter={filter}
-                        suggestions={suggestions}
-                        suggestionFormatter={this._suggestionFormatter}
-                        count={count}
-                        pageSize={pageSize}
-                        page={page}
-                        onChangeRowsPerPage={onChangeRowsPerPage}
-                        onChangePage={onChangePage}
-                    />
-                )}
                 <TextField className={classes.picker}
                     disabled={readOnly}
                     required={required}
@@ -145,6 +131,36 @@ class Picker extends Component {
                     }}
                 />
             </FormControl>
+        )
+    }
+    render() {
+        const { module, dialogTitle, dialogClose, dialogSelect, filter,
+            suggestions, count, page, pageSize,
+            onChangeRowsPerPage, onChangePage, readOnly = false, IconRender } = this.props;
+        return (
+            <Fragment>
+                {!readOnly && (
+                    <PickerDialog
+                        open={this.state.open}
+                        onClose={this.onClose}
+                        onSelect={this._onSelect}
+                        module={module}
+                        title={dialogTitle}
+                        close={dialogClose}
+                        select={dialogSelect}
+                        filter={filter}
+                        suggestions={suggestions}
+                        suggestionFormatter={this._suggestionFormatter}
+                        count={count}
+                        pageSize={pageSize}
+                        page={page}
+                        onChangeRowsPerPage={onChangeRowsPerPage}
+                        onChangePage={onChangePage}
+                    />
+                )}
+                {!!IconRender && this.renderIcon()}
+                {!IconRender && this.renderField()}
+            </Fragment>
         )
     }
 }

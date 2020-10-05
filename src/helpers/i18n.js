@@ -1,3 +1,5 @@
+import React from "react";
+import { Tooltip } from "@material-ui/core";
 import moment from "moment";
 import { formatDateFromISO as adFormateDateFromISO } from "../pickers/AdDateFormatter";
 import { formatDateFromISO as neFormateDateFromISO } from "../pickers/NeDateFormatter";
@@ -28,7 +30,7 @@ export function formatDateFromISO(mm, intl, date) {
     if (mm.getConf("fe-core", "datePicker") === "ne") {
         return neFormateDateFromISO(date);
     }
-    return adFormateDateFromISO(intl, date);
+    return adFormateDateFromISO(mm, intl, date);
 }
 
 export function toISODate(d) {
@@ -38,4 +40,8 @@ export function toISODate(d) {
     a[1] = ('00' + (a[1] + 1)).slice(-2);
     a[2] = ('00' + a[2]).slice(-2);
     return a.join('-');
+}
+
+export function withTooltip(c, t) {
+    return !!t ? <Tooltip title={t}>{c}</Tooltip> : c
 }

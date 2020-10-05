@@ -2,12 +2,14 @@ import React, { Component, Fragment } from "react";
 import classNames from "classnames";
 import { injectIntl } from 'react-intl';
 import _ from "lodash";
+import DeleteIcon from "@material-ui/icons/Delete";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import {
-    Typography, Divider, Box,
+    Typography, Divider, Box, IconButton,
     Table as MUITable, TableRow, TableHead, TableBody, TableCell, TableFooter, TablePagination
 } from "@material-ui/core";
 import FormattedMessage from "./FormattedMessage";
+import ProgressOrError from "./ProgressOrError";
 import withModulesManager from "../../helpers/modules";
 import { formatMessage, formatMessageWithValues } from "../../helpers/i18n";
 
@@ -45,14 +47,14 @@ class Table extends Component {
     }
 
     _atom = (a) => !!a && a.reduce(
-        (m, i) => { m[this.props.itemIdentifier(i)] = i; return m },
+        (m, i) => { m[this.itemIdentifier(i)] = i; return m },
         {}
     )
 
     componentDidMount() {
         if (this.props.withSelection) {
             this.setState((state, props) => ({
-                selection: this._atom(props.selection)
+                selection: this._atom(props.selection || [])
             }))
         }
     }
@@ -60,8 +62,8 @@ class Table extends Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (this.props.withSelection && prevProps.selectAll !== this.props.selectAll) {
             this.setState((state, props) => ({
-                    selection: _.merge(state.selection, this._atom(props.items)) 
-                }),
+                selection: _.merge(state.selection, this._atom(props.items))
+            }),
                 e => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection))
             )
         }
@@ -73,16 +75,27 @@ class Table extends Component {
         }
     }
 
-    isSelected = i => !!this.props.withSelection && !!this.state.selection[this.props.itemIdentifier(i)]
+    itemIdentifier = (i) => {
+        if (!!this.props.itemIdentifier) {
+            return this.props.itemIdentifier(i);
+        }
+        else {
+            return i.uuid;
+        }
+    }
+
+    isSelected = i => !!this.props.withSelection && !!this.state.selection[this.itemIdentifier(i)]
 
     select = i => {
         if (!this.props.withSelection) return;
         let s = this.state.selection;
-        let id = this.props.itemIdentifier(i);
+        let id = this.itemIdentifier(i);
         if (!!s[id]) {
             delete (s[id]);
-        } else {
+        } else if (this.props.withSelection === "multiple") {
             s[id] = i;
+        } else {
+            s = { [id]: i }
         }
         this.setState(
             { selection: s },
@@ -98,20 +111,33 @@ class Table extends Component {
             preHeaders, headers, aligns = [], headerSpans = [], headerActions = [], colSpans = [],
             items, itemFormatters,
             rowHighlighted = null, rowHighlightedAlt = null, rowDisabled = null, rowLocked = null,
-            withPagination = false, page, pageSize, count, rowsPerPageOptions = [10, 20, 50],
-            onChangeRowsPerPage, onChangePage, onDoubleClick } = this.props;
+            withPagination = false, page = 0, pageSize, count, rowsPerPageOptions = [10, 20, 50],
+            onChangeRowsPerPage, onChangePage, onDoubleClick, onDelete = null,
+            fetching = null, error = null } = this.props;
+        let localHeaders = [...(headers || [])];
+        let localPreHeaders = !!preHeaders ? [...preHeaders] : null;
+        let localItemFormatters = [...itemFormatters];
         var i = !!headers && headers.length
-        while (!!headers && i--) {
-            if (!!modulesManager && modulesManager.hideField(module, headers[i])) {
-                if (!!preHeaders) preHeaders.splice(i, 1);
+        while (!!localHeaders && i--) {
+            if (!!modulesManager && modulesManager.hideField(module, localHeaders[i])) {
+                if (!!localPreHeaders) localPreHeaders.splice(i, 1);
                 if (!!aligns && aligns.length > i) aligns.splice(i, 1);
                 if (!!headerSpans && headerSpans.length > i) headerSpans.splice(i, 1);
                 if (!!headerActions && headerActions.length > i) headerActions.splice(i, 1);
                 if (!!colSpans && colSpans.length > i) colSpans.splice(i, 1);
-                headers.splice(i, 1);
-                itemFormatters.splice(i, 1);
+                localHeaders.splice(i, 1);
+                localItemFormatters.splice(i, 1);
             }
         }
+        if (!!onDelete) {
+            if (!!localPreHeaders) localPreHeaders.push("")
+            localHeaders.push("")
+            localItemFormatters.push(
+                (i, idx) => <IconButton onClick={e => onDelete(idx)}><DeleteIcon /></IconButton>
+            );
+        }
+        var colsCount = (!!localHeaders && localHeaders.length) || (localItemFormatters.length);
+        var rowsPerPage = pageSize || rowsPerPageOptions[0]
         return (
             <Fragment>
                 {header &&
@@ -123,10 +149,10 @@ class Table extends Component {
                     </Fragment>
                 }
                 <MUITable className={classes.table}>
-                    {!!preHeaders && preHeaders.length > 0 && (
+                    {!!localPreHeaders && localPreHeaders.length > 0 && (
                         <TableHead>
                             <TableRow>
-                                {preHeaders.map((h, idx) => {
+                                {localPreHeaders.map((h, idx) => {
                                     if (headerSpans.length > idx && !headerSpans[idx]) return null;
                                     return <TableCell
                                         colSpan={headerSpans.length > idx ? headerSpans[idx] : 1}
@@ -137,22 +163,24 @@ class Table extends Component {
                             </TableRow>
                         </TableHead>
                     )}
-                    {!!headers && headers.length > 0 && (
+                    {!!localHeaders && localHeaders.length > 0 && (
                         <TableHead>
                             <TableRow>
-                                {headers.map((h, idx) => {
+                                {localHeaders.map((h, idx) => {
                                     if (headerSpans.length > idx && !headerSpans[idx]) return null;
                                     return (<TableCell
                                         colSpan={headerSpans.length > idx ? headerSpans[idx] : 1}
                                         className={classes.tableCell}
-                                        key={`h-${idx}`}>
+                                        key={`h-${idx}`}
+                                    >
                                         {!!h && (
-                                            <div style={{ width: '100%' }}>
+                                            <div style={{ width: '100%', cursor: headerActions.length > idx && !!headerActions[idx][0] ? 'pointer' : '' }}
+                                                onClick={headerActions.length > idx ? headerActions[idx][0] : null}>
                                                 <Box display="flex" className={classes.tableHeader} alignItems="center">
                                                     <Box>
                                                         <FormattedMessage module={module} id={h} />
                                                     </Box>
-                                                    {headerActions.length > idx ? this.headerAction(headerActions[idx]) : null}
+                                                    {headerActions.length > idx ? this.headerAction(headerActions[idx][1]) : null}
                                                 </Box>
                                             </div>
                                         )}
@@ -163,6 +191,11 @@ class Table extends Component {
                         </TableHead>
                     )}
                     <TableBody>
+                        {(!!fetching || !!error) && (
+                            <TableRow>
+                                <TableCell colSpan={colsCount}><ProgressOrError progress={fetching} error={error} /></TableCell>
+                            </TableRow>
+                        )}
                         {items && items.length > 0 && items.map((i, iidx) => (
                             <TableRow key={iidx}
                                 selected={this.isSelected(i)}
@@ -176,7 +209,7 @@ class Table extends Component {
                                     !!rowDisabled && rowDisabled(i) ? classes.tableDisabledRow : null,
                                 )}
                             >
-                                {itemFormatters && itemFormatters.map((f, fidx) => {
+                                {localItemFormatters && localItemFormatters.map((f, fidx) => {
                                     if (colSpans.length > fidx && !colSpans[fidx]) return null;
                                     return (
                                         <TableCell
@@ -202,12 +235,12 @@ class Table extends Component {
                             <TableRow>
                                 <TablePagination
                                     className={classes.pager}
-                                    colSpan={itemFormatters.length}
+                                    colSpan={localItemFormatters.length}
                                     labelRowsPerPage={formatMessage(intl, "core", "rowsPerPage")}
                                     labelDisplayedRows={({ from, to, count }) => `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`}
                                     count={count}
                                     page={page}
-                                    rowsPerPage={pageSize}
+                                    rowsPerPage={rowsPerPage}
                                     rowsPerPageOptions={rowsPerPageOptions}
                                     onChangeRowsPerPage={e => onChangeRowsPerPage(e.target.value)}
                                     onChangePage={onChangePage}

@@ -10,6 +10,7 @@ const styles = theme => ({
         marginRight: "auto",       
         marginTop: theme.spacing(1),
         marginBottom: theme.spacing(1),
+        align: "center",
     }
 });
 

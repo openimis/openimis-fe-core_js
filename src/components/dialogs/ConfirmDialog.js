@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { bindActionCreators } from "redux";
 import { injectIntl } from 'react-intl';
 import { connect } from "react-redux";
+import { withTheme, withStyles } from "@material-ui/core/styles";
 import {
     Button,
     Dialog,
@@ -13,7 +14,12 @@ import {
 import { clearConfirm } from "../../actions";
 import { formatMessage } from "../../helpers/i18n";
 
-class AlertDialog extends Component {
+const styles = theme => ({
+    primaryButton: theme.dialog.primaryButton,
+    secondaryButton: theme.dialog.secondaryButton,
+})
+
+class ConfirmDialog extends Component {
 
     handleCancel = () => {
         this.props.clearConfirm(false);
@@ -24,7 +30,7 @@ class AlertDialog extends Component {
     };
 
     render() {
-        const { intl, confirm } = this.props;
+        const { intl, classes, confirm } = this.props;
         return (
             <div>
                 <Dialog
@@ -38,11 +44,11 @@ class AlertDialog extends Component {
                         </DialogContent>
                     }
                     <DialogActions>
-                        <Button onClick={this.handleCancel}>
-                            {formatMessage(intl, "core", "cancel")}
-                        </Button>
-                        <Button onClick={this.handleConfirm} color="primary" autoFocus>
+                        <Button onClick={this.handleConfirm} autoFocus  className={classes.primaryButton}>
                             {formatMessage(intl, "core", "ok")}
+                        </Button>
+                        <Button onClick={this.handleCancel}  className={classes.secondaryButton}>
+                            {formatMessage(intl, "core", "cancel")}
                         </Button>
                     </DialogActions>
                 </Dialog>
@@ -59,4 +65,4 @@ const mapDispatchToProps = dispatch => {
         dispatch);
 };
 
-export default injectIntl(connect(null, mapDispatchToProps)(AlertDialog));
+export default withTheme(withStyles(styles)(injectIntl(connect(null, mapDispatchToProps)(ConfirmDialog))));

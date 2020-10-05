@@ -1,4 +1,10 @@
+import React from "react";
 import _ from "lodash-uuid";
+import { IconButton } from "@material-ui/core";
+import SortIcon from "@material-ui/icons/UnfoldMore";
+import SortAscIcon from "@material-ui/icons/ExpandLess";
+import SortDescIcon from "@material-ui/icons/ExpandMore";
+
 
 function _entityAndFilters(entity, filters) {
   return `${entity}${!!filters && filters.length ? `(${filters.join(',')})` : ""}`
@@ -45,6 +51,18 @@ export function formatPageQueryWithCount(entity, filters, projections) {
         ${_pageAndEdges(projections)}
       }
     }`
+}
+
+export function formatGQLString(str) {
+  if (!str) return str;
+  return str.replace(/[\"]/g, '\\"')
+    .replace(/[\\]/g, '\\\\')
+    .replace(/[\/]/g, '\\/')
+    .replace(/[\b]/g, '\\b')
+    .replace(/[\f]/g, '\\f')
+    .replace(/[\n]/g, '\\n')
+    .replace(/[\r]/g, '\\r')
+    .replace(/[\t]/g, '\\t');
 }
 
 export function formatMutation(service, input, clientMutationLabel, clientMutationDetails) {
@@ -143,3 +161,33 @@ export function openBlob(data, filename, mime) {
   }, 100);
 }
 
+export function sort(orderBy, attr, asc = true) {
+  let targetSort = null;
+  if (orderBy === attr) {
+    targetSort = '-' + attr
+  } else if (orderBy === '-' + attr) {
+    targetSort = attr
+  } else {
+    targetSort = asc ? attr : '-' + attr
+  }
+  return targetSort;
+}
+
+export function formatSorter(orderBy, attr, asc) {
+  if (orderBy === attr) {
+    return (
+      <IconButton size="small">
+        <SortAscIcon size={24} />
+      </IconButton>)
+  } else if (orderBy === '-' + attr) {
+    return (
+      <IconButton size="small">
+        <SortDescIcon size={24} />
+      </IconButton>)
+  } else {
+    return (
+      <IconButton size="small">
+        <SortIcon size={24} />
+      </IconButton>)
+  }
+}

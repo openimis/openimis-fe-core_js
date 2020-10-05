@@ -10,6 +10,7 @@ import FieldLabel from "./components/generics/FieldLabel";
 import Form from "./components/generics/Form";
 import FormPanel from "./components/generics/FormPanel";
 import FormattedMessage from "./components/generics/FormattedMessage";
+import PagedDataHandler from "./components/generics/PagedDataHandler";
 import SelectInput from "./components/inputs/SelectInput";
 import TextInput from "./components/inputs/TextInput";
 import TextAreaInput from "./components/inputs/TextAreaInput";
@@ -31,11 +32,12 @@ import YearPicker from "./pickers/YearPicker";
 import MonthPicker from "./pickers/MonthPicker";
 import reducer from "./reducer";
 import { baseApiUrl, apiHeaders, graphql, journalize, coreAlert, coreConfirm } from './actions';
-import { formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount } from './helpers/i18n';
+import { formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount, withTooltip } from './helpers/i18n';
 import {
   decodeId, encodeId, formatQuery, formatPageQuery, formatPageQueryWithCount,
   parseData, pageInfo, formatServerError, formatGraphQLError, formatMutation,
-  dispatchMutationReq, dispatchMutationResp, dispatchMutationErr, openBlob
+  dispatchMutationReq, dispatchMutationResp, dispatchMutationErr, openBlob,
+  sort, formatSorter, formatGQLString
 } from './helpers/api';
 import withHistory, { historyPush } from "./helpers/history";
 import withModulesManager from './helpers/modules';
@@ -65,18 +67,18 @@ export const CoreModule = (cfg) => {
 }
 
 export {
-  baseApiUrl, apiHeaders, graphql, journalize, coreAlert, coreConfirm, openBlob,
+  baseApiUrl, apiHeaders, graphql, journalize, coreAlert, coreConfirm, openBlob, sort, formatSorter,
   withHistory, historyPush,
   decodeId, encodeId,
   withModulesManager,
   formatQuery, formatPageQuery, formatPageQueryWithCount, formatMutation,
   dispatchMutationReq, dispatchMutationResp, dispatchMutationErr,
   parseData, pageInfo, formatServerError, formatGraphQLError,
-  formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount, formatJsonField,
+  formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount, formatGQLString, formatJsonField, withTooltip,
   App, AutoSuggestion, Contributions, ControlledField, Picker,
   Error, FatalError, AlertForwarder,
   SelectInput, TextInput, TextAreaInput, AmountInput, FakeInput, YearPicker, MonthPicker,
-  Form, FormPanel, FieldLabel, FormattedMessage, NumberInput,
+  PagedDataHandler, Form, FormPanel, FieldLabel, FormattedMessage, NumberInput,
   MainMenuContribution, ProgressOrError, ProxyPage, PublishedComponent, Table,
   Searcher, SearcherPane,
   ConstantBasedPicker

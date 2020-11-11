@@ -26,9 +26,9 @@ export function formatQuery(entity, filters, projections) {
   return `
     {
       ${_entityAndFilters(entity, filters)}
-      {
+      ${!!projections ? `{
         ${projections.join(',')}
-      }
+      }`: ''}
     }`
 }
 

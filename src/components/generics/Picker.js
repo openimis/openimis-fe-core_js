@@ -38,7 +38,8 @@ class RawPickerDialog extends Component {
 
     render() {
         const { classes, open, onClose, onSelect, module, title, close, filter,
-            suggestions, suggestionFormatter, count, page, pageSize, onChangePage, onChangeRowsPerPage } = this.props;
+            suggestions, suggestionFormatter, count, page, pageSize, onChangePage, onChangeRowsPerPage,
+        } = this.props;
         return (
             <Dialog
                 open={open}
@@ -82,11 +83,26 @@ class Picker extends Component {
         open: false
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (!prevProps.checked && !!this.props.checked) {
+            this.setState({ open: true })
+        }
+    }
+
     _onSelect = v => {
         this.setState(
             { open: false },
             e => this.props.onSelect(v)
         )
+    }
+
+    onClick = () => {
+        const { check = null, checked = true } = this.props;
+        if (!!check && !checked) {
+            check()
+        } else {
+            this.setState({ open: true })
+        }
     }
 
     onClose = e => this.setState({ open: false });
@@ -99,13 +115,13 @@ class Picker extends Component {
 
     renderIcon() {
         const { IconRender, title } = this.props;
-        return <IconButton title={title} onClick={() => this.setState({ open: true })}><IconRender /></IconButton>
+        return <IconButton title={title} onClick={this.onClick}><IconRender /></IconButton>
     }
 
     renderField() {
-        const { intl, classes, module, label, dialogTitle, dialogClose, dialogSelect, filter,
-            suggestions, suggestionFormatter, count, page, pageSize,
-            onChangeRowsPerPage, onChangePage, value, readOnly = false, required = false } = this.props;
+        const { intl, classes, module, label,
+            suggestionFormatter,
+            value, readOnly = false, required = false } = this.props;
         return (
             <FormControl fullWidth>
                 <TextField className={classes.picker}
@@ -136,10 +152,12 @@ class Picker extends Component {
     render() {
         const { module, dialogTitle, dialogClose, dialogSelect, filter,
             suggestions, count, page, pageSize,
-            onChangeRowsPerPage, onChangePage, readOnly = false, IconRender } = this.props;
+            onChangeRowsPerPage, onChangePage, readOnly = false, IconRender,
+            checked = true,
+        } = this.props;
         return (
             <Fragment>
-                {!readOnly && (
+                {!readOnly && !!checked && (
                     <PickerDialog
                         open={this.state.open}
                         onClose={this.onClose}

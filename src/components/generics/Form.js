@@ -59,7 +59,7 @@ class Form extends Component {
             openDirty = false,
             save, canSave, saveTooltip, actions = [],
             fab = null, fabAction = null, fabTooltip = null,
-            title, titleParams = [], HeadPanel, Panels, contributedPanelsKey = null, ...others } = this.props;
+            title, titleParams = [], HeadPanel, headPanelContributionsKey, Panels, contributedPanelsKey = null, ...others } = this.props;
         return (
             <Fragment>
                 <form noValidate autoComplete="off">
@@ -106,12 +106,15 @@ class Form extends Component {
                                     <Divider />
                                 </Grid>
                                 <Grid item xs={12}>
-                                    <HeadPanel
+                                    {!!HeadPanel && (<HeadPanel
                                         edited={this.props.edited}
                                         edited_id={this.props.edited_id}
                                         {...others}
                                         onEditedChanged={this.onEditedChanged}
-                                    />
+                                    />)}
+                                    {!!headPanelContributionsKey && (
+                                        <Contributions {...others} contributionKey={headPanelContributionsKey} />
+                                    )}
                                 </Grid>
                             </Paper>
                         </Grid>

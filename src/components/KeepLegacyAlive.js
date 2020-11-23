@@ -14,7 +14,7 @@ class KeepLegacyAlive extends Component {
     }
 
     componentWillUnmount() {
-        if (!!this.state.timeoutId) { clearTimeout(this.state.timeoutId) };
+        if (!!this.state && !!this.state.timeoutId) { clearTimeout(this.state.timeoutId) };
     }
 
     keepLegacyAlive = () => {

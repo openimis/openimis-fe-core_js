@@ -13,6 +13,7 @@
   "scripts": {
     "build": "rollup -c",
     "start": "rollup -c -w"
+	"prepare": "yarn run build",
   },
   "peerDependency": {
     "react-intl": "^5.8.1"

@@ -1,0 +1,10 @@
+{
+    "core.roleManagement.label": "Roles Management",
+    "core.roleManagement.searcher.results.title": "{rolesTotalCount} Roles Found",
+    "core.roleManagement.roleName": "Role Name",
+    "core.roleManagement.isSystem": "System",
+    "core.roleManagement.isBlocked": "Blocked",
+    "core.roleManagement.showHistory": "Show Historical",
+    "core.roleManagement.dateValidFrom": "Valid from",
+    "core.roleManagement.dateValidTo": "Valid to"
+}

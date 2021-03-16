@@ -1,4 +1,6 @@
 import App from "./components/App";
+import React from "react";
+import messages_en from "./translations/en.json";
 import KeepLegacyAlive from "./components/KeepLegacyAlive";
 import AutoSuggestion from "./components/inputs/AutoSuggestion";
 import Contributions from "./components/generics/Contributions";
@@ -30,6 +32,8 @@ import Picker from "./components/generics/Picker";
 import ConstantBasedPicker from "./components/generics/ConstantBasedPicker";
 import YearPicker from "./pickers/YearPicker";
 import MonthPicker from "./pickers/MonthPicker";
+import AccountBox from "@material-ui/icons/AccountBox";
+import Roles from "./pages/Roles";
 import reducer from "./reducer";
 import { baseApiUrl, apiHeaders, graphql, journalize, coreAlert, coreConfirm } from './actions';
 import { formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount, withTooltip } from './helpers/i18n';
@@ -42,8 +46,12 @@ import {
 import withHistory, { historyPush } from "./helpers/history";
 import withModulesManager from './helpers/modules';
 import { formatJsonField } from './helpers/jsonExt';
+import { RIGHT_ROLE_SEARCH } from "./constants"
+
+const ROUTE_ROLE_MANAGEMENT = "roles";
 
 const DEFAULT_CONFIG = {
+  "translations": [{ key: "en", messages: messages_en }],
   "reducers": [{ key: 'core', reducer: reducer }],
   "refs": [
     { key: "core.JournalDrawer.pollInterval", ref: 2000 },
@@ -52,6 +60,17 @@ const DEFAULT_CONFIG = {
     { key: "core.MonthPicker", ref: MonthPicker },
   ],
   "core.Boot": [KeepLegacyAlive],
+  "core.Router": [
+    { path: ROUTE_ROLE_MANAGEMENT, component: Roles }
+  ],
+  "admin.MainMenu": [
+    {
+      text: <FormattedMessage module="core" id="roleManagement.label" />,
+      icon: <AccountBox />,
+      route: "/" + ROUTE_ROLE_MANAGEMENT,
+      filter: rights => rights.includes(RIGHT_ROLE_SEARCH)
+    }
+  ]
 }
 
 export const CoreModule = (cfg) => {

@@ -1,5 +1,7 @@
 import { RSAA } from "redux-api-middleware";
-import { formatPageQuery } from "./helpers/api";
+import { formatPageQuery, formatPageQueryWithCount } from "./helpers/api";
+
+const ROLE_FULL_PROJECTION = () => ["name", "altLanguage", "isSystem", "isBlocked", "validityFrom", "validityTo"];
 
 export const baseApiUrl = process.env.NODE_ENV === 'development' ? "/api" : "/iapi";
 
@@ -115,4 +117,13 @@ export function clearConfirm(confirmed) {
     return dispatch => {
         dispatch({ type: 'CORE_CONFIRM_CLEAR', payload: confirmed })
     }
+}
+
+export function fetchRoles(params) {
+    const payload = formatPageQueryWithCount(
+        "role",
+        params,
+        ROLE_FULL_PROJECTION()
+    );
+    return graphql(payload, "CORE_ROLES");
 }

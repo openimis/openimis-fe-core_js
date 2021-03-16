@@ -1,4 +1,4 @@
-import { parseData, decodeId, pageInfo } from './helpers/api';
+import { parseData, decodeId, pageInfo, formatGraphQLError, formatServerError } from './helpers/api';
 
 function reducer(
     state = {
@@ -10,6 +10,12 @@ function reducer(
         fetchingMutations: false,
         mutations: [],
         filtersCache: {},
+        fetchingRoles: false,
+        fetchedRoles: false,
+        roles: [],
+        rolesPageInfo: {},
+        rolesTotalCount: 0,
+        errorRoles: null
     },
     action,
 ) {
@@ -118,6 +124,32 @@ function reducer(
                 fetchingHistoricalMutations: false,
                 fetchedHistoricalMutations: true,
             }
+        case 'CORE_ROLES_REQ':
+            return {
+                ...state,
+                fetchingRoles: true,
+                fetchedRoles: false,
+                roles: [],
+                rolesPageInfo: {},
+                rolesTotalCount: 0,
+                errorRoles: null
+            };
+        case "CORE_ROLES_RESP":
+            return {
+                ...state,
+                fetchingRoles: false,
+                fetchedRoles: true,
+                roles: parseData(action.payload.data.role),
+                rolesPageInfo: pageInfo(action.payload.data.role),
+                rolesTotalCount: !!action.payload.data.role ? action.payload.data.role.totalCount : null,
+                errorRoles: formatGraphQLError(action.payload)
+            };
+        case "CORE_ROLES_ERR":
+            return {
+                ...state,
+                fetchingRoles: false,
+                errorRoles: formatServerError(action.payload)
+            };
         default:
             return state;
     }

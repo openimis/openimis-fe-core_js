@@ -34,6 +34,7 @@ import YearPicker from "./pickers/YearPicker";
 import MonthPicker from "./pickers/MonthPicker";
 import AccountBox from "@material-ui/icons/AccountBox";
 import Roles from "./pages/Roles";
+import Role from "./pages/Role";
 import reducer from "./reducer";
 import { baseApiUrl, apiHeaders, graphql, journalize, coreAlert, coreConfirm } from './actions';
 import { formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount, withTooltip } from './helpers/i18n';
@@ -48,7 +49,8 @@ import withModulesManager from './helpers/modules';
 import { formatJsonField } from './helpers/jsonExt';
 import { RIGHT_ROLE_SEARCH } from "./constants"
 
-const ROUTE_ROLE_MANAGEMENT = "roles";
+const ROUTE_ROLES = "roles";
+const ROUTE_ROLE = "roles/role";
 
 const DEFAULT_CONFIG = {
   "translations": [{ key: "en", messages: messages_en }],
@@ -58,16 +60,18 @@ const DEFAULT_CONFIG = {
     { key: "core.KeepLegacyAlive.pollInterval", ref: 300000 },
     { key: "core.YearPicker", ref: YearPicker },
     { key: "core.MonthPicker", ref: MonthPicker },
+    { key: "core.route.role", ref: ROUTE_ROLE }
   ],
   "core.Boot": [KeepLegacyAlive],
   "core.Router": [
-    { path: ROUTE_ROLE_MANAGEMENT, component: Roles }
+    { path: ROUTE_ROLES, component: Roles },
+    { path: ROUTE_ROLE, component: Role }
   ],
   "admin.MainMenu": [
     {
       text: <FormattedMessage module="core" id="roleManagement.label" />,
       icon: <AccountBox />,
-      route: "/" + ROUTE_ROLE_MANAGEMENT,
+      route: "/" + ROUTE_ROLES,
       filter: rights => rights.includes(RIGHT_ROLE_SEARCH)
     }
   ]

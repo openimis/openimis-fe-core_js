@@ -2,9 +2,19 @@
     "core.roleManagement.label": "Roles Management",
     "core.roleManagement.searcher.results.title": "{rolesTotalCount} Roles Found",
     "core.roleManagement.roleName": "Role Name",
+    "core.roleManagement.altLanguage": "Alternative Language",
     "core.roleManagement.isSystem": "System",
     "core.roleManagement.isBlocked": "Blocked",
     "core.roleManagement.showHistory": "Show Historical",
     "core.roleManagement.dateValidFrom": "Valid from",
-    "core.roleManagement.dateValidTo": "Valid to"
+    "core.roleManagement.dateValidTo": "Valid to",
+    "core.roleManagement.createButton.tooltip": "Create new Role",
+    "core.roleManagement.role.page.title": "Role Details {label}",
+    "core.roleManagement.requiredFieldsEmptyError": "* These fields are required",
+    "core.roleManagement.saveButton.tooltip.enabled": "Save changes",
+    "core.roleManagement.saveButton.tooltip.disabled": "Please fill required fields first",
+    "core.roleManagement.role.availableRights": "Available permissions",
+    "core.roleManagement.role.chosenRights": "Chosen permissions",
+    "core.roleManagement.role.rightsFilter": "Filter",
+    "core.roleManagement.CreateRole.mutationLabel": "Create Role {label}"
 }

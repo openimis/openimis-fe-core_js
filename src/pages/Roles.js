@@ -6,9 +6,12 @@ import {
     formatMessageWithValues,
     Searcher,
     formatDateFromISO,
-    TextInput
+    TextInput,
+    withTooltip,
+    historyPush,
+    toISODate
 } from "@openimis/fe-core";
-import { Grid, FormControlLabel, Checkbox } from "@material-ui/core";
+import { Grid, FormControlLabel, Checkbox, Fab } from "@material-ui/core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
@@ -17,8 +20,11 @@ import {
     DEFAULT_PAGE_SIZE,
     ROWS_PER_PAGE_OPTIONS,
     CONTAINS_LOOKUP,
-    LANGUAGE_EN
+    LANGUAGE_EN,
+    RIGHT_ROLE_SEARCH,
+    RIGHT_ROLE_CREATE
 } from "../constants";
+import AddIcon from "@material-ui/icons/Add";
 
 const styles = theme => ({
     page: theme.page,
@@ -27,7 +33,8 @@ const styles = theme => ({
     },
     item: {
         padding: theme.spacing(1)
-    }
+    },
+    fab: theme.fab
 });
 
 const DEFAULT_ORDER_BY = "name";
@@ -109,6 +116,8 @@ class Roles extends Component {
         document.title = formatMessage(this.props.intl, "core", "roleManagement.label");
     }
 
+    onAdd = () => historyPush(this.props.modulesManager, this.props.history, "core.route.role");
+
     fetch = params => this.props.fetchRoles(params);
 
     headers = () => [
@@ -149,9 +158,17 @@ class Roles extends Component {
         ['validityTo', true]
     ];
 
+    isRowDisabled = (_, role) => !!role.validityTo &&
+        formatDateFromISO(
+            this.props.modulesManager,
+            this.props.intl,
+            role.validityTo
+        ) < toISODate(new Date());
+
     render() {
         const {
             intl,
+            rights,
             classes,
             fetchingRoles,
             fetchedRoles,
@@ -161,37 +178,58 @@ class Roles extends Component {
             rolesTotalCount
         } = this.props;
         return (
-            <div className={classes.page}>
-                <Searcher
-                    module="core"
-                    FilterPane={RoleFilter}
-                    fetch={this.fetch}
-                    items={roles}
-                    itemsPageInfo={rolesPageInfo}
-                    fetchingItems={fetchingRoles}
-                    fetchedItems={fetchedRoles}
-                    errorItems={errorRoles}
-                    tableTitle={formatMessageWithValues(intl, "core", "roleManagement.searcher.results.title", { rolesTotalCount })}
-                    headers={this.headers}
-                    itemFormatters={this.itemFormatters}
-                    sorts={this.sorts}
-                    rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
-                    defaultPageSize={DEFAULT_PAGE_SIZE}
-                    defaultOrderBy={DEFAULT_ORDER_BY}
-                />
-            </div>
+            rights.includes(RIGHT_ROLE_SEARCH) && (
+                <div className={classes.page}>
+                    <Searcher
+                        module="core"
+                        FilterPane={RoleFilter}
+                        fetch={this.fetch}
+                        items={roles}
+                        itemsPageInfo={rolesPageInfo}
+                        fetchingItems={fetchingRoles}
+                        fetchedItems={fetchedRoles}
+                        errorItems={errorRoles}
+                        tableTitle={formatMessageWithValues(
+                            intl,
+                            "core",
+                            "roleManagement.searcher.results.title", { rolesTotalCount }
+                        )}
+                        headers={this.headers}
+                        itemFormatters={this.itemFormatters}
+                        sorts={this.sorts}
+                        rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
+                        defaultPageSize={DEFAULT_PAGE_SIZE}
+                        defaultOrderBy={DEFAULT_ORDER_BY}
+                        rowLocked={this.isRowDisabled}
+                        rowDisabled={this.isRowDisabled}
+                    />
+                    {rights.includes(RIGHT_ROLE_CREATE) && withTooltip(
+                        <div className={classes.fab} >
+                            <Fab color="primary" onClick={this.onAdd}>
+                                <AddIcon />
+                            </Fab>
+                        </div>,
+                        formatMessage(intl, "core", "roleManagement.createButton.tooltip")
+                    )}
+                </div>
+            )
         )
     }
 }
 
 const mapStateToProps = state => ({
+    rights: !!state.core && !!state.core.user && !!state.core.user.i_user
+        ? state.core.user.i_user.rights
+        : [],
+    language: !!state.core && !!state.core.user && !!state.core.user.i_user
+        ? state.core.user.i_user.language
+        : null,
     fetchingRoles: state.core.fetchingRoles,
     fetchedRoles: state.core.fetchedRoles,
     errorRoles: state.core.errorRoles,
     roles: state.core.roles,
     rolesPageInfo: state.core.rolesPageInfo,
-    rolesTotalCount: state.core.rolesTotalCount,
-    language: !!state.core.user && !!state.core.user.i_user ? state.core.user.i_user.language : null
+    rolesTotalCount: state.core.rolesTotalCount
 });
 
 const mapDispatchToProps = dispatch => {

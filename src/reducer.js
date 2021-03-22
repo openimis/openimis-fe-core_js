@@ -1,4 +1,13 @@
-import { parseData, decodeId, pageInfo, formatGraphQLError, formatServerError } from './helpers/api';
+import {
+    parseData,
+    decodeId,
+    pageInfo,
+    formatGraphQLError,
+    formatServerError,
+    dispatchMutationReq,
+    dispatchMutationResp,
+    dispatchMutationErr
+} from "./helpers/api";
 
 function reducer(
     state = {
@@ -15,7 +24,11 @@ function reducer(
         roles: [],
         rolesPageInfo: {},
         rolesTotalCount: 0,
-        errorRoles: null
+        errorRoles: null,
+        fetchingModulePermissions: false,
+        fetchedModulePermissions: false,
+        modulePermissions: [],
+        errorModulePermissions: null
     },
     action,
 ) {
@@ -150,6 +163,36 @@ function reducer(
                 fetchingRoles: false,
                 errorRoles: formatServerError(action.payload)
             };
+        case 'CORE_MODULEPERMISSIONS_REQ':
+            return {
+                ...state,
+                fetchingModulePermissions: true,
+                fetchedModulePermissions: false,
+                modulePermissions: [],
+                errorModulePermissions: null
+            };
+        case "CORE_MODULEPERMISSIONS_RESP":
+            return {
+                ...state,
+                fetchingModulePermissions: false,
+                fetchedModulePermissions: true,
+                modulePermissions: !!action.payload.data.modulesPermissions
+                    ? action.payload.data.modulesPermissions.modulePermsList
+                    : [],
+                errorModulePermissions: formatGraphQLError(action.payload)
+            };
+        case "CORE_MODULEPERMISSIONS_ERR":
+            return {
+                ...state,
+                fetchingModulePermissions: false,
+                errorModulePermissions: formatServerError(action.payload)
+            };
+        case "CORE_ROLE_MUTATION_REQ":
+            return dispatchMutationReq(state, action);
+        case "CORE_ROLE_MUTATION_ERR":
+            return dispatchMutationErr(state, action);
+        case "CORE_CREATE_ROLE_RESP":
+            return dispatchMutationResp(state, "createRole", action);
         default:
             return state;
     }

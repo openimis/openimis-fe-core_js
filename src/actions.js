@@ -1,7 +1,24 @@
 import { RSAA } from "redux-api-middleware";
-import { formatPageQuery, formatPageQueryWithCount } from "./helpers/api";
+import {
+    formatQuery,
+    formatPageQuery,
+    formatPageQueryWithCount,
+    formatGQLString,
+    formatMutation
+} from "./helpers/api";
 
-const ROLE_FULL_PROJECTION = () => ["name", "altLanguage", "isSystem", "isBlocked", "validityFrom", "validityTo"];
+const ROLE_FULL_PROJECTION = () => [
+    "name",
+    "altLanguage",
+    "isSystem",
+    "isBlocked",
+    "validityFrom",
+    "validityTo"
+];
+
+const MODULEPERMISSION_FULL_PROJECTION = () => [
+    "modulePermsList{moduleName, permissions{permsName, permsValue}}"
+];
 
 export const baseApiUrl = process.env.NODE_ENV === 'development' ? "/api" : "/iapi";
 
@@ -126,4 +143,37 @@ export function fetchRoles(params) {
         ROLE_FULL_PROJECTION()
     );
     return graphql(payload, "CORE_ROLES");
+}
+
+export function fetchModulesPermissions() {
+    const payload = formatQuery(
+        "modulesPermissions",
+        null,
+        MODULEPERMISSION_FULL_PROJECTION()
+    );
+    return graphql(payload, "CORE_MODULEPERMISSIONS");
+}
+
+function formatRoleGQL(role) {
+    return `
+        ${!!role.name ? `name: "${formatGQLString(role.name)}"` : ""}
+        ${!!role.altLanguage ? `altLanguage: "${formatGQLString(role.altLanguage)}"` : ""}
+        ${role.isSystem !== null ? `isSystem: ${role.isSystem}` : ""}
+        ${role.isBlocked !== null ? `isBlocked: ${role.isBlocked}` : ""}
+        ${!!role.roleRights ? `rightsId: [${role.roleRights.join(",")}]` : ""}
+    `;
+}
+
+export function createRole(role, clientMutationLabel) {
+    let mutation = formatMutation("createRole", formatRoleGQL(role), clientMutationLabel);
+    var requestedDateTime = new Date();
+    return graphql(
+        mutation.payload,
+        ["CORE_ROLE_MUTATION_REQ", "CORE_CREATE_ROLE_RESP", "CORE_ROLE_MUTATION_ERR"],
+        {
+            clientMutationId: mutation.clientMutationId,
+            clientMutationLabel,
+            requestedDateTime
+        }
+    );
 }

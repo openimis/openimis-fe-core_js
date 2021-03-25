@@ -8,6 +8,8 @@ import {
 } from "./helpers/api";
 
 const ROLE_FULL_PROJECTION = () => [
+    "id",
+    "uuid",
     "name",
     "altLanguage",
     "isSystem",
@@ -170,6 +172,21 @@ export function createRole(role, clientMutationLabel) {
     return graphql(
         mutation.payload,
         ["CORE_ROLE_MUTATION_REQ", "CORE_CREATE_ROLE_RESP", "CORE_ROLE_MUTATION_ERR"],
+        {
+            clientMutationId: mutation.clientMutationId,
+            clientMutationLabel,
+            requestedDateTime
+        }
+    );
+}
+
+export function deleteRole(role, clientMutationLabel, clientMutationDetails = null) {
+    let roleUuids = `uuids: ["${role.uuid}"]`;
+    let mutation = formatMutation("deleteRole", roleUuids, clientMutationLabel, clientMutationDetails);
+    var requestedDateTime = new Date();
+    return graphql(
+        mutation.payload,
+        ["CORE_ROLE_MUTATION_REQ", "CORE_DELETE_ROLE_RESP", "CORE_ROLE_MUTATION_ERR"],
         {
             clientMutationId: mutation.clientMutationId,
             clientMutationLabel,

@@ -193,6 +193,8 @@ function reducer(
             return dispatchMutationErr(state, action);
         case "CORE_CREATE_ROLE_RESP":
             return dispatchMutationResp(state, "createRole", action);
+        case "CORE_DELETE_ROLE_RESP":
+            return dispatchMutationResp(state, "deleteRole", action);
         default:
             return state;
     }

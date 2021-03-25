@@ -9,22 +9,32 @@ import {
     TextInput,
     withTooltip,
     historyPush,
-    toISODate
+    toISODate,
+    coreConfirm,
+    journalize
 } from "@openimis/fe-core";
-import { Grid, FormControlLabel, Checkbox, Fab } from "@material-ui/core";
+import {
+    Grid,
+    FormControlLabel,
+    Checkbox,
+    Fab,
+    IconButton
+} from "@material-ui/core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
-import { fetchRoles } from "../actions";
+import { fetchRoles, deleteRole } from "../actions";
 import {
     DEFAULT_PAGE_SIZE,
     ROWS_PER_PAGE_OPTIONS,
     CONTAINS_LOOKUP,
     LANGUAGE_EN,
     RIGHT_ROLE_SEARCH,
-    RIGHT_ROLE_CREATE
+    RIGHT_ROLE_CREATE,
+    RIGHT_ROLE_DELETE
 } from "../constants";
 import AddIcon from "@material-ui/icons/Add";
+import DeleteIcon from "@material-ui/icons/Delete";
 
 const styles = theme => ({
     page: theme.page,
@@ -112,24 +122,45 @@ class RawRoleFilter extends Component {
 const RoleFilter = injectIntl(withTheme(withStyles(styles)(RawRoleFilter)));
 
 class Roles extends Component {
+    state = {
+        toDelete: null,
+        deleted: []
+    }
+
     componentDidMount() {
         document.title = formatMessage(this.props.intl, "core", "roleManagement.label");
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.submittingMutation && !this.props.submittingMutation) {
+            this.props.journalize(this.props.mutation);
+            this.setState(state => ({ deleted: state.deleted.concat(state.toDelete) }));
+        } else if (prevProps.confirmed !== this.props.confirmed && !!this.props.confirmed && !!this.state.confirmedAction) {
+            this.state.confirmedAction();
+        }
     }
 
     onAdd = () => historyPush(this.props.modulesManager, this.props.history, "core.route.role");
 
     fetch = params => this.props.fetchRoles(params);
 
-    headers = () => [
-        "roleManagement.roleName",
-        "roleManagement.isSystem",
-        "roleManagement.isBlocked",
-        "roleManagement.dateValidFrom",
-        "roleManagement.dateValidTo"
-    ];
+    headers = () => {
+        const { rights } = this.props;
+        let result = [
+            "roleManagement.roleName",
+            "roleManagement.isSystem",
+            "roleManagement.isBlocked",
+            "roleManagement.dateValidFrom",
+            "roleManagement.dateValidTo"
+        ];
+        if (rights.includes(RIGHT_ROLE_DELETE)) {
+            result.push("roleManagement.emptyLabel");
+        }
+        return result;
+    }
 
     itemFormatters = () => {
-        const { intl, modulesManager, language } = this.props;
+        const { intl, rights, modulesManager, language } = this.props;
         const result = [
             role => language === null
                 ? role.name
@@ -147,7 +178,53 @@ class Roles extends Component {
                 ? formatDateFromISO(modulesManager, intl, role.validityTo)
                 : ""
         ];
+        if (rights.includes(RIGHT_ROLE_DELETE)) {
+            result.push(
+                role => withTooltip(
+                    <div>
+                        <IconButton
+                            onClick={() => this.onDelete(role)}
+                            disabled={this.isRowDisabled(_, role)}>
+                            <DeleteIcon/>
+                        </IconButton>
+                    </div>,
+                    formatMessage(intl, "core", "roleManagement.deleteButton.tooltip")
+                )
+            );
+        }
         return result;
+    }
+
+    onDelete = role => {
+        const { intl, coreConfirm, deleteRole } = this.props;
+        const confirm = () => coreConfirm(
+            formatMessageWithValues(
+                intl,
+                "core",
+                "roleManagement.deleteRole.confirm.title",
+                { label: role.name }
+            ),
+            formatMessage(
+                intl,
+                "core",
+                "roleManagement.deleteRole.confirm.message"
+            )
+        );
+        const confirmedAction = () => {
+            this.setState(
+                { toDelete: role.id },
+                () => deleteRole(
+                    role,
+                    formatMessageWithValues(
+                        intl,
+                        "core",
+                        "roleManagement.DeleteRole.mutationLabel",
+                        { label: role.name }
+                    )
+                )
+            );
+        }
+        this.setState({ confirmedAction }, confirm);
     }
 
     sorts = () => [
@@ -158,12 +235,21 @@ class Roles extends Component {
         ['validityTo', true]
     ];
 
-    isRowDisabled = (_, role) => !!role.validityTo &&
-        formatDateFromISO(
-            this.props.modulesManager,
-            this.props.intl,
-            role.validityTo
-        ) < toISODate(new Date());
+    isRowDisabled = (_, role) =>
+        this.state.deleted.includes(role.id) || (
+            !!role.validityTo &&
+            formatDateFromISO(
+                this.props.modulesManager,
+                this.props.intl,
+                role.validityTo
+            )
+            < toISODate(new Date()));
+
+    isRowLocked = (_, role) => this.state.deleted.includes(role.id);
+
+    isOnDoubleClickEnabled = role => !this.isRowDisabled(_, role);
+
+    onDoubleClick = () => null;
 
     render() {
         const {
@@ -200,8 +286,9 @@ class Roles extends Component {
                         rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
                         defaultPageSize={DEFAULT_PAGE_SIZE}
                         defaultOrderBy={DEFAULT_ORDER_BY}
-                        rowLocked={this.isRowDisabled}
+                        rowLocked={this.isRowLocked}
                         rowDisabled={this.isRowDisabled}
+                        onDoubleClick={role => this.isOnDoubleClickEnabled(role) && this.onDoubleClick()}
                     />
                     {rights.includes(RIGHT_ROLE_CREATE) && withTooltip(
                         <div className={classes.fab} >
@@ -229,11 +316,14 @@ const mapStateToProps = state => ({
     errorRoles: state.core.errorRoles,
     roles: state.core.roles,
     rolesPageInfo: state.core.rolesPageInfo,
-    rolesTotalCount: state.core.rolesTotalCount
+    rolesTotalCount: state.core.rolesTotalCount,
+    confirmed: state.core.confirmed,
+    submittingMutation: state.core.submittingMutation,
+    mutation: state.core.mutation
 });
 
 const mapDispatchToProps = dispatch => {
-    return bindActionCreators({ fetchRoles }, dispatch);
+    return bindActionCreators({ fetchRoles, deleteRole, coreConfirm, journalize }, dispatch);
 };
 
 export default withModulesManager(injectIntl(withTheme(withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(Roles)))));

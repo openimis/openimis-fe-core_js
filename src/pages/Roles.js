@@ -9,9 +9,9 @@ import {
     TextInput,
     withTooltip,
     historyPush,
-    toISODate,
     coreConfirm,
-    journalize
+    journalize,
+    SelectInput
 } from "@openimis/fe-core";
 import {
     Grid,
@@ -31,9 +31,11 @@ import {
     LANGUAGE_EN,
     RIGHT_ROLE_SEARCH,
     RIGHT_ROLE_CREATE,
+    RIGHT_ROLE_UPDATE,
     RIGHT_ROLE_DELETE
 } from "../constants";
 import AddIcon from "@material-ui/icons/Add";
+import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
 
 const styles = theme => ({
@@ -75,11 +77,21 @@ class RawRoleFilter extends Component {
         ])
     }
 
+    booleanOptions = () => {
+        const options = [null, "true", "false"];
+        return [
+            ...options.map((option) => ({
+                value: option,
+                label: formatMessage(this.props.intl, "core", `roleManagement.${option}`)
+            }))
+        ];
+    }
+
     render() {
         const { intl, classes } = this.props;
         return (
             <Grid container className={classes.form}>
-                <Grid item className={classes.item}>
+                <Grid item xs={3} className={classes.item}>
                     <TextInput
                         module="core"
                         label="roleManagement.roleName"
@@ -87,25 +99,25 @@ class RawRoleFilter extends Component {
                         onChange={v => this._onChangeStringFilter('name', v, CONTAINS_LOOKUP)}
                     />
                 </Grid>
-                <Grid item className={classes.item}>
-                    <FormControlLabel
-                        label={formatMessage(intl, "core", "roleManagement.isSystem")}
-                        control={<Checkbox 
-                            checked={!!this._filterValue('isSystem')}
-                            onChange={event => this._onChangeFilter('isSystem', event.target.checked)}
-                        />}
+                <Grid item xs={3} className={classes.item}>
+                    <SelectInput
+                        module="core"
+                        label="roleManagement.isSystem"
+                        options={this.booleanOptions()}
+                        value={this._filterValue('isSystem')}
+                        onChange={v => this._onChangeFilter('isSystem', v)}
                     />
                 </Grid>
-                <Grid item className={classes.item}>
-                    <FormControlLabel
-                        label={formatMessage(intl, "core", "roleManagement.isBlocked")}
-                        control={<Checkbox 
-                            checked={!!this._filterValue('isBlocked')}
-                            onChange={event => this._onChangeFilter('isBlocked', event.target.checked)}
-                        />}
+                <Grid item xs={3} className={classes.item}>
+                    <SelectInput
+                        module="core"
+                        label="roleManagement.isBlocked"
+                        options={this.booleanOptions()}
+                        value={this._filterValue('isBlocked')}
+                        onChange={v => this._onChangeFilter('isBlocked', v)}
                     />
                 </Grid>
-                <Grid item className={classes.item}>
+                <Grid item xs={3} className={classes.item}>
                     <FormControlLabel
                         label={formatMessage(intl, "core", "roleManagement.showHistory")}
                         control={<Checkbox 
@@ -141,6 +153,15 @@ class Roles extends Component {
     }
 
     onAdd = () => historyPush(this.props.modulesManager, this.props.history, "core.route.role");
+
+    roleUpdatePageUrl = (role) => `${this.props.modulesManager.getRef("core.route.role")}${"/" + role.uuid}`;
+
+    onDoubleClick = (role, newTab = false) => {
+        const { rights, modulesManager, history } = this.props;
+        if (rights.includes(RIGHT_ROLE_SEARCH) || rights.includes(RIGHT_ROLE_UPDATE)) {
+            historyPush(modulesManager, history, "core.route.role", [role.uuid], newTab);
+        }
+    }
 
     fetch = params => this.props.fetchRoles(params);
 
@@ -178,13 +199,27 @@ class Roles extends Component {
                 ? formatDateFromISO(modulesManager, intl, role.validityTo)
                 : ""
         ];
+        if (rights.includes(RIGHT_ROLE_SEARCH) || rights.includes(RIGHT_ROLE_UPDATE)) {
+            result.push(
+                role => withTooltip(
+                    <div>
+                        <IconButton
+                            href={this.roleUpdatePageUrl(role)}
+                            disabled={this.isRowDisabled(null, role)}>
+                            <EditIcon />
+                        </IconButton>
+                    </div>,
+                    formatMessage(intl, "core", "roleManagement.editButton.tooltip")
+                )
+            );
+        }
         if (rights.includes(RIGHT_ROLE_DELETE)) {
             result.push(
                 role => withTooltip(
                     <div>
                         <IconButton
                             onClick={() => this.onDelete(role)}
-                            disabled={this.isRowDisabled(_, role)}>
+                            disabled={this.isRowDisabled(null, role)}>
                             <DeleteIcon/>
                         </IconButton>
                     </div>,
@@ -237,19 +272,11 @@ class Roles extends Component {
 
     isRowDisabled = (_, role) =>
         this.state.deleted.includes(role.id) || (
-            !!role.validityTo &&
-            formatDateFromISO(
-                this.props.modulesManager,
-                this.props.intl,
-                role.validityTo
-            )
-            < toISODate(new Date()));
+            !!role.validityTo && role.validityTo < (new Date()).toISOString());
 
     isRowLocked = (_, role) => this.state.deleted.includes(role.id);
 
     isOnDoubleClickEnabled = role => !this.isRowDisabled(_, role);
-
-    onDoubleClick = () => null;
 
     render() {
         const {
@@ -288,7 +315,7 @@ class Roles extends Component {
                         defaultOrderBy={DEFAULT_ORDER_BY}
                         rowLocked={this.isRowLocked}
                         rowDisabled={this.isRowDisabled}
-                        onDoubleClick={role => this.isOnDoubleClickEnabled(role) && this.onDoubleClick()}
+                        onDoubleClick={role => this.isOnDoubleClickEnabled(role) && this.onDoubleClick(role)}
                     />
                     {rights.includes(RIGHT_ROLE_CREATE) && withTooltip(
                         <div className={classes.fab} >

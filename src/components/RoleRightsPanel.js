@@ -14,7 +14,8 @@ import {
     ListItemSecondaryAction,
     Typography,
     IconButton,
-    TextField
+    TextField,
+    InputAdornment
 } from "@material-ui/core";
 import { injectIntl } from "react-intl";
 import { bindActionCreators } from "redux";
@@ -98,6 +99,7 @@ class RoleRightsPanel extends FormPanel {
             intl,
             classes,
             edited,
+            isReadOnly,
             fetchingModulePermissions,
             fetchedModulePermissions,
             modulePermissions,
@@ -114,24 +116,26 @@ class RoleRightsPanel extends FormPanel {
                 {!!fetchedModulePermissions && !!sortedModulePermissions.length && (
                     <Paper className={classes.paper}>
                         <Grid container>
-                            <Grid item xs={6} className={classes.item}>
+                            <Grid item className={classes.item}>
                                 <Paper>
-                                    <Grid container justify="flex-end" alignItems="center">
-                                        <Grid item className={classes.item}>
-                                            <SearchIcon />
-                                        </Grid>
-                                        <Grid item xs={11} className={classes.item}>
-                                            <TextField
-                                                className={classes.filter}
-                                                variant="outlined"
-                                                label={formatMessage(
-                                                    intl,
-                                                    "core",
-                                                    "roleManagement.role.rightsFilter"
-                                                )}
-                                                onChange={e => this.setState({ filterValue: e.target.value })}
-                                            />
-                                        </Grid>
+                                    <Grid item className={classes.item}>
+                                        <TextField
+                                            className={classes.filter}
+                                            variant="outlined"
+                                            label={formatMessage(
+                                                intl,
+                                                "core",
+                                                "roleManagement.role.rightsFilter"
+                                            )}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <SearchIcon />
+                                                    </InputAdornment>
+                                                )
+                                            }}
+                                            onChange={e => this.setState({ filterValue: e.target.value })}
+                                        />
                                     </Grid>
                                 </Paper>
                             </Grid>
@@ -157,7 +161,10 @@ class RoleRightsPanel extends FormPanel {
                                                             primary={this.rightLabel(modulePermission.moduleName, permission.permsName)}
                                                         />
                                                         <ListItemSecondaryAction>
-                                                            <IconButton onClick={() => this.selectRight(permission.permsValue)}>
+                                                            <IconButton
+                                                                onClick={() => this.selectRight(permission.permsValue)}
+                                                                disabled={!!isReadOnly}
+                                                            >
                                                                 <ArrowForwardIcon />
                                                             </IconButton>
                                                         </ListItemSecondaryAction>
@@ -187,7 +194,10 @@ class RoleRightsPanel extends FormPanel {
                                                             primary={this.rightLabel(modulePermission.moduleName, permission.permsName)}
                                                         />
                                                         <ListItemSecondaryAction>
-                                                            <IconButton onClick={() => this.unselectRight(permission.permsValue)}>
+                                                            <IconButton
+                                                                onClick={() => this.unselectRight(permission.permsValue)}
+                                                                disabled={!!isReadOnly}
+                                                            >
                                                                 <ArrowBackIcon />
                                                             </IconButton>
                                                         </ListItemSecondaryAction>

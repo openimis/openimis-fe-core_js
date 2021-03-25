@@ -28,7 +28,15 @@ function reducer(
         fetchingModulePermissions: false,
         fetchedModulePermissions: false,
         modulePermissions: [],
-        errorModulePermissions: null
+        errorModulePermissions: null,
+        fetchingRole: false,
+        fetchedRole: false,
+        role: null,
+        errorRole: null,
+        fetchingRoleRights: false,
+        fetchedRoleRights: false,
+        roleRights: [],
+        errorRoleRights: null,
     },
     action,
 ) {
@@ -187,12 +195,58 @@ function reducer(
                 fetchingModulePermissions: false,
                 errorModulePermissions: formatServerError(action.payload)
             };
+        case "CORE_ROLE_REQ":
+            return {
+                ...state,
+                fetchingRole: true,
+                fetchedRole: false,
+                role: null,
+                errorRole: null
+            };
+        case "CORE_ROLE_RESP":
+            return {
+                ...state,
+                fetchingRole: false,
+                fetchedRole: true,
+                role: parseData(action.payload.data.role).find(role => !!role),
+                errorRole: formatGraphQLError(action.payload)
+            };
+        case "CORE_ROLE_ERR":
+            return {
+                ...state,
+                fetchingRole: false,
+                errorRole: formatServerError(action.payload)
+            };
+        case 'CORE_ROLERIGHTS_REQ':
+            return {
+                ...state,
+                fetchingRoleRights: true,
+                fetchedRoleRights: false,
+                roleRights: [],
+                errorRoleRights: null
+            };
+        case "CORE_ROLERIGHTS_RESP":
+            return {
+                ...state,
+                fetchingRoleRights: false,
+                fetchedRoleRights: true,
+                roleRights: parseData(action.payload.data.roleRight),
+                errorRoleRights: formatGraphQLError(action.payload)
+            };
+        case "CORE_ROLERIGHTS_ERR":
+            return {
+                ...state,
+                fetchingRoleRights: false,
+                errorRoleRights: formatServerError(action.payload)
+            };
         case "CORE_ROLE_MUTATION_REQ":
             return dispatchMutationReq(state, action);
         case "CORE_ROLE_MUTATION_ERR":
             return dispatchMutationErr(state, action);
         case "CORE_CREATE_ROLE_RESP":
             return dispatchMutationResp(state, "createRole", action);
+        case "CORE_UPDATE_ROLE_RESP":
+            return dispatchMutationResp(state, "updateRole", action);
         case "CORE_DELETE_ROLE_RESP":
             return dispatchMutationResp(state, "deleteRole", action);
         default:

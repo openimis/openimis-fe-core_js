@@ -20,7 +20,7 @@ const styles = theme => ({
 
 class RoleHeadPanel extends FormPanel {
     render() {
-        const { intl, classes, edited, isRequiredFieldsEmpty } = this.props;
+        const { intl, classes, edited, isRequiredFieldsEmpty, isReadOnly } = this.props;
         return (
             <Fragment>
                 <Divider />
@@ -40,6 +40,7 @@ class RoleHeadPanel extends FormPanel {
                             value={!!edited && !!edited.name ? edited.name : ""}
                             onChange={v => this.updateAttribute("name", v)}
                             required
+                            readOnly={!!isReadOnly}
                         />
                     </Grid>
                     <Grid item className={classes.item}>
@@ -48,6 +49,7 @@ class RoleHeadPanel extends FormPanel {
                             label="roleManagement.altLanguage"
                             value={!!edited && !!edited.altLanguage ? edited.altLanguage : ""}
                             onChange={v => this.updateAttribute("altLanguage", v)}
+                            readOnly={!!isReadOnly}
                         />
                     </Grid>
                     <Grid item className={classes.item}>
@@ -56,6 +58,7 @@ class RoleHeadPanel extends FormPanel {
                             control={<Checkbox 
                                 checked={!!edited && !!edited.isSystem && edited.isSystem}
                                 onChange={event => this.updateAttribute("isSystem", event.target.checked)}
+                                disabled={!!isReadOnly}
                             />}
                         />
                     </Grid>
@@ -65,6 +68,7 @@ class RoleHeadPanel extends FormPanel {
                             control={<Checkbox 
                                 checked={!!edited && !!edited.isBlocked && edited.isBlocked}
                                 onChange={event => this.updateAttribute("isBlocked", event.target.checked)}
+                                disabled={!!isReadOnly}
                             />}
                         />
                     </Grid>

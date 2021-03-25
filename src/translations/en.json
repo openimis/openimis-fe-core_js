@@ -8,6 +8,10 @@
     "core.roleManagement.showHistory": "Show Historical",
     "core.roleManagement.dateValidFrom": "Valid from",
     "core.roleManagement.dateValidTo": "Valid to",
+    "core.roleManagement.emptyLabel": " ",
+    "core.roleManagement.null": "Any",
+    "core.roleManagement.true": "True",
+    "core.roleManagement.false": "False",
     "core.roleManagement.createButton.tooltip": "Create new Role",
     "core.roleManagement.role.page.title": "Role Details {label}",
     "core.roleManagement.requiredFieldsEmptyError": "* These fields are required",
@@ -21,5 +25,8 @@
     "core.roleManagement.deleteButton.tooltip": "Delete",
     "core.roleManagement.deleteRole.confirm.title":  "Are you sure you want to delete {label}?",
     "core.roleManagement.deleteRole.confirm.message":  "Deleting data does not mean erasing it from OpenIMIS database. The data will only be deactivated from the viewed list.",
-    "core.roleManagement.emptyLabel": " "
+    "core.roleManagement.UpdateRole.mutationLabel": "Update Role {label}",
+    "core.roleManagement.editButton.tooltip": "Edit",
+    "core.roleManagement.updateRole.confirm.title":  "Save changes in {label}?",
+    "core.roleManagement.updateRole.confirm.message":  "Are you sure you want to save changes in {label}?"
 }

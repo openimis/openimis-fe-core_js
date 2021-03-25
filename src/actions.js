@@ -18,6 +18,10 @@ const ROLE_FULL_PROJECTION = () => [
     "validityTo"
 ];
 
+const ROLERIGHT_FULL_PROJECTION = () => [
+    "rightId"
+];
+
 const MODULEPERMISSION_FULL_PROJECTION = () => [
     "modulePermsList{moduleName, permissions{permsName, permsValue}}"
 ];
@@ -147,6 +151,24 @@ export function fetchRoles(params) {
     return graphql(payload, "CORE_ROLES");
 }
 
+export function fetchRole(params) {
+    const payload = formatPageQuery(
+        "role",
+        params,
+        ROLE_FULL_PROJECTION()
+    );
+    return graphql(payload, "CORE_ROLE");
+}
+
+export function fetchRoleRights(params) {
+    const payload = formatPageQuery(
+        "roleRight",
+        params,
+        ROLERIGHT_FULL_PROJECTION()
+    );
+    return graphql(payload, "CORE_ROLERIGHTS");
+}
+
 export function fetchModulesPermissions() {
     const payload = formatQuery(
         "modulesPermissions",
@@ -158,6 +180,7 @@ export function fetchModulesPermissions() {
 
 function formatRoleGQL(role) {
     return `
+        ${!!role.uuid ? `uuid: "${role.uuid}"` : ''}
         ${!!role.name ? `name: "${formatGQLString(role.name)}"` : ""}
         ${!!role.altLanguage ? `altLanguage: "${formatGQLString(role.altLanguage)}"` : ""}
         ${role.isSystem !== null ? `isSystem: ${role.isSystem}` : ""}
@@ -172,6 +195,20 @@ export function createRole(role, clientMutationLabel) {
     return graphql(
         mutation.payload,
         ["CORE_ROLE_MUTATION_REQ", "CORE_CREATE_ROLE_RESP", "CORE_ROLE_MUTATION_ERR"],
+        {
+            clientMutationId: mutation.clientMutationId,
+            clientMutationLabel,
+            requestedDateTime
+        }
+    );
+}
+
+export function updateRole(role, clientMutationLabel) {
+    let mutation = formatMutation("updateRole", formatRoleGQL(role), clientMutationLabel);
+    var requestedDateTime = new Date();
+    return graphql(
+        mutation.payload,
+        ["CORE_ROLE_MUTATION_REQ", "CORE_UPDATE_ROLE_RESP", "CORE_ROLE_MUTATION_ERR"],
         {
             clientMutationId: mutation.clientMutationId,
             clientMutationLabel,

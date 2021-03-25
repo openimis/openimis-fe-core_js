@@ -4,4 +4,5 @@ export const CONTAINS_LOOKUP = "Icontains"
 export const LANGUAGE_EN = "en"
 export const RIGHT_ROLE_SEARCH = 122001
 export const RIGHT_ROLE_CREATE = 122002
+export const RIGHT_ROLE_UPDATE = 122003
 export const RIGHT_ROLE_DELETE = 122004

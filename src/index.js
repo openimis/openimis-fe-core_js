@@ -65,7 +65,7 @@ const DEFAULT_CONFIG = {
   "core.Boot": [KeepLegacyAlive],
   "core.Router": [
     { path: ROUTE_ROLES, component: Roles },
-    { path: ROUTE_ROLE, component: Role }
+    { path: ROUTE_ROLE  + "/:role_uuid?", component: Role }
   ],
   "admin.MainMenu": [
     {

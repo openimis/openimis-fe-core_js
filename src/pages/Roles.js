@@ -32,10 +32,13 @@ import {
     RIGHT_ROLE_SEARCH,
     RIGHT_ROLE_CREATE,
     RIGHT_ROLE_UPDATE,
-    RIGHT_ROLE_DELETE
+    RIGHT_ROLE_DUPLICATE,
+    RIGHT_ROLE_DELETE,
+    QUERY_STRING_DUPLICATE
 } from "../constants";
 import AddIcon from "@material-ui/icons/Add";
 import EditIcon from "@material-ui/icons/Edit";
+import SupervisedUserCircleIcon from '@material-ui/icons/SupervisedUserCircle';
 import DeleteIcon from "@material-ui/icons/Delete";
 
 const styles = theme => ({
@@ -156,6 +159,8 @@ class Roles extends Component {
 
     roleUpdatePageUrl = (role) => `${this.props.modulesManager.getRef("core.route.role")}${"/" + role.uuid}`;
 
+    roleDuplicatePageUrl = (role) => `${this.roleUpdatePageUrl(role)}?${QUERY_STRING_DUPLICATE}`
+
     onDoubleClick = (role, newTab = false) => {
         const { rights, modulesManager, history } = this.props;
         if (rights.includes(RIGHT_ROLE_SEARCH) || rights.includes(RIGHT_ROLE_UPDATE)) {
@@ -174,9 +179,13 @@ class Roles extends Component {
             "roleManagement.dateValidFrom",
             "roleManagement.dateValidTo"
         ];
-        if (rights.includes(RIGHT_ROLE_DELETE)) {
-            result.push("roleManagement.emptyLabel");
-        }
+        [RIGHT_ROLE_UPDATE, RIGHT_ROLE_DUPLICATE, RIGHT_ROLE_DELETE].forEach(
+            right => {
+                if (rights.includes(right)) {
+                    result.push("roleManagement.emptyLabel");
+                }
+            }
+        );
         return result;
     }
 
@@ -205,11 +214,27 @@ class Roles extends Component {
                     <div>
                         <IconButton
                             href={this.roleUpdatePageUrl(role)}
-                            disabled={this.isRowDisabled(null, role)}>
+                            disabled={this.isRowDisabled(null, role)}
+                        >
                             <EditIcon />
                         </IconButton>
                     </div>,
                     formatMessage(intl, "core", "roleManagement.editButton.tooltip")
+                )
+            );
+        }
+        if (rights.includes(RIGHT_ROLE_DUPLICATE)) {
+            result.push(
+                role => withTooltip(
+                    <div>
+                        <IconButton
+                            href={this.roleDuplicatePageUrl(role)}
+                            disabled={this.isRowDisabled(null, role)}
+                        >
+                            <SupervisedUserCircleIcon />
+                        </IconButton>
+                    </div>,
+                    formatMessage(intl, "core", "roleManagement.duplicateButton.tooltip")
                 )
             );
         }
@@ -219,7 +244,8 @@ class Roles extends Component {
                     <div>
                         <IconButton
                             onClick={() => this.onDelete(role)}
-                            disabled={this.isRowDisabled(null, role)}>
+                            disabled={this.isRowDisabled(null, role)}
+                        >
                             <DeleteIcon/>
                         </IconButton>
                     </div>,

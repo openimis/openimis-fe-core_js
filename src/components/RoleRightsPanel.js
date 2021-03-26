@@ -103,7 +103,10 @@ class RoleRightsPanel extends FormPanel {
             fetchingModulePermissions,
             fetchedModulePermissions,
             modulePermissions,
-            errorModulePermissions
+            errorModulePermissions,
+            fetchingRoleRights,
+            fetchedRoleRights,
+            errorRoleRights
         } = this.props;
         const sortedModulePermissions = !!modulePermissions
             ? modulePermissions.sort(
@@ -112,104 +115,115 @@ class RoleRightsPanel extends FormPanel {
             ) : [];
         return (
             <Fragment>
-                <ProgressOrError progress={fetchingModulePermissions} error={errorModulePermissions} />
-                {!!fetchedModulePermissions && !!sortedModulePermissions.length && (
-                    <Paper className={classes.paper}>
-                        <Grid container>
+                <Paper className={classes.paper}>
+                    <Grid container>
+                        <Grid item className={classes.item}>
+                            <Paper>
+                                <Grid item className={classes.item}>
+                                    <TextField
+                                        className={classes.filter}
+                                        variant="outlined"
+                                        label={formatMessage(
+                                            intl,
+                                            "core",
+                                            "roleManagement.role.rightsFilter"
+                                        )}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <SearchIcon />
+                                                </InputAdornment>
+                                            )
+                                        }}
+                                        onChange={e => this.setState({ filterValue: e.target.value })}
+                                    />
+                                </Grid>
+                            </Paper>
+                        </Grid>
+                    </Grid>
+                    <Grid container justify="space-between" alignItems="center">
+                        <Grid item xs={6} className={classes.item}>
                             <Grid item className={classes.item}>
-                                <Paper>
-                                    <Grid item className={classes.item}>
-                                        <TextField
-                                            className={classes.filter}
-                                            variant="outlined"
-                                            label={formatMessage(
-                                                intl,
-                                                "core",
-                                                "roleManagement.role.rightsFilter"
-                                            )}
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <SearchIcon />
-                                                    </InputAdornment>
-                                                )
-                                            }}
-                                            onChange={e => this.setState({ filterValue: e.target.value })}
-                                        />
-                                    </Grid>
-                                </Paper>
+                                <Typography variant="h6">
+                                    <FormattedMessage module="core" id="roleManagement.role.availableRights" />
+                                </Typography>
                             </Grid>
+                            <Paper>
+                                <List className={classes.list} subheader={<li />}>
+                                    <ProgressOrError
+                                        progress={fetchingModulePermissions || fetchingRoleRights}
+                                        error={errorModulePermissions || errorRoleRights}
+                                    />
+                                    {!!fetchedModulePermissions &&
+                                    !!fetchedRoleRights &&
+                                    !!sortedModulePermissions.length &&
+                                    sortedModulePermissions.map((modulePermission) => (
+                                        modulePermission.permissions
+                                            .filter((permission) => (
+                                                !edited.roleRights.includes(permission.permsValue) &&
+                                                    this.isFilterMatched(modulePermission.moduleName, permission.permsName)))
+                                            .map((permission) => (
+                                                <ListItem button divider>
+                                                    <ListItemText
+                                                        className={classes.listItemText}
+                                                        primary={this.rightLabel(modulePermission.moduleName, permission.permsName)}
+                                                    />
+                                                    <ListItemSecondaryAction>
+                                                        <IconButton
+                                                            onClick={() => this.selectRight(permission.permsValue)}
+                                                            disabled={!!isReadOnly}
+                                                        >
+                                                            <ArrowForwardIcon />
+                                                        </IconButton>
+                                                    </ListItemSecondaryAction>
+                                                </ListItem>
+                                            ))
+                                    ))}
+                                </List>
+                            </Paper>
                         </Grid>
-                        <Grid container justify="space-between" alignItems="center">
-                            <Grid item xs={6} className={classes.item}>
-                                <Grid item className={classes.item}>
-                                    <Typography variant="h6">
-                                        <FormattedMessage module="core" id="roleManagement.role.availableRights" />
-                                    </Typography>
-                                </Grid>
-                                <Paper>
-                                    <List className={classes.list} subheader={<li />}>
-                                        {sortedModulePermissions.map((modulePermission) => (
-                                            modulePermission.permissions
-                                                .filter((permission) => (
-                                                    !edited.roleRights.includes(permission.permsValue) && 
-                                                        this.isFilterMatched(modulePermission.moduleName, permission.permsName)))
-                                                .map((permission) => (
-                                                    <ListItem button divider>
-                                                        <ListItemText
-                                                            className={classes.listItemText}
-                                                            primary={this.rightLabel(modulePermission.moduleName, permission.permsName)}
-                                                        />
-                                                        <ListItemSecondaryAction>
-                                                            <IconButton
-                                                                onClick={() => this.selectRight(permission.permsValue)}
-                                                                disabled={!!isReadOnly}
-                                                            >
-                                                                <ArrowForwardIcon />
-                                                            </IconButton>
-                                                        </ListItemSecondaryAction>
-                                                    </ListItem>
-                                                ))
-                                        ))}
-                                    </List>
-                                </Paper>
+                        <Grid item xs={6} className={classes.item}>
+                            <Grid item className={classes.item}>
+                                <Typography variant="h6">
+                                    <FormattedMessage module="core" id="roleManagement.role.chosenRights" />
+                                </Typography>
                             </Grid>
-                            <Grid item xs={6} className={classes.item}>
-                                <Grid item className={classes.item}>
-                                    <Typography variant="h6">
-                                        <FormattedMessage module="core" id="roleManagement.role.chosenRights" />
-                                    </Typography>
-                                </Grid>
-                                <Paper>
-                                    <List className={classes.list} subheader={<li />}>
-                                        {sortedModulePermissions.map((modulePermission) => (
-                                            modulePermission.permissions
-                                                .filter((permission) => (
-                                                    edited.roleRights.includes(permission.permsValue) && 
-                                                        this.isFilterMatched(modulePermission.moduleName, permission.permsName)))
-                                                .map((permission) => (
-                                                    <ListItem button divider>
-                                                        <ListItemText
-                                                            className={classes.listItemText}
-                                                            primary={this.rightLabel(modulePermission.moduleName, permission.permsName)}
-                                                        />
-                                                        <ListItemSecondaryAction>
-                                                            <IconButton
-                                                                onClick={() => this.unselectRight(permission.permsValue)}
-                                                                disabled={!!isReadOnly}
-                                                            >
-                                                                <ArrowBackIcon />
-                                                            </IconButton>
-                                                        </ListItemSecondaryAction>
-                                                    </ListItem>
-                                                ))
-                                        ))}
-                                    </List>
-                                </Paper>
-                            </Grid>
+                            <Paper>
+                                <List className={classes.list} subheader={<li />}>
+                                    <ProgressOrError
+                                        progress={fetchingModulePermissions || fetchingRoleRights}
+                                        error={errorModulePermissions || errorRoleRights}
+                                    />
+                                    {!!fetchedModulePermissions &&
+                                    !!fetchedRoleRights &&
+                                    !!sortedModulePermissions.length &&
+                                    sortedModulePermissions.map((modulePermission) => (
+                                        modulePermission.permissions
+                                            .filter((permission) => (
+                                                edited.roleRights.includes(permission.permsValue) &&
+                                                    this.isFilterMatched(modulePermission.moduleName, permission.permsName)))
+                                            .map((permission) => (
+                                                <ListItem button divider>
+                                                    <ListItemText
+                                                        className={classes.listItemText}
+                                                        primary={this.rightLabel(modulePermission.moduleName, permission.permsName)}
+                                                    />
+                                                    <ListItemSecondaryAction>
+                                                        <IconButton
+                                                            onClick={() => this.unselectRight(permission.permsValue)}
+                                                            disabled={!!isReadOnly}
+                                                        >
+                                                            <ArrowBackIcon />
+                                                        </IconButton>
+                                                    </ListItemSecondaryAction>
+                                                </ListItem>
+                                            ))
+                                    ))}
+                                </List>
+                            </Paper>
                         </Grid>
-                    </Paper>
-                )}
+                    </Grid>
+                </Paper>
             </Fragment>
         )
     }
@@ -220,7 +234,10 @@ const mapStateToProps = state => ({
     fetchingModulePermissions: state.core.fetchingModulePermissions,
     fetchedModulePermissions: state.core.fetchedModulePermissions,
     modulePermissions: state.core.modulePermissions,
-    errorModulePermissions: state.core.errorModulePermissions
+    errorModulePermissions: state.core.errorModulePermissions,
+    fetchingRoleRights: state.core.fetchingRoleRights,
+    fetchedRoleRights: state.core.fetchedRoleRights,
+    errorRoleRights: state.core.errorRoleRights
 });
 
 const mapDispatchToProps = dispatch => {

@@ -84,6 +84,10 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 
 ## Contributions
 * `core.Boot` - KeepLegacyAlive: contributing to own contribution point in order to register the component that pings the Legacy openIMIS application to prevent session timeout while in the new part.
+* `core.Router`: registering `roles`, `roles/role` routes in openIMIS client-side router
+* `admin.MainMenu`:
+  
+    **Roles Management** (`roleManagement.label` translation key)
 
 ## Published Components
 * `core.DatePicker`, configured date picker  (Gregorian vs. Nepali)
@@ -96,7 +100,15 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 * `CORE_USERS_CURRENT_USER_{REQ|RESP|ERR}`: retrieve authenticated info (language, rights,...)
 * `CORE_MUTATION_{ADD|REQ|RESP|ERR}`: mutation lifecycle (request,...)
 * `CORE_HISTORICAL_MUTATIONS_{REQ|RESP|ERR}`: retrieve mutations from previous sessions (init JournalDrawer)
-
+* `CORE_ROLE_MUTATION_{REQ|ERR}`: sending a mutation on Role
+* `CORE_ROLES_{REQ|RESP|ERR}`: retrieve Roles
+* `CORE_MODULEPERMISSIONS_{REQ|RESP|ERR}`: retrieve permissions of all modules
+* `CORE_ROLE_{REQ|RESP|ERR}`: retrieve a single Role
+* `CORE_ROLERIGHTS_{REQ|RESP|ERR}`: retrieve rights/permissions of a single Role
+* `CORE_CREATE_ROLE_RESP`: receive a result of create Role mutation
+* `CORE_UPDATE_ROLE_RESP`: receive a result of update Role mutation
+* `CORE_DUPLICATE_ROLE_RESP`: receive a result of duplicate Role mutation
+* `CORE_DELETE_ROLE_RESP`: receive a result of delete Role mutation
 
 ## Other Modules Listened Redux Actions 
 None

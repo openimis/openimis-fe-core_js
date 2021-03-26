@@ -28,5 +28,7 @@
     "core.roleManagement.UpdateRole.mutationLabel": "Update Role {label}",
     "core.roleManagement.editButton.tooltip": "Edit",
     "core.roleManagement.updateRole.confirm.title":  "Save changes in {label}?",
-    "core.roleManagement.updateRole.confirm.message":  "Are you sure you want to save changes in {label}?"
+    "core.roleManagement.updateRole.confirm.message":  "Are you sure you want to save changes in {label}?",
+    "core.roleManagement.DuplicateRole.mutationLabel": "Duplicate Role {label}",
+    "core.roleManagement.duplicateButton.tooltip": "Duplicate"
 }

@@ -12,10 +12,15 @@ import { injectIntl } from "react-intl";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { createRole, updateRole, fetchRole, fetchRoleRights } from "../actions";
+import { createRole, updateRole, duplicateRole, fetchRole, fetchRoleRights } from "../actions";
 import RoleHeadPanel from "../components/RoleHeadPanel";
 import RoleRightsPanel from "../components/RoleRightsPanel";
-import { RIGHT_ROLE_SEARCH, RIGHT_ROLE_CREATE, RIGHT_ROLE_UPDATE } from "../constants";
+import {
+    RIGHT_ROLE_SEARCH,
+    RIGHT_ROLE_CREATE,
+    RIGHT_ROLE_UPDATE,
+    QUERY_STRING_DUPLICATE
+} from "../constants";
 
 const styles = theme => ({
     page: theme.page
@@ -39,8 +44,14 @@ class Role extends Component {
             this.titleParams(this.state.role)
         );
         if (!!this.props.roleUuid) {
-            this.props.fetchRole([`uuid: "${this.props.roleUuid}"`]);
-            this.props.fetchRoleRights([`role_Uuid: "${this.props.roleUuid}"`]);
+            this.setState((_, props) => ({
+                isDuplicate: new URLSearchParams(props.location.search).has(
+                    QUERY_STRING_DUPLICATE
+                )
+            }), () => {
+                this.props.fetchRole([`uuid: "${this.props.roleUuid}"`]);
+                this.props.fetchRoleRights([`role_Uuid: "${this.props.roleUuid}"`]);
+            });
         }
     }
 
@@ -52,11 +63,15 @@ class Role extends Component {
             this.setState((state, props) => ({
                 role: {
                     ...props.role,
-                    isSystem: !!props.role.isSystem,
+                    name: state.isDuplicate ? null : props.role.name,
+                    altLanguage: state.isDuplicate ? null : props.role.altLanguage,
+                    isSystem: state.isDuplicate ? false : !!props.role.isSystem,
+                    isBlocked: state.isDuplicate ? false : !!props.role.isBlocked,
                     roleRights: state.role.roleRights
                 },
                 reset: state.reset + 1,
-                isSystemRole: !!props.role.isSystem
+                isSystemRole: state.isDuplicate ? false : !!props.role.isSystem,
+                originalRoleName: props.role.name
             }), () => (
                 document.title = formatMessageWithValues(
                     this.props.intl,
@@ -77,10 +92,15 @@ class Role extends Component {
             }));
         } else if (prevProps.submittingMutation && !this.props.submittingMutation) {
             this.props.journalize(this.props.mutation);
-            if (!!this.state.role.uuid) {
+            if (!!this.state.role.uuid && !this.state.isDuplicate) {
                 this.props.fetchRole([`uuid: "${this.state.role.uuid}"`]);
             } else {
-                this.props.fetchRole([`clientMutationId: "${this.props.mutation.clientMutationId}"`]);
+                this.setState(
+                    { isDuplicate: false },
+                    () => this.props.fetchRole([
+                        `clientMutationId: "${this.props.mutation.clientMutationId}"`
+                    ])
+                );
             }
         } else if (prevProps.confirmed !== this.props.confirmed &&
             !!this.props.confirmed &&
@@ -91,8 +111,8 @@ class Role extends Component {
     }
 
     save = role => {
-        const { intl, createRole, updateRole, coreConfirm } = this.props;
-        if (!!role.id) {
+        const { intl, createRole, updateRole, duplicateRole, coreConfirm } = this.props;
+        if (!!role.id && !this.state.isDuplicate) {
             const confirm = () => coreConfirm(
                 formatMessageWithValues(
                     intl,
@@ -119,6 +139,16 @@ class Role extends Component {
                 );
             }
             this.setState({ confirmedAction }, confirm);
+        } else if (!!role.id && this.state.isDuplicate) {
+            duplicateRole(
+                role,
+                formatMessageWithValues(
+                    intl,
+                    "core",
+                    "roleManagement.DuplicateRole.mutationLabel",
+                    { label: this.state.originalRoleName }
+                )
+            );
         } else {
             createRole(
                 role,
@@ -189,7 +219,7 @@ const mapStateToProps = (state, props) => ({
 });
 
 const mapDispatchToProps = dispatch => {
-    return bindActionCreators({ createRole, updateRole, fetchRole, fetchRoleRights, journalize, coreConfirm }, dispatch);
+    return bindActionCreators({ createRole, updateRole, duplicateRole, fetchRole, fetchRoleRights, journalize, coreConfirm }, dispatch);
 };
 
 export default withHistory(withModulesManager(injectIntl(withTheme(withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(Role))))));

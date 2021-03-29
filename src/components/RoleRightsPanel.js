@@ -59,7 +59,9 @@ class RoleRightsPanel extends FormPanel {
     }
 
     componentDidMount() {
-        this.props.fetchModulesPermissions();
+        if (!this.props.fetchedModulePermissions) {
+            this.props.fetchModulesPermissions();
+        }
     }
 
     selectRight = (rightId) => {
@@ -106,7 +108,8 @@ class RoleRightsPanel extends FormPanel {
             errorModulePermissions,
             fetchingRoleRights,
             fetchedRoleRights,
-            errorRoleRights
+            errorRoleRights,
+            roleUuid
         } = this.props;
         const sortedModulePermissions = !!modulePermissions
             ? modulePermissions.sort(
@@ -155,13 +158,13 @@ class RoleRightsPanel extends FormPanel {
                                         error={errorModulePermissions || errorRoleRights}
                                     />
                                     {!!fetchedModulePermissions &&
-                                    !!fetchedRoleRights &&
+                                    (!!roleUuid ? !!fetchedRoleRights : true) &&
                                     !!sortedModulePermissions.length &&
                                     sortedModulePermissions.map((modulePermission) => (
                                         modulePermission.permissions
                                             .filter((permission) => (
                                                 !edited.roleRights.includes(permission.permsValue) &&
-                                                    this.isFilterMatched(modulePermission.moduleName, permission.permsName)))
+                                                this.isFilterMatched(modulePermission.moduleName, permission.permsName)))
                                             .map((permission) => (
                                                 <ListItem button divider>
                                                     <ListItemText
@@ -195,13 +198,13 @@ class RoleRightsPanel extends FormPanel {
                                         error={errorModulePermissions || errorRoleRights}
                                     />
                                     {!!fetchedModulePermissions &&
-                                    !!fetchedRoleRights &&
+                                    (!!roleUuid ? !!fetchedRoleRights : true) &&
                                     !!sortedModulePermissions.length &&
                                     sortedModulePermissions.map((modulePermission) => (
                                         modulePermission.permissions
                                             .filter((permission) => (
                                                 edited.roleRights.includes(permission.permsValue) &&
-                                                    this.isFilterMatched(modulePermission.moduleName, permission.permsName)))
+                                                this.isFilterMatched(modulePermission.moduleName, permission.permsName)))
                                             .map((permission) => (
                                                 <ListItem button divider>
                                                     <ListItemText

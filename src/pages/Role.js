@@ -173,7 +173,7 @@ class Role extends Component {
     titleParams = role => ({ label: !!role && !!role.name ? role.name : null });
 
     render() {
-        const { intl, rights, classes } = this.props;
+        const { intl, rights, classes, roleUuid } = this.props;
         return (
             rights.includes(RIGHT_ROLE_SEARCH) &&
             rights.includes(RIGHT_ROLE_CREATE) && (
@@ -197,6 +197,7 @@ class Role extends Component {
                         )}
                         isReadOnly={!!this.state.isSystemRole || !rights.includes(RIGHT_ROLE_UPDATE)}
                         reset={this.state.reset}
+                        roleUuid={roleUuid}
                     />
                 </div>
             )

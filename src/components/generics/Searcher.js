@@ -77,7 +77,7 @@ class SelectionMenu extends Component {
         )
     }
 
-    renderButtons = (entries) => (
+    renderButtons = (entries, contributionKey) => (
         <Grid item className={this.props.classes.paperHeader}>
             <Grid container alignItems="center" className={this.props.classes.paperHeaderAction}>
                 {entries.map((i, idx) => (
@@ -85,11 +85,17 @@ class SelectionMenu extends Component {
                         <Button onClick={e => this.action(i.action)}>{i.text}</Button>
                     </Grid>
                 ))}
+                {
+                !!contributionKey && 
+                <Contributions 
+                    actionHandler={this.action}
+                    selection={this.props.selection} 
+                    contributionKey={contributionKey}/>}
             </Grid>
         </Grid>
     )
 
-    renderMenu = (entries) => {
+    renderMenu = (entries, contributionKey) => {
         return (
             <Grid item className={this.props.classes.paperHeader}>
                 <Grid container alignItems="center">
@@ -97,30 +103,39 @@ class SelectionMenu extends Component {
                         <IconButton onClick={this.openMenu}><MoreHoriz /></IconButton>
                     </Grid>
                 </Grid>
-                {!!this.state.anchorEl && (
                     <Menu
                         open={!!this.state.anchorEl}
                         anchorEl={this.state.anchorEl}
                         onClose={this.closeMenu}
+                        keepMounted
                     >
                         {entries.map((i, idx) => (
                             <MenuItem key={`selectionsMenu-${idx}`} onClick={e => this.action(i.action)}>{i.text}</MenuItem>
                         ))}
+                        {
+                            !!contributionKey && 
+                            <Contributions  
+                                actionHandler={this.action} 
+                                selection={this.props.selection} 
+                                contributionKey={contributionKey}/>
+                        }
+                        
                     </Menu>
-                )}
             </Grid>
         )
     }
 
     render() {
-        const { intl, classes, canSelectAll, selection, clearSelected, selectAll, actions = [], processing } = this.props;
+        const { intl, classes, canSelectAll, selection, clearSelected, selectAll, actions = [], processing, actionsContributionKey=null } = this.props;
         if (!actions.length) return null;
         if (processing) {
             return (
                 <CircularProgress className={classes.processing} size={24} />
             )
         }
+        
         let entries = [];
+        let contributed_entries = this.props.modulesManager.getContribs(actionsContributionKey)
         let selectionCount = selection.length;
         if (!!selectionCount) {
             entries.push({ text: formatMessage(intl, "claim", "clearSelected"), action: clearSelected });
@@ -134,14 +149,14 @@ class SelectionMenu extends Component {
             }
         });
         if (entries.length > 2) {
-            return this.renderMenu(entries);
+            return this.renderMenu(entries, actionsContributionKey);
         } else {
-            return this.renderButtons(entries);
+            return this.renderButtons(entries, actionsContributionKey);
         }
     }
 }
 
-const StyledSelectionMenu = injectIntl(withTheme(withStyles(styles)(SelectionMenu)))
+const StyledSelectionMenu = injectIntl(withModulesManager(withTheme(withStyles(styles)(SelectionMenu))))
 
 class Searcher extends Component {
 
@@ -335,6 +350,7 @@ class Searcher extends Component {
             itemFormatters,
             onDoubleClick, actions, processing = false,
             withSelection = null,
+            actionsContributionKey = null
         } = this.props;
         return (
             <Fragment>
@@ -385,6 +401,7 @@ class Searcher extends Component {
                                             triggerAction={this.triggerAction}
                                             actions={actions}
                                             processing={processing}
+                                            actionsContributionKey={actionsContributionKey}
                                         />
                                     </Grid>
 

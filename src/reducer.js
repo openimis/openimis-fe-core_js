@@ -1,4 +1,13 @@
-import { parseData, decodeId, pageInfo } from './helpers/api';
+import {
+    parseData,
+    decodeId,
+    pageInfo,
+    formatGraphQLError,
+    formatServerError,
+    dispatchMutationReq,
+    dispatchMutationResp,
+    dispatchMutationErr
+} from "./helpers/api";
 
 function reducer(
     state = {
@@ -10,6 +19,24 @@ function reducer(
         fetchingMutations: false,
         mutations: [],
         filtersCache: {},
+        fetchingRoles: false,
+        fetchedRoles: false,
+        roles: [],
+        rolesPageInfo: {},
+        rolesTotalCount: 0,
+        errorRoles: null,
+        fetchingModulePermissions: false,
+        fetchedModulePermissions: false,
+        modulePermissions: [],
+        errorModulePermissions: null,
+        fetchingRole: false,
+        fetchedRole: false,
+        role: null,
+        errorRole: null,
+        fetchingRoleRights: false,
+        fetchedRoleRights: false,
+        roleRights: [],
+        errorRoleRights: null,
     },
     action,
 ) {
@@ -118,6 +145,112 @@ function reducer(
                 fetchingHistoricalMutations: false,
                 fetchedHistoricalMutations: true,
             }
+        case 'CORE_ROLES_REQ':
+            return {
+                ...state,
+                fetchingRoles: true,
+                fetchedRoles: false,
+                roles: [],
+                rolesPageInfo: {},
+                rolesTotalCount: 0,
+                errorRoles: null
+            };
+        case "CORE_ROLES_RESP":
+            return {
+                ...state,
+                fetchingRoles: false,
+                fetchedRoles: true,
+                roles: parseData(action.payload.data.role),
+                rolesPageInfo: pageInfo(action.payload.data.role),
+                rolesTotalCount: !!action.payload.data.role ? action.payload.data.role.totalCount : null,
+                errorRoles: formatGraphQLError(action.payload)
+            };
+        case "CORE_ROLES_ERR":
+            return {
+                ...state,
+                fetchingRoles: false,
+                errorRoles: formatServerError(action.payload)
+            };
+        case 'CORE_MODULEPERMISSIONS_REQ':
+            return {
+                ...state,
+                fetchingModulePermissions: true,
+                fetchedModulePermissions: false,
+                modulePermissions: [],
+                errorModulePermissions: null
+            };
+        case "CORE_MODULEPERMISSIONS_RESP":
+            return {
+                ...state,
+                fetchingModulePermissions: false,
+                fetchedModulePermissions: true,
+                modulePermissions: !!action.payload.data.modulesPermissions
+                    ? action.payload.data.modulesPermissions.modulePermsList
+                    : [],
+                errorModulePermissions: formatGraphQLError(action.payload)
+            };
+        case "CORE_MODULEPERMISSIONS_ERR":
+            return {
+                ...state,
+                fetchingModulePermissions: false,
+                errorModulePermissions: formatServerError(action.payload)
+            };
+        case "CORE_ROLE_REQ":
+            return {
+                ...state,
+                fetchingRole: true,
+                fetchedRole: false,
+                role: null,
+                errorRole: null
+            };
+        case "CORE_ROLE_RESP":
+            return {
+                ...state,
+                fetchingRole: false,
+                fetchedRole: true,
+                role: parseData(action.payload.data.role).find(role => !!role),
+                errorRole: formatGraphQLError(action.payload)
+            };
+        case "CORE_ROLE_ERR":
+            return {
+                ...state,
+                fetchingRole: false,
+                errorRole: formatServerError(action.payload)
+            };
+        case 'CORE_ROLERIGHTS_REQ':
+            return {
+                ...state,
+                fetchingRoleRights: true,
+                fetchedRoleRights: false,
+                roleRights: [],
+                errorRoleRights: null
+            };
+        case "CORE_ROLERIGHTS_RESP":
+            return {
+                ...state,
+                fetchingRoleRights: false,
+                fetchedRoleRights: true,
+                roleRights: parseData(action.payload.data.roleRight),
+                errorRoleRights: formatGraphQLError(action.payload)
+            };
+        case "CORE_ROLERIGHTS_ERR":
+            return {
+                ...state,
+                fetchingRoleRights: false,
+                errorRoleRights: formatServerError(action.payload)
+            };
+        case "CORE_ROLE_MUTATION_REQ":
+            return dispatchMutationReq(state, action);
+        case "CORE_ROLE_MUTATION_ERR":
+            return dispatchMutationErr(state, action);
+        case "CORE_CREATE_ROLE_RESP":
+            return dispatchMutationResp(state, "createRole", action);
+        case "CORE_UPDATE_ROLE_RESP":
+            return dispatchMutationResp(state, "updateRole", action);
+        case "CORE_DUPLICATE_ROLE_RESP":
+            return dispatchMutationResp(state, "duplicateRole", action);
+        case "CORE_DELETE_ROLE_RESP":
+            return dispatchMutationResp(state, "deleteRole", action);
         default:
             return state;
     }

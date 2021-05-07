@@ -7,7 +7,7 @@ import {
     CircularProgress, ClickAwayListener, List, ListItem, ListItemText, ListItemIcon,
     Drawer, Divider, IconButton, Grid, Popover, Typography,
     Collapse,
-    ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails
+    Accordion, AccordionSummary, AccordionDetails
 } from "@material-ui/core";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
@@ -103,25 +103,25 @@ class Messages extends Component {
     formatSingleMessage = (message, idx) => {
         if (message.hasOwnProperty("message")) {
             return (
-                <ExpansionPanel key={`message-${idx}-panel`}
+                <Accordion key={`message-${idx}-panel`}
                     expanded={message.hasOwnProperty("detail") && this.state.expanded === `message-${idx}`}
                     onChange={this.handleChange(`message-${idx}`)}
                     className={this.props.classes.errorPanel}
                 >
-                    <ExpansionPanelSummary
+                    <AccordionSummary
                         id={`message-${idx}-header`}
                         expandIcon={message.hasOwnProperty("detail") && <ExpandMoreIcon />}
                     >
                         <Typography variant="caption">{message.hasOwnProperty("code") ? `[${message.code}] ` : ""}{message.message}</Typography>
-                    </ExpansionPanelSummary>
+                    </AccordionSummary>
                     {message.hasOwnProperty("detail") &&
-                        <ExpansionPanelDetails>
+                        <AccordionDetails>
                             <Typography variant="caption">
                                 {message.detail}
                             </Typography>
-                        </ExpansionPanelDetails>
+                        </AccordionDetails>
                     }
-                </ExpansionPanel >
+                </Accordion >
             )
         } else if (message.hasOwnProperty("clientMutationLabel")) {
             return <Grid key={`message-${idx}-panel`} item className={this.props.classes.messagePanel}>{message.clientMutationLabel}</Grid>
@@ -133,18 +133,18 @@ class Messages extends Component {
     formatMessage = (message, idx) => {
         if (message.hasOwnProperty('title')) {
             return (
-                <ExpansionPanel key={`groupMessage-${idx}-panel`}
+                <Accordion key={`groupMessage-${idx}-panel`}
                     expanded={this.state.groupExpanded === `groupMessage-${idx}`}
                     onChange={this.handleGroupChange(`groupMessage-${idx}`)}
                     className={this.props.classes.groupMessagePanel}
                 >
-                    <ExpansionPanelSummary
+                    <AccordionSummary
                         id={`groupMessage-${idx}-header`}
                         expandIcon={<ExpandMoreIcon />}
                     >
                         <Typography variant="caption">{message.title}</Typography>
-                    </ExpansionPanelSummary>
-                    <ExpansionPanelDetails className={this.props.classes.groupMessagePanel}>
+                    </AccordionSummary>
+                    <AccordionDetails className={this.props.classes.groupMessagePanel}>
                         <Grid container spacing={0}>
                             {message.list.map((m, i) => (
                                 <Grid item xs={12}>
@@ -152,9 +152,9 @@ class Messages extends Component {
                                 </Grid>))
                             }
                         </Grid>
-                    </ExpansionPanelDetails>
+                    </AccordionDetails>
 
-                </ExpansionPanel >
+                </Accordion >
             )
         } else {
             return this.formatSingleMessage(message, idx)
@@ -218,29 +218,29 @@ class JournalDrawer extends Component {
         if (!this.props.fetchedHistoricalMutations) {
             this.props.fetchHistoricalMutations(this.state.pageSize, this.state.afterCursor);
         }
-        this.setState({
+        this.setState((state, props) => ({
             timeoutId: setInterval(
                 this.checkProcessing,
-                this.props.modulesManager.getRef("core.JournalDrawer.pollInterval")
+                props.modulesManager.getRef("core.JournalDrawer.pollInterval")
             ),
-            displayedMutations: [...this.props.mutations],
-        });
+            displayedMutations: [...props.mutations],
+        }));
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.fetchingHistoricalMutations && !this.props.fetchingHistoricalMutations) {
-            this.setState({
-                displayedMutations: [...this.state.displayedMutations, ...this.props.mutations],
-                afterCursor: this.props.mutationsPageInfo.endCursor,
-                hasNextPage: this.props.mutationsPageInfo.hasNextPage
-            })
+            this.setState((state, props) => ({
+                displayedMutations: [...state.displayedMutations, ...props.mutations],
+                afterCursor: props.mutationsPageInfo.endCursor,
+                hasNextPage: props.mutationsPageInfo.hasNextPage
+            }))
         } else if (!_.isEqual(prevProps.mutations, this.props.mutations)) {
             let prevMutationIds = prevProps.mutations.map(m => m.id);
             let new_mutations = [...this.props.mutations].filter(m => !prevMutationIds.includes(m.id))
             if (!!new_mutations.length) {
-                this.setState({
-                    displayedMutations: [...new_mutations, ...this.state.displayedMutations]
-                })
+                this.setState((state, props) => ({
+                    displayedMutations: [...new_mutations, ...state.displayedMutations]
+                }))
             }
         }
     }
@@ -291,7 +291,6 @@ class JournalDrawer extends Component {
                     <StyledMessages
                         anchorEl={this.state.messagesAnchor}
                         messages={this.state.messages}
-                        error={this.state.Err}
                         onClick={this.hideMessages}
                     />
                     <Drawer

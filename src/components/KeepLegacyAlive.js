@@ -1,29 +1,29 @@
-import React, { Component } from 'react'
-import { baseApiUrl } from '../actions';
+import { Component } from 'react'
+import withModulesManager from "../helpers/modules";
 
 class KeepLegacyAlive extends Component {
 
 
     componentDidMount() {
-        this.setState({
+        this.setState((state, props) => ({
             timeoutId: setInterval(
                 this.keepLegacyAlive,
-                this.props.modulesManager.getRef("core.KeepLegacyAlive.pollInterval")
+                props.modulesManager.getRef("core.KeepLegacyAlive.pollInterval")
             ),
-        });
+        }));
     }
 
     componentWillUnmount() {
-        clearTimeout(this.state.timeoutId);
+        if (!!this.state && !!this.state.timeoutId) { clearTimeout(this.state.timeoutId) };
     }
 
     keepLegacyAlive = () => {
         fetch(`${window.location.origin}/keepLegacyAlive`);
     }
 
-    render() {        
+    render() {
         return null;
     }
 }
 
-export default KeepLegacyAlive;
+export default withModulesManager(KeepLegacyAlive);

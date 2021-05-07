@@ -1,6 +1,6 @@
 import moment from "moment";
 
-export function formatDateFromISO(intl, date) {
+export function formatDateFromISO(mm, intl, date) {
     if (!date) return '';
-    return intl.formatDate(moment(date));
+    return moment(date).format(mm.getConf("fe-core", "dateFormat", "YYYY-MM-DD"));
 }

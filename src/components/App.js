@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { IntlProvider } from 'react-intl';
 import { Redirect, Route, Router, Switch } from "react-router-dom";
-import { CssBaseline, CircularProgress, Dialog } from "@material-ui/core";
+import { CssBaseline, CircularProgress } from "@material-ui/core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import withHistory from "../helpers/history";
 import withModulesManager from "../helpers/modules";
@@ -75,13 +75,13 @@ class RootApp extends Component {
                 exact
                 path={`${process.env.PUBLIC_URL || ""}/`}
                 render={() => {
-				  let search = this.props.history.location.search;
-				  if (!search) {
-					  return <Redirect to={`${process.env.PUBLIC_URL || ""}/home`} />
-				  } else {
-					  return <Redirect to={`${atob(search.substring(5))}`} />
-				  }
-				}}
+                  let search = this.props.history.location.search;
+                  if (!search) {
+                    return <Redirect to={`${process.env.PUBLIC_URL || ""}/home`} />
+                  } else {
+                    return <Redirect to={`${atob(search.substring(5))}`} />
+                  }
+                }}
               />
               {this.routerContributions.map((route, index) => {
                 const Comp = route.component;
@@ -107,11 +107,11 @@ class RootApp extends Component {
 }
 
 const mapStateToProps = (state, props) => ({
-    authenticating: state.core.authenticating,
-    user: !!state.core.user && state.core.user.i_user,
-    error: state.core.error,
-    alert: state.core.alert,
-    confirm: state.core.confirm,
+  authenticating: state.core.authenticating,
+  user: !!state.core.user && state.core.user.i_user,
+  error: state.core.error,
+  alert: state.core.alert,
+  confirm: state.core.confirm,
 })
 
 export default withHistory(connect(mapStateToProps, { auth })(

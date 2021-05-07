@@ -1,8 +1,8 @@
 import React, { Component, Fragment } from "react";
 import PropTypes from "prop-types";
-import MuiExpansionPanel from "@material-ui/core/ExpansionPanel";
-import MuiExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
-import MuiExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
+import MuiAccordion from "@material-ui/core/Accordion";
+import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
+import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Typography from "@material-ui/core/Typography";
 import { withTheme, withStyles } from "@material-ui/core/styles";
@@ -10,6 +10,7 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import { Divider, List, IconButton, MenuList, MenuItem, Button, Popper, Grow, Paper, ClickAwayListener } from "@material-ui/core";
+import withModulesManager from "../../helpers/modules";
 import { _historyPush } from '../../helpers/history';
 
 const styles = theme => ({
@@ -40,7 +41,7 @@ const styles = theme => ({
   }
 });
 
-const ExpansionPanel = withStyles({
+const Accordion = withStyles({
   root: {
     border: '1px solid rgba(0, 0, 0, .125)',
     boxShadow: 'none',
@@ -55,9 +56,9 @@ const ExpansionPanel = withStyles({
     },
   },
   expanded: {},
-})(MuiExpansionPanel);
+})(MuiAccordion);
 
-const ExpansionPanelSummary = withStyles({
+const AccordionSummary = withStyles({
   root: {
     backgroundColor: 'rgba(0, 0, 0, .03)',
     borderBottom: '1px solid rgba(0, 0, 0, .125)',
@@ -73,14 +74,14 @@ const ExpansionPanelSummary = withStyles({
     },
   },
   expanded: {},
-})(MuiExpansionPanelSummary);
+})(MuiAccordionSummary);
 
-const ExpansionPanelDetails = withStyles(theme => ({
+const AccordionDetails = withStyles(theme => ({
   root: {
     padding: theme.spacing(2),
     display: "block"
   },
-}))(MuiExpansionPanelDetails);
+}))(MuiAccordionDetails);
 
 class MainMenuContribution extends Component {
   state = {
@@ -106,7 +107,8 @@ class MainMenuContribution extends Component {
   }
 
   redirect(route) {
-    _historyPush(this.props.history, route);
+    const { modulesManager, history } = this.props;
+    _historyPush(modulesManager, history, route);
   }
 
   appBarMenu = () => {
@@ -166,19 +168,19 @@ class MainMenuContribution extends Component {
 
   drawerMenu = () => {
     return (
-      <ExpansionPanel
+      <Accordion
         className={this.props.classes.panel}
         expanded={this.state.expanded}
         onChange={this.toggleExpanded}
       >
-        <ExpansionPanelSummary
+        <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           id={`${this.props.header}-header`}
         >
           <IconButton>{this.props.icon}</IconButton>
           <Typography className={this.props.classes.drawerHeading}>{this.props.header}</Typography>
-        </ExpansionPanelSummary>
-        <ExpansionPanelDetails>
+        </AccordionSummary>
+        <AccordionDetails>
           <List component="nav">
             {this.props.entries.map((entry, idx) => (
               <Fragment key={`${this.props.header}_${idx}`}>
@@ -200,8 +202,8 @@ class MainMenuContribution extends Component {
               </Fragment>
             ))}
           </List>
-        </ExpansionPanelDetails>
-      </ExpansionPanel>
+        </AccordionDetails>
+      </Accordion>
     );
   }
 
@@ -221,4 +223,4 @@ MainMenuContribution.propTypes = {
   history: PropTypes.object.isRequired
 };
 
-export default withTheme(withStyles(styles)(MainMenuContribution));
+export default withModulesManager(withTheme(withStyles(styles)(MainMenuContribution)));

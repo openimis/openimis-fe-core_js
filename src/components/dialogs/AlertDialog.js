@@ -10,7 +10,7 @@ import {
     DialogContentText,
     DialogTitle,
     Typography,
-    Collapse
+    Grid,
 } from '@material-ui/core';
 import { clearAlert } from "../../actions";
 import { formatMessage } from "../../helpers/i18n";
@@ -38,12 +38,19 @@ class AlertDialog extends Component {
                     onClose={this.handleClose}
                 >
                     {!!alert && !!alert.title && <DialogTitle>{alert.title}</DialogTitle>}
-                    {!!alert && !!alert.message &&
+                    {!!alert && !!alert.message && !Array.isArray(alert.message) &&
                         <DialogContent>
                             <DialogContentText onClick={this.toggleOpen}>{alert.message}</DialogContentText>
                             {!!alert.detail && this.state.expanded && (
                                 <Typography>{alert.detail}</Typography>
                             )}
+                        </DialogContent>
+                    }
+                    {!!alert && !!alert.message && !!Array.isArray(alert.message) &&
+                        <DialogContent>
+                            <Grid container>
+                                {alert.message.map((m,i) => <Grid key={`message-${i}`}item><DialogContentText>{m}</DialogContentText></Grid>)}
+                            </Grid>
                         </DialogContent>
                     }
                     <DialogActions>

@@ -38,7 +38,8 @@ class RawPickerDialog extends Component {
 
     render() {
         const { classes, open, onClose, onSelect, module, title, close, filter,
-            suggestions, suggestionFormatter, count, page, pageSize, onChangePage, onChangeRowsPerPage } = this.props;
+            suggestions, suggestionFormatter, count, page, pageSize, onChangePage, onChangeRowsPerPage,
+        } = this.props;
         return (
             <Dialog
                 open={open}
@@ -82,6 +83,12 @@ class Picker extends Component {
         open: false
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (!prevProps.checked && !!this.props.checked) {
+            this.setState({ open: true })
+        }
+    }
+
     _onSelect = v => {
         this.setState(
             { open: false },
@@ -89,42 +96,34 @@ class Picker extends Component {
         )
     }
 
+    onClick = () => {
+        const { check = null, checked = true } = this.props;
+        if (!!check && !checked) {
+            check()
+        } else {
+            this.setState({ open: true })
+        }
+    }
+
     onClose = e => this.setState({ open: false });
 
     onClear = e => {
-        this.setState(
-            { value: '' },
-            e => this.props.onSelect(null)
-        );
+        this.props.onSelect(null)
     }
 
     _suggestionFormatter = a => <FakeInput onSelect={e => this._onSelect(a)} value={this.props.suggestionFormatter(a)} />
 
-    render() {
-        const { intl, classes, module, label, dialogTitle, dialogClose, dialogSelect, filter,
-            suggestions, suggestionFormatter, suggestionTxtFormatter, count, page, pageSize,
-            onChangeRowsPerPage, onChangePage, value, readOnly = false, required = false } = this.props;
+    renderIcon() {
+        const { IconRender, title } = this.props;
+        return <IconButton title={title} onClick={this.onClick}><IconRender /></IconButton>
+    }
+
+    renderField() {
+        const { intl, classes, module, label,
+            suggestionFormatter,
+            value, readOnly = false, required = false } = this.props;
         return (
             <FormControl fullWidth>
-                {!readOnly && (
-                    <PickerDialog
-                        open={this.state.open}
-                        onClose={this.onClose}
-                        onSelect={this._onSelect}
-                        module={module}
-                        title={dialogTitle}
-                        close={dialogClose}
-                        select={dialogSelect}
-                        filter={filter}
-                        suggestions={suggestions}
-                        suggestionFormatter={this._suggestionFormatter}
-                        count={count}
-                        pageSize={pageSize}
-                        page={page}
-                        onChangeRowsPerPage={onChangeRowsPerPage}
-                        onChangePage={onChangePage}
-                    />
-                )}
                 <TextField className={classes.picker}
                     disabled={readOnly}
                     required={required}
@@ -148,6 +147,38 @@ class Picker extends Component {
                     }}
                 />
             </FormControl>
+        )
+    }
+    render() {
+        const { module, dialogTitle, dialogClose, dialogSelect, filter,
+            suggestions, count, page, pageSize,
+            onChangeRowsPerPage, onChangePage, readOnly = false, IconRender,
+            checked = true,
+        } = this.props;
+        return (
+            <Fragment>
+                {!readOnly && !!checked && (
+                    <PickerDialog
+                        open={this.state.open}
+                        onClose={this.onClose}
+                        onSelect={this._onSelect}
+                        module={module}
+                        title={dialogTitle}
+                        close={dialogClose}
+                        select={dialogSelect}
+                        filter={filter}
+                        suggestions={suggestions}
+                        suggestionFormatter={this._suggestionFormatter}
+                        count={count}
+                        pageSize={pageSize}
+                        page={page}
+                        onChangeRowsPerPage={onChangeRowsPerPage}
+                        onChangePage={onChangePage}
+                    />
+                )}
+                {!!IconRender && this.renderIcon()}
+                {!IconRender && this.renderField()}
+            </Fragment>
         )
     }
 }

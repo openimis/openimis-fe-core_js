@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import { Component } from "react";
 import withModulesManager from "../../helpers/modules";
 
 class ControlledField extends Component {

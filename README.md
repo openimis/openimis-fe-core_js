@@ -8,6 +8,7 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 * various helpers (building GraphQL queries,...)
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/openimis/openimis-fe-core_js.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/openimis/openimis-fe-core_js/alerts/)
 
 ## Core Components
 * `App`: application pages container (all openIMIS pages are loaded within that container)
@@ -83,6 +84,10 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 
 ## Contributions
 * `core.Boot` - KeepLegacyAlive: contributing to own contribution point in order to register the component that pings the Legacy openIMIS application to prevent session timeout while in the new part.
+* `core.Router`: registering `roles`, `roles/role` routes in openIMIS client-side router
+* `admin.MainMenu`:
+  
+    **Roles Management** (`roleManagement.label` translation key)
 
 ## Published Components
 * `core.DatePicker`, configured date picker  (Gregorian vs. Nepali)
@@ -95,13 +100,22 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 * `CORE_USERS_CURRENT_USER_{REQ|RESP|ERR}`: retrieve authenticated info (language, rights,...)
 * `CORE_MUTATION_{ADD|REQ|RESP|ERR}`: mutation lifecycle (request,...)
 * `CORE_HISTORICAL_MUTATIONS_{REQ|RESP|ERR}`: retrieve mutations from previous sessions (init JournalDrawer)
-
+* `CORE_ROLE_MUTATION_{REQ|ERR}`: sending a mutation on Role
+* `CORE_ROLES_{REQ|RESP|ERR}`: retrieve Roles
+* `CORE_MODULEPERMISSIONS_{REQ|RESP|ERR}`: retrieve permissions of all modules
+* `CORE_ROLE_{REQ|RESP|ERR}`: retrieve a single Role
+* `CORE_ROLERIGHTS_{REQ|RESP|ERR}`: retrieve rights/permissions of a single Role
+* `CORE_CREATE_ROLE_RESP`: receive a result of create Role mutation
+* `CORE_UPDATE_ROLE_RESP`: receive a result of update Role mutation
+* `CORE_DUPLICATE_ROLE_RESP`: receive a result of duplicate Role mutation
+* `CORE_DELETE_ROLE_RESP`: receive a result of delete Role mutation
 
 ## Other Modules Listened Redux Actions 
 None
 
 ## Configurations Options
 * `datePicker`: the concrete date picker to publish as `core.DatePicker` component ("ad"= Gregorian DatePicker, "ne"= Neplali calendar date picker )
+* `useDynPermalinks`: use ?dyn=<Base64-URL> when opening in new tab (prevent sending client-side routes to server while) (Default: false)
 * `core.JournalDrawer.pollInterval`: poll interval (in ms) to check for mutation status once submitted (Default: 2000)
 * `core.KeepLegacyAlive.pollInterval`: poll interval (in ms) to send the ping to legacy openIMIS (to prevent session timeout). (Default: 300000 = 5')
 * `journalDrawer.pageSize`: page size when loading (historical) mutations (Default: `5`)

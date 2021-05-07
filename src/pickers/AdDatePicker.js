@@ -23,12 +23,12 @@ class AdDatePicker extends Component {
     state = { value: null }
 
     componentDidMount() {
-        this.setState({ value: this.props.value || null })
+        this.setState((state, props) => ({ value: props.value || null }))
     }
 
     componentDidUpdate(prevState, prevProps, snapshot) {
         if (prevState.value !== this.props.value) {
-            this.setState({ value: fromISODate(this.props.value) })
+            this.setState((state, props) => ({ value: fromISODate(props.value) }))
         }
     }
 

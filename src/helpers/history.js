@@ -17,15 +17,17 @@ function withHistory(C) {
 
 export default withHistory;
 
-export function _historyPush(history, route, newTab) {
-    if (!!newTab) {
+export function _historyPush(mm, history, route, newTab) {
+    if (!!newTab && mm.getConf("fe-core", "useDynPermalinks", false)) {
         let r = btoa(`${process.env.PUBLIC_URL || ""}${route}`);
         window.open(`${process.env.PUBLIC_URL || ""}?dyn=${r}`);
+    } else if (!!newTab) {
+        window.open(`${process.env.PUBLIC_URL || ""}${route}`);
     } else {
         history.push(`${process.env.PUBLIC_URL || ""}${route}`);
     }
 }
 
 export function historyPush(mm, history, route, params, newTab = false) {
-    _historyPush(history, `/${mm.getRef(route)}${!!params ? "/" + params.join("/"): ""}`, newTab);
+    _historyPush(mm, history, `/${mm.getRef(route)}${!!params ? "/" + params.join("/"): ""}`, newTab);
 }

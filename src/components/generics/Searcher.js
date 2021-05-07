@@ -1,4 +1,4 @@
-import React, { Component, Fragment, useCallback } from "react";
+import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import { injectIntl } from 'react-intl';
@@ -8,17 +8,14 @@ import {
     Grid,
     Paper,
     Divider,
-    IconButton,
     Typography,
+    IconButton,
     Button,
     Menu,
     MenuItem,
     CircularProgress,
 } from "@material-ui/core";
 import MoreHoriz from "@material-ui/icons/MoreHoriz";
-import SortIcon from "@material-ui/icons/UnfoldMore";
-import SortAscIcon from "@material-ui/icons/ExpandLess";
-import SortDescIcon from "@material-ui/icons/ExpandMore";
 import SearcherPane from "./SearcherPane";
 import Contributions from "./Contributions";
 import FormattedMessage from "./FormattedMessage";
@@ -26,6 +23,7 @@ import ProgressOrError from "./ProgressOrError";
 import Table from "./Table";
 import withModulesManager from "../../helpers/modules";
 import { formatMessage } from "../../helpers/i18n";
+import { sort, formatSorter } from "../../helpers/api"
 import { cacheFilters } from "../../actions";
 
 const styles = theme => ({
@@ -79,46 +77,65 @@ class SelectionMenu extends Component {
         )
     }
 
-    renderButtons = (entries) => (
-        <Fragment>
-            {entries.map((i, idx) => (
-                <Grid key={`selectionsButtons-${idx}`} item className={this.props.classes.paperHeaderAction}>
-                    <Button onClick={e => this.action(i.action)}>{i.text}</Button>
-                </Grid>
-            ))}
-        </Fragment>
+    renderButtons = (entries, contributionKey) => (
+        <Grid item className={this.props.classes.paperHeader}>
+            <Grid container alignItems="center" className={this.props.classes.paperHeaderAction}>
+                {entries.map((i, idx) => (
+                    <Grid key={`selectionsButtons-${idx}`} item className={this.props.classes.paperHeaderAction}>
+                        <Button onClick={e => this.action(i.action)}>{i.text}</Button>
+                    </Grid>
+                ))}
+                {
+                !!contributionKey && 
+                <Contributions 
+                    actionHandler={this.action}
+                    selection={this.props.selection} 
+                    contributionKey={contributionKey}/>}
+            </Grid>
+        </Grid>
     )
 
-    renderMenu = (entries) => {
+    renderMenu = (entries, contributionKey) => {
         return (
-            <Grid item className={this.props.classes.paperHeaderAction}>
+            <Grid item className={this.props.classes.paperHeader}>
                 <Grid container alignItems="center">
-                    <Grid item className={this.props.classes.paperHeader}>
+                    <Grid item className={this.props.classes.paperHeaderAction}>
                         <IconButton onClick={this.openMenu}><MoreHoriz /></IconButton>
                     </Grid>
                 </Grid>
-                {!!this.state.anchorEl && (
                     <Menu
                         open={!!this.state.anchorEl}
                         anchorEl={this.state.anchorEl}
                         onClose={this.closeMenu}
+                        keepMounted
                     >
                         {entries.map((i, idx) => (
                             <MenuItem key={`selectionsMenu-${idx}`} onClick={e => this.action(i.action)}>{i.text}</MenuItem>
                         ))}
+                        {
+                            !!contributionKey && 
+                            <Contributions  
+                                actionHandler={this.action} 
+                                selection={this.props.selection} 
+                                contributionKey={contributionKey}/>
+                        }
+                        
                     </Menu>
-                )}
             </Grid>
         )
     }
 
     render() {
-        const { intl, classes, canSelectAll, selection, clearSelected, selectAll, actions = [], processing } = this.props;
+        const { intl, classes, canSelectAll, selection, clearSelected, selectAll, actions = [], processing, actionsContributionKey=null } = this.props;
         if (!actions.length) return null;
         if (processing) {
-            return <CircularProgress className={classes.processing} size={24} />
+            return (
+                <CircularProgress className={classes.processing} size={24} />
+            )
         }
+        
         let entries = [];
+        let contributed_entries = this.props.modulesManager.getContribs(actionsContributionKey)
         let selectionCount = selection.length;
         if (!!selectionCount) {
             entries.push({ text: formatMessage(intl, "claim", "clearSelected"), action: clearSelected });
@@ -132,14 +149,14 @@ class SelectionMenu extends Component {
             }
         });
         if (entries.length > 2) {
-            return this.renderMenu(entries);
+            return this.renderMenu(entries, actionsContributionKey);
         } else {
-            return this.renderButtons(entries);
+            return this.renderButtons(entries, actionsContributionKey);
         }
     }
 }
 
-const StyledSelectionMenu = injectIntl(withTheme(withStyles(styles)(SelectionMenu)))
+const StyledSelectionMenu = injectIntl(withModulesManager(withTheme(withStyles(styles)(SelectionMenu))))
 
 class Searcher extends Component {
 
@@ -147,7 +164,7 @@ class Searcher extends Component {
         filters: {},
         orderBy: null,
         page: 0,
-        pageSize: 0,
+        pageSize: this.props.defaultPageSize || 10,
         afterCursor: null,
         beforeCursor: null,
         selection: [],
@@ -158,11 +175,11 @@ class Searcher extends Component {
 
     componentDidMount() {
         var filters = this.props.filtersCache[this.props.cacheFiltersKey] || this.props.defaultFilters || {}
-        this.setState({
+        this.setState((state, props) => ({
             filters,
-            pageSize: this.props.defaultPageSize || 10,
-            orderBy: this.props.defaultOrderBy,
-        },
+            pageSize: props.defaultPageSize || 10,
+            orderBy: props.defaultOrderBy,
+        }),
             e => this.applyFilters()
         );
     }
@@ -183,6 +200,15 @@ class Searcher extends Component {
             prms.push(`orderBy: ["${this.state.orderBy}"]`);
         }
         return prms;
+    }
+
+    resetFilters = () => {
+        this.setState((state, props) => ({
+            filters: { ...this.props.defaultFilters },
+            orderBy: props.defaultOrderBy
+        }),
+            e => this.applyFilters()
+        );
     }
 
     onChangeFilters = (fltrs) => {
@@ -211,12 +237,12 @@ class Searcher extends Component {
     }
 
     applyFilters = () => {
-        this.setState({
+        this.setState((state, props) => ({
             page: 0,
             afterCursor: null,
             beforeCursor: null,
-            clearAll: this.state.clearAll + 1,
-        },
+            clearAll: state.clearAll + 1,
+        }),
             this._cacheAndApply
         )
     }
@@ -235,7 +261,7 @@ class Searcher extends Component {
     }
 
     clearSelected = (e) => {
-        this.setState({ clearAll: this.state.clearAll + 1 })
+        this.setState((state, props) => ({ clearAll: state.clearAll + 1 }))
     }
 
     selectAll = (e) => {
@@ -260,21 +286,19 @@ class Searcher extends Component {
 
     onChangePage = (page, nbr) => {
         if (nbr > this.state.page) {
-            this.setState(
-                {
-                    page: this.state.page + 1,
-                    beforeCursor: null,
-                    afterCursor: this.props.itemsPageInfo.endCursor,
-                },
+            this.setState((state, props) => ({
+                page: state.page + 1,
+                beforeCursor: null,
+                afterCursor: props.itemsPageInfo.endCursor,
+            }),
                 e => this.props.fetch(this.filtersToQueryParams())
             )
         } else if (nbr < this.state.page) {
-            this.setState(
-                {
-                    page: this.state.page - 1,
-                    beforeCursor: this.props.itemsPageInfo.startCursor,
-                    afterCursor: null,
-                },
+            this.setState((state, props) => ({
+                page: state.page - 1,
+                beforeCursor: props.itemsPageInfo.startCursor,
+                afterCursor: null,
+            }),
                 e => this.props.fetch(this.filtersToQueryParams())
             )
         }
@@ -290,45 +314,21 @@ class Searcher extends Component {
 
     triggerAction = a => {
         let s = [...this.state.selection]
-        this.setState(
-            {
-                selection: [],
-                clearAll: this.state.clearAll + 1
-            },
+        this.setState((state, props) => ({
+            selection: [],
+            clearAll: state.clearAll + 1
+        }),
             e => a(s));
-    }
-
-
-    sort = attr => {
-        this.setState({ orderBy: attr },
-            e => this.props.fetch(this.filtersToQueryParams()))
-    }
-
-    formatSorter = (attr, asc = true) => {
-        if (!this.props.sorts) return null;
-        if (this.state.orderBy === attr) {
-            return (
-                <IconButton size="small" onClick={e => this.sort('-' + attr)}>
-                    <SortAscIcon size={24} />
-                </IconButton>)
-        } else if (this.state.orderBy === '-' + attr) {
-            return (
-                <IconButton size="small" onClick={e => this.sort(attr)} >
-                    <SortDescIcon size={24} />
-                </IconButton>)
-        } else {
-            return (
-                <IconButton size="small" onClick={e => asc ? this.sort(attr) : this.sort('-' + attr)}>
-                    <SortIcon size={24} />
-                </IconButton>)
-        }
     }
 
     headerActions = (filters) => {
         if (!!this.props.headerActions) return this.props.headerActions(filters);
         if (!!this.props.sorts) {
             return this.props.sorts(filters)
-                .map(s => !!s ? () => this.formatSorter(s[0], s[1]) : () => null);
+                .map(s => !!s ? [
+                    () => this.setState((state, props) => ({ orderBy: sort(state.orderBy, s[0], s[1]) }), e => this.props.fetch(this.filtersToQueryParams())),
+                    () => formatSorter(this.state.orderBy, s[0], s[1])
+                ] : [null, () => null]);
         }
         return [];
     }
@@ -349,12 +349,15 @@ class Searcher extends Component {
             items, itemsPageInfo, fetchingItems, fetchedItems, errorItems,
             itemFormatters,
             onDoubleClick, actions, processing = false,
+            withSelection = null,
+            actionsContributionKey = null
         } = this.props;
         return (
             <Fragment>
                 {!!FilterPane && (
                     <SearcherPane
                         module={module}
+                        reset={this.resetFilters}
                         refresh={this.applyFilters}
                         del={this.deleteFilter}
                         filters={this.state.filters}
@@ -373,8 +376,8 @@ class Searcher extends Component {
                         <ProgressOrError progress={fetchingItems} error={errorItems} />
                         {!!fetchedItems && !errorItems && (
                             <Fragment>
-                                <Grid item xs={8}>
-                                    <Grid container alignItems="center" className={classes.paperHeader}>
+                                <Grid item xs={8} className={classes.paperHeader}>
+                                    <Grid container alignItems="center">
                                         <Grid item xs={8} className={classes.paperHeaderTitle}>
                                             {tableTitle}
                                         </Grid>
@@ -387,8 +390,8 @@ class Searcher extends Component {
                                         </Grid>
                                     </Grid>
                                 </Grid>
-                                <Grid item xs={4}>
-                                    <Grid container direction="row" justify="flex-end">
+                                <Grid item xs={4} className={classes.paperHeader}>
+                                    <Grid container direction="row" justify="flex-end" className={classes.paperHeaderAction}>
                                         <StyledSelectionMenu
                                             canSelectAll={canSelectAll}
                                             selection={this.state.selection}
@@ -398,6 +401,7 @@ class Searcher extends Component {
                                             triggerAction={this.triggerAction}
                                             actions={actions}
                                             processing={processing}
+                                            actionsContributionKey={actionsContributionKey}
                                         />
                                     </Grid>
 
@@ -419,7 +423,7 @@ class Searcher extends Component {
                                         rowDisabled={i => rowDisabled(this.state.selection, i)}
                                         items={items}
                                         withPagination={true}
-                                        withSelection={true}
+                                        withSelection={withSelection}
                                         itemIdentifier={rowIdentifier}
                                         selection={this.state.selection}
                                         selectAll={this.state.selectAll}

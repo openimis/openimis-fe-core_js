@@ -1,5 +1,30 @@
 import { RSAA } from "redux-api-middleware";
-import { formatPageQuery } from "./helpers/api";
+import {
+    formatQuery,
+    formatPageQuery,
+    formatPageQueryWithCount,
+    formatGQLString,
+    formatMutation
+} from "./helpers/api";
+
+const ROLE_FULL_PROJECTION = () => [
+    "id",
+    "uuid",
+    "name",
+    "altLanguage",
+    "isSystem",
+    "isBlocked",
+    "validityFrom",
+    "validityTo"
+];
+
+const ROLERIGHT_FULL_PROJECTION = () => [
+    "rightId"
+];
+
+const MODULEPERMISSION_FULL_PROJECTION = () => [
+    "modulePermsList{moduleName, permissions{permsName, permsValue}}"
+];
 
 export const baseApiUrl = process.env.NODE_ENV === 'development' ? "/api" : "/iapi";
 
@@ -115,4 +140,108 @@ export function clearConfirm(confirmed) {
     return dispatch => {
         dispatch({ type: 'CORE_CONFIRM_CLEAR', payload: confirmed })
     }
+}
+
+export function fetchRoles(params) {
+    const payload = formatPageQueryWithCount(
+        "role",
+        params,
+        ROLE_FULL_PROJECTION()
+    );
+    return graphql(payload, "CORE_ROLES");
+}
+
+export function fetchRole(params) {
+    const payload = formatPageQuery(
+        "role",
+        params,
+        ROLE_FULL_PROJECTION()
+    );
+    return graphql(payload, "CORE_ROLE");
+}
+
+export function fetchRoleRights(params) {
+    const payload = formatPageQuery(
+        "roleRight",
+        params,
+        ROLERIGHT_FULL_PROJECTION()
+    );
+    return graphql(payload, "CORE_ROLERIGHTS");
+}
+
+export function fetchModulesPermissions() {
+    const payload = formatQuery(
+        "modulesPermissions",
+        null,
+        MODULEPERMISSION_FULL_PROJECTION()
+    );
+    return graphql(payload, "CORE_MODULEPERMISSIONS");
+}
+
+function formatRoleGQL(role) {
+    return `
+        ${!!role.uuid ? `uuid: "${role.uuid}"` : ''}
+        ${!!role.name ? `name: "${formatGQLString(role.name)}"` : ""}
+        ${!!role.altLanguage ? `altLanguage: "${formatGQLString(role.altLanguage)}"` : ""}
+        ${role.isSystem !== null ? `isSystem: ${role.isSystem}` : ""}
+        ${role.isBlocked !== null ? `isBlocked: ${role.isBlocked}` : ""}
+        ${!!role.roleRights ? `rightsId: [${role.roleRights.join(",")}]` : ""}
+    `;
+}
+
+export function createRole(role, clientMutationLabel) {
+    let mutation = formatMutation("createRole", formatRoleGQL(role), clientMutationLabel);
+    var requestedDateTime = new Date();
+    return graphql(
+        mutation.payload,
+        ["CORE_ROLE_MUTATION_REQ", "CORE_CREATE_ROLE_RESP", "CORE_ROLE_MUTATION_ERR"],
+        {
+            clientMutationId: mutation.clientMutationId,
+            clientMutationLabel,
+            requestedDateTime
+        }
+    );
+}
+
+export function updateRole(role, clientMutationLabel) {
+    let mutation = formatMutation("updateRole", formatRoleGQL(role), clientMutationLabel);
+    var requestedDateTime = new Date();
+    return graphql(
+        mutation.payload,
+        ["CORE_ROLE_MUTATION_REQ", "CORE_UPDATE_ROLE_RESP", "CORE_ROLE_MUTATION_ERR"],
+        {
+            clientMutationId: mutation.clientMutationId,
+            clientMutationLabel,
+            requestedDateTime
+        }
+    );
+}
+
+export function duplicateRole(role, clientMutationLabel) {
+    let mutation = formatMutation("duplicateRole", formatRoleGQL(role), clientMutationLabel);
+    var requestedDateTime = new Date();
+    return graphql(
+        mutation.payload,
+        ["CORE_ROLE_MUTATION_REQ", "CORE_DUPLICATE_ROLE_RESP", "CORE_ROLE_MUTATION_ERR"],
+        {
+            clientMutationId: mutation.clientMutationId,
+            clientMutationLabel,
+            requestedDateTime
+        }
+    );
+}
+
+export function deleteRole(role, clientMutationLabel, clientMutationDetails = null) {
+    let roleUuids = `uuids: ["${role.uuid}"]`;
+    let mutation = formatMutation("deleteRole", roleUuids, clientMutationLabel, clientMutationDetails);
+    var requestedDateTime = new Date();
+    return graphql(
+        mutation.payload,
+        ["CORE_ROLE_MUTATION_REQ", "CORE_DELETE_ROLE_RESP", "CORE_ROLE_MUTATION_ERR"],
+        {
+            clientMutationId: mutation.clientMutationId,
+            clientMutationLabel,
+            requestedDateTime
+        }
+    );
 }

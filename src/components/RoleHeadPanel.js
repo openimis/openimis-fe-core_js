@@ -58,7 +58,7 @@ class RoleHeadPanel extends FormPanel {
                             control={<Checkbox 
                                 checked={!!edited && !!edited.isSystem && edited.isSystem}
                                 onChange={event => this.updateAttribute("isSystem", event.target.checked)}
-                                disabled={!!isReadOnly}
+                                disabled
                             />}
                         />
                     </Grid>

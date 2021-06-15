@@ -195,6 +195,30 @@ function reducer(
                 fetchingModulePermissions: false,
                 errorModulePermissions: formatServerError(action.payload)
             };
+        case 'CORE_LANGUAGES_REQ':
+            return {
+                ...state,
+                fetchingLanguages: true,
+                fetchedLanguages: false,
+                languages: [],
+                errorLanguages: null
+            };
+        case "CORE_LANGUAGES_RESP":
+            return {
+                ...state,
+                fetchingLanguages: false,
+                fetchedLanguages: true,
+                languages: !!action.payload.data.languages
+                    ? action.payload.data.languages
+                    : [],
+                    errorLanguages: formatGraphQLError(action.payload)
+            };
+        case "CORE_LANGUAGES_ERR":
+            return {
+                ...state,
+                fetchingLanguages: false,
+                errorLanguages: formatServerError(action.payload)
+            };
         case "CORE_ROLE_REQ":
             return {
                 ...state,

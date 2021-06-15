@@ -32,6 +32,7 @@ import Picker from "./components/generics/Picker";
 import ConstantBasedPicker from "./components/generics/ConstantBasedPicker";
 import YearPicker from "./pickers/YearPicker";
 import MonthPicker from "./pickers/MonthPicker";
+import LanguagePicker from "./pickers/LanguagePicker";
 import AccountBox from "@material-ui/icons/AccountBox";
 import Roles from "./pages/Roles";
 import Role from "./pages/Role";
@@ -60,7 +61,8 @@ const DEFAULT_CONFIG = {
     { key: "core.KeepLegacyAlive.pollInterval", ref: 300000 },
     { key: "core.YearPicker", ref: YearPicker },
     { key: "core.MonthPicker", ref: MonthPicker },
-    { key: "core.route.role", ref: ROUTE_ROLE }
+    { key: "core.LanguagePicker", ref: LanguagePicker},
+    { key: "core.route.role", ref: ROUTE_ROLE },
   ],
   "core.Boot": [KeepLegacyAlive],
   "core.Router": [
@@ -100,7 +102,7 @@ export {
   formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount, formatGQLString, formatJsonField, withTooltip,
   App, AutoSuggestion, Contributions, ControlledField, Picker,
   Error, FatalError, AlertForwarder,
-  SelectInput, TextInput, TextAreaInput, AmountInput, FakeInput, YearPicker, MonthPicker,
+  SelectInput, TextInput, TextAreaInput, AmountInput, FakeInput, YearPicker, MonthPicker, LanguagePicker, 
   PagedDataHandler, Form, FormPanel, FieldLabel, FormattedMessage, NumberInput,
   MainMenuContribution, ProgressOrError, ProxyPage, PublishedComponent, Table,
   Searcher, SearcherPane,

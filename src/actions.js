@@ -22,6 +22,10 @@ const ROLERIGHT_FULL_PROJECTION = () => [
     "rightId"
 ];
 
+const LANGUAGE_FULL_PROJECTION = () => [
+    "name", "code", "sortOrder"
+];
+
 const MODULEPERMISSION_FULL_PROJECTION = () => [
     "modulePermsList{moduleName, permissions{permsName, permsValue}}"
 ];
@@ -176,6 +180,14 @@ export function fetchModulesPermissions() {
         MODULEPERMISSION_FULL_PROJECTION()
     );
     return graphql(payload, "CORE_MODULEPERMISSIONS");
+}
+
+export function fetchLanguages() {
+    let payload = formatQuery("languages",
+      null,
+      LANGUAGE_FULL_PROJECTION(),
+    );
+    return graphql(payload, 'CORE_LANGUAGES');
 }
 
 function formatRoleGQL(role) {

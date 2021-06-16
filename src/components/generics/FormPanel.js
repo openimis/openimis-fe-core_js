@@ -33,6 +33,10 @@ class FormPanel extends Component {
 
     updateAttribute = (attr, v) => this.updateAttributes({ [attr]: v })
 
+    getAttributes = () => {return this.state.data}
+
+    getAttribute = (attr) => {return !!this.state.data[attr] ? this.state.data[attr] : null}
+
     updateExts = updates => {       
         let data = { ...this.state.data };
         updates.forEach(update => {

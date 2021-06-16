@@ -93,6 +93,7 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 * `core.DatePicker`, configured date picker  (Gregorian vs. Nepali)
 * `core.YearPicker`, pick a year within a range
 * `core.MonthPicker`, contant-based month picker. Translation keys `month.null`, `month.1`,...
+* `core.LanguagePicker`, pick from available languages
 
 ## Dispatched Redux Actions
 * `CORE_ALERT{_CLEAR}`: display/close the AlertDialog modal pop up
@@ -103,6 +104,7 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 * `CORE_ROLE_MUTATION_{REQ|ERR}`: sending a mutation on Role
 * `CORE_ROLES_{REQ|RESP|ERR}`: retrieve Roles
 * `CORE_MODULEPERMISSIONS_{REQ|RESP|ERR}`: retrieve permissions of all modules
+* `CORE_LANGUAGES_{REQ|RESP|ERR}`: retrieve available languages and their codes
 * `CORE_ROLE_{REQ|RESP|ERR}`: retrieve a single Role
 * `CORE_ROLERIGHTS_{REQ|RESP|ERR}`: retrieve rights/permissions of a single Role
 * `CORE_CREATE_ROLE_RESP`: receive a result of create Role mutation

@@ -32,7 +32,7 @@ class LanguagePicker extends Component {
     render() {
         const { intl, languages, module = "core", withLabel = true, label = "LanguagePicker.label", withPlaceholder = false, placeholder, value, reset,
             readOnly = false, required = false,
-            withNull = false, nullLabel = null
+            withNull = false // , nullLabel = null
         } = this.props;
         let options = !!languages ? languages.map(v => ({ value: v.code, label: v.name })) : [];
         if (withNull) {

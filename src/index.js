@@ -36,6 +36,7 @@ import LanguagePicker from "./pickers/LanguagePicker";
 import AccountBox from "@material-ui/icons/AccountBox";
 import Roles from "./pages/Roles";
 import Role from "./pages/Role";
+import Login from "./pages/Login";
 import reducer from "./reducer";
 import { baseApiUrl, apiHeaders, graphql, journalize, coreAlert, coreConfirm } from './actions';
 import { formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount, withTooltip } from './helpers/i18n';
@@ -52,6 +53,7 @@ import { RIGHT_ROLE_SEARCH } from "./constants"
 
 const ROUTE_ROLES = "roles";
 const ROUTE_ROLE = "roles/role";
+const ROUTE_LOGIN = "login";
 
 const DEFAULT_CONFIG = {
   "translations": [{ key: "en", messages: messages_en }],
@@ -62,7 +64,8 @@ const DEFAULT_CONFIG = {
     { key: "core.YearPicker", ref: YearPicker },
     { key: "core.MonthPicker", ref: MonthPicker },
     { key: "core.LanguagePicker", ref: LanguagePicker},
-    { key: "core.route.role", ref: ROUTE_ROLE },
+    { key: "core.route.login", ref: ROUTE_LOGIN },
+    { key: "core.route.role", ref: ROUTE_ROLE }
   ],
   "core.Boot": [KeepLegacyAlive],
   "core.Router": [

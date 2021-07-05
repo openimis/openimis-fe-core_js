@@ -127,7 +127,9 @@ class SelectionMenu extends Component {
 
     render() {
         const { intl, classes, canSelectAll, selection, clearSelected, selectAll, actions = [], processing, actionsContributionKey=null } = this.props;
-        if (!actions.length) return null;
+        
+        let contributed_entries = this.props.modulesManager.getContribs(actionsContributionKey)
+        if (!actions.length && !contributed_entries) return null;
         if (processing) {
             return (
                 <CircularProgress className={classes.processing} size={24} />
@@ -135,7 +137,6 @@ class SelectionMenu extends Component {
         }
         
         let entries = [];
-        let contributed_entries = this.props.modulesManager.getContribs(actionsContributionKey)
         let selectionCount = selection.length;
         if (!!selectionCount) {
             entries.push({ text: formatMessage(intl, "claim", "clearSelected"), action: clearSelected });

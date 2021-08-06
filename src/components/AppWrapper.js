@@ -3,7 +3,7 @@ import withWidth from '@material-ui/core/withWidth';
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import Logout from "../pages/Logout";
 import Help from "../pages/Help";
-import { fade } from "@material-ui/core/styles/colorManipulator";
+import { alpha } from "@material-ui/core/styles/";
 import classNames from 'classnames';
 
 import {
@@ -115,9 +115,9 @@ const styles = theme => ({
   search: {
     position: "relative",
     borderRadius: theme.shape.borderRadius,
-    backgroundColor: fade(theme.palette.common.white, 0.15),
+    backgroundColor: alpha(theme.palette.common.white, 0.15),
     "&:hover": {
-      backgroundColor: fade(theme.palette.common.white, 0.25)
+      backgroundColor: alpha(theme.palette.common.white, 0.25)
     },
     marginLeft: 0,
     width: "100%",

@@ -28,7 +28,7 @@ class ConstantBasedPicker extends Component {
         formatMessage(
             this.props.intl,
             this.props.module,
-            this.props.nullLabel ? this.props.nullLabel : `${this.props.label}.null`
+            this.props.nullLabel ?? `${this.props.label}.null`
         ) :
         formatMessage(
             this.props.intl,

@@ -34,7 +34,9 @@ const styles = theme => ({
     paperHeader: theme.paper.header,
     paperHeaderTitle: theme.paper.title,
     paperHeaderMessage: theme.paper.message,
-    paperHeaderAction: theme.paper.action,
+    paperHeaderAction: {
+        paddingInline: 5
+    },
     paperDivider: theme.paper.divider,
     tableHeaderAction: theme.table.headerAction,
     processing: {
@@ -126,9 +128,9 @@ class SelectionMenu extends Component {
     }
 
     render() {
-        const { intl, classes, canSelectAll, selection, clearSelected, selectAll, actions = [], processing, actionsContributionKey=null } = this.props;
+        const { modulesManager, intl, classes, canSelectAll, selection, clearSelected, selectAll, actions = [], processing, actionsContributionKey=null } = this.props;
         
-        let contributed_entries = this.props.modulesManager.getContribs(actionsContributionKey)
+        let contributed_entries = modulesManager.getContribs(actionsContributionKey)
         if (!actions.length && !contributed_entries) return null;
         if (processing) {
             return (
@@ -373,14 +375,14 @@ class Searcher extends Component {
                 )}
                 {!!contributionKey && <Contributions contributionKey={contributionKey} />}
                 <Paper className={classes.paper}>
-                    <Grid container>
-                        <ProgressOrError progress={fetchingItems} error={errorItems} />
-                        {!!fetchedItems && !errorItems && (
+                    <Grid container className={classes.tableContainer}>
+                        {errorItems
+                            ? <ProgressOrError error={errorItems} />
+                            : (
                             <Fragment>
-                                <Grid item xs={8} className={classes.paperHeader}>
-                                    <Grid container alignItems="center">
+                                <Grid container alignItems="center" xs={8} className={classes.paperHeader}>
                                         <Grid item xs={8} className={classes.paperHeaderTitle}>
-                                            {tableTitle}
+                                            {!fetchingItems ? tableTitle: 'Loading...'}
                                         </Grid>
                                         <Grid item xs={4} className={classes.paperHeaderMessage}>
                                             <SelectionPane
@@ -388,24 +390,24 @@ class Searcher extends Component {
                                                 selectionMessage={selectionMessage}
                                                 selection={this.state.selection}
                                             />
-                                        </Grid>
                                     </Grid>
                                 </Grid>
-                                <Grid item xs={4} className={classes.paperHeader}>
-                                    <Grid container direction="row" justify="flex-end" className={classes.paperHeaderAction}>
-                                        <StyledSelectionMenu
-                                            canSelectAll={canSelectAll}
-                                            selection={this.state.selection}
-                                            items={items}
-                                            clearSelected={this.clearSelected}
-                                            selectAll={this.selectAll}
-                                            triggerAction={this.triggerAction}
-                                            actions={actions}
-                                            processing={processing}
-                                            actionsContributionKey={actionsContributionKey}
-                                        />
-                                    </Grid>
-
+                                <Grid container alignItems="center" xs={4} className={classes.paperHeader}>
+                                    {fetchedItems && (
+                                        <Grid container direction="row" justify="flex-end" className={classes.paperHeaderAction}>
+                                            <StyledSelectionMenu
+                                                canSelectAll={canSelectAll}
+                                                selection={this.state.selection}
+                                                items={items}
+                                                clearSelected={this.clearSelected}
+                                                selectAll={this.selectAll}
+                                                triggerAction={this.triggerAction}
+                                                actions={actions}
+                                                processing={processing}
+                                                actionsContributionKey={actionsContributionKey}
+                                            />
+                                        </Grid>
+                                    )}
                                 </Grid>
                                 <Grid item xs={12} className={classes.paperDivider}>
                                     <Divider />
@@ -413,6 +415,7 @@ class Searcher extends Component {
                                 <Grid item xs={12}>
                                     <Table
                                         module={module}
+                                        fetching={fetchingItems}
                                         preHeaders={!!preHeaders && preHeaders(this.state.selection)}
                                         headers={headers(this.state.filters)}
                                         headerActions={this.headerActions(this.state.filters)}
@@ -423,7 +426,7 @@ class Searcher extends Component {
                                         rowHighlightedAlt={i => rowHighlightedAlt(this.state.selection, i)}
                                         rowDisabled={i => rowDisabled(this.state.selection, i)}
                                         items={items}
-                                        withPagination={true}
+                                        withPagination
                                         withSelection={withSelection}
                                         itemIdentifier={rowIdentifier}
                                         selection={this.state.selection}

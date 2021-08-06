@@ -37,6 +37,7 @@ import AccountBox from "@material-ui/icons/AccountBox";
 import Roles from "./pages/Roles";
 import Role from "./pages/Role";
 import reducer from "./reducer";
+import ErrorBoundary from "./helpers/ErrorBoundary";
 import { baseApiUrl, apiHeaders, graphql, journalize, coreAlert, coreConfirm } from './actions';
 import { formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount, withTooltip } from './helpers/i18n';
 import {
@@ -102,9 +103,10 @@ export {
   formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount, formatGQLString, formatJsonField, withTooltip,
   App, AutoSuggestion, Contributions, ControlledField, Picker,
   Error, FatalError, AlertForwarder,
-  SelectInput, TextInput, TextAreaInput, AmountInput, FakeInput, YearPicker, MonthPicker, LanguagePicker, 
+  SelectInput, TextInput, TextAreaInput, AmountInput, FakeInput, YearPicker, MonthPicker, LanguagePicker,
   PagedDataHandler, Form, FormPanel, FieldLabel, FormattedMessage, NumberInput,
   MainMenuContribution, ProgressOrError, ProxyPage, PublishedComponent, Table,
   Searcher, SearcherPane,
-  ConstantBasedPicker
+  ConstantBasedPicker,
+  ErrorBoundary,
 };

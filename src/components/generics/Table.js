@@ -196,7 +196,7 @@ class Table extends Component {
                                 <TableCell colSpan={colsCount}><ProgressOrError progress={fetching} error={error} /></TableCell>
                             </TableRow>
                         )}
-                        {items && items.length > 0 && items.map((i, iidx) => (
+                        {!fetching && items && items.length > 0 && items.map((i, iidx) => (
                             <TableRow key={iidx}
                                 selected={this.isSelected(i)}
                                 onClick={e => this.select(i)}

@@ -1,10 +1,10 @@
 import React, { Component, Fragment } from "react";
-import withWidth from '@material-ui/core/withWidth';
+import withWidth from "@material-ui/core/withWidth";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import Logout from "../pages/Logout";
 import Help from "../pages/Help";
 import { alpha } from "@material-ui/core/styles/";
-import classNames from 'classnames';
+import classNames from "classnames";
 
 import {
   AppBar,
@@ -16,7 +16,7 @@ import {
   Tooltip,
   Button,
   Hidden,
-  ClickAwayListener
+  ClickAwayListener,
 } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
 import Contributions from "./generics/Contributions";
@@ -28,12 +28,12 @@ export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
 export const MAIN_MENU_CONTRIBUTION_KEY = "core.MainMenu";
 export const MAIN_SEARCHER_CONTRIBUTION_KEY = "core.MainSearcher";
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
-    display: 'flex',
+    display: "flex",
   },
   grow: {
-    flexGrow: 1
+    flexGrow: 1,
   },
   logo: {
     verticalAlign: "middle",
@@ -44,24 +44,24 @@ const styles = theme => ({
     paddingRight: theme.jrnlDrawer.close.width,
     transition: theme.transitions.create(["margin", "width"], {
       easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen
-    })
+      duration: theme.transitions.duration.leavingScreen,
+    }),
   },
   appBarShift: {
     width: `calc(100% - ${theme.menu.drawer.width})`,
     marginLeft: theme.menu.drawer.width,
     transition: theme.transitions.create(["margin", "width"], {
       easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen
-    })
+      duration: theme.transitions.duration.enteringScreen,
+    }),
   },
   menuButton: {
     margin: theme.spacing(0, 1, 0, 1),
     padding: 0,
   },
   autoHideMenuButton: {
-    [theme.breakpoints.up('md')]: {
-      display: 'none',
+    [theme.breakpoints.up("md")]: {
+      display: "none",
     },
   },
   toolbar: {
@@ -69,7 +69,7 @@ const styles = theme => ({
     marginTop: theme.spacing(2),
   },
   drawer: {
-    [theme.breakpoints.up('sm')]: {
+    [theme.breakpoints.up("sm")]: {
       width: theme.menu.drawer.width,
       flexShrink: 0,
     },
@@ -86,20 +86,20 @@ const styles = theme => ({
     paddingRight: theme.jrnlDrawer.close.width - theme.spacing(1),
     transition: theme.transitions.create("margin", {
       easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen
+      duration: theme.transitions.duration.leavingScreen,
     }),
   },
   contentShift: {
     transition: theme.transitions.create("margin", {
       easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen
+      duration: theme.transitions.duration.enteringScreen,
     }),
-    marginLeft: theme.menu.drawer.width
+    marginLeft: theme.menu.drawer.width,
   },
   appName: {
     color: theme.palette.secondary.main,
     textTransform: "none",
-    fontSize: theme.typography.title.fontSize
+    fontSize: theme.typography.title.fontSize,
   },
   appVersionsBox: {
     padding: 0,
@@ -110,21 +110,21 @@ const styles = theme => ({
     color: theme.palette.secondary.main,
     fontSize: theme.typography.title.fontSize / 2,
     verticalAlign: "text-bottom",
-    marginRight: theme.spacing(2)
+    marginRight: theme.spacing(2),
   },
   search: {
     position: "relative",
     borderRadius: theme.shape.borderRadius,
     backgroundColor: alpha(theme.palette.common.white, 0.15),
     "&:hover": {
-      backgroundColor: alpha(theme.palette.common.white, 0.25)
+      backgroundColor: alpha(theme.palette.common.white, 0.25),
     },
     marginLeft: 0,
     width: "100%",
     [theme.breakpoints.up("sm")]: {
       marginLeft: theme.spacing(1),
-      width: "auto"
-    }
+      width: "auto",
+    },
   },
   searchIcon: {
     width: theme.spacing(9),
@@ -133,11 +133,11 @@ const styles = theme => ({
     pointerEvents: "none",
     display: "flex",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   inputRoot: {
     color: "inherit",
-    width: "100%"
+    width: "100%",
   },
   inputInput: {
     padding: theme.spacing(1, 1, 1, 10),
@@ -146,43 +146,41 @@ const styles = theme => ({
     [theme.breakpoints.up("sm")]: {
       width: 120,
       "&:focus": {
-        width: 200
-      }
-    }
+        width: 200,
+      },
+    },
   },
-
 });
 
 class AppWrapper extends Component {
-
   state = {
     open: false,
     jrnlOpen: false,
-  }
+  };
 
   isAppBarMenu = () => {
-    return this.props.theme.menu.variant.toUpperCase() === 'APPBAR';
-  }
+    return this.props.theme.menu.variant.toUpperCase() === "APPBAR";
+  };
 
   isShifted = () => {
-    return this.state.open && this.props.theme.breakpoints.up('md');
-  }
+    return this.state.open && this.props.theme.breakpoints.up("md");
+  };
 
   handleOpen = () => {
     this.setState({ open: true });
-  }
+  };
 
   handleClose = () => {
     this.setState({ open: false });
-  }
+  };
 
   isJrnlShifted = () => {
     return this.state.jrnlOpen;
-  }
+  };
 
   handleJrnlDrawer = () => {
     this.setState({ jrnlOpen: !this.state.jrnlOpen });
-  }
+  };
 
   render() {
     const { classes, modulesManager, ...others } = this.props;
@@ -190,36 +188,32 @@ class AppWrapper extends Component {
 
     return (
       <Fragment>
-        <Contributions
-          modulesManager={modulesManager}
-          contributionKey={APP_BOOT_CONTRIBUTION_KEY}
-        />
+        <Contributions modulesManager={modulesManager} contributionKey={APP_BOOT_CONTRIBUTION_KEY} />
         <AppBar
           position="fixed"
           className={classNames(classes.appBar, {
-            [classes.appBarShift]: this.isShifted()
+            [classes.appBarShift]: this.isShifted(),
           })}
         >
           <Toolbar>
             <IconButton
               color="inherit"
               onClick={this.handleOpen}
-              className={classNames(classes.menuButton,
+              className={classNames(
+                classes.menuButton,
                 this.isAppBarMenu() && classes.autoHideMenuButton,
-                open && classes.hide)}
+                open && classes.hide
+              )}
             >
               <MenuIcon />
             </IconButton>
-            <Button
-              className={classes.appName}
-              onClick={e => window.location.href = "/home"}>
+            <Button className={classes.appName} onClick={(e) => (window.location.href = "/home")}>
               {this.isAppBarMenu() && (
                 <Hidden smDown implementation="css">
                   <img className={classes.logo} src={this.props.logo} />
                 </Hidden>
               )}
-              <FormattedMessage module="core" id="appName"
-                defaultMessage={<FormattedMessage id="root.appName" />} />
+              <FormattedMessage module="core" id="appName" defaultMessage={<FormattedMessage id="root.appName" />} />
             </Button>
             <Hidden smDown implementation="css">
               <Tooltip title={modulesManager.getModulesVersions().join(", ")}>
@@ -230,19 +224,12 @@ class AppWrapper extends Component {
             </Hidden>
             {this.isAppBarMenu() && (
               <Hidden smDown implementation="css">
-                <Contributions
-                  {...others}
-                  menuVariant='AppBar'
-                  contributionKey={MAIN_MENU_CONTRIBUTION_KEY}
-                >
+                <Contributions {...others} menuVariant="AppBar" contributionKey={MAIN_MENU_CONTRIBUTION_KEY}>
                   <div onClick={this.handleClose} />
                 </Contributions>
               </Hidden>
             )}
-            <Contributions
-              {...others}
-              contributionKey={APP_BAR_CONTRIBUTION_KEY}
-            >
+            <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
               <div className={classes.grow} />
             </Contributions>
             <Logout />
@@ -258,28 +245,21 @@ class AppWrapper extends Component {
                 anchor="left"
                 open={open}
                 classes={{
-                  paper: classes.drawerPaper
+                  paper: classes.drawerPaper,
                 }}
               >
-                <Contributions
-                  {...others}
-                  contributionKey={MAIN_MENU_CONTRIBUTION_KEY}
-                  menuVariant="Drawer"
-                >
+                <Contributions {...others} contributionKey={MAIN_MENU_CONTRIBUTION_KEY} menuVariant="Drawer">
                   <Divider />
                 </Contributions>
               </Drawer>
             </nav>
           </ClickAwayListener>
         )}
-        <JournalDrawer
-          open={this.state.jrnlOpen}
-          handleDrawer={this.handleJrnlDrawer}
-        />
+        <JournalDrawer open={this.state.jrnlOpen} handleDrawer={this.handleJrnlDrawer} />
         <div className={classes.toolbar} />
         <main
           className={classNames(classes.content, {
-            [classes.jrnlContentShift]: this.isJrnlShifted()
+            [classes.jrnlContentShift]: this.isJrnlShifted(),
           })}
         >
           {this.props.children}

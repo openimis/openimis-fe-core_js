@@ -38,47 +38,67 @@ import Roles from "./pages/Roles";
 import Role from "./pages/Role";
 import reducer from "./reducer";
 import ErrorBoundary from "./helpers/ErrorBoundary";
-import { baseApiUrl, apiHeaders, graphql, journalize, coreAlert, coreConfirm } from './actions';
-import { formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount, withTooltip } from './helpers/i18n';
+import { baseApiUrl, apiHeaders, graphql, journalize, coreAlert, coreConfirm } from "./actions";
 import {
-  decodeId, encodeId, formatQuery, formatPageQuery, formatPageQueryWithCount,
-  parseData, pageInfo, formatServerError, formatGraphQLError, formatMutation,
-  dispatchMutationReq, dispatchMutationResp, dispatchMutationErr, openBlob,
-  sort, formatSorter, formatGQLString
-} from './helpers/api';
+  formatMessage,
+  formatMessageWithValues,
+  formatDateFromISO,
+  toISODate,
+  formatAmount,
+  withTooltip,
+} from "./helpers/i18n";
+import {
+  decodeId,
+  encodeId,
+  formatQuery,
+  formatPageQuery,
+  formatPageQueryWithCount,
+  parseData,
+  pageInfo,
+  formatServerError,
+  formatGraphQLError,
+  formatMutation,
+  dispatchMutationReq,
+  dispatchMutationResp,
+  dispatchMutationErr,
+  openBlob,
+  sort,
+  formatSorter,
+  formatGQLString,
+} from "./helpers/api";
 import withHistory, { historyPush } from "./helpers/history";
-import withModulesManager from './helpers/modules';
-import { formatJsonField } from './helpers/jsonExt';
-import { RIGHT_ROLE_SEARCH } from "./constants"
+import withModulesManager from "./helpers/modules";
+import { formatJsonField } from "./helpers/jsonExt";
+import { RIGHT_ROLE_SEARCH } from "./constants";
 
 const ROUTE_ROLES = "roles";
 const ROUTE_ROLE = "roles/role";
 
 const DEFAULT_CONFIG = {
   "translations": [{ key: "en", messages: messages_en }],
-  "reducers": [{ key: 'core', reducer: reducer }],
+  "reducers": [{ key: "core", reducer: reducer }],
   "refs": [
     { key: "core.JournalDrawer.pollInterval", ref: 2000 },
     { key: "core.KeepLegacyAlive.pollInterval", ref: 300000 },
     { key: "core.YearPicker", ref: YearPicker },
     { key: "core.MonthPicker", ref: MonthPicker },
-    { key: "core.LanguagePicker", ref: LanguagePicker},
+    { key: "core.LanguagePicker", ref: LanguagePicker },
     { key: "core.route.role", ref: ROUTE_ROLE },
   ],
   "core.Boot": [KeepLegacyAlive],
   "core.Router": [
     { path: ROUTE_ROLES, component: Roles },
-    { path: ROUTE_ROLE  + "/:role_uuid?", component: Role }
+    { path: ROUTE_ROLE + "/:role_uuid?", component: Role },
   ],
   "admin.MainMenu": [
     {
       text: <FormattedMessage module="core" id="roleManagement.label" />,
       icon: <AccountBox />,
       route: "/" + ROUTE_ROLES,
-      filter: rights => rights.includes(RIGHT_ROLE_SEARCH)
-    }
-  ]
-}
+      filter: (rights) => rights.includes(RIGHT_ROLE_SEARCH),
+    },
+  ],
+};
 
 export const CoreModule = (cfg) => {
   let def = { ...DEFAULT_CONFIG };
@@ -86,27 +106,73 @@ export const CoreModule = (cfg) => {
   if (cfg.datePicker === "ne") {
     DatePicker = NeDatePicker;
   }
-  def.refs.push(
-    { key: "core.DatePicker", ref: DatePicker }
-  )
+  def.refs.push({ key: "core.DatePicker", ref: DatePicker });
   return { ...def, ...cfg };
 }
 
 export {
-  baseApiUrl, apiHeaders, graphql, journalize, coreAlert, coreConfirm, openBlob, sort, formatSorter,
-  withHistory, historyPush,
-  decodeId, encodeId,
+  baseApiUrl,
+  apiHeaders,
+  graphql,
+  journalize,
+  coreAlert,
+  coreConfirm,
+  openBlob,
+  sort,
+  formatSorter,
+  withHistory,
+  historyPush,
+  decodeId,
+  encodeId,
   withModulesManager,
-  formatQuery, formatPageQuery, formatPageQueryWithCount, formatMutation,
-  dispatchMutationReq, dispatchMutationResp, dispatchMutationErr,
-  parseData, pageInfo, formatServerError, formatGraphQLError,
-  formatMessage, formatMessageWithValues, formatDateFromISO, toISODate, formatAmount, formatGQLString, formatJsonField, withTooltip,
-  App, AutoSuggestion, Contributions, ControlledField, Picker,
-  Error, FatalError, AlertForwarder,
-  SelectInput, TextInput, TextAreaInput, AmountInput, FakeInput, YearPicker, MonthPicker, LanguagePicker,
-  PagedDataHandler, Form, FormPanel, FieldLabel, FormattedMessage, NumberInput,
-  MainMenuContribution, ProgressOrError, ProxyPage, PublishedComponent, Table,
-  Searcher, SearcherPane,
+  formatQuery,
+  formatPageQuery,
+  formatPageQueryWithCount,
+  formatMutation,
+  dispatchMutationReq,
+  dispatchMutationResp,
+  dispatchMutationErr,
+  parseData,
+  pageInfo,
+  formatServerError,
+  formatGraphQLError,
+  formatMessage,
+  formatMessageWithValues,
+  formatDateFromISO,
+  toISODate,
+  formatAmount,
+  formatGQLString,
+  formatJsonField,
+  withTooltip,
+  App,
+  AutoSuggestion,
+  Contributions,
+  ControlledField,
+  Picker,
+  Error,
+  FatalError,
+  AlertForwarder,
+  SelectInput,
+  TextInput,
+  TextAreaInput,
+  AmountInput,
+  FakeInput,
+  YearPicker,
+  MonthPicker,
+  LanguagePicker,
+  PagedDataHandler,
+  Form,
+  FormPanel,
+  FieldLabel,
+  FormattedMessage,
+  NumberInput,
+  MainMenuContribution,
+  ProgressOrError,
+  ProxyPage,
+  PublishedComponent,
+  Table,
+  Searcher,
+  SearcherPane,
   ConstantBasedPicker,
   ErrorBoundary,
 };

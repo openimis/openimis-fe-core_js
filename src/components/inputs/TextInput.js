@@ -1,76 +1,79 @@
 import React, { Component } from "react";
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { injectIntl } from 'react-intl';
+import { injectIntl } from "react-intl";
 import { TextField } from "@material-ui/core";
 import { formatMessage } from "../../helpers/i18n";
 
-const styles = theme => ({
-    label: {
-        color: theme.palette.primary.main
-    }
+const styles = (theme) => ({
+  label: {
+    color: theme.palette.primary.main,
+  },
 });
 
 class TextInput extends Component {
-    state = {
-        value: ""
+  state = {
+    value: "",
+  };
+  componentDidMount() {
+    let value = this.props.value || "";
+    if (!!this.props.formatInput) {
+      value = this.props.formatInput(value);
     }
-    componentDidMount() {
-        let value = this.props.value || "";
-        if (!!this.props.formatInput) {
-            value = this.props.formatInput(value)
-        }
-        if (value !== this.state.value) {
-            this.setState({ value })
-        }
+    if (value !== this.state.value) {
+      this.setState({ value });
     }
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        if (prevProps.reset !== this.props.reset || prevProps.value !== this.props.value) {
-            let value = this.props.value || "";
-            if (!!this.props.formatInput) {
-                value = this.props.formatInput(value)
-            }
-            if (value !== this.state.value) {
-                this.setState({ value })
-            }
-        }
+  }
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevProps.reset !== this.props.reset || prevProps.value !== this.props.value) {
+      let value = this.props.value || "";
+      if (!!this.props.formatInput) {
+        value = this.props.formatInput(value);
+      }
+      if (value !== this.state.value) {
+        this.setState({ value });
+      }
     }
-    _onChange = e => {
-        let value = e.target.value;
-        if (!!this.props.formatInput) {
-            value = this.props.formatInput(value)
-        }
-        if (value !== this.state.value) {
-            this.setState(
-                { value },
-                e => !!this.props.onChange && this.props.onChange(this.state.value)
-            );
-        }
+  }
+  _onChange = (e) => {
+    let value = e.target.value;
+    if (!!this.props.formatInput) {
+      value = this.props.formatInput(value);
     }
-    render() {
-        const {
-            intl, classes, module, label,
-            readOnly = false, error = null,
-            startAdornment = null, endAdornment = null, inputProps = {},
-            formatInput = null,
-            ...others
-        } = this.props;
-        return (
-            <TextField
-                {...others}
-                fullWidth
-                disabled={readOnly}                
-                label={!!label && formatMessage(intl, module, label)}
-                InputLabelProps={{
-                    className: classes.label
-                }}
-                InputProps={{ inputProps, startAdornment, endAdornment }}
-                onChange={this._onChange}
-                value={this.state.value}
-                error={!!error}
-                helperText={error}                
-            />
-        )
+    if (value !== this.state.value) {
+      this.setState({ value }, (e) => !!this.props.onChange && this.props.onChange(this.state.value));
     }
+  };
+  render() {
+    const {
+      intl,
+      classes,
+      module,
+      label,
+      readOnly = false,
+      error = null,
+      startAdornment = null,
+      endAdornment = null,
+      inputProps = {},
+      formatInput = null,
+      ...others
+    } = this.props;
+    return (
+      <TextField
+        {...others}
+        fullWidth
+        disabled={readOnly}
+        label={!!label && formatMessage(intl, module, label)}
+        InputLabelProps={{
+          className: classes.label,
+        }}
+        InputProps={{ inputProps, startAdornment, endAdornment }}
+        onChange={this._onChange}
+        value={this.state.value}
+        error={!!error}
+        helperText={error}
+      />
+    );
+  }
 }
 
 export default injectIntl(withTheme(withStyles(styles)(TextInput)));

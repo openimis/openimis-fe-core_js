@@ -46,6 +46,7 @@ import {
   toISODate,
   formatAmount,
   withTooltip,
+  useTranslations,
 } from "./helpers/i18n";
 import {
   decodeId,
@@ -108,6 +109,12 @@ export const CoreModule = (cfg) => {
   }
   def.refs.push({ key: "core.DatePicker", ref: DatePicker });
   return { ...def, ...cfg };
+};
+
+export function combine(...hocs) {
+  return function (Component) {
+    return hocs.reduceRight((acc, hoc) => hoc(acc), Component);
+  };
 }
 
 export {
@@ -175,4 +182,5 @@ export {
   SearcherPane,
   ConstantBasedPicker,
   ErrorBoundary,
+  useTranslations,
 };

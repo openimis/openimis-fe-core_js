@@ -1,5 +1,6 @@
 import React from "react";
 import { Tooltip } from "@material-ui/core";
+import { useIntl } from "react-intl";
 import moment from "moment";
 import { formatDateFromISO as adFormateDateFromISO } from "../pickers/AdDateFormatter";
 import { formatDateFromISO as neFormateDateFromISO } from "../pickers/NeDateFormatter";
@@ -43,4 +44,18 @@ export function toISODate(d) {
 
 export function withTooltip(c, t) {
   return !!t ? <Tooltip title={t}>{c}</Tooltip> : c;
+}
+
+export function useTranslations(moduleName, modulesManager) {
+  // TODO: Take modulesManager from the context (once it has been refactored in @openimis/fe)
+  const intl = useIntl();
+
+  return {
+    formatDateFromISO: formatDateFromISO.bind(null, modulesManager, intl),
+    formatAmount: formatAmount.bind(null, intl),
+    formatMessage: moduleName ? formatMessage.bind(null, intl, moduleName) : formatMessage.bind(null, intl),
+    formatMessageWithValues: moduleName
+      ? formatMessageWithValues.bind(null, intl, moduleName)
+      : formatMessageWithValues.bind(null, intl),
+  };
 }

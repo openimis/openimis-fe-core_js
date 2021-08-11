@@ -382,6 +382,7 @@ class Searcher extends Component {
       processing = false,
       withSelection = null,
       actionsContributionKey = null,
+      intl,
     } = this.props;
     return (
       <Fragment>
@@ -411,7 +412,7 @@ class Searcher extends Component {
               <Fragment>
                 <Grid container alignItems="center" xs={8} className={classes.paperHeader}>
                   <Grid item xs={8} className={classes.paperHeaderTitle}>
-                    {!fetchingItems ? tableTitle : "Loading..."}
+                    {!fetchingItems ? tableTitle : formatMessage(intl, "core", "table.resultsLoading")}
                   </Grid>
                   <Grid item xs={4} className={classes.paperHeaderMessage}>
                     <SelectionPane

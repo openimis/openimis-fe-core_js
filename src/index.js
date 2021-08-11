@@ -67,6 +67,7 @@ import {
   formatSorter,
   formatGQLString,
 } from "./helpers/api";
+import { useDebounceCb } from "./helpers/hooks";
 import withHistory, { historyPush } from "./helpers/history";
 import withModulesManager from "./helpers/modules";
 import { formatJsonField } from "./helpers/jsonExt";
@@ -183,4 +184,5 @@ export {
   ConstantBasedPicker,
   ErrorBoundary,
   useTranslations,
+  useDebounceCb,
 };

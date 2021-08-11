@@ -253,8 +253,8 @@ class Table extends Component {
                 <TableRow
                   key={iidx}
                   selected={this.isSelected(i)}
-                  onClick={(e) => this.select(i)}
-                  onDoubleClick={(e) => !!onDoubleClick && onDoubleClick(i)}
+                  onClick={() => this.select(i)}
+                  onDoubleClick={onDoubleClick ? () => onDoubleClick(i) : undefined}
                   className={classNames(
                     classes.tableRow,
                     !!rowLocked && rowLocked(i) ? classes.tableLockedRow : null,
@@ -275,7 +275,7 @@ class Table extends Component {
                             !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
                             !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
                             !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
-                            classes[`${aligns.length > fidx && !!aligns[fidx] ? aligns[fidx] : "left"}`]
+                            classes[`${aligns.length > fidx && (aligns[fidx] ?? "left")}`]
                           )}
                           key={`v-${iidx}-${fidx}`}
                         >

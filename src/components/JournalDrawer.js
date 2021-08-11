@@ -63,6 +63,9 @@ const styles = (theme) => ({
   jrnlItem: theme.jrnlDrawer.item,
   jrnlItemDetail: theme.jrnlDrawer.itemDetail,
   jrnlItemDetailText: theme.jrnlDrawer.itemDetailText,
+  jrnlIconClickable: {
+    cursor: "pointer",
+  },
   jrnlIcon: {
     paddingLeft: theme.spacing(1),
   },
@@ -260,7 +263,6 @@ class JournalDrawer extends Component {
   componentWillUnmount() {
     clearTimeout(this.state.timeoutId);
   }
-
   checkProcessing = () => {
     if (!!this.props.fetchingMutations) {
       return;
@@ -269,12 +271,14 @@ class JournalDrawer extends Component {
     //TODO: change for a "fetchMutationS(ids)"  > requires id_In backend implementation
     ids.forEach((id) => this.props.fetchMutation(id));
   };
-
   more = (e) => {
     this.props.fetchHistoricalMutations(this.state.pageSize, this.state.afterCursor);
   };
 
   showMessages = (e, m) => {
+    if (this.props.open) {
+      return;
+    }
     this.setState({
       messagesAnchor: e.currentTarget,
       messages: m,
@@ -336,12 +340,18 @@ class JournalDrawer extends Component {
                       </ListItemIcon>
                     )}
                     {m.status === 1 && (
-                      <ListItemIcon className={classes.jrnlErrorIcon} onClick={(e) => this.showMessages(e, m.error)}>
+                      <ListItemIcon
+                        className={clsx(classes.jrnlErrorIcon, { [classes.jrnlIconClickable]: !open })}
+                        onClick={(e) => this.showMessages(e, m.error)}
+                      >
                         <ErrorIcon />
                       </ListItemIcon>
                     )}
                     {m.status === 2 && (
-                      <ListItemIcon className={classes.jrnlIcon} onClick={(e) => this.showMessages(e, m)}>
+                      <ListItemIcon
+                        className={clsx(classes.jrnlIcon, { [classes.jrnlIconClickable]: !open })}
+                        onClick={(e) => this.showMessages(e, m)}
+                      >
                         <CheckIcon />
                       </ListItemIcon>
                     )}

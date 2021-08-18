@@ -9,9 +9,10 @@ import withModulesManager from "../helpers/modules";
 import AppWrapper from "./AppWrapper";
 import FatalError from "./generics/FatalError";
 import kebabCase from "lodash/kebabCase";
-import { auth } from "../actions";
+import { auth, clearConfirm } from "../actions";
 import AlertDialog from "./dialogs/AlertDialog";
 import ConfirmDialog from "./dialogs/ConfirmDialog";
+import { bindActionCreators } from "redux";
 
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";
 export const TRANSLATION_CONTRIBUTION_KEY = "translations";
@@ -45,7 +46,7 @@ class RootApp extends Component {
   }
 
   render() {
-    const { history, classes, error, alert, confirm, user, messages, ...others } = this.props;
+    const { history, classes, error, alert, confirm, user, messages, clearConfirm,...others } = this.props;
     if (error) {
       return <FatalError error={error} />;
     }
@@ -65,7 +66,7 @@ class RootApp extends Component {
           <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
           <CssBaseline />
           <AlertDialog alert={alert} />
-          <ConfirmDialog confirm={confirm} />
+          <ConfirmDialog confirm={confirm} onConfirm={clearConfirm}/>
           <Router history={history}>
             <Switch>
               <Route
@@ -111,6 +112,8 @@ const mapStateToProps = (state, props) => ({
   confirm: state.core.confirm,
 });
 
+const mapDispatchToProps = dispatch => bindActionCreators({auth, clearConfirm}, dispatch)
+
 export default withHistory(
-  connect(mapStateToProps, { auth })(withModulesManager(withTheme(withStyles(styles)(RootApp))))
+  connect(mapStateToProps, mapDispatchToProps)(withModulesManager(withTheme(withStyles(styles)(RootApp))))
 );

@@ -136,7 +136,7 @@ class Form extends Component {
           </Grid>
           {!!Panels &&
             Panels.map((P, idx) => (
-              <Grid key={`form_pannel_${idx}`} item xs={12}>
+              <Grid key={`form_panel_${idx}`} item xs={12}>
                 <P
                   edited={this.props.edited}
                   edited_id={this.props.edited_id}

@@ -35,6 +35,18 @@ export function formatQuery(entity, filters, projections) {
     }`;
 }
 
+export function formatNodeQuery(entityGQLType, nodeId, projections = ["id"]) {
+  return `
+  {
+    node (id: "${nodeId}") {
+      ...on ${entityGQLType} {
+        ${projections.join(',')}
+      }
+    }
+  }
+  `
+}
+
 export function formatPageQuery(entity, filters, projections) {
   return `
     {
@@ -69,11 +81,11 @@ export function formatGQLString(str) {
     .replace(/[\t]/g, "\\t");
 }
 
-export function formatMutation(service, input, clientMutationLabel, clientMutationDetails) {
+export function formatMutation(operationName, input, clientMutationLabel, clientMutationDetails) {
   const clientMutationId = _.uuid();
   const payload = `
     mutation {
-      ${service}(
+      ${operationName}(
         input: {
           clientMutationId: "${clientMutationId}"
           clientMutationLabel: "${clientMutationLabel}"

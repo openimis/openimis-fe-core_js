@@ -265,9 +265,9 @@ class JournalDrawer extends Component {
     if (!!this.props.fetchingMutations) {
       return;
     }
-    var ids = this.state.displayedMutations.filter((m) => m.status === 0).map((m) => m.id);
+    var clientMutationIds = this.state.displayedMutations.filter((m) => m.status === 0).map((m) => m.clientMutationId);
     //TODO: change for a "fetchMutationS(ids)"  > requires id_In backend implementation
-    ids.forEach((id) => this.props.fetchMutation(id));
+    clientMutationIds.forEach((id) => this.props.fetchMutation(id));
   };
 
   more = (e) => {

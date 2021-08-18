@@ -39,6 +39,7 @@ import Role from "./pages/Role";
 import reducer from "./reducer";
 import ErrorBoundary from "./helpers/ErrorBoundary";
 import ConfirmDialog from './components/dialogs/ConfirmDialog'
+import { baseApiUrl, apiHeaders, graphql, graphqlMutation, journalize, coreAlert, coreConfirm } from "./actions";
 import {
   formatMessage,
   formatMessageWithValues,
@@ -66,7 +67,9 @@ import {
   sort,
   formatSorter,
   formatGQLString,
+  formatNodeQuery,
 } from "./helpers/api";
+import { useDebounceCb } from "./helpers/hooks";
 import withHistory, { historyPush } from "./helpers/history";
 import withModulesManager from "./helpers/modules";
 import { formatJsonField } from "./helpers/jsonExt";
@@ -121,6 +124,7 @@ export {
   baseApiUrl,
   apiHeaders,
   graphql,
+  graphqlMutation,
   journalize,
   coreAlert,
   coreConfirm,
@@ -136,6 +140,7 @@ export {
   formatPageQuery,
   formatPageQueryWithCount,
   formatMutation,
+  formatNodeQuery,
   dispatchMutationReq,
   dispatchMutationResp,
   dispatchMutationErr,
@@ -183,5 +188,6 @@ export {
   ConstantBasedPicker,
   ErrorBoundary,
   useTranslations,
+  useDebounceCb,
   ConfirmDialog,
 };

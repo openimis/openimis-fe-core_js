@@ -1,4 +1,5 @@
 import { RSAA } from "redux-api-middleware";
+import _ from "lodash-uuid";
 import { formatQuery, formatPageQuery, formatPageQueryWithCount, formatGQLString, formatMutation } from "./helpers/api";
 
 const ROLE_FULL_PROJECTION = () => [
@@ -75,6 +76,50 @@ export function graphql(payload, type, params = {}) {
   };
 }
 
+export function graphqlWithVariables(operation, variables, type, params = {}) {
+  let req = type + "_REQ";
+  let resp = type + "_RESP";
+  let err = type + "_ERR";
+  if (Array.isArray(type)) {
+    [req, resp, err] = type;
+  }
+  return {
+    [RSAA]: {
+      endpoint: `${baseApiUrl}/graphql`,
+      method: "POST",
+      headers: apiHeaders(),
+      body: JSON.stringify({ query: operation, variables }),
+      types: [
+        {
+          type: req,
+          meta: params,
+        },
+        {
+          type: resp,
+          meta: params,
+        },
+        {
+          type: err,
+          meta: params,
+        },
+      ],
+    },
+  };
+}
+
+export function graphqlMutation(mutation, variables, type = "CORE_TRIGGER_MUTATION", params = {}) {
+  let clientMutationId;
+  if (variables?.input) {
+    clientMutationId = _.uuid();
+    variables.input.clientMutationId = clientMutationId;
+  }
+  return async (dispatch) => {
+    const response = await dispatch(graphqlWithVariables(mutation, variables, type, params));
+    if (clientMutationId) dispatch(fetchMutation(clientMutationId));
+    return response;
+  };
+}
+
 export function auth() {
   return {
     [RSAA]: {
@@ -86,10 +131,10 @@ export function auth() {
   };
 }
 
-export function fetchMutation(id) {
+export function fetchMutation(clientMutationId) {
   const payload = formatPageQuery(
     "mutationLogs",
-    [`id: "${id}"`],
+    [`clientMutationId: "${clientMutationId}"`],
     ["id", "status", "error", "clientMutationId", "clientMutationLabel", "clientMutationDetails", "requestDateTime"]
   );
   return graphql(payload, "CORE_MUTATION");
@@ -105,6 +150,7 @@ export function fetchHistoricalMutations(pageSize, afterCursor) {
     "id",
     "status",
     "error",
+    "clientMutationId",
     "clientMutationLabel",
     "clientMutationDetails",
     "requestDateTime",

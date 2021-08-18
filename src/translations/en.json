@@ -31,5 +31,6 @@
   "core.roleManagement.updateRole.confirm.message": "Are you sure you want to save changes in {label}?",
   "core.roleManagement.DuplicateRole.mutationLabel": "Duplicate Role {label}",
   "core.roleManagement.duplicateButton.tooltip": "Duplicate",
+  "core.table.resultsLoading": "Loading...",
   "LanguagePicker.label": "Language"
 }

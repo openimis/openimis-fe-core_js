@@ -75,6 +75,14 @@ export function graphql(payload, type, params = {}) {
   };
 }
 
+export function graphqlMutation(mutation) {
+  return async (dispatch) => {
+    const response = await(dispatch(graphql(mutation.payload, "CORE_TRIGGER_MUTATION")))
+    dispatch(fetchMutation(mutation.clientMutationId))
+    return response
+  }
+}
+
 export function auth() {
   return {
     [RSAA]: {
@@ -86,10 +94,10 @@ export function auth() {
   };
 }
 
-export function fetchMutation(id) {
+export function fetchMutation(clientMutationId) {
   const payload = formatPageQuery(
     "mutationLogs",
-    [`id: "${id}"`],
+    [`clientMutationId: "${clientMutationId}"`],
     ["id", "status", "error", "clientMutationId", "clientMutationLabel", "clientMutationDetails", "requestDateTime"]
   );
   return graphql(payload, "CORE_MUTATION");
@@ -105,6 +113,7 @@ export function fetchHistoricalMutations(pageSize, afterCursor) {
     "id",
     "status",
     "error",
+    "clientMutationId",
     "clientMutationLabel",
     "clientMutationDetails",
     "requestDateTime",

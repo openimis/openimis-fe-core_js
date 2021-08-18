@@ -38,7 +38,7 @@ import Roles from "./pages/Roles";
 import Role from "./pages/Role";
 import reducer from "./reducer";
 import ErrorBoundary from "./helpers/ErrorBoundary";
-import { baseApiUrl, apiHeaders, graphql, journalize, coreAlert, coreConfirm } from "./actions";
+import ConfirmDialog from './components/dialogs/ConfirmDialog'
 import {
   formatMessage,
   formatMessageWithValues,
@@ -183,4 +183,5 @@ export {
   ConstantBasedPicker,
   ErrorBoundary,
   useTranslations,
+  ConfirmDialog,
 };

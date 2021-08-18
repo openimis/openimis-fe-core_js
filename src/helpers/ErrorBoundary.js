@@ -7,13 +7,13 @@ class ErrorBoundary extends React.Component {
   }
 
   static getDerivedStateFromError(error) {
-      // update the state to show the failover UI at next render
-      return { hasError: true };
+    // update the state to show the failover UI at next render
+    return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
     // Just log for now, could be reported elsewhere
-    console.log({error, errorInfo});
+    console.log({ error, errorInfo });
   }
   render() {
     if (this.state.hasError) {

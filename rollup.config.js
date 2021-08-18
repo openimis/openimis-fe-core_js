@@ -1,20 +1,20 @@
-import babel from '@rollup/plugin-babel'
-import json from '@rollup/plugin-json'
-import pkg from './package.json'
+import babel from "@rollup/plugin-babel";
+import json from "@rollup/plugin-json";
+import pkg from "./package.json";
 
 export default {
-  input: 'src/index.js',
+  input: "src/index.js",
   output: [
     {
       file: pkg.module,
-      format: 'es',
-      sourcemap: true
+      format: "es",
+      sourcemap: true,
     },
     {
-      file: 'dist/index.js',
-      format: 'cjs',
-      sourcemap: true
-    }
+      file: "dist/index.js",
+      format: "cjs",
+      sourcemap: true,
+    },
   ],
   external: [
     /^@babel.*/,
@@ -28,13 +28,13 @@ export default {
     "moment",
     "prop-types",
     /^react.*/,
-    /^redux.*/
+    /^redux.*/,
   ],
   plugins: [
     json(),
     babel({
-      exclude: 'node_modules/**',
-      babelHelpers: 'runtime'
+      exclude: "node_modules/**",
+      babelHelpers: "runtime",
     }),
-  ]
-}
+  ],
+};

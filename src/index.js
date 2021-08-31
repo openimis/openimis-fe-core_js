@@ -38,8 +38,19 @@ import Roles from "./pages/Roles";
 import Role from "./pages/Role";
 import reducer from "./reducer";
 import ErrorBoundary from "./helpers/ErrorBoundary";
-import ConfirmDialog from './components/dialogs/ConfirmDialog'
-import { baseApiUrl, apiHeaders, graphql, graphqlMutation, journalize, coreAlert, coreConfirm } from "./actions";
+import ConfirmDialog from "./components/dialogs/ConfirmDialog";
+import {
+  baseApiUrl,
+  apiHeaders,
+  graphql,
+  graphqlMutation,
+  graphqlWithVariables,
+  journalize,
+  coreAlert,
+  coreConfirm,
+  fetchMutation,
+  prepareMutation,
+} from "./actions";
 import {
   formatMessage,
   formatMessageWithValues,
@@ -124,8 +135,11 @@ export {
   baseApiUrl,
   apiHeaders,
   graphql,
+  graphqlWithVariables,
   graphqlMutation,
   journalize,
+  fetchMutation,
+  prepareMutation,
   coreAlert,
   coreConfirm,
   openBlob,

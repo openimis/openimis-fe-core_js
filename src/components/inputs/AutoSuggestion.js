@@ -76,9 +76,8 @@ class AutoSuggestion extends Component {
   state = INIT_STATE;
 
   _allItems = () => {
-    var items = [...(this.props.items || [])];
-    items.unshift(...(this.props.preValues || []));
-    return items;
+    const { preValues, items } = this.props;
+    return [...(preValues ?? []), ...(items ?? [])];
   };
 
   componentDidMount() {
@@ -124,7 +123,7 @@ class AutoSuggestion extends Component {
         value: "",
         selected: null,
       },
-      (e) => (!!this.props.onClear ? this.props.onClear() : this.props.onSuggestionSelected(null))
+      (e) => (!!this.props.onClear ? this.props.onClear() : this.props.onSuggestionSelected(null)),
     );
   };
 
@@ -212,7 +211,7 @@ class AutoSuggestion extends Component {
       (state, props) => ({
         selected: props.getSuggestionValue(i.suggestion),
       }),
-      (e) => this.props.onSuggestionSelected(i.suggestion)
+      (e) => this.props.onSuggestionSelected(i.suggestion),
     );
   };
 

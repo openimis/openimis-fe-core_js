@@ -107,6 +107,21 @@ export function graphqlWithVariables(operation, variables, type, params = {}) {
   };
 }
 
+export function prepareMutation(operation, input, params = {}) {
+  if (!params.clientMutationId) {
+    params.clientMutationId = _.uuid();
+  }
+
+  const variables = {
+    input: {
+      ...input,
+      ...params,
+    },
+  };
+
+  return { operation, variables, clientMutationId: params.clientMutationId };
+}
+
 export function graphqlMutation(mutation, variables, type = "CORE_TRIGGER_MUTATION", params = {}) {
   let clientMutationId;
   if (variables?.input) {
@@ -135,7 +150,7 @@ export function fetchMutation(clientMutationId) {
   const payload = formatPageQuery(
     "mutationLogs",
     [`clientMutationId: "${clientMutationId}"`],
-    ["id", "status", "error", "clientMutationId", "clientMutationLabel", "clientMutationDetails", "requestDateTime"]
+    ["id", "status", "error", "clientMutationId", "clientMutationLabel", "clientMutationDetails", "requestDateTime"],
   );
   return graphql(payload, "CORE_MUTATION");
 }

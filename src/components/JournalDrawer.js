@@ -250,13 +250,9 @@ class JournalDrawer extends Component {
         hasNextPage: props.mutationsPageInfo.hasNextPage,
       }));
     } else if (!_.isEqual(prevProps.mutations, this.props.mutations)) {
-      let prevMutationIds = prevProps.mutations.map((m) => m.id);
-      let new_mutations = [...this.props.mutations].filter((m) => !prevMutationIds.includes(m.id));
-      if (!!new_mutations.length) {
-        this.setState((state, props) => ({
-          displayedMutations: [...new_mutations, ...state.displayedMutations],
-        }));
-      }
+      this.setState({
+        displayedMutations: [...this.props.mutations],
+      });
     }
   }
 
@@ -264,9 +260,6 @@ class JournalDrawer extends Component {
     clearTimeout(this.state.timeoutId);
   }
   checkProcessing = () => {
-    if (!!this.props.fetchingMutations) {
-      return;
-    }
     var clientMutationIds = this.state.displayedMutations.filter((m) => m.status === 0).map((m) => m.clientMutationId);
     //TODO: change for a "fetchMutationS(ids)"  > requires id_In backend implementation
     clientMutationIds.forEach((id) => this.props.fetchMutation(id));
@@ -420,5 +413,5 @@ const mapDispatchToProps = (dispatch) => {
 };
 
 export default withModulesManager(
-  withTheme(withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(JournalDrawer)))
+  withTheme(withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(JournalDrawer))),
 );

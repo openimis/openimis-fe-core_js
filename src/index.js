@@ -82,7 +82,7 @@ import {
 } from "./helpers/api";
 import { useDebounceCb } from "./helpers/hooks";
 import withHistory, { historyPush } from "./helpers/history";
-import withModulesManager from "./helpers/modules";
+import withModulesManager, { useModulesManager } from "./helpers/modules";
 import { formatJsonField } from "./helpers/jsonExt";
 import { RIGHT_ROLE_SEARCH } from "./constants";
 
@@ -150,6 +150,7 @@ export {
   decodeId,
   encodeId,
   withModulesManager,
+  useModulesManager,
   formatQuery,
   formatPageQuery,
   formatPageQueryWithCount,

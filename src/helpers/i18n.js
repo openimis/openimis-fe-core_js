@@ -35,11 +35,7 @@ export function formatDateFromISO(mm, intl, date) {
 
 export function toISODate(d) {
   if (!d) return null;
-  const a = moment(d).toArray().slice(0, 3);
-  a[0] = ("0000" + a[0]).slice(-4);
-  a[1] = ("00" + (a[1] + 1)).slice(-2);
-  a[2] = ("00" + a[2]).slice(-2);
-  return a.join("-");
+  return moment(d).format().slice(0, 10);
 }
 
 export function withTooltip(c, t) {

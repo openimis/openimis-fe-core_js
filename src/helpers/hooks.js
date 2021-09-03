@@ -7,14 +7,14 @@ export const useDebounceCb = (cb, duration = 0) => {
   useEffect(() => {
     if (enabled) {
       clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => cb(payload), duration);
+      timeoutRef.current = setTimeout(() => cb(...payload), duration);
     }
 
     return () => clearTimeout(timeoutRef.current);
   }, [payload]);
 
-  return (payload) => {
+  return (...args) => {
     setEnabled(true);
-    setPayload(payload);
+    setPayload(args);
   };
 };

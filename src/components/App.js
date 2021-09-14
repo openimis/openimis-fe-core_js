@@ -5,7 +5,7 @@ import { Redirect, Route, Router, Switch } from "react-router-dom";
 import { CssBaseline, CircularProgress } from "@material-ui/core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import withHistory from "../helpers/history";
-import withModulesManager from "../helpers/modules";
+import withModulesManager, { ModulesManagerProvider } from "../helpers/modules";
 import AppWrapper from "./AppWrapper";
 import FatalError from "./generics/FatalError";
 import kebabCase from "lodash/kebabCase";
@@ -46,7 +46,7 @@ class RootApp extends Component {
   }
 
   render() {
-    const { history, classes, error, alert, confirm, user, messages, clearConfirm,...others } = this.props;
+    const { history, classes, error, alert, confirm, user, messages, clearConfirm, ...others } = this.props;
     if (error) {
       return <FatalError error={error} />;
     }
@@ -58,48 +58,49 @@ class RootApp extends Component {
       );
     }
     return (
-      <IntlProvider
-        locale={this.props.localesManager.getLocale(user.language)}
-        messages={this.buildMessages(messages, user.language)}
-      >
-        <div className="App">
-          <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-          <CssBaseline />
-          <AlertDialog alert={alert} />
-          <ConfirmDialog confirm={confirm} onConfirm={clearConfirm}/>
-          <Router history={history}>
-            <Switch>
-              <Route
-                exact
-                path={`${process.env.PUBLIC_URL || ""}/`}
-                render={() => {
-                  let search = this.props.history.location.search;
-                  if (!search) {
-                    return <Redirect to={`${process.env.PUBLIC_URL || ""}/home`} />;
-                  } else {
-                    return <Redirect to={`${atob(search.substring(5))}`} />;
+      <ModulesManagerProvider value={this.props.modulesManager}>
+        <IntlProvider
+          locale={this.props.localesManager.getLocale(user.language)}
+          messages={this.buildMessages(messages, user.language)}
+        >
+          <div className="App">
+            <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+            <CssBaseline />
+            <AlertDialog alert={alert} />
+            <ConfirmDialog confirm={confirm} onConfirm={clearConfirm} />
+            <Router history={history}>
+              <Switch>
+                <Route
+                  exact
+                  path={`${process.env.PUBLIC_URL || ""}/`}
+                  render={() =>
+                    history.location.search ? (
+                      <Redirect to={`${atob(history.location.search.substring(5))}`} />
+                    ) : (
+                      <Redirect to={`${process.env.PUBLIC_URL || ""}/home`} />
+                    )
                   }
-                }}
-              />
-              {this.routerContributions.map((route, index) => {
-                const Comp = route.component;
-                return (
-                  <Route
-                    exact
-                    key={`route_${kebabCase(route.path)}_${index}`}
-                    path={`${process.env.PUBLIC_URL || ""}/${route.path}`}
-                    render={(props) => (
-                      <AppWrapper {...props} {...others}>
-                        <Comp {...props} {...others} />
-                      </AppWrapper>
-                    )}
-                  />
-                );
-              })}
-            </Switch>
-          </Router>
-        </div>
-      </IntlProvider>
+                />
+                {this.routerContributions.map((route, index) => {
+                  const Comp = route.component;
+                  return (
+                    <Route
+                      exact
+                      key={`route_${kebabCase(route.path)}_${index}`}
+                      path={`${process.env.PUBLIC_URL || ""}/${route.path}`}
+                      render={(props) => (
+                        <AppWrapper {...props} {...others}>
+                          <Comp {...props} {...others} />
+                        </AppWrapper>
+                      )}
+                    />
+                  );
+                })}
+              </Switch>
+            </Router>
+          </div>
+        </IntlProvider>
+      </ModulesManagerProvider>
     );
   }
 }
@@ -112,8 +113,8 @@ const mapStateToProps = (state, props) => ({
   confirm: state.core.confirm,
 });
 
-const mapDispatchToProps = dispatch => bindActionCreators({auth, clearConfirm}, dispatch)
+const mapDispatchToProps = (dispatch) => bindActionCreators({ auth, clearConfirm }, dispatch);
 
 export default withHistory(
-  connect(mapStateToProps, mapDispatchToProps)(withModulesManager(withTheme(withStyles(styles)(RootApp))))
+  connect(mapStateToProps, mapDispatchToProps)(withModulesManager(withTheme(withStyles(styles)(RootApp)))),
 );

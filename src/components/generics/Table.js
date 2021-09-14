@@ -15,6 +15,7 @@ import {
   TableBody,
   TableCell,
   TableFooter,
+  Grid,
   TablePagination,
 } from "@material-ui/core";
 import FormattedMessage from "./FormattedMessage";
@@ -47,6 +48,17 @@ const styles = (theme) => ({
   center: {
     textAlign: "center",
   },
+  wrapper: {
+    position: "relative",
+  },
+  loader: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    background: "rgba(0, 0, 0, 0.12)",
+  },
 });
 
 class Table extends Component {
@@ -75,13 +87,13 @@ class Table extends Component {
         (state, props) => ({
           selection: _.merge(state.selection, this._atom(props.items)),
         }),
-        (e) => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection))
+        (e) => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection)),
       );
     }
     if (this.props.withSelection && prevProps.clearAll !== this.props.clearAll) {
       this.setState(
         { selection: {} },
-        (e) => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection))
+        (e) => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection)),
       );
     }
   }
@@ -109,7 +121,7 @@ class Table extends Component {
     }
     this.setState(
       { selection: s },
-      (e) => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection))
+      (e) => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection)),
     );
   };
 
@@ -176,10 +188,9 @@ class Table extends Component {
         </IconButton>
       ));
     }
-    var colsCount = (!!localHeaders && localHeaders.length) || localItemFormatters.length;
     var rowsPerPage = pageSize || rowsPerPageOptions[0];
     return (
-      <Fragment>
+      <div className={classes.wrapper}>
         {header && (
           <Fragment>
             <Typography className={classes.tableTitle}>{header}</Typography>
@@ -239,15 +250,7 @@ class Table extends Component {
             </TableHead>
           )}
           <TableBody>
-            {(!!fetching || !!error) && (
-              <TableRow>
-                <TableCell colSpan={colsCount}>
-                  <ProgressOrError progress={fetching} error={error} />
-                </TableCell>
-              </TableRow>
-            )}
-            {!fetching &&
-              items &&
+            {items &&
               items.length > 0 &&
               items.map((i, iidx) => (
                 <TableRow
@@ -260,7 +263,7 @@ class Table extends Component {
                     !!rowLocked && rowLocked(i) ? classes.tableLockedRow : null,
                     !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedRow : null,
                     !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltRow : null,
-                    !!rowDisabled && rowDisabled(i) ? classes.tableDisabledRow : null
+                    !!rowDisabled && rowDisabled(i) ? classes.tableDisabledRow : null,
                   )}
                 >
                   {localItemFormatters &&
@@ -275,7 +278,7 @@ class Table extends Component {
                             !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
                             !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
                             !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
-                            classes[`${aligns.length > fidx && (aligns[fidx] ?? "left")}`]
+                            classes[`${aligns.length > fidx && (aligns[fidx] ?? "left")}`],
                           )}
                           key={`v-${iidx}-${fidx}`}
                         >
@@ -307,7 +310,13 @@ class Table extends Component {
             </TableFooter>
           )}
         </MUITable>
-      </Fragment>
+        {(fetching || error) && (
+          <Grid className={classes.loader} container justifyContent="center" alignItems="center">
+            <ProgressOrError progress={items?.length && fetching} error={error} />{" "}
+            {/* We do not want to display the spinner with the empty table */}
+          </Grid>
+        )}
+      </div>
     );
   }
 }

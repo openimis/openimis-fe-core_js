@@ -8,7 +8,7 @@ import {
   dispatchMutationResp,
   dispatchMutationErr,
 } from "./helpers/api";
-import _ from 'lodash'
+import _ from "lodash";
 function reducer(
   state = {
     authenticating: false,
@@ -38,7 +38,7 @@ function reducer(
     roleRights: [],
     errorRoleRights: null,
   },
-  action
+  action,
 ) {
   switch (action.type) {
     case "CORE_ALERT":
@@ -91,11 +91,9 @@ function reducer(
         filtersCache,
       };
     case "CORE_MUTATION_ADD":
-      var mutations = [...state.mutations];
-      mutations.unshift(action.payload);
       return {
         ...state,
-        mutations,
+        mutations: [action.payload, ...state.mutations],
       };
     case "CORE_MUTATION_REQ":
       return {
@@ -103,12 +101,11 @@ function reducer(
         fetchingMutations: true,
       };
     case "CORE_MUTATION_RESP": {
-      const mutations = parseData(action.payload.data.mutationLogs)
-      
+      const mutations = parseData(action.payload.data.mutationLogs);
       return {
         ...state,
         fetchingMutations: false,
-        mutations: _.unionBy(mutations, state.mutations, x => x.clientMutationId),
+        mutations: _.unionBy(mutations, state.mutations, "clientMutationId"),
       };
     }
     case "CORE_MUTATION_ERR":

@@ -32,5 +32,6 @@
   "core.roleManagement.DuplicateRole.mutationLabel": "Duplicate Role {label}",
   "core.roleManagement.duplicateButton.tooltip": "Duplicate",
   "core.table.resultsLoading": "Loading...",
-  "LanguagePicker.label": "Language"
+  "LanguagePicker.label": "Language",
+  "core.Language.null": ""
 }

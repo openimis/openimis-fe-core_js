@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import { useDispatch } from "react-redux";
+import { graphqlWithVariables } from "../actions";
 
 export const useDebounceCb = (cb, duration = 0) => {
   const [payload, setPayload] = useState();
@@ -7,14 +9,77 @@ export const useDebounceCb = (cb, duration = 0) => {
   useEffect(() => {
     if (enabled) {
       clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => cb(payload), duration);
+      timeoutRef.current = setTimeout(() => cb(...payload), duration);
     }
 
     return () => clearTimeout(timeoutRef.current);
   }, [payload]);
 
-  return (payload) => {
+  return (...args) => {
     setEnabled(true);
-    setPayload(payload);
+    setPayload(args);
   };
+};
+
+// Ref: https://usehooks.com/usePrevious/
+export const usePrevious = (value) => {
+  // The ref object is a generic container whose current property is mutable ...
+  // ... and can hold any value, similar to an instance property on a class
+  const ref = useRef();
+
+  // Store current value in ref
+  useEffect(() => {
+    ref.current = value;
+  }, [value]); // Only re-run if value changes
+
+  // Return previous value (happens before update in useEffect above)
+  return ref.current;
+};
+
+const DEFAULT_CONFIG = {
+  type: "GRAPHQL_QUERY",
+  skip: true,
+  keepStale: false,
+};
+
+export const useGraphqlQuery = (operation, variables, config) => {
+  const dispatch = useDispatch();
+  const [queryState, setQueryState] = useState({ isLoading: false, data: null, error: null });
+  const [isMounted, setMounted] = useState(false);
+  const prevVariables = usePrevious(variables ?? {});
+  const prevOperation = usePrevious(operation);
+
+  config = {
+    ...DEFAULT_CONFIG,
+    ...config,
+  };
+
+  async function fetchQuery() {
+    try {
+      setQueryState({ isLoading: true, data: config.keepStale ? queryState.data : null, error: null });
+      const action = await dispatch(graphqlWithVariables(operation, variables, config.type, { operation, variables }));
+      if (action.error) {
+        setQueryState({ error: action.payload, isLoading: false, data: null });
+      } else {
+        setQueryState({ error: null, isLoading: false, data: action.payload.data });
+      }
+    } catch (error) {
+      setQueryState({ error, isLoading: false, data: null });
+    }
+  }
+
+  useEffect(() => {
+    if (!isMounted) return;
+    if (operation !== prevOperation || !_.isEqual(variables, prevVariables)) {
+      fetchQuery();
+    }
+  }, [operation, variables]);
+
+  useEffect(() => {
+    if (!config.skip) {
+      fetchQuery();
+    }
+    setMounted(true);
+  }, []);
+  return queryState;
 };

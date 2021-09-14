@@ -38,8 +38,19 @@ import Roles from "./pages/Roles";
 import Role from "./pages/Role";
 import reducer from "./reducer";
 import ErrorBoundary from "./helpers/ErrorBoundary";
-import ConfirmDialog from './components/dialogs/ConfirmDialog'
-import { baseApiUrl, apiHeaders, graphql, graphqlMutation, journalize, coreAlert, coreConfirm } from "./actions";
+import ConfirmDialog from "./components/dialogs/ConfirmDialog";
+import {
+  baseApiUrl,
+  apiHeaders,
+  graphql,
+  graphqlMutation,
+  graphqlWithVariables,
+  journalize,
+  coreAlert,
+  coreConfirm,
+  fetchMutation,
+  prepareMutation,
+} from "./actions";
 import {
   formatMessage,
   formatMessageWithValues,
@@ -69,9 +80,9 @@ import {
   formatGQLString,
   formatNodeQuery,
 } from "./helpers/api";
-import { useDebounceCb } from "./helpers/hooks";
+import { useDebounceCb, usePrevious, useGraphqlQuery } from "./helpers/hooks";
 import withHistory, { historyPush } from "./helpers/history";
-import withModulesManager from "./helpers/modules";
+import withModulesManager, { useModulesManager } from "./helpers/modules";
 import { formatJsonField } from "./helpers/jsonExt";
 import { RIGHT_ROLE_SEARCH } from "./constants";
 
@@ -124,8 +135,11 @@ export {
   baseApiUrl,
   apiHeaders,
   graphql,
+  graphqlWithVariables,
   graphqlMutation,
   journalize,
+  fetchMutation,
+  prepareMutation,
   coreAlert,
   coreConfirm,
   openBlob,
@@ -136,6 +150,7 @@ export {
   decodeId,
   encodeId,
   withModulesManager,
+  useModulesManager,
   formatQuery,
   formatPageQuery,
   formatPageQueryWithCount,
@@ -189,5 +204,7 @@ export {
   ErrorBoundary,
   useTranslations,
   useDebounceCb,
+  usePrevious,
+  useGraphqlQuery,
   ConfirmDialog,
 };

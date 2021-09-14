@@ -106,7 +106,7 @@ class Form extends Component {
                             <Grid item key={`form-action-${idx}`} className={classes.paperHeaderAction}>
                               {withTooltip(
                                 !!a.button ? a.button : <IconButton onClick={a.doIt}>{a.icon}</IconButton>,
-                                a.tooltip
+                                a.tooltip,
                               )}
                             </Grid>
                           );
@@ -118,19 +118,21 @@ class Form extends Component {
                 <Grid item xs={12}>
                   <Divider />
                 </Grid>
-                <Grid item xs={12}>
-                  {!!HeadPanel && (
-                    <HeadPanel
-                      edited={this.props.edited}
-                      edited_id={this.props.edited_id}
-                      {...others}
-                      onEditedChanged={this.onEditedChanged}
-                    />
-                  )}
-                  {!!headPanelContributionsKey && (
-                    <Contributions {...others} contributionKey={headPanelContributionsKey} />
-                  )}
-                </Grid>
+                {(HeadPanel || headPanelContributionsKey) && (
+                  <Grid item xs={12}>
+                    {!!HeadPanel && (
+                      <HeadPanel
+                        edited={this.props.edited}
+                        edited_id={this.props.edited_id}
+                        {...others}
+                        onEditedChanged={this.onEditedChanged}
+                      />
+                    )}
+                    {!!headPanelContributionsKey && (
+                      <Contributions {...others} contributionKey={headPanelContributionsKey} />
+                    )}
+                  </Grid>
+                )}
               </Paper>
             </Grid>
           </Grid>
@@ -161,7 +163,7 @@ class Form extends Component {
                 <AddIcon />
               </Fab>
             </div>,
-            addTooltip || formatMessage(this.props.intl, module, "addTooltip")
+            addTooltip || formatMessage(this.props.intl, module, "addTooltip"),
           )}
         {(!!this.state.dirty || !!openDirty) &&
           !!save &&
@@ -175,7 +177,7 @@ class Form extends Component {
                 <SaveIcon />
               </Fab>
             </div>,
-            saveTooltip || formatMessage(this.props.intl, module, "saveTooltip")
+            saveTooltip || formatMessage(this.props.intl, module, "saveTooltip"),
           )}
         {!this.state.dirty &&
           !!fab &&
@@ -185,7 +187,7 @@ class Form extends Component {
                 {fab}
               </Fab>
             </div>,
-            fabTooltip
+            fabTooltip,
           )}
       </Fragment>
     );

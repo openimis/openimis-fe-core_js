@@ -81,7 +81,7 @@ import {
   formatGQLString,
   formatNodeQuery,
 } from "./helpers/api";
-import { useDebounceCb, usePrevious, useGraphqlQuery } from "./helpers/hooks";
+import { useDebounceCb, usePrevious, useGraphqlQuery, useGraphqlMutation } from "./helpers/hooks";
 import withHistory, { historyPush } from "./helpers/history";
 import withModulesManager, { useModulesManager } from "./helpers/modules";
 import { formatJsonField } from "./helpers/jsonExt";
@@ -208,5 +208,6 @@ export {
   useDebounceCb,
   usePrevious,
   useGraphqlQuery,
+  useGraphqlMutation,
   ConfirmDialog,
 };

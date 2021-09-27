@@ -43,68 +43,16 @@ class AdDatePicker extends Component {
       readOnly = false,
       required = false,
       fullWidth = true,
-      minDate = null,
-      maxDate = null,
+      format = "YYYY-MM-DD",
       reset,
+      ...otherProps
     } = this.props;
-    //bug in MUIDatePicker!!
-    let Picker = null;
-    if (!!minDate && !!maxDate) {
-      Picker = (
+
+    return (
+      <FormControl fullWidth={fullWidth}>
         <MUIDatePicker
-          format="YYYY-MM-DD"
-          disabled={readOnly}
-          required={required}
-          clearable
-          value={this.state.value}
-          InputLabelProps={{
-            className: classes.label,
-          }}
-          label={!!label ? formatMessage(intl, module, label) : null}
-          onChange={this.dateChange}
-          minDate={minDate}
-          maxDate={maxDate}
-          reset={reset}
-        />
-      );
-    } else if (!!minDate) {
-      Picker = (
-        <MUIDatePicker
-          format="YYYY-MM-DD"
-          disabled={readOnly}
-          required={required}
-          clearable
-          value={this.state.value}
-          InputLabelProps={{
-            className: classes.label,
-          }}
-          label={!!label ? formatMessage(intl, module, label) : null}
-          onChange={this.dateChange}
-          minDate={minDate}
-          reset={reset}
-        />
-      );
-    } else if (!!maxDate) {
-      Picker = (
-        <MUIDatePicker
-          format="YYYY-MM-DD"
-          disabled={readOnly}
-          required={required}
-          clearable
-          value={this.state.value}
-          InputLabelProps={{
-            className: classes.label,
-          }}
-          label={!!label ? formatMessage(intl, module, label) : null}
-          onChange={this.dateChange}
-          maxDate={maxDate}
-          reset={reset}
-        />
-      );
-    } else {
-      Picker = (
-        <MUIDatePicker
-          format="YYYY-MM-DD"
+          {...otherProps}
+          format={format}
           disabled={readOnly}
           required={required}
           clearable
@@ -116,9 +64,8 @@ class AdDatePicker extends Component {
           onChange={this.dateChange}
           reset={reset}
         />
-      );
-    }
-    return <FormControl fullWidth={fullWidth}>{Picker}</FormControl>;
+      </FormControl>
+    );
   }
 }
 

@@ -3,6 +3,7 @@ import React from "react";
 import messages_en from "./translations/en.json";
 import KeepLegacyAlive from "./components/KeepLegacyAlive";
 import AutoSuggestion from "./components/inputs/AutoSuggestion";
+import Autocomplete from "./components/inputs/Autocomplete";
 import Contributions from "./components/generics/Contributions";
 import ControlledField from "./components/generics/ControlledField";
 import Error from "./components/generics/Error";
@@ -172,6 +173,7 @@ export {
   formatJsonField,
   withTooltip,
   App,
+  Autocomplete,
   AutoSuggestion,
   Contributions,
   ControlledField,

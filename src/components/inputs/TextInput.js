@@ -35,12 +35,12 @@ class TextInput extends Component {
     }
   }
   _onChange = (e) => {
-    let value = e.target.value;
-    if (!!this.props.formatInput) {
+    let {value} = e.target;
+    if (this.props.formatInput) {
       value = this.props.formatInput(value);
     }
     if (value !== this.state.value) {
-      this.setState({ value }, (e) => !!this.props.onChange && this.props.onChange(this.state.value));
+      this.setState({ value }, () => this.props.onChange && this.props.onChange(this.state.value));
     }
   };
   render() {
@@ -55,6 +55,7 @@ class TextInput extends Component {
       endAdornment = null,
       inputProps = {},
       formatInput = null,
+      helperText,
       ...others
     } = this.props;
     return (
@@ -69,8 +70,8 @@ class TextInput extends Component {
         InputProps={{ inputProps, startAdornment, endAdornment }}
         onChange={this._onChange}
         value={this.state.value}
-        error={!!error}
-        helperText={error}
+        error={Boolean(error)}
+        helperText={error ?? helperText}
       />
     );
   }

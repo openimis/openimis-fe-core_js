@@ -99,15 +99,15 @@ class AutoSuggestion extends Component {
     if (prevProps.reset !== this.props.reset) {
       this.setState((state, props) => ({
         suggestions: this._truncate(this._allItems()),
-        value: props.getSuggestionValue(props.value),
-        selected: props.getSuggestionValue(props.value),
+        value: props.value ? props.getSuggestionValue(props.value) : null,
+        selected: props.value ? props.getSuggestionValue(props.value) : null,
       }));
     } else {
       if (!_.isEqual(prevProps.value, this.props.value)) {
         this.setState((state, props) => ({
           suggestions: this._truncate(this._allItems()),
-          value: props.getSuggestionValue(props.value),
-          selected: props.getSuggestionValue(props.value),
+          value: props.value ? props.getSuggestionValue(props.value) : null,
+          selected: props.value ? props.getSuggestionValue(props.value) : null,
         }));
       } else if (!_.isEqual(prevProps.items, this.props.items)) {
         this.setState({
@@ -120,7 +120,7 @@ class AutoSuggestion extends Component {
   onClear = (e) => {
     this.setState(
       {
-        value: "",
+        value: null,
         selected: null,
       },
       (e) => (!!this.props.onClear ? this.props.onClear() : this.props.onSuggestionSelected(null)),
@@ -274,7 +274,8 @@ class AutoSuggestion extends Component {
     const inputProps = {
       className: classes.suggestionInputField,
       placeholder,
-      value: value,
+      // Value has to be a string
+      value: value ?? "",
       label,
       disabled,
       onChange: this._onAutoselectChange,

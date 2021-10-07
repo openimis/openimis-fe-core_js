@@ -97,7 +97,10 @@ export const useGraphqlMutation = (operation, config = {}) => {
     }
     setState({ isLoading: true, error: null });
     try {
-      const action = await dispatch(graphqlMutation(operation, { input }, config.type, { operation, input }));
+      const variables = {
+        input,
+      };
+      const action = await dispatch(graphqlMutation(operation, variables, config.type, { operation, input }));
       setState({ isLoading: false, error: null });
       if (config.onSuccess) {
         return config.onSuccess(action.payload.data);
@@ -105,6 +108,9 @@ export const useGraphqlMutation = (operation, config = {}) => {
         return action.payload.data;
       }
     } catch (err) {
+      if (config.onError) {
+        config.onError(err);
+      }
       setState({
         isLoading: false,
         error: err,

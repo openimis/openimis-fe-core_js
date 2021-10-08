@@ -6,6 +6,7 @@ import {
   formatMessageWithValues,
   Searcher,
   formatDateFromISO,
+  Helmet,
   TextInput,
   withTooltip,
   historyPush,
@@ -138,10 +139,6 @@ class Roles extends Component {
     deleted: [],
   };
 
-  componentDidMount() {
-    document.title = formatMessage(this.props.intl, "core", "roleManagement.label");
-  }
-
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (prevProps.submittingMutation && !this.props.submittingMutation) {
       this.props.journalize(this.props.mutation);
@@ -200,8 +197,8 @@ class Roles extends Component {
               <EditIcon />
             </IconButton>
           </div>,
-          formatMessage(intl, "core", "roleManagement.editButton.tooltip")
-        )
+          formatMessage(intl, "core", "roleManagement.editButton.tooltip"),
+        ),
       );
     }
     if (rights.includes(RIGHT_ROLE_DUPLICATE)) {
@@ -212,8 +209,8 @@ class Roles extends Component {
               <SupervisedUserCircleIcon />
             </IconButton>
           </div>,
-          formatMessage(intl, "core", "roleManagement.duplicateButton.tooltip")
-        )
+          formatMessage(intl, "core", "roleManagement.duplicateButton.tooltip"),
+        ),
       );
     }
     if (rights.includes(RIGHT_ROLE_DELETE)) {
@@ -224,8 +221,8 @@ class Roles extends Component {
               <DeleteIcon />
             </IconButton>
           </div>,
-          formatMessage(intl, "core", "roleManagement.deleteButton.tooltip")
-        )
+          formatMessage(intl, "core", "roleManagement.deleteButton.tooltip"),
+        ),
       );
     }
     return result;
@@ -236,14 +233,14 @@ class Roles extends Component {
     const confirm = () =>
       coreConfirm(
         formatMessageWithValues(intl, "core", "roleManagement.deleteRole.confirm.title", { label: role.name }),
-        formatMessage(intl, "core", "roleManagement.deleteRole.confirm.message")
+        formatMessage(intl, "core", "roleManagement.deleteRole.confirm.message"),
       );
     const confirmedAction = () => {
       this.setState({ toDelete: role.id }, () =>
         deleteRole(
           role,
-          formatMessageWithValues(intl, "core", "roleManagement.DeleteRole.mutationLabel", { label: role.name })
-        )
+          formatMessageWithValues(intl, "core", "roleManagement.DeleteRole.mutationLabel", { label: role.name }),
+        ),
       );
     };
     this.setState({ confirmedAction }, confirm);
@@ -270,6 +267,7 @@ class Roles extends Component {
     return (
       rights.includes(RIGHT_ROLE_SEARCH) && (
         <div className={classes.page}>
+          <Helmet title={formatMessage(this.props.intl, "core", "roleManagement.label")} />
           <Searcher
             module="core"
             FilterPane={RoleFilter}
@@ -299,7 +297,7 @@ class Roles extends Component {
                   <AddIcon />
                 </Fab>
               </div>,
-              formatMessage(intl, "core", "roleManagement.createButton.tooltip")
+              formatMessage(intl, "core", "roleManagement.createButton.tooltip"),
             )}
         </div>
       )
@@ -326,5 +324,5 @@ const mapDispatchToProps = (dispatch) => {
 };
 
 export default withModulesManager(
-  injectIntl(withTheme(withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(Roles))))
+  injectIntl(withTheme(withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(Roles)))),
 );

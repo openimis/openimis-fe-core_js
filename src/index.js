@@ -33,6 +33,7 @@ import ConstantBasedPicker from "./components/generics/ConstantBasedPicker";
 import YearPicker from "./pickers/YearPicker";
 import MonthPicker from "./pickers/MonthPicker";
 import LanguagePicker from "./pickers/LanguagePicker";
+import Helmet from "./helpers/Helmet";
 import AccountBox from "@material-ui/icons/AccountBox";
 import Roles from "./pages/Roles";
 import Role from "./pages/Role";
@@ -132,6 +133,7 @@ export function combine(...hocs) {
 }
 
 export {
+  Helmet,
   baseApiUrl,
   apiHeaders,
   graphql,

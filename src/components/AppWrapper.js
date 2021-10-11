@@ -4,7 +4,7 @@ import { withTheme, withStyles } from "@material-ui/core/styles";
 import Logout from "../pages/Logout";
 import Help from "../pages/Help";
 import { alpha } from "@material-ui/core/styles/";
-import classNames from "classnames";
+import clsx from "clsx";
 
 import {
   AppBar,
@@ -191,7 +191,7 @@ class AppWrapper extends Component {
         <Contributions modulesManager={modulesManager} contributionKey={APP_BOOT_CONTRIBUTION_KEY} />
         <AppBar
           position="fixed"
-          className={classNames(classes.appBar, {
+          className={clsx(classes.appBar, {
             [classes.appBarShift]: this.isShifted(),
           })}
         >
@@ -199,10 +199,10 @@ class AppWrapper extends Component {
             <IconButton
               color="inherit"
               onClick={this.handleOpen}
-              className={classNames(
+              className={clsx(
                 classes.menuButton,
                 this.isAppBarMenu() && classes.autoHideMenuButton,
-                open && classes.hide
+                open && classes.hide,
               )}
             >
               <MenuIcon />
@@ -258,7 +258,7 @@ class AppWrapper extends Component {
         <JournalDrawer open={this.state.jrnlOpen} handleDrawer={this.handleJrnlDrawer} />
         <div className={classes.toolbar} />
         <main
-          className={classNames(classes.content, {
+          className={clsx(classes.content, {
             [classes.jrnlContentShift]: this.isJrnlShifted(),
           })}
         >

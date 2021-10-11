@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from "react";
-import classNames from "classnames";
+import clsx from "clsx";
 import { injectIntl } from "react-intl";
 import _ from "lodash";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -258,7 +258,7 @@ class Table extends Component {
                   selected={this.isSelected(i)}
                   onClick={() => this.select(i)}
                   onDoubleClick={onDoubleClick ? () => onDoubleClick(i) : undefined}
-                  className={classNames(
+                  className={clsx(
                     classes.tableRow,
                     !!rowLocked && rowLocked(i) ? classes.tableLockedRow : null,
                     !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedRow : null,
@@ -272,7 +272,7 @@ class Table extends Component {
                       return (
                         <TableCell
                           colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
-                          className={classNames(
+                          className={clsx(
                             classes.tableCell,
                             !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
                             !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,

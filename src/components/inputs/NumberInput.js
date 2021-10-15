@@ -5,14 +5,13 @@ import { formatMessageWithValues } from "../../helpers/i18n";
 
 class NumberInput extends Component {
   formatInput = (v, displayZero) => {
-    if (v == 0 && displayZero) return "0";
+    if (v == 0 && displayZero) return 0;
     if (!v) return "";
-    return v;
+    return parseFloat(v);
   };
   render() {
     const { intl, module = "core", min = null, max = null, value, error, displayZero = false, ...others } = this.props;
-    let inputProps = { ...this.props.inputProps };
-    inputProps.type = "number";
+    let inputProps = { ...this.props.inputProps, type: "number" };
     let err = error;
 
     if (min !== null) {

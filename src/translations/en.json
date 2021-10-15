@@ -31,6 +31,11 @@
   "core.roleManagement.updateRole.confirm.message": "Are you sure you want to save changes in {label}?",
   "core.roleManagement.DuplicateRole.mutationLabel": "Duplicate Role {label}",
   "core.roleManagement.duplicateButton.tooltip": "Duplicate",
+  "core.Autocomplete.loadingText": "Loading...",
+  "core.Autocomplete.clearText": "Clear",
+  "core.Autocomplete.openText": "Open",
+  "core.Autocomplete.closeText": "Close",
+  "core.Autocomplete.placeholder": "Search...",
   "core.table.resultsLoading": "Loading...",
   "LanguagePicker.label": "Language",
   "core.Language.null": ""

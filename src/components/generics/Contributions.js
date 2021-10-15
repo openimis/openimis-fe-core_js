@@ -6,17 +6,17 @@ import _ from "lodash";
 class Contributions extends Component {
   createComponents(contributions, reverse) {
     const { classes, modulesManager, contributionKey, ...others } = this.props;
-    var contribs = contributions.map((Comp, index) => {
+    const contribs = contributions.map((ElementTag, index) => {
       let k = `${contributionKey}_${index}`;
       let keys = {
         "key_index": k,
         "key": k,
       };
-      if (_.isString(Comp)) {
-        var C = modulesManager.getRef(Comp);
-        return <C {...others} {...keys} />;
+      if (_.isString(ElementTag)) {
+        const ContributionComponent = modulesManager.getRef(ElementTag);
+        return <ContributionComponent {...others} {...keys} />;
       } else {
-        return <Comp {...others} {...keys} />;
+        return <ElementTag {...others} {...keys} />;
       }
     });
     if (reverse) {

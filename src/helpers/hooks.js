@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
-import { graphqlWithVariables } from "../actions";
+import { graphqlWithVariables, graphqlMutation } from "../actions";
 
 export const useDebounceCb = (cb, duration = 0) => {
   const [payload, setPayload] = useState();
@@ -42,17 +42,16 @@ const DEFAULT_CONFIG = {
   keepStale: false,
 };
 
-export const useGraphqlQuery = (operation, variables, config) => {
-  const dispatch = useDispatch();
-  const [queryState, setQueryState] = useState({ isLoading: false, data: null, error: null });
-  const [isMounted, setMounted] = useState(false);
-  const prevVariables = usePrevious(variables ?? {});
-  const prevOperation = usePrevious(operation);
-
+export const useGraphqlQuery = (operation, variables, config = {}) => {
   config = {
     ...DEFAULT_CONFIG,
     ...config,
   };
+  const dispatch = useDispatch();
+  const [queryState, setQueryState] = useState({ isLoading: !config.skip, data: null, error: null });
+  const [isMounted, setMounted] = useState(false);
+  const prevVariables = usePrevious(variables ?? {});
+  const prevOperation = usePrevious(operation);
 
   async function fetchQuery() {
     try {
@@ -81,5 +80,47 @@ export const useGraphqlQuery = (operation, variables, config) => {
     }
     setMounted(true);
   }, []);
-  return queryState;
+  return {
+    ...queryState,
+    refetch: fetchQuery,
+  };
+};
+
+export const useGraphqlMutation = (operation, config = {}) => {
+  const dispatch = useDispatch();
+  const [state, setState] = useState({ isLoading: false, error: null });
+
+  async function mutate(input) {
+    if (state.isLoading) {
+      console.warn("A mutation is already in progress");
+      return;
+    }
+    setState({ isLoading: true, error: null });
+    try {
+      const variables = {
+        input,
+      };
+      const action = await dispatch(graphqlMutation(operation, variables, config.type, { operation, input }));
+      setState({ isLoading: false, error: null });
+      if (config.onSuccess) {
+        return config.onSuccess(action.payload.data);
+      } else {
+        return action.payload.data;
+      }
+    } catch (err) {
+      if (config.onError) {
+        config.onError(err);
+      }
+      setState({
+        isLoading: false,
+        error: err,
+      });
+    }
+  }
+
+  return {
+    isLoading: state.isLoading,
+    error: state.error,
+    mutate,
+  };
 };

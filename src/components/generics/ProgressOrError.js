@@ -16,10 +16,10 @@ const styles = (theme) => ({
 
 class ProgressOrError extends Component {
   render() {
-    const { classes, progress, error } = this.props;
+    const { classes, progress, error, size } = this.props;
     return (
       <Fragment>
-        {!!progress && <CircularProgress className={classes.progress} />}
+        {!!progress && <CircularProgress size={size} className={classes.progress} />}
         {!progress && !!error && <Error error={error} />}
       </Fragment>
     );

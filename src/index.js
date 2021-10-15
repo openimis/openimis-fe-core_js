@@ -3,6 +3,7 @@ import React from "react";
 import messages_en from "./translations/en.json";
 import KeepLegacyAlive from "./components/KeepLegacyAlive";
 import AutoSuggestion from "./components/inputs/AutoSuggestion";
+import Autocomplete from "./components/inputs/Autocomplete";
 import Contributions from "./components/generics/Contributions";
 import ControlledField from "./components/generics/ControlledField";
 import Error from "./components/generics/Error";
@@ -80,7 +81,7 @@ import {
   formatGQLString,
   formatNodeQuery,
 } from "./helpers/api";
-import { useDebounceCb, usePrevious, useGraphqlQuery } from "./helpers/hooks";
+import { useDebounceCb, usePrevious, useGraphqlQuery, useGraphqlMutation } from "./helpers/hooks";
 import withHistory, { historyPush } from "./helpers/history";
 import withModulesManager, { useModulesManager } from "./helpers/modules";
 import { formatJsonField } from "./helpers/jsonExt";
@@ -172,6 +173,7 @@ export {
   formatJsonField,
   withTooltip,
   App,
+  Autocomplete,
   AutoSuggestion,
   Contributions,
   ControlledField,
@@ -206,5 +208,6 @@ export {
   useDebounceCb,
   usePrevious,
   useGraphqlQuery,
+  useGraphqlMutation,
   ConfirmDialog,
 };

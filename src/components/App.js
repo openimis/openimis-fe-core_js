@@ -6,6 +6,7 @@ import { CssBaseline, CircularProgress } from "@material-ui/core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import withHistory from "../helpers/history";
 import withModulesManager, { ModulesManagerProvider } from "../helpers/modules";
+import Helmet from "../helpers/Helmet";
 import AppWrapper from "./AppWrapper";
 import FatalError from "./generics/FatalError";
 import kebabCase from "lodash/kebabCase";
@@ -65,7 +66,7 @@ class RootApp extends Component {
           messages={this.buildMessages(messages, user.language)}
         >
           <div className="App">
-            <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+            <Helmet titleTemplate="%s - openIMIS" defaultTitle="openIMIS" />
             <CssBaseline />
             <AlertDialog alert={alert} />
             <ConfirmDialog confirm={confirm} onConfirm={clearConfirm} />

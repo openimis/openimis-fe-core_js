@@ -16,7 +16,8 @@
     "format": "prettier src -w"
   },
   "peerDependency": {
-    "react-intl": "^5.8.1"
+    "react-intl": "^5.8.1",
+    "react-helmet": "*"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",

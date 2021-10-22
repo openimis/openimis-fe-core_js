@@ -38,7 +38,7 @@ export const usePrevious = (value) => {
 
 const DEFAULT_CONFIG = {
   type: "GRAPHQL_QUERY",
-  skip: true,
+  skip: false,
   keepStale: false,
 };
 
@@ -90,32 +90,36 @@ export const useGraphqlMutation = (operation, config = {}) => {
   const dispatch = useDispatch();
   const [state, setState] = useState({ isLoading: false, error: null });
 
-  async function mutate(input) {
+  function mutate(input) {
     if (state.isLoading) {
       console.warn("A mutation is already in progress");
       return;
     }
     setState({ isLoading: true, error: null });
-    try {
-      const variables = {
-        input,
-      };
-      const action = await dispatch(graphqlMutation(operation, variables, config.type, { operation, input }));
-      setState({ isLoading: false, error: null });
-      if (config.onSuccess) {
-        return config.onSuccess(action.payload.data);
-      } else {
-        return action.payload.data;
+    return new Promise(async (resolve, reject) => {
+      try {
+        const variables = {
+          input,
+        };
+        const action = await dispatch(graphqlMutation(operation, variables, config.type, { operation, input }));
+        setState({ isLoading: false, error: null });
+        if (config.onSuccess) {
+          resolve(config.onSuccess(action.payload.data));
+        } else {
+          resolve(action.payload.data);
+        }
+      } catch (err) {
+        setState({
+          isLoading: false,
+          error: err,
+        });
+        if (config.onError) {
+          reject(config.onError(err));
+        } else {
+          reject(err);
+        }
       }
-    } catch (err) {
-      if (config.onError) {
-        config.onError(err);
-      }
-      setState({
-        isLoading: false,
-        error: err,
-      });
-    }
+    });
   }
 
   return {

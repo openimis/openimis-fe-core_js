@@ -444,6 +444,7 @@ class Searcher extends Component {
                 </Grid>
                 <Grid item xs={12}>
                   <Table
+                    size="small"
                     module={module}
                     fetching={fetchingItems}
                     preHeaders={!!preHeaders && preHeaders(this.state.selection)}

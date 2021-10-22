@@ -28,7 +28,6 @@ const styles = (theme) => ({
   tableTitle: theme.table.title,
   tableHeader: theme.table.header,
   tableRow: theme.table.row,
-  tableCell: theme.table.cell,
   tableLockedRow: theme.table.lockedRow,
   tableLockedCell: theme.table.lockedCell,
   tableHighlightedRow: theme.table.highlightedRow,
@@ -156,6 +155,7 @@ class Table extends Component {
       page = 0,
       pageSize,
       count,
+      size,
       rowsPerPageOptions = [10, 20, 50],
       onChangeRowsPerPage,
       onChangePage,
@@ -197,7 +197,7 @@ class Table extends Component {
             <Divider />
           </Fragment>
         )}
-        <MUITable className={classes.table}>
+        <MUITable className={classes.table} size={size}>
           {!!localPreHeaders && localPreHeaders.length > 0 && (
             <TableHead>
               <TableRow>
@@ -206,7 +206,7 @@ class Table extends Component {
                   return (
                     <TableCell
                       colSpan={headerSpans.length > idx ? headerSpans[idx] : 1}
-                      className={classes.tableHeader}
+                      className={clsx(classes.tableHeader, aligns.length > idx && classes[aligns[idx]])}
                       key={`preh-${idx}`}
                     >
                       {!!h && h}
@@ -222,26 +222,24 @@ class Table extends Component {
                 {localHeaders.map((h, idx) => {
                   if (headerSpans.length > idx && !headerSpans[idx]) return null;
                   return (
-                    <TableCell
-                      colSpan={headerSpans.length > idx ? headerSpans[idx] : 1}
-                      className={classes.tableCell}
-                      key={`h-${idx}`}
-                    >
+                    <TableCell colSpan={headerSpans.length > idx ? headerSpans[idx] : 1} key={`h-${idx}`}>
                       {!!h && (
-                        <div
+                        <Box
                           style={{
                             width: "100%",
                             cursor: headerActions.length > idx && !!headerActions[idx][0] ? "pointer" : "",
                           }}
                           onClick={headerActions.length > idx ? headerActions[idx][0] : null}
+                          display="flex"
+                          className={classes.tableHeader}
+                          alignItems="center"
+                          justifyContent={aligns.length > idx ? aligns[idx] : "left"}
                         >
-                          <Box display="flex" className={classes.tableHeader} alignItems="center">
-                            <Box>
-                              <FormattedMessage module={module} id={h} />
-                            </Box>
-                            {headerActions.length > idx ? this.headerAction(headerActions[idx][1]) : null}
+                          <Box>
+                            <FormattedMessage module={module} id={h} />
                           </Box>
-                        </div>
+                          {headerActions.length > idx ? this.headerAction(headerActions[idx][1]) : null}
+                        </Box>
                       )}
                     </TableCell>
                   );
@@ -273,12 +271,11 @@ class Table extends Component {
                         <TableCell
                           colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
                           className={clsx(
-                            classes.tableCell,
                             !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
                             !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
                             !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
                             !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
-                            classes[`${aligns.length > fidx && (aligns[fidx] ?? "left")}`],
+                            aligns.length > fidx && classes[aligns[fidx]],
                           )}
                           key={`v-${iidx}-${fidx}`}
                         >

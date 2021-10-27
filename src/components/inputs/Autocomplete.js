@@ -91,7 +91,7 @@ const Autocomplete = (props) => {
           cd
           required={required}
           label={withLabel && (label || formatMessage("label"))}
-          placeholder={withPlaceholder && (placeholder || formatMessage("placeholder"))}
+          placeholder={!readOnly && withPlaceholder && (placeholder || formatMessage("placeholder"))}
         />
       )}
     />

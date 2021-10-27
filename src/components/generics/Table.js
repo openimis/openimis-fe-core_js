@@ -168,8 +168,8 @@ class Table extends Component {
     let localPreHeaders = !!preHeaders ? [...preHeaders] : null;
     let localItemFormatters = [...itemFormatters];
     var i = !!headers && headers.length;
-    while (!!localHeaders && i--) {
-      if (!!modulesManager && modulesManager.hideField(module, localHeaders[i])) {
+    while (localHeaders && i--) {
+      if (modulesManager?.hideField(module, localHeaders[i])) {
         if (!!localPreHeaders) localPreHeaders.splice(i, 1);
         if (!!aligns && aligns.length > i) aligns.splice(i, 1);
         if (!!headerSpans && headerSpans.length > i) headerSpans.splice(i, 1);
@@ -180,7 +180,7 @@ class Table extends Component {
       }
     }
     if (!!onDelete) {
-      if (!!localPreHeaders) localPreHeaders.push("");
+      if (localPreHeaders) localPreHeaders.push("");
       localHeaders.push("");
       localItemFormatters.push((i, idx) => (
         <IconButton onClick={(e) => onDelete(idx)}>
@@ -188,7 +188,8 @@ class Table extends Component {
         </IconButton>
       ));
     }
-    var rowsPerPage = pageSize || rowsPerPageOptions[0];
+
+    const rowsPerPage = pageSize || rowsPerPageOptions[0];
     return (
       <div className={classes.wrapper}>
         {header && (

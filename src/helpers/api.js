@@ -5,9 +5,8 @@ import SortIcon from "@material-ui/icons/UnfoldMore";
 import SortAscIcon from "@material-ui/icons/ExpandLess";
 import SortDescIcon from "@material-ui/icons/ExpandMore";
 
-
 function _entityAndFilters(entity, filters) {
-  return `${entity}${!!filters && filters.length ? `(${filters.join(',')})` : ""}`
+  return `${entity}${!!filters && filters.length ? `(${filters.join(",")})` : ""}`;
 }
 
 function _pageAndEdges(projections) {
@@ -17,19 +16,35 @@ function _pageAndEdges(projections) {
     {
       node
       {
-        ${projections.join(',')}
+        ${projections.join(",")}
       }
-    }`
+    }`;
 }
 
 export function formatQuery(entity, filters, projections) {
   return `
     {
       ${_entityAndFilters(entity, filters)}
-      ${!!projections ? `{
+      ${
+        !!projections
+          ? `{
+        ${projections.join(",")}
+      }`
+          : ""
+      }
+    }`;
+}
+
+export function formatNodeQuery(entityGQLType, nodeId, projections = ["id"]) {
+  return `
+  {
+    node (id: "${nodeId}") {
+      ...on ${entityGQLType} {
         ${projections.join(',')}
-      }`: ''}
-    }`
+      }
+    }
+  }
+  `
 }
 
 export function formatPageQuery(entity, filters, projections) {
@@ -39,7 +54,7 @@ export function formatPageQuery(entity, filters, projections) {
       {
         ${_pageAndEdges(projections)}
       }
-    }`
+    }`;
 }
 
 export function formatPageQueryWithCount(entity, filters, projections) {
@@ -50,26 +65,27 @@ export function formatPageQueryWithCount(entity, filters, projections) {
         totalCount
         ${_pageAndEdges(projections)}
       }
-    }`
+    }`;
 }
 
 export function formatGQLString(str) {
   if (!str) return str;
-  return str.replace(/[\"]/g, '\\"')
-    .replace(/[\\]/g, '\\\\')
-    .replace(/[\/]/g, '\\/')
-    .replace(/[\b]/g, '\\b')
-    .replace(/[\f]/g, '\\f')
-    .replace(/[\n]/g, '\\n')
-    .replace(/[\r]/g, '\\r')
-    .replace(/[\t]/g, '\\t');
+  return str
+    .replace(/[\"]/g, '\\"')
+    .replace(/[\\]/g, "\\\\")
+    .replace(/[\/]/g, "\\/")
+    .replace(/[\b]/g, "\\b")
+    .replace(/[\f]/g, "\\f")
+    .replace(/[\n]/g, "\\n")
+    .replace(/[\r]/g, "\\r")
+    .replace(/[\t]/g, "\\t");
 }
 
-export function formatMutation(service, input, clientMutationLabel, clientMutationDetails) {
+export function formatMutation(operationName, input, clientMutationLabel, clientMutationDetails) {
   const clientMutationId = _.uuid();
   const payload = `
     mutation {
-      ${service}(
+      ${operationName}(
         input: {
           clientMutationId: "${clientMutationId}"
           clientMutationLabel: "${clientMutationLabel}"
@@ -80,13 +96,13 @@ export function formatMutation(service, input, clientMutationLabel, clientMutati
         clientMutationId
         internalId
       }
-    }`
-  return { clientMutationId, payload }
+    }`;
+  return { clientMutationId, payload };
 }
 
 export function decodeId(id) {
-  if (/^\d+$/.test(id)) return id
-  else return atob(id).split(':')[1];
+  if (/^\d+$/.test(id)) return id;
+  else return atob(id).split(":")[1];
 }
 
 export function encodeId(modulesManager, type, id) {
@@ -95,7 +111,7 @@ export function encodeId(modulesManager, type, id) {
 
 export function parseData(data) {
   if (!data) return [];
-  return data['edges'].map(e => e['node']);
+  return data["edges"].map((e) => e["node"]);
 }
 
 export function dispatchMutationReq(state, action) {
@@ -103,7 +119,7 @@ export function dispatchMutationReq(state, action) {
     ...state,
     submittingMutation: true,
     mutation: action.meta,
-  }
+  };
 }
 
 export function dispatchMutationResp(state, service, action) {
@@ -113,41 +129,42 @@ export function dispatchMutationResp(state, service, action) {
     ...state,
     submittingMutation: false,
     mutation,
-  }
+  };
 }
 
 export function dispatchMutationErr(state, action) {
   return {
     ...state,
     alert: JSON.stringify(action.payload),
-  }
+  };
 }
 
 export function pageInfo(data) {
   if (!data) return {};
-  return { totalCount: data['totalCount'], ...data['pageInfo'] };
+  return { totalCount: data["totalCount"], ...data["pageInfo"] };
 }
 
 export function formatServerError(payload) {
   return {
     code: payload.status,
     message: payload.statusText,
-    detail: !!payload.response && payload.response.errors ?
-      payload.response.errors.map((e) => e.message).join('; ')
-      : null
-  }
+    detail:
+      !!payload.response && payload.response.errors ? payload.response.errors.map((e) => e.message).join("; ") : null,
+  };
 }
 
 export function formatGraphQLError(payload) {
-  return !payload.errors ? null : {
-    code: "Data error",
-    message: "Server returned data error status",
-    detail: payload.errors.map((e) => e.message).join('; ')
-  }
+  return !payload.errors
+    ? null
+    : {
+        code: "Data error",
+        message: "Server returned data error status",
+        detail: payload.errors.map((e) => e.message).join("; "),
+      };
 }
 
 export function openBlob(data, filename, mime) {
-  var a = document.createElement('a');
+  var a = document.createElement("a");
   a.style = "display: none";
   var blob = new Blob([data], { type: `application/${mime}` });
   var url = window.URL.createObjectURL(blob);
@@ -164,11 +181,11 @@ export function openBlob(data, filename, mime) {
 export function sort(orderBy, attr, asc = true) {
   let targetSort = null;
   if (orderBy === attr) {
-    targetSort = '-' + attr
-  } else if (orderBy === '-' + attr) {
-    targetSort = attr
+    targetSort = "-" + attr;
+  } else if (orderBy === "-" + attr) {
+    targetSort = attr;
   } else {
-    targetSort = asc ? attr : '-' + attr
+    targetSort = asc ? attr : "-" + attr;
   }
   return targetSort;
 }
@@ -178,16 +195,19 @@ export function formatSorter(orderBy, attr, asc) {
     return (
       <IconButton size="small">
         <SortAscIcon size={24} />
-      </IconButton>)
-  } else if (orderBy === '-' + attr) {
+      </IconButton>
+    );
+  } else if (orderBy === "-" + attr) {
     return (
       <IconButton size="small">
         <SortDescIcon size={24} />
-      </IconButton>)
+      </IconButton>
+    );
   } else {
     return (
       <IconButton size="small">
         <SortIcon size={24} />
-      </IconButton>)
+      </IconButton>
+    );
   }
 }

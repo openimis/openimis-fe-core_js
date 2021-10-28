@@ -19,7 +19,7 @@ function Error(props) {
   return (
     <div className={classes.error}>
       <Typography variant="h6" className={classes.errorHeader}>
-        {error.code}: {error.message}
+        {error.code} {error.code && ": "} {error.message}
       </Typography>
       {!!error.detail && (
         <Fragment>

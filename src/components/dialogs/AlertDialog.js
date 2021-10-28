@@ -12,8 +12,11 @@ import {
   Typography,
   Grid,
 } from "@material-ui/core";
+import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
+import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import { clearAlert } from "../../actions";
 import { formatMessage } from "../../helpers/i18n";
+import { ensureArray } from "../../helpers/utils";
 
 class AlertDialog extends Component {
   state = {
@@ -24,40 +27,45 @@ class AlertDialog extends Component {
     this.setState({ expanded: !this.state.expanded });
   };
 
-  handleClose = () => {
-    this.props.clearAlert();
-  };
-
   render() {
-    const { intl, alert } = this.props;
+    const { intl, alert, clearAlert } = this.props;
     return (
-      <div>
-        <Dialog open={!!alert} onClose={this.handleClose}>
-          {!!alert && !!alert.title && <DialogTitle>{alert.title}</DialogTitle>}
-          {!!alert && !!alert.message && !Array.isArray(alert.message) && (
-            <DialogContent>
-              <DialogContentText onClick={this.toggleOpen}>{alert.message}</DialogContentText>
-              {!!alert.detail && this.state.expanded && <Typography>{alert.detail}</Typography>}
-            </DialogContent>
-          )}
-          {!!alert && !!alert.message && !!Array.isArray(alert.message) && (
+      <Dialog open={Boolean(alert)} onClose={() => clearAlert()}>
+        {alert && (
+          <>
+            <DialogTitle>{alert.title ?? formatMessage(intl, "core", "FatalError.title")}</DialogTitle>
             <DialogContent>
               <Grid container>
-                {alert.message.map((m, i) => (
-                  <Grid key={`message-${i}`} item>
-                    <DialogContentText>{m}</DialogContentText>
+                <Grid item onClick={this.toggleOpen}>
+                  {alert.detail && this.state.expanded && <ArrowDropDownIcon />}
+                  {alert.detail && !this.state.expanded && <ArrowRightIcon />}
+                </Grid>
+                <Grid item>
+                  <Grid container onClick={this.toggleOpen}>
+                    {ensureArray(alert.message ?? formatMessage(intl, "core", "FatalError.message")).map(
+                      (message, i) => (
+                        <Grid key={`message-${i}`} item>
+                          <DialogContentText>{message}</DialogContentText>
+                        </Grid>
+                      ),
+                    )}
                   </Grid>
-                ))}
+                  {alert.detail && (
+                    <Typography style={{ visibility: this.state.expanded ? "visible" : "hidden" }}>
+                      {alert.detail}
+                    </Typography>
+                  )}
+                </Grid>
               </Grid>
             </DialogContent>
-          )}
-          <DialogActions>
-            <Button onClick={this.handleClose} color="primary" autoFocus>
-              {formatMessage(intl, "core", "close")}
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </div>
+          </>
+        )}
+        <DialogActions>
+          <Button onClick={() => clearAlert()} color="primary" autoFocus>
+            {formatMessage(intl, "core", "close")}
+          </Button>
+        </DialogActions>
+      </Dialog>
     );
   }
 }
@@ -67,8 +75,8 @@ const mapDispatchToProps = (dispatch) => {
     {
       clearAlert,
     },
-    dispatch
+    dispatch,
   );
 };
 
-export default injectIntl(connect(null, mapDispatchToProps)(AlertDialog));
+export default injectIntl(connect((state) => ({ alert: state.core.alert }), mapDispatchToProps)(AlertDialog));

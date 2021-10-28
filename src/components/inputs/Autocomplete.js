@@ -40,6 +40,7 @@ const Autocomplete = (props) => {
   const minCharLookup = modulesManager.getConf("fe-admin", "usersMinCharLookup", 2);
   const { formatMessage } = useTranslations("core.Autocomplete", modulesManager);
   const [open, setOpen] = useState(false);
+  const [resetKey, setResetKey] = useState(Date.now());
 
   const handleInputChange = useDebounceCb((searchString) => {
     if (open && (!searchString || searchString.length > minCharLookup)) {
@@ -58,8 +59,13 @@ const Autocomplete = (props) => {
     }
   }, [open]);
 
+  useEffect(() => {
+    setResetKey(Date.now());
+  }, [value]);
+
   return (
     <MuiAutocomplete
+      key={resetKey}
       fullWidth={fullWidth}
       className={className}
       loadingText={formatMessage("loadingText")}

@@ -48,7 +48,7 @@ class RootApp extends Component {
   }
 
   render() {
-    const { history, classes, error, alert, confirm, user, messages, clearConfirm, ...others } = this.props;
+    const { history, classes, error, confirm, user, messages, clearConfirm, ...others } = this.props;
     if (error) {
       return <FatalError error={error} />;
     }
@@ -68,7 +68,7 @@ class RootApp extends Component {
           <div className="App">
             <Helmet titleTemplate="%s - openIMIS" defaultTitle="openIMIS" />
             <CssBaseline />
-            <AlertDialog alert={alert} />
+            <AlertDialog />
             <ConfirmDialog confirm={confirm} onConfirm={clearConfirm} />
             <Router history={history}>
               <Switch>
@@ -107,11 +107,10 @@ class RootApp extends Component {
   }
 }
 
-const mapStateToProps = (state, props) => ({
+const mapStateToProps = (state) => ({
   authenticating: state.core.authenticating,
   user: !!state.core.user && state.core.user.i_user,
   error: state.core.error,
-  alert: state.core.alert,
   confirm: state.core.confirm,
 });
 

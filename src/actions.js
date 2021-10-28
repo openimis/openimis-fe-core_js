@@ -1,6 +1,14 @@
 import { RSAA } from "redux-api-middleware";
-import _ from "lodash-uuid";
-import { formatQuery, formatPageQuery, formatPageQueryWithCount, formatGQLString, formatMutation } from "./helpers/api";
+import uuid from "lodash-uuid";
+import _ from "lodash";
+import {
+  formatQuery,
+  formatPageQuery,
+  formatPageQueryWithCount,
+  formatGQLString,
+  formatMutation,
+  formatServerError,
+} from "./helpers/api";
 
 const ROLE_FULL_PROJECTION = () => [
   "id",
@@ -52,27 +60,37 @@ export function graphql(payload, type, params = {}) {
   if (Array.isArray(type)) {
     [req, resp, err] = type;
   }
-  return {
-    [RSAA]: {
-      endpoint: `${baseApiUrl}/graphql`,
-      method: "POST",
-      headers: apiHeaders(),
-      body: JSON.stringify({ query: payload }),
-      types: [
-        {
-          type: req,
-          meta: params,
+  return async (dispatch) => {
+    try {
+      const response = await dispatch({
+        [RSAA]: {
+          endpoint: `${baseApiUrl}/graphql`,
+          method: "POST",
+          headers: apiHeaders(),
+          body: JSON.stringify({ query: payload }),
+          types: [
+            {
+              type: req,
+              meta: params,
+            },
+            {
+              type: resp,
+              meta: params,
+            },
+            {
+              type: err,
+              meta: params,
+            },
+          ],
         },
-        {
-          type: resp,
-          meta: params,
-        },
-        {
-          type: err,
-          meta: params,
-        },
-      ],
-    },
+      });
+      if (response.error) {
+        dispatch(coreAlert(formatServerError(response.payload)));
+      }
+      return response;
+    } catch (err) {
+      console.error(err);
+    }
   };
 }
 
@@ -83,33 +101,43 @@ export function graphqlWithVariables(operation, variables, type, params = {}) {
   if (Array.isArray(type)) {
     [req, resp, err] = type;
   }
-  return {
-    [RSAA]: {
-      endpoint: `${baseApiUrl}/graphql`,
-      method: "POST",
-      headers: apiHeaders(),
-      body: JSON.stringify({ query: operation, variables }),
-      types: [
-        {
-          type: req,
-          meta: params,
+  return async (dispatch) => {
+    try {
+      const response = await dispatch({
+        [RSAA]: {
+          endpoint: `${baseApiUrl}/graphql`,
+          method: "POST",
+          headers: apiHeaders(),
+          body: JSON.stringify({ query: operation, variables }),
+          types: [
+            {
+              type: req,
+              meta: params,
+            },
+            {
+              type: resp,
+              meta: params,
+            },
+            {
+              type: err,
+              meta: params,
+            },
+          ],
         },
-        {
-          type: resp,
-          meta: params,
-        },
-        {
-          type: err,
-          meta: params,
-        },
-      ],
-    },
+      });
+      if (response.error) {
+        dispatch(coreAlert(formatServerError(response.payload)));
+      }
+      return response;
+    } catch (err) {
+      console.error(err);
+    }
   };
 }
 
 export function prepareMutation(operation, input, params = {}) {
   if (!params.clientMutationId) {
-    params.clientMutationId = _.uuid();
+    params.clientMutationId = uuid.uuid();
   }
 
   const variables = {
@@ -125,7 +153,7 @@ export function prepareMutation(operation, input, params = {}) {
 export function graphqlMutation(mutation, variables, type = "CORE_TRIGGER_MUTATION", params = {}) {
   let clientMutationId;
   if (variables?.input) {
-    clientMutationId = _.uuid();
+    clientMutationId = uuid.uuid();
     variables.input.clientMutationId = clientMutationId;
   }
   return async (dispatch) => {
@@ -173,9 +201,21 @@ export function fetchHistoricalMutations(pageSize, afterCursor) {
   return graphql(payload, "CORE_HISTORICAL_MUTATIONS");
 }
 
-export function coreAlert(title, message, detail) {
+export function coreAlert(titleOrObject, message, detail) {
+  let payload;
+
+  if (_.isObject(titleOrObject)) {
+    payload = titleOrObject;
+  } else {
+    payload = {
+      title: titleOrObject,
+      message,
+      detail,
+    };
+  }
+
   return (dispatch) => {
-    dispatch({ type: "CORE_ALERT", payload: { title, message, detail } });
+    dispatch({ type: "CORE_ALERT", payload });
   };
 }
 

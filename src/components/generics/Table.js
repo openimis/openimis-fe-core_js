@@ -47,9 +47,6 @@ const styles = (theme) => ({
   center: {
     textAlign: "center",
   },
-  wrapper: {
-    position: "relative",
-  },
   loader: {
     position: "absolute",
     top: 0,
@@ -191,7 +188,7 @@ class Table extends Component {
 
     const rowsPerPage = pageSize || rowsPerPageOptions[0];
     return (
-      <div className={classes.wrapper}>
+      <Box position="relative" overflow="auto">
         {header && (
           <Fragment>
             <Typography className={classes.tableTitle}>{header}</Typography>
@@ -314,7 +311,7 @@ class Table extends Component {
             {/* We do not want to display the spinner with the empty table */}
           </Grid>
         )}
-      </div>
+      </Box>
     );
   }
 }

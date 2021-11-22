@@ -258,8 +258,6 @@ function reducer(
       return dispatchMutationResp(state, "createRole", action);
     case "CORE_UPDATE_ROLE_RESP":
       return dispatchMutationResp(state, "updateRole", action);
-    case "CORE_DUPLICATE_ROLE_RESP":
-      return dispatchMutationResp(state, "duplicateRole", action);
     case "CORE_DELETE_ROLE_RESP":
       return dispatchMutationResp(state, "deleteRole", action);
     default:

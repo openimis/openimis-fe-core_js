@@ -13,7 +13,7 @@ import { injectIntl } from "react-intl";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { createRole, updateRole, duplicateRole, fetchRole, fetchRoleRights } from "../actions";
+import { createRole, updateRole, fetchRole, fetchRoleRights } from "../actions";
 import RoleHeadPanel from "../components/RoleHeadPanel";
 import RoleRightsPanel from "../components/RoleRightsPanel";
 import { RIGHT_ROLE_SEARCH, RIGHT_ROLE_CREATE, RIGHT_ROLE_UPDATE, QUERY_STRING_DUPLICATE } from "../constants";
@@ -59,7 +59,6 @@ class Role extends Component {
         },
         reset: state.reset + 1,
         isSystemRole: state.isDuplicate ? false : !!props.role.isSystem,
-        originalRoleName: props.role.name,
       }));
     } else if (prevProps.fetchedRoleRights !== this.props.fetchedRoleRights && !!this.props.fetchedRoleRights) {
       this.setState((state, props) => ({
@@ -83,7 +82,7 @@ class Role extends Component {
   }
 
   save = (role) => {
-    const { intl, createRole, updateRole, duplicateRole, coreConfirm } = this.props;
+    const { intl, createRole, updateRole, coreConfirm } = this.props;
     if (!!role.id && !this.state.isDuplicate) {
       const confirm = () =>
         coreConfirm(
@@ -98,10 +97,12 @@ class Role extends Component {
       };
       this.setState({ confirmedAction }, confirm);
     } else if (!!role.id && this.state.isDuplicate) {
-      duplicateRole(
+      delete role["id"];
+      delete role["uuid"];
+      createRole(
         role,
         formatMessageWithValues(intl, "core", "roleManagement.DuplicateRole.mutationLabel", {
-          label: this.state.originalRoleName,
+          label: this.props.role.name,
         }),
       );
     } else {
@@ -176,10 +177,7 @@ const mapStateToProps = (state, props) => ({
 });
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators(
-    { createRole, updateRole, duplicateRole, fetchRole, fetchRoleRights, journalize, coreConfirm },
-    dispatch,
-  );
+  return bindActionCreators({ createRole, updateRole, fetchRole, fetchRoleRights, journalize, coreConfirm }, dispatch);
 };
 
 export default withHistory(

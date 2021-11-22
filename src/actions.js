@@ -293,16 +293,6 @@ export function updateRole(role, clientMutationLabel) {
   });
 }
 
-export function duplicateRole(role, clientMutationLabel) {
-  let mutation = formatMutation("duplicateRole", formatRoleGQL(role), clientMutationLabel);
-  var requestedDateTime = new Date();
-  return graphql(mutation.payload, ["CORE_ROLE_MUTATION_REQ", "CORE_DUPLICATE_ROLE_RESP", "CORE_ROLE_MUTATION_ERR"], {
-    clientMutationId: mutation.clientMutationId,
-    clientMutationLabel,
-    requestedDateTime,
-  });
-}
-
 export function deleteRole(role, clientMutationLabel, clientMutationDetails = null) {
   let roleUuids = `uuids: ["${role.uuid}"]`;
   let mutation = formatMutation("deleteRole", roleUuids, clientMutationLabel, clientMutationDetails);

@@ -33,10 +33,6 @@ export function apiHeaders() {
   let headers = {
     "Content-Type": "application/json",
   };
-  if (process.env.NODE_ENV === "development") {
-    headers["remote-user"] = "Admin";
-    // headers['remote-user'] = "user";
-  }
   return headers;
 }
 

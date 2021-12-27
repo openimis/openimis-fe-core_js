@@ -21,6 +21,8 @@ const ROLE_FULL_PROJECTION = () => [
   "validityTo",
 ];
 
+import { getRefreshToken, setRefreshToken } from "./helpers/auth";
+
 const ROLERIGHT_FULL_PROJECTION = () => ["rightId"];
 
 const LANGUAGE_FULL_PROJECTION = () => ["name", "code", "sortOrder"];
@@ -49,7 +51,7 @@ export function journalize(mutation, meta) {
   };
 }
 
-export function graphql(payload, type, params = {}) {
+export function graphql(payload, type = "GRAPHQL_QUERY", params = {}) {
   let req = type + "_REQ";
   let resp = type + "_RESP";
   let err = type + "_ERR";
@@ -58,11 +60,10 @@ export function graphql(payload, type, params = {}) {
   }
   return async (dispatch) => {
     try {
-      const response = await dispatch({
-        [RSAA]: {
+      const response = await dispatch(
+        fetch({
           endpoint: `${baseApiUrl}/graphql`,
           method: "POST",
-          headers: apiHeaders(),
           body: JSON.stringify({ query: payload }),
           types: [
             {
@@ -78,8 +79,8 @@ export function graphql(payload, type, params = {}) {
               meta: params,
             },
           ],
-        },
-      });
+        }),
+      );
       if (response.error) {
         dispatch(coreAlert(formatServerError(response.payload)));
       }
@@ -90,44 +91,38 @@ export function graphql(payload, type, params = {}) {
   };
 }
 
-export function graphqlWithVariables(operation, variables, type, params = {}) {
-  let req = type + "_REQ";
-  let resp = type + "_RESP";
-  let err = type + "_ERR";
+export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY", params = {}) {
+  let req, resp, err;
   if (Array.isArray(type)) {
     [req, resp, err] = type;
+  } else {
+    req = type + "_REQ";
+    resp = type + "_RESP";
+    err = type + "_ERR";
   }
   return async (dispatch) => {
-    try {
-      const response = await dispatch({
-        [RSAA]: {
-          endpoint: `${baseApiUrl}/graphql`,
-          method: "POST",
-          headers: apiHeaders(),
-          body: JSON.stringify({ query: operation, variables }),
-          types: [
-            {
-              type: req,
-              meta: params,
-            },
-            {
-              type: resp,
-              meta: params,
-            },
-            {
-              type: err,
-              meta: params,
-            },
-          ],
-        },
-      });
-      if (response.error) {
-        dispatch(coreAlert(formatServerError(response.payload)));
-      }
-      return response;
-    } catch (err) {
-      console.error(err);
-    }
+    const response = await dispatch(
+      fetch({
+        endpoint: `${baseApiUrl}/graphql`,
+        method: "POST",
+        body: JSON.stringify({ query: operation, variables }),
+        types: [
+          {
+            type: req,
+            meta: params,
+          },
+          {
+            type: resp,
+            meta: params,
+          },
+          {
+            type: err,
+            meta: params,
+          },
+        ],
+      }),
+    );
+    return response;
   };
 }
 
@@ -146,6 +141,45 @@ export function prepareMutation(operation, input, params = {}) {
   return { operation, variables, clientMutationId: params.clientMutationId };
 }
 
+export function waitForMutation(clientMutationId) {
+  return async (dispatch) => {
+    let attempts = 0;
+    let res;
+    do {
+      if (res) {
+        await new Promise((resolve) => setTimeout(resolve, 100 * attempts));
+      }
+      const response = await dispatch(
+        graphqlWithVariables(
+          `
+        query ($clientMutationId: String) {
+          mutationLogs (clientMutationId: $clientMutationId) {
+            edges {
+              node {
+                status
+                clientMutationId
+                jsonContent
+                error
+              }
+            }
+          }
+        }
+      `,
+          { clientMutationId },
+        ),
+      );
+      if (response.error) {
+        return null;
+      }
+      res = response.payload.data.mutationLogs.edges[0].node;
+    } while ((!res || res.status === 0) && attempts++ < 10);
+    if (res.status === 1 && res.error) {
+      res.error = JSON.parse(res.error);
+    }
+    return res;
+  };
+}
+
 export function graphqlMutation(mutation, variables, type = "CORE_TRIGGER_MUTATION", params = {}) {
   let clientMutationId;
   if (variables?.input) {
@@ -154,19 +188,138 @@ export function graphqlMutation(mutation, variables, type = "CORE_TRIGGER_MUTATI
   }
   return async (dispatch) => {
     const response = await dispatch(graphqlWithVariables(mutation, variables, type, params));
-    if (clientMutationId) dispatch(fetchMutation(clientMutationId));
+    if (clientMutationId) {
+      dispatch(fetchMutation(clientMutationId));
+      return dispatch(waitForMutation(clientMutationId));
+    }
     return response;
   };
 }
 
-export function auth() {
+export function fetch(config) {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const token = state.core.auth.token;
+    const headers = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    return dispatch({
+      [RSAA]: {
+        ...config,
+        headers: {
+          "Content-Type": "application/json",
+          ...config.headers,
+          ...headers,
+        },
+      },
+    });
+  };
+}
+
+export function loadUser() {
+  return fetch({
+    endpoint: `${baseApiUrl}/core/users/current_user/`,
+    method: "GET",
+    types: ["CORE_USERS_CURRENT_USER_REQ", "CORE_USERS_CURRENT_USER_RESP", "CORE_USERS_CURRENT_USER_ERR"],
+  });
+}
+
+export function login(credentials) {
+  return async (dispatch, getState) => {
+    if (credentials) {
+      // We log in the user using the credentials
+      const mutation = `mutation authenticate($username: String!, $password: String!) {
+            tokenAuth(username: $username, password: $password) {
+              token
+              refreshToken
+              refreshExpiresIn
+            }
+          }`;
+
+      await dispatch(
+        graphqlMutation(mutation, credentials, ["CORE_AUTH_LOGIN_REQ", "CORE_AUTH_LOGIN_RESP", "CORE_AUTH_ERR"]),
+      );
+      const state = getState();
+      setRefreshToken(state.core.auth.refreshToken);
+    } else {
+      // We try to login using the refresh token if any
+      await refreshAuthToken();
+    }
+    const isAuthenticated = getState().core.auth.isAuthenticated;
+    if (isAuthenticated) {
+      await dispatch(loadUser());
+    }
+    return isAuthenticated;
+  };
+}
+
+export function refreshAuthToken() {
+  return async (dispatch, getState) => {
+    const { refreshToken, isAuthenticated, isAuthenticating } = getState().core.auth;
+    const storedToken = getRefreshToken();
+    if (!refreshToken && !storedToken) {
+      console.warn("No refresh token found");
+      return;
+    }
+
+    if (!isAuthenticated && isAuthenticating) {
+      console.warn("User is currently logging in.");
+      return;
+    }
+
+    const mutation = `
+      mutation refreshAuthToken ($refreshToken: String) {
+        refreshToken (refreshToken: $refreshToken) {
+          refreshToken
+          refreshExpiresIn
+          token
+        }
+      }
+    `;
+    const action = await dispatch(
+      graphqlMutation(mutation, { refreshToken: refreshToken ?? storedToken }, "CORE_AUTH_REFRESH_TOKEN"),
+    );
+    const state = getState();
+
+    if (state.core.auth.isAuthenticated) {
+      await dispatch(loadUser());
+    }
+    setRefreshToken(state.core.auth.refreshToken);
+    return action;
+  };
+}
+
+export function initializeAuth() {
+  return async (dispatch) => {
+    await dispatch(refreshAuthToken());
+    return dispatch({ type: "CORE_AUTH_INITIALIZED" });
+  };
+}
+
+export function authError(error) {
   return {
-    [RSAA]: {
-      endpoint: `${baseApiUrl}/core/users/current_user/`,
-      method: "GET",
-      headers: apiHeaders(),
-      types: ["CORE_USERS_CURRENT_USER_REQ", "CORE_USERS_CURRENT_USER_RESP", "CORE_USERS_CURRENT_USER_ERR"],
-    },
+    type: "CORE_AUTH_ERR",
+    payload: error,
+  };
+}
+
+export function logout() {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const { refreshToken } = state.core.auth;
+
+    const mutation = `
+      mutation revokeToken($refreshToken: String) {
+        revokeToken(refreshToken: $refreshToken) {
+          revoked
+        }
+      }
+    `;
+    setRefreshToken(null);
+    await dispatch(graphqlMutation(mutation, { refreshToken }));
+    dispatch({ tye: "CORE_AUTH_LOGOUT" });
   };
 }
 

@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
-import { useDispatch } from "react-redux";
-import { graphqlWithVariables, graphqlMutation } from "../actions";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { refreshAuthToken, login, logout, initializeAuth, graphqlWithVariables, graphqlMutation } from "../actions";
 
 export const useDebounceCb = (cb, duration = 0) => {
   const [payload, setPayload] = useState();
@@ -101,12 +101,17 @@ export const useGraphqlMutation = (operation, config = {}) => {
         const variables = {
           input,
         };
-        const action = await dispatch(graphqlMutation(operation, variables, config.type, { operation, input }));
+        const result = await dispatch(graphqlMutation(operation, variables, config.type, { operation, input }));
+        const error = result?.error?.map((err) => err.detail).join("; ");
+
+        if (error) {
+          throw new Error(error);
+        }
         setState({ isLoading: false, error: null });
         if (config.onSuccess) {
-          resolve(config.onSuccess(action.payload.data));
+          resolve(config.onSuccess(result));
         } else {
-          resolve(action.payload.data);
+          resolve(result);
         }
       } catch (err) {
         setState({
@@ -127,4 +132,40 @@ export const useGraphqlMutation = (operation, config = {}) => {
     error: state.error,
     mutate,
   };
+};
+
+export const useAuthentication = () => {
+  const dispatch = useDispatch();
+  const auth = useSelector((state) => state.core.auth);
+  const user = useSelector((state) => state.core.user);
+  const refresh = async () => {
+    await dispatch(refreshAuthToken());
+  };
+
+  return {
+    user,
+    isInitialized: auth.isInitialized,
+    isAuthenticated: auth.isAuthenticated && Boolean(user),
+    isAuthenticating: auth.isAuthenticating || (auth.isAuthenticated && !user && !auth.error),
+    token: auth.token,
+    refreshToken: auth.refreshToken,
+    expiresIn: auth.expiresIn,
+    error: auth.error,
+    login: (credentials) => {
+      return dispatch(login(credentials));
+    },
+    refresh,
+    initialize: () => dispatch(initializeAuth()),
+    logout: () => dispatch(logout()),
+  };
+};
+
+export const useBoolean = (defaultValue = false) => {
+  const [bool, setBool] = useState(defaultValue);
+
+  const toggle = useCallback(() => setBool(!bool), [bool]);
+  const on = useCallback(() => setBool(true), []);
+  const off = useCallback(() => setBool(false), []);
+
+  return [bool, { toggle, on, off }];
 };

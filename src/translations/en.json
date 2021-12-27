@@ -36,6 +36,10 @@
   "core.Autocomplete.openText": "Open",
   "core.Autocomplete.closeText": "Close",
   "core.Autocomplete.placeholder": "Search...",
+  "core.LoginPage.username.label": "Username",
+  "core.LoginPage.password.label": "Password",
+  "core.LoginPage.loginBtn": "Log In",
+  "core.LoginPage.pageTitle": "Log In",
   "core.table.resultsLoading": "Loading...",
   "LanguagePicker.label": "Language",
   "core.Language.null": ""

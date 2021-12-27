@@ -82,18 +82,27 @@ import {
   formatGQLString,
   formatNodeQuery,
 } from "./helpers/api";
-import { useDebounceCb, usePrevious, useGraphqlQuery, useGraphqlMutation } from "./helpers/hooks";
+import {
+  useDebounceCb,
+  usePrevious,
+  useGraphqlQuery,
+  useBoolean,
+  useGraphqlMutation,
+  useAuthentication,
+} from "./helpers/hooks";
 import withHistory, { historyPush } from "./helpers/history";
 import withModulesManager, { useModulesManager } from "./helpers/modules";
 import { formatJsonField } from "./helpers/jsonExt";
 import { RIGHT_ROLE_SEARCH } from "./constants";
-
+import { authMiddleware } from "./middlewares";
+import RefreshAuthToken from "./components/RefreshAuthToken";
 const ROUTE_ROLES = "roles";
 const ROUTE_ROLE = "roles/role";
 
 const DEFAULT_CONFIG = {
   "translations": [{ key: "en", messages: messages_en }],
   "reducers": [{ key: "core", reducer: reducer }],
+  "middlewares": [authMiddleware],
   "refs": [
     { key: "core.JournalDrawer.pollInterval", ref: 2000 },
     { key: "core.KeepLegacyAlive.pollInterval", ref: 300000 },
@@ -102,7 +111,7 @@ const DEFAULT_CONFIG = {
     { key: "core.LanguagePicker", ref: LanguagePicker },
     { key: "core.route.role", ref: ROUTE_ROLE },
   ],
-  "core.Boot": [KeepLegacyAlive],
+  "core.Boot": [KeepLegacyAlive, RefreshAuthToken],
   "core.Router": [
     { path: ROUTE_ROLES, component: Roles },
     { path: ROUTE_ROLE + "/:role_uuid?", component: Role },
@@ -214,4 +223,6 @@ export {
   useGraphqlQuery,
   useGraphqlMutation,
   ConfirmDialog,
+  useAuthentication,
+  useBoolean,
 };

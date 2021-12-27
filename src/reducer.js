@@ -9,9 +9,19 @@ import {
   dispatchMutationErr,
 } from "./helpers/api";
 import _ from "lodash";
+
+const AUTH_INITIAL_STATE = {
+  isAuthenticated: false,
+  isAuthenticating: false,
+  isInitialized: false,
+  token: null,
+  refreshToken: null,
+  expiresIn: null,
+  error: null,
+};
+
 function reducer(
   state = {
-    authenticating: false,
     user: null,
     fatalError: null,
     fetchingHistoricalMutations: false,
@@ -37,6 +47,8 @@ function reducer(
     fetchedRoleRights: false,
     roleRights: [],
     errorRoleRights: null,
+
+    auth: AUTH_INITIAL_STATE,
   },
   action,
 ) {
@@ -63,21 +75,14 @@ function reducer(
       };
       delete s.confirm;
       return s;
-    case "CORE_USERS_CURRENT_USER_REQ":
-      return {
-        ...state,
-        authenticating: true,
-      };
     case "CORE_USERS_CURRENT_USER_RESP":
       return {
         ...state,
-        authenticating: false,
         user: action.payload,
       };
     case "CORE_USERS_CURRENT_USER_ERR":
       return {
         ...state,
-        authenticating: false,
         error: {
           code: action.payload.status,
           message: action.payload.statusText,
@@ -260,6 +265,87 @@ function reducer(
       return dispatchMutationResp(state, "updateRole", action);
     case "CORE_DELETE_ROLE_RESP":
       return dispatchMutationResp(state, "deleteRole", action);
+
+    // AUTH
+
+    case "CORE_AUTH_LOGIN_REQ":
+      return {
+        ...state,
+        auth: {
+          ...state.auth,
+          isAuthenticating: true,
+        },
+      };
+    case "CORE_AUTH_LOGIN_RESP": {
+      if (action.payload?.errors) {
+        return {
+          ...state,
+          auth: {
+            ...state.auth,
+            isAuthenticating: false,
+            isAuthenticated: false,
+            error: formatGraphQLError(action.payload),
+          },
+        };
+      }
+      const { token, refreshToken, refreshExpiresIn } = action.payload.data.tokenAuth;
+      return {
+        ...state,
+        auth: {
+          ...state.auth,
+          isAuthenticating: false,
+          isAuthenticated: true,
+          error: null,
+          token,
+          refreshToken,
+          expiresIn: refreshExpiresIn,
+        },
+      };
+    }
+    case "CORE_AUTH_ERR": {
+      return {
+        ...state,
+        auth: {
+          ...state.auth,
+          isAuthenticating: false,
+          isAuthenticated: false,
+          error: formatServerError(action.payload),
+        },
+      };
+    }
+
+    case "CORE_AUTH_REFRESH_TOKEN_REQ":
+      return state;
+
+    case "CORE_AUTH_REFRESH_TOKEN_RESP":
+      if (action.payload?.errors) {
+        return {
+          ...state,
+          auth: { ...state.auth, isAuthenticated: false },
+        };
+      }
+      const { token, refreshToken, refreshExpiresIn } = action.payload.data.refreshToken;
+      return {
+        ...state,
+        auth: {
+          ...state.auth,
+          isAuthenticated: true,
+          token,
+          refreshToken,
+          expiresIn: refreshExpiresIn,
+        },
+      };
+    case "CORE_AUTH_INITIALIZED":
+      return {
+        ...state,
+        auth: { ...state.auth, isInitialized: true, error: null },
+      };
+    case "CORE_AUTH_LOGOUT":
+      return {
+        ...state,
+        auth: { ...AUTH_INITIAL_STATE, isInitialized: true },
+      };
+
     default:
       return state;
   }

@@ -40,6 +40,13 @@
   "core.LoginPage.password.label": "Password",
   "core.LoginPage.loginBtn": "Log In",
   "core.LoginPage.pageTitle": "Log In",
+  "core.LoginPage.forgotPassword": "Forgot Password ?",
+  "core.ForgotPasswordPage.pageTitle": "Forgot Password ?",
+  "core.ForgotPasswordPage.submitBtn": "Submit",
+  "core.ForgotPasswordPage.usernameOrEmail.label": "Username / E-mail Address",
+  "core.ForgotPasswordPage.recoverTitle": "Recover your account",
+  "core.ForgotPasswordPage.explanationMessage": "Enter your username or your e-mail address to be able to recover your account. En e-mail with the instructions will be sent to your e-mail address.",
+  "core.ForgotPasswordPage.contactAdministrator": "If you do not receive an e-mail, please check with your administrator.",
   "core.table.resultsLoading": "Loading...",
   "LanguagePicker.label": "Language",
   "core.Language.null": ""

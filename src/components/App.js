@@ -18,6 +18,8 @@ import Contributions from "./generics/Contributions";
 
 import LoginPage from "../pages/LoginPage";
 import { useAuthentication } from "../helpers/hooks";
+import ForgotPasswordPage from "../pages/ForgotPasswordPage";
+import SetPasswordPage from "../pages/SetPasswordPage";
 
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";
 export const APP_BOOT_CONTRIBUTION_KEY = "core.Boot";
@@ -91,6 +93,11 @@ const App = (props) => {
                   render={() => <Redirect to={process.env.PUBLIC_URL + "/home"} />}
                 />
                 <Route path={process.env.PUBLIC_URL + "/login"} render={() => <LoginPage {...others} />} />
+                <Route
+                  path={process.env.PUBLIC_URL + "/password_reset"}
+                  render={() => <ForgotPasswordPage {...others} />}
+                />
+                <Route path={process.env.PUBLIC_URL + "/set_password"} render={() => <SetPasswordPage {...others} />} />
                 {routes.map((route, index) => (
                   <Route
                     exact

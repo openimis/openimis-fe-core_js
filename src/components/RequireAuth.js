@@ -1,5 +1,5 @@
-import React, { useMemo, Fragment } from "react";
-import { Redirect } from "react-router-dom";
+import React, { useMemo } from "react";
+import { Navigate, Outlet } from "react-router-dom";
 import withWidth from "@material-ui/core/withWidth";
 import { alpha, useTheme, makeStyles } from "@material-ui/core/styles";
 import { useModulesManager } from "../helpers/modules";
@@ -153,7 +153,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const RequireAuth = (props) => {
-  const { children, logo, redirectTo, ...others } = props;
+  const { children, logo, redirectTo, RouteComponent, ...others } = props;
   const [isOpen, setOpen] = useBoolean();
   const [isDrawerOpen, setDrawerOpen] = useBoolean();
   const theme = useTheme();
@@ -164,11 +164,11 @@ const RequireAuth = (props) => {
   const isAppBarMenu = useMemo(() => theme.menu.variant.toUpperCase() === "APPBAR", [theme.menu.variant]);
 
   if (!auth.isAuthenticated) {
-    return <Redirect to={redirectTo} />;
+    return <Navigate to={redirectTo} />;
   }
 
   return (
-    <Fragment>
+    <>
       <AppBar
         position="fixed"
         className={clsx(classes.appBar, {
@@ -238,9 +238,9 @@ const RequireAuth = (props) => {
           [classes.jrnlContentShift]: isDrawerOpen,
         })}
       >
-        {children}
+        <Outlet />
       </main>
-    </Fragment>
+    </>
   );
 };
 

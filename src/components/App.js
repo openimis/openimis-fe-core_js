@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect } from "react";
 import { connect } from "react-redux";
 import { IntlProvider } from "react-intl";
-import { Redirect, Route, Router, Switch } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { CssBaseline } from "@material-ui/core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import withHistory from "../helpers/history";
@@ -9,13 +9,13 @@ import withModulesManager, { ModulesManagerProvider } from "../helpers/modules";
 import Helmet from "../helpers/Helmet";
 import RequireAuth from "./RequireAuth";
 import FatalError from "./generics/FatalError";
-import kebabCase from "lodash/kebabCase";
 import { clearConfirm } from "../actions";
 import AlertDialog from "./dialogs/AlertDialog";
 import ConfirmDialog from "./dialogs/ConfirmDialog";
 import { bindActionCreators } from "redux";
 import Contributions from "./generics/Contributions";
-
+import BrowserRouter from "./BrowserRouter";
+import RouteProxy from "./RouteProxy";
 import LoginPage from "../pages/LoginPage";
 import { useAuthentication } from "../helpers/hooks";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
@@ -35,8 +35,19 @@ const styles = () => ({
 });
 
 const App = (props) => {
-  const { history, classes, error, confirm, user, messages, clearConfirm, localesManager, modulesManager, ...others } =
-    props;
+  const {
+    history,
+    classes,
+    error,
+    confirm,
+    user,
+    messages,
+    clearConfirm,
+    localesManager,
+    modulesManager,
+    basename = process.env.PUBLIC_URL,
+    ...others
+  } = props;
 
   const auth = useAuthentication();
   const routes = useMemo(() => {
@@ -65,6 +76,14 @@ const App = (props) => {
 
   useEffect(() => {
     auth.initialize();
+
+    if (process.env.NODE_ENV == "development") {
+      // In development, redirect the browser to the basename if
+      // the location is currently the root path
+      if (location.pathname === "/") {
+        location.replace(basename);
+      }
+    }
   }, []);
 
   if (error) {
@@ -85,33 +104,23 @@ const App = (props) => {
             {auth.isAuthenticated && (
               <Contributions modulesManager={modulesManager} contributionKey={APP_BOOT_CONTRIBUTION_KEY} />
             )}
-            <Router history={history}>
-              <Switch>
-                <Route
-                  path={process.env.PUBLIC_URL}
-                  exact
-                  render={() => <Redirect to={process.env.PUBLIC_URL + "/home"} />}
-                />
-                <Route path={process.env.PUBLIC_URL + "/login"} render={() => <LoginPage {...others} />} />
-                <Route
-                  path={process.env.PUBLIC_URL + "/forgot_password"}
-                  render={() => <ForgotPasswordPage {...others} />}
-                />
-                <Route path={process.env.PUBLIC_URL + "/set_password"} render={() => <SetPasswordPage {...others} />} />
-                {routes.map((route, index) => (
-                  <Route
-                    exact
-                    key={`route_${kebabCase(route.path)}_${index}`}
-                    path={process.env.PUBLIC_URL + "/" + route.path}
-                    render={(props) => (
-                      <RequireAuth {...props} {...others} redirectTo={process.env.PUBLIC_URL + "/login"}>
-                        <route.component modulesManager={modulesManager} {...props} {...others} />
-                      </RequireAuth>
-                    )}
-                  />
-                ))}
-              </Switch>
-            </Router>
+            <BrowserRouter history={history} basename={basename}>
+              <Routes>
+                <Route index element={<Navigate to={"/home"} />} />
+                <Route path="/login" element={<LoginPage {...others} />} />
+                <Route path="/forgot_password" element={<ForgotPasswordPage {...others} />} />
+                <Route path="/set_password" element={<SetPasswordPage {...others} />} />
+                <Route element={<RequireAuth {...props} {...others} redirectTo="/login" />}>
+                  {routes.map((route) => (
+                    <Route
+                      key={route.path}
+                      path={route.path}
+                      element={<RouteProxy RouteComponent={route.component} {...others} />}
+                    />
+                  ))}
+                </Route>
+              </Routes>
+            </BrowserRouter>
           </div>
         </IntlProvider>
       </ModulesManagerProvider>

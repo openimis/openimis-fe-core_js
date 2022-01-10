@@ -5,9 +5,9 @@ import { Button, Box, Grid, Paper } from "@material-ui/core";
 import TextInput from "../components/inputs/TextInput";
 import { useTranslations } from "../helpers/i18n";
 import { useModulesManager } from "../helpers/modules";
-import withHistory from "../helpers/history";
+import { useNavigate } from "react-router-dom";
 import Helmet from "../helpers/Helmet";
-import { useAuthentication, useGraphqlMutation } from "../helpers/hooks";
+import { useGraphqlMutation } from "../helpers/hooks";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -25,9 +25,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const SetPasswordPage = ({ history }) => {
+const SetPasswordPage = () => {
   const classes = useStyles();
   const modulesManager = useModulesManager();
+  const navigate = useNavigate();
   const { formatMessage } = useTranslations("core.SetPasswordPage", modulesManager);
   const [credentials, setCredentials] = useState({});
   const [error, setError] = useState();
@@ -58,7 +59,7 @@ const SetPasswordPage = ({ history }) => {
         newPassword: credentials.password,
       });
       if (result?.setPassword.success) {
-        history.push(process.env.PUBLIC_URL);
+        navigate("/");
       } else {
         setError(result?.setPassword.error || formatMessage("error"));
       }
@@ -130,4 +131,4 @@ const SetPasswordPage = ({ history }) => {
   );
 };
 
-export default withHistory(SetPasswordPage);
+export default SetPasswordPage;

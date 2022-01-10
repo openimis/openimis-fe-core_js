@@ -1,11 +1,10 @@
 import React, { useState } from "react";
-
+import { useNavigate } from "react-router-dom";
 import { makeStyles } from "@material-ui/styles";
 import { Button, Box, Grid, Paper, LinearProgress } from "@material-ui/core";
 import TextInput from "../components/inputs/TextInput";
 import { useTranslations } from "../helpers/i18n";
 import { useModulesManager } from "../helpers/modules";
-import withHistory from "../helpers/history";
 import Helmet from "../helpers/Helmet";
 import { useAuthentication } from "../helpers/hooks";
 
@@ -27,9 +26,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const LoginPage = ({ logo, history }) => {
+const LoginPage = ({ logo }) => {
   const classes = useStyles();
   const modulesManager = useModulesManager();
+  const navigate = useNavigate();
   const { formatMessage } = useTranslations("core.LoginPage", modulesManager);
   const [credentials, setCredentials] = useState({});
   const [hasError, setError] = useState(false);
@@ -39,7 +39,7 @@ const LoginPage = ({ logo, history }) => {
     e.preventDefault();
     setError(false);
     if (await auth.login(credentials)) {
-      history.push(process.env.PUBLIC_URL);
+      navigate("/");
     } else {
       setError(true);
     }
@@ -47,7 +47,7 @@ const LoginPage = ({ logo, history }) => {
 
   const redirectToForgotPassword = (e) => {
     e.preventDefault();
-    history.push(process.env.PUBLIC_URL + "/forgot_password");
+    navigate("/forgot_password");
   };
 
   return (
@@ -119,4 +119,4 @@ const LoginPage = ({ logo, history }) => {
   );
 };
 
-export default withHistory(LoginPage);
+export default LoginPage;

@@ -22,7 +22,8 @@ export function _historyPush(mm, history, route, newTab) {
   } else if (!!newTab) {
     window.open(`${process.env.PUBLIC_URL || ""}${route}`);
   } else {
-    history.push(`${process.env.PUBLIC_URL || ""}${route}`);
+    console.warn("[Deprecated]: Use `useNavigate`");
+    history.push(route);
   }
 }
 

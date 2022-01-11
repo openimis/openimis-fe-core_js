@@ -114,6 +114,7 @@ class MainMenuContribution extends Component {
   handleMenuSelect = (e, route) => {
     e.stopPropagation();
     e.preventDefault();
+    this.toggleExpanded(e);
     this.redirect(route);
   };
 

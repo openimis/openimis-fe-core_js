@@ -1,10 +1,9 @@
 import React, { useMemo, useEffect } from "react";
 import { connect } from "react-redux";
 import { IntlProvider } from "react-intl";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Redirect, Route, BrowserRouter, Switch } from "react-router-dom";
 import { CssBaseline } from "@material-ui/core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import withHistory from "../helpers/history";
 import withModulesManager, { ModulesManagerProvider } from "../helpers/modules";
 import Helmet from "../helpers/Helmet";
 import RequireAuth from "./RequireAuth";
@@ -14,8 +13,6 @@ import AlertDialog from "./dialogs/AlertDialog";
 import ConfirmDialog from "./dialogs/ConfirmDialog";
 import { bindActionCreators } from "redux";
 import Contributions from "./generics/Contributions";
-import BrowserRouter from "./BrowserRouter";
-import RouteProxy from "./RouteProxy";
 import LoginPage from "../pages/LoginPage";
 import { useAuthentication } from "../helpers/hooks";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
@@ -104,22 +101,25 @@ const App = (props) => {
             {auth.isAuthenticated && (
               <Contributions modulesManager={modulesManager} contributionKey={APP_BOOT_CONTRIBUTION_KEY} />
             )}
-            <BrowserRouter history={history} basename={basename}>
-              <Routes>
-                <Route index element={<Navigate to={"/home"} />} />
-                <Route path="/login" element={<LoginPage {...others} />} />
-                <Route path="/forgot_password" element={<ForgotPasswordPage {...others} />} />
-                <Route path="/set_password" element={<SetPasswordPage {...others} />} />
-                <Route element={<RequireAuth {...props} {...others} redirectTo="/login" />}>
-                  {routes.map((route) => (
-                    <Route
-                      key={route.path}
-                      path={route.path}
-                      element={<RouteProxy RouteComponent={route.component} {...others} />}
-                    />
-                  ))}
-                </Route>
-              </Routes>
+            <BrowserRouter basename={basename}>
+              <Switch>
+                <Route exact path="/" render={() => <Redirect to={"/home"} />} />
+                <Route path={"/login"} render={() => <LoginPage {...others} />} />
+                <Route path={"/forgot_password"} render={() => <ForgotPasswordPage {...others} />} />
+                <Route path={"/set_password"} render={() => <SetPasswordPage {...others} />} />
+                {routes.map((route) => (
+                  <Route
+                    exact
+                    key={route.path}
+                    path={"/" + route.path}
+                    render={(props) => (
+                      <RequireAuth {...props} {...others} redirectTo={"/login"}>
+                        <route.component modulesManager={modulesManager} {...props} {...others} />
+                      </RequireAuth>
+                    )}
+                  />
+                ))}
+              </Switch>
             </BrowserRouter>
           </div>
         </IntlProvider>
@@ -136,6 +136,4 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => bindActionCreators({ clearConfirm }, dispatch);
 
-export default withHistory(
-  connect(mapStateToProps, mapDispatchToProps)(withTheme(withStyles(styles)(withModulesManager(App)))),
-);
+export default connect(mapStateToProps, mapDispatchToProps)(withTheme(withStyles(styles)(withModulesManager(App))));

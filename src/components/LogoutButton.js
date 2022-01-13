@@ -3,8 +3,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
 import { IconButton } from "@material-ui/core";
 import { ExitToApp } from "@material-ui/icons";
-import { useNavigate } from "react-router-dom";
 import { logout } from "../actions";
+import { useHistory } from "../helpers/history";
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -14,11 +14,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const LogoutButton = () => {
-  const navigate = useNavigate();
+  const history = useHistory();
   const dispatch = useDispatch();
   const onClick = async () => {
     await dispatch(logout());
-    navigate("/");
+    history.push("/");
   };
 
   const classes = useStyles();

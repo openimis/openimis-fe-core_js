@@ -92,7 +92,7 @@ const ForgotPasswordPage = (props) => {
                 </Grid>
               )}
 
-              {isDone && <h1>Done ! Check your inbox and click on the verification link to reset your password.</h1>}
+              {isDone && <h1>{formatMessage("done")}</h1>}
             </Box>
           </form>
         </Paper>

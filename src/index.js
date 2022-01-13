@@ -90,7 +90,16 @@ import {
   useGraphqlMutation,
   useAuthentication,
 } from "./helpers/hooks";
-import withHistory, { historyPush } from "./helpers/history";
+import withHistory, {
+  historyPush,
+  useLocation,
+  useHistory,
+  useParams,
+  useRouteMatch,
+  Link,
+  Redirect,
+  NavLink,
+} from "./helpers/history";
 import withModulesManager, { useModulesManager } from "./helpers/modules";
 import { formatJsonField } from "./helpers/jsonExt";
 import { RIGHT_ROLE_SEARCH } from "./constants";
@@ -160,6 +169,13 @@ export {
   sort,
   formatSorter,
   withHistory,
+  useLocation,
+  useHistory,
+  useParams,
+  useRouteMatch,
+  Link,
+  Redirect,
+  NavLink,
   historyPush,
   decodeId,
   encodeId,

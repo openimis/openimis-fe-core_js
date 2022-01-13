@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
-import { Navigate, Outlet } from "react-router-dom";
 import withWidth from "@material-ui/core/withWidth";
+import { Redirect } from "../helpers/history";
 import { alpha, useTheme, makeStyles } from "@material-ui/core/styles";
 import { useModulesManager } from "../helpers/modules";
 import LogoutButton from "./LogoutButton";
@@ -153,7 +153,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const RequireAuth = (props) => {
-  const { children, logo, redirectTo, RouteComponent, ...others } = props;
+  const { children, logo, redirectTo, ...others } = props;
   const [isOpen, setOpen] = useBoolean();
   const [isDrawerOpen, setDrawerOpen] = useBoolean();
   const theme = useTheme();
@@ -164,7 +164,7 @@ const RequireAuth = (props) => {
   const isAppBarMenu = useMemo(() => theme.menu.variant.toUpperCase() === "APPBAR", [theme.menu.variant]);
 
   if (!auth.isAuthenticated) {
-    return <Navigate to={redirectTo} />;
+    return <Redirect to={redirectTo} />;
   }
 
   return (
@@ -238,7 +238,7 @@ const RequireAuth = (props) => {
           [classes.jrnlContentShift]: isDrawerOpen,
         })}
       >
-        <Outlet />
+        {children}
       </main>
     </>
   );

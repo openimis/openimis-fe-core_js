@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useHistory } from "../helpers/history";
 import { makeStyles } from "@material-ui/styles";
 import { Button, Box, Grid, Paper, LinearProgress } from "@material-ui/core";
 import TextInput from "../components/inputs/TextInput";
@@ -28,8 +28,8 @@ const useStyles = makeStyles((theme) => ({
 
 const LoginPage = ({ logo }) => {
   const classes = useStyles();
+  const history = useHistory();
   const modulesManager = useModulesManager();
-  const navigate = useNavigate();
   const { formatMessage } = useTranslations("core.LoginPage", modulesManager);
   const [credentials, setCredentials] = useState({});
   const [hasError, setError] = useState(false);
@@ -39,7 +39,7 @@ const LoginPage = ({ logo }) => {
     e.preventDefault();
     setError(false);
     if (await auth.login(credentials)) {
-      navigate("/");
+      history.push("/");
     } else {
       setError(true);
     }
@@ -47,7 +47,7 @@ const LoginPage = ({ logo }) => {
 
   const redirectToForgotPassword = (e) => {
     e.preventDefault();
-    navigate("/forgot_password");
+    history.push("/forgot_password");
   };
 
   return (

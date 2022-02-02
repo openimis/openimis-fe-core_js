@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { refreshAuthToken, login, logout, initializeAuth, graphqlWithVariables, graphqlMutation } from "../actions";
+import { refreshAuthToken, login, logout, initialize, graphqlWithVariables, graphqlMutation } from "../actions";
 
 export const useDebounceCb = (cb, duration = 0) => {
   const [payload, setPayload] = useState();
@@ -145,26 +145,21 @@ export const useGraphqlMutation = (operation, config) => {
 
 export const useAuthentication = () => {
   const dispatch = useDispatch();
-  const auth = useSelector((state) => state.core.auth);
   const user = useSelector((state) => state.core.user);
+  const isInitialized = useSelector((state) => state.core.isInitialized);
+  const error = useSelector((state) => state.core.authError);
   const refresh = async () => {
     await dispatch(refreshAuthToken());
   };
 
   return {
     user,
-    isInitialized: auth.isInitialized,
-    isAuthenticated: auth.isAuthenticated && Boolean(user),
-    isAuthenticating: auth.isAuthenticating || (auth.isAuthenticated && !user && !auth.error),
-    token: auth.token,
-    refreshToken: auth.refreshToken,
-    expiresIn: auth.expiresIn,
-    error: auth.error,
-    login: (credentials) => {
-      return dispatch(login(credentials));
-    },
+    error,
+    isAuthenticated: Boolean(user),
+    isInitialized,
+    initialize: () => dispatch(initialize()),
+    login: (credentials) => dispatch(login(credentials)),
     refresh,
-    initialize: () => dispatch(initializeAuth()),
     logout: () => dispatch(logout()),
   };
 };

@@ -73,7 +73,6 @@ const App = (props) => {
 
   useEffect(() => {
     auth.initialize();
-
     if (process.env.NODE_ENV == "development") {
       // In development, redirect the browser to the basename if
       // the location is currently the root path
@@ -86,7 +85,6 @@ const App = (props) => {
   if (error) {
     return <FatalError error={error} />;
   }
-
   if (!auth.isInitialized) return null;
 
   return (

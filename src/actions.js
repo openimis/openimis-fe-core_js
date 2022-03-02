@@ -21,8 +21,6 @@ const ROLE_FULL_PROJECTION = () => [
   "validityTo",
 ];
 
-import { getRefreshToken, setRefreshToken } from "./helpers/auth";
-
 const ROLERIGHT_FULL_PROJECTION = () => ["rightId"];
 
 const LANGUAGE_FULL_PROJECTION = () => ["name", "code", "sortOrder"];
@@ -201,21 +199,13 @@ export function graphqlMutation(mutation, variables, type = "CORE_TRIGGER_MUTATI
 }
 
 export function fetch(config) {
-  return async (dispatch, getState) => {
-    const state = getState();
-    const token = state.core.auth.token;
-    const headers = {};
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-
+  return async (dispatch) => {
     return dispatch({
       [RSAA]: {
         ...config,
         headers: {
           "Content-Type": "application/json",
           ...config.headers,
-          ...headers,
         },
       },
     });
@@ -231,74 +221,43 @@ export function loadUser() {
 }
 
 export function login(credentials) {
-  return async (dispatch, getState) => {
+  return async (dispatch) => {
     if (credentials) {
       // We log in the user using the credentials
       const mutation = `mutation authenticate($username: String!, $password: String!) {
             tokenAuth(username: $username, password: $password) {
-              token
-              refreshToken
               refreshExpiresIn
             }
           }`;
-
       await dispatch(
         graphqlMutation(mutation, credentials, ["CORE_AUTH_LOGIN_REQ", "CORE_AUTH_LOGIN_RESP", "CORE_AUTH_ERR"]),
       );
-      const state = getState();
-      setRefreshToken(state.core.auth.refreshToken);
     } else {
-      // We try to login using the refresh token if any
-      await refreshAuthToken();
+      // Try to refresh the token using the cookie (if present)
+      await dispatch(refreshAuthToken());
     }
-    const isAuthenticated = getState().core.auth.isAuthenticated;
-    if (isAuthenticated) {
-      await dispatch(loadUser());
-    }
-    return isAuthenticated;
+    const action = await dispatch(loadUser());
+    return action.type !== "CORE_AUTH_ERR";
   };
 }
 
 export function refreshAuthToken() {
-  return async (dispatch, getState) => {
-    const { refreshToken, isAuthenticated, isAuthenticating } = getState().core.auth;
-    const storedToken = getRefreshToken();
-    if (!refreshToken && !storedToken) {
-      console.warn("No refresh token found");
-      return;
-    }
-
-    if (!isAuthenticated && isAuthenticating) {
-      console.warn("User is currently logging in.");
-      return;
-    }
-
+  return (dispatch) => {
     const mutation = `
-      mutation refreshAuthToken ($refreshToken: String) {
-        refreshToken (refreshToken: $refreshToken) {
-          refreshToken
-          refreshExpiresIn
-          token
-        }
+    mutation refreshAuthToken {
+      refreshToken {
+        refreshExpiresIn
       }
-    `;
-    const action = await dispatch(
-      graphqlMutation(mutation, { refreshToken: refreshToken ?? storedToken }, "CORE_AUTH_REFRESH_TOKEN"),
-    );
-    const state = getState();
-
-    if (state.core.auth.isAuthenticated) {
-      await dispatch(loadUser());
     }
-    setRefreshToken(state.core.auth.refreshToken);
-    return action;
+  `;
+    return dispatch(graphqlMutation(mutation, {}, "CORE_AUTH_REFRESH_TOKEN"));
   };
 }
 
-export function initializeAuth() {
+export function initialize() {
   return async (dispatch) => {
-    await dispatch(refreshAuthToken());
-    return dispatch({ type: "CORE_AUTH_INITIALIZED" });
+    await dispatch(login());
+    return dispatch({ type: "CORE_INITIALIZED" });
   };
 }
 
@@ -311,18 +270,17 @@ export function authError(error) {
 
 export function logout() {
   return async (dispatch, getState) => {
-    const state = getState();
-    const { refreshToken } = state.core.auth;
-
     const mutation = `
-      mutation revokeToken($refreshToken: String) {
-        revokeToken(refreshToken: $refreshToken) {
-          revoked
+      mutation logout {
+        deleteTokenCookie {
+          deleted
         }
+        deleteRefreshTokenCookie {
+          deleted
+        } 
       }
     `;
-    setRefreshToken(null);
-    await dispatch(graphqlMutation(mutation, { refreshToken }));
+    await dispatch(graphqlMutation(mutation, {}));
     return dispatch({ type: "CORE_AUTH_LOGOUT" });
   };
 }

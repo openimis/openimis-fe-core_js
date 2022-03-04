@@ -27,7 +27,7 @@ const LANGUAGE_FULL_PROJECTION = () => ["name", "code", "sortOrder"];
 
 const MODULEPERMISSION_FULL_PROJECTION = () => ["modulePermsList{moduleName, permissions{permsName, permsValue}}"];
 
-export const baseApiUrl = process.env.NODE_ENV === "development" ? "/api" : "/iapi";
+export const baseApiUrl =  "/api";
 
 export function apiHeaders() {
   let headers = {

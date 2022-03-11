@@ -382,6 +382,7 @@ class Searcher extends Component {
       processing = false,
       withSelection = null,
       actionsContributionKey = null,
+      withPagination = true,
       intl,
     } = this.props;
     return (
@@ -457,7 +458,7 @@ class Searcher extends Component {
                     rowHighlightedAlt={(i) => rowHighlightedAlt(this.state.selection, i)}
                     rowDisabled={(i) => rowDisabled(this.state.selection, i)}
                     items={items}
-                    withPagination
+                    withPagination={withPagination}
                     withSelection={withSelection}
                     itemIdentifier={rowIdentifier}
                     selection={this.state.selection}

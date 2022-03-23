@@ -24,6 +24,7 @@ const Autocomplete = (props) => {
     autoHighlight = true,
     value,
     className,
+    minWidth,
     fullWidth = true,
     options,
     isLoading,
@@ -68,6 +69,7 @@ const Autocomplete = (props) => {
       key={resetKey}
       fullWidth={fullWidth}
       className={className}
+      style={{ minWidth }}
       loadingText={formatMessage("loadingText")}
       openText={formatMessage("openText")}
       closeText={formatMessage("closeText")}
@@ -94,7 +96,6 @@ const Autocomplete = (props) => {
         <TextField
           {...inputProps}
           variant="standard"
-          cd
           required={required}
           label={withLabel && (label || formatMessage("label"))}
           placeholder={!readOnly && withPlaceholder && (placeholder || formatMessage("placeholder"))}

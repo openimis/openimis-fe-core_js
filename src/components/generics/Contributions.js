@@ -1,41 +1,32 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import withModulesManager from "../../helpers/modules";
-import _ from "lodash";
+import React, { useMemo } from "react";
+import { useModulesManager } from "../../helpers/modules";
 
-class Contributions extends Component {
-  createComponents(contributions, reverse) {
-    const { classes, modulesManager, contributionKey, ...others } = this.props;
-    const contribs = contributions.map((ElementTag, index) => {
-      let k = `${contributionKey}_${index}`;
-      let keys = {
-        "key_index": k,
-        "key": k,
-      };
-      if (_.isString(ElementTag)) {
-        const ContributionComponent = modulesManager.getRef(ElementTag);
-        return <ContributionComponent {...others} {...keys} />;
-      } else {
-        return <ElementTag {...others} {...keys} />;
-      }
-    });
-    if (reverse) {
-      return contribs.reverse();
-    }
-    return contribs;
-  }
+function getComponents(modulesManager, key) {
+  const contributions = modulesManager.getContribs(key);
 
-  render() {
-    const { modulesManager, contributionKey, reverse } = this.props;
-
-    const contributions = modulesManager.getContribs(contributionKey);
-
-    return [this.props.children, ...this.createComponents(contributions, reverse)];
-  }
+  return contributions
+    .map((contrib) => (typeof contrib === "string" ? modulesManager.getRef(contrib) : contrib))
+    .filter(Boolean);
 }
 
-Contributions.propTypes = {
-  contributionKey: PropTypes.string.isRequired,
+const Contributions = ({ children = null, contributionKey, reverse = false, ...delegated }) => {
+  const modulesManager = useModulesManager();
+  const components = useMemo(() => {
+    const components = getComponents(modulesManager, contributionKey);
+    if (reverse) {
+      components.reverse();
+    }
+    return components;
+  }, [contributionKey, reverse]);
+
+  return (
+    <>
+      {children}
+      {components.map((Comp, idx) => (
+        <Comp key={`${contributionKey}_${idx}`} modulesManager={modulesManager} {...delegated} />
+      ))}
+    </>
+  );
 };
 
-export default withModulesManager(Contributions);
+export default Contributions;

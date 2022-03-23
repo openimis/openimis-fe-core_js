@@ -96,9 +96,7 @@ const App = (props) => {
           <AlertDialog />
           <ConfirmDialog confirm={confirm} onConfirm={clearConfirm} />
           <div className="App">
-            {auth.isAuthenticated && (
-              <Contributions modulesManager={modulesManager} contributionKey={APP_BOOT_CONTRIBUTION_KEY} />
-            )}
+            {auth.isAuthenticated && <Contributions contributionKey={APP_BOOT_CONTRIBUTION_KEY} />}
             <BrowserRouter basename={basename}>
               <Switch>
                 <Route exact path="/" render={() => <Redirect to={"/home"} />} />

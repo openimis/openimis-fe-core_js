@@ -17,6 +17,7 @@ import LoginPage from "../pages/LoginPage";
 import { useAuthentication } from "../helpers/hooks";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import SetPasswordPage from "../pages/SetPasswordPage";
+import { ErrorBoundary } from "@openimis/fe-core";
 
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";
 export const APP_BOOT_CONTRIBUTION_KEY = "core.Boot";
@@ -109,9 +110,11 @@ const App = (props) => {
                     key={route.path}
                     path={"/" + route.path}
                     render={(props) => (
-                      <RequireAuth {...props} {...others} redirectTo={"/login"}>
-                        <route.component modulesManager={modulesManager} {...props} {...others} />
-                      </RequireAuth>
+                      <ErrorBoundary>
+                        <RequireAuth {...props} {...others} redirectTo={"/login"}>
+                          <route.component modulesManager={modulesManager} {...props} {...others} />
+                        </RequireAuth>
+                      </ErrorBoundary>
                     )}
                   />
                 ))}

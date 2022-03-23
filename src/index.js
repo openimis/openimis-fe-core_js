@@ -5,6 +5,7 @@ import KeepLegacyAlive from "./components/KeepLegacyAlive";
 import AutoSuggestion from "./components/inputs/AutoSuggestion";
 import Autocomplete from "./components/inputs/Autocomplete";
 import Contributions from "./components/generics/Contributions";
+import Block from "./components/generics/Block";
 import ControlledField from "./components/generics/ControlledField";
 import Error from "./components/generics/Error";
 import FatalError from "./components/generics/FatalError";
@@ -204,6 +205,7 @@ export {
   App,
   Autocomplete,
   AutoSuggestion,
+  Block,
   Contributions,
   ControlledField,
   Picker,

@@ -90,6 +90,7 @@ import {
   useBoolean,
   useGraphqlMutation,
   useAuthentication,
+  useUserQuery,
 } from "./helpers/hooks";
 import withHistory, {
   historyPush,
@@ -240,6 +241,7 @@ export {
   usePrevious,
   useGraphqlQuery,
   useGraphqlMutation,
+  useUserQuery,
   ConfirmDialog,
   useAuthentication,
   useBoolean,

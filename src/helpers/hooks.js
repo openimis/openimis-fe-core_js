@@ -1,3 +1,4 @@
+import { useModulesManager } from "@openimis/fe-core";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { refreshAuthToken, login, logout, initialize, graphqlWithVariables, graphqlMutation } from "../actions";
@@ -162,6 +163,57 @@ export const useAuthentication = () => {
     refresh,
     logout: () => dispatch(logout()),
   };
+};
+
+export const useUserQuery = () => {
+  const modulesManager = useModulesManager();
+  const { data, isLoading } = useGraphqlQuery(`
+    query useUserQuery {
+      user {
+        healthFacility ${modulesManager.getProjection("location.HealthFacilityPicker.projection")}
+        id
+        username
+        rights
+        email
+        lastName
+        otherNames
+        phone
+        iUser {
+          id
+          uuid
+          language {
+            code
+            name
+          }
+        }
+        claimAdmin {
+          id
+          code
+          uuid
+        }
+        officer {
+          id
+          uuid
+          code
+          dob
+          address
+          location {
+            id
+            uuid
+            code
+            name
+            parent {
+              id
+              uuid
+              code
+              name
+            }
+          }
+        }
+      }
+    }
+  `);
+  return { user: data?.user, isLoading };
 };
 
 export const useBoolean = (defaultValue = false) => {

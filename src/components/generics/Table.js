@@ -47,6 +47,9 @@ const styles = (theme) => ({
   center: {
     textAlign: "center",
   },
+  clickable: {
+    cursor: "pointer",
+  },
   loader: {
     position: "absolute",
     top: 0,
@@ -260,6 +263,7 @@ class Table extends Component {
                     !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedRow : null,
                     !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltRow : null,
                     !!rowDisabled && rowDisabled(i) ? classes.tableDisabledRow : null,
+                    !!onDoubleClick && classes.clickable,
                   )}
                 >
                   {localItemFormatters &&

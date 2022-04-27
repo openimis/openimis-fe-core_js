@@ -151,7 +151,7 @@ class MainMenuContribution extends Component {
                   <MenuList>
                     {this.props.entries.map((entry, idx) => (
                       <div key={`${this.props.header}_${idx}_menuItem`}>
-                        <MenuItem onClick={(e) => this.handleMenuSelect(e, entry.route)}  href={`${process.env.PUBLIC_URL || ""}/${entry.route}`}>
+                        <MenuItem onClick={(e) => this.handleMenuSelect(e, entry.route)}  href={`${process.env.PUBLIC_URL || ""}${entry.route}`}>
                           <ListItemIcon>{entry.icon}</ListItemIcon>
                           <ListItemText primary={entry.text}/>
                         </MenuItem>

@@ -112,8 +112,11 @@ class MainMenuContribution extends Component {
   };
 
   handleMenuSelect = (e, route) => {
-    e.stopPropagation();
-    e.preventDefault();
+    // block normal href only for left click
+    if (e.type === 'click') {
+      e.stopPropagation();
+      e.preventDefault();
+    }
     this.toggleExpanded(e);
     this.redirect(route);
   };

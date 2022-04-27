@@ -117,6 +117,8 @@ class MainMenuContribution extends Component {
     this.toggleExpanded(e);
     this.redirect(route);
   };
+  
+  menuPageUrl = (route) => `${this.props.modulesManager.getRef("route")}`
 
   redirect(route) {
     const { modulesManager, history } = this.props;
@@ -150,7 +152,7 @@ class MainMenuContribution extends Component {
                       <div key={`${this.props.header}_${idx}_menuItem`}>
                         <MenuItem onClick={(e) => this.handleMenuSelect(e, entry.route)}>
                           <ListItemIcon>{entry.icon}</ListItemIcon>
-                          <ListItemText primary={entry.text} />
+                          <ListItemText primary={entry.text} href={menuPageUrl(entry.route)}/>
                         </MenuItem>
                         {entry.withDivider && (
                           <Divider

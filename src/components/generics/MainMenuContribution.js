@@ -118,8 +118,8 @@ class MainMenuContribution extends Component {
     this.redirect(route);
   };
   
-  menuPageUrl(route) => {
-    return `${this.props.modulesManager.getRef(route)}`
+  menuPageUrl(route)  {
+    return this.props.modulesManager.getRef(route)
   }
 
   redirect(route) {
@@ -152,7 +152,7 @@ class MainMenuContribution extends Component {
                   <MenuList>
                     {this.props.entries.map((entry, idx) => (
                       <div key={`${this.props.header}_${idx}_menuItem`}>
-                        <MenuItem onClick={(e) => this.handleMenuSelect(e, entry.route)}  href={this.menuPageUrl(entry.route)}>
+                        <MenuItem onClick={(e) => this.handleMenuSelect(e, entry.route)}  href = this.menuPageUrl(entry.route)>
                           <ListItemIcon>{entry.icon}</ListItemIcon>
                           <ListItemText primary={entry.text}/>
                         </MenuItem>

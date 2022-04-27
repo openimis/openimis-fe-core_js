@@ -152,7 +152,7 @@ class MainMenuContribution extends Component {
                       <div key={`${this.props.header}_${idx}_menuItem`}>
                         <MenuItem onClick={(e) => this.handleMenuSelect(e, entry.route)}>
                           <ListItemIcon>{entry.icon}</ListItemIcon>
-                          <ListItemText primary={entry.text} href={menuPageUrl(entry.route)}/>
+                          <ListItemText primary={entry.text} href={this.menuPageUrl(entry.route)}/>
                         </MenuItem>
                         {entry.withDivider && (
                           <Divider

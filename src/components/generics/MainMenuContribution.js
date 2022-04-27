@@ -118,7 +118,9 @@ class MainMenuContribution extends Component {
     this.redirect(route);
   };
   
-  menuPageUrl = (route) => `${this.props.modulesManager.getRef(route)}`
+  menuPageUrl = (route) => {
+    return `${this.props.modulesManager.getRef(route)}`
+  }
 
   redirect(route) {
     const { modulesManager, history } = this.props;

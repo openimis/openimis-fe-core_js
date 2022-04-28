@@ -97,6 +97,7 @@ const Autocomplete = (props) => {
           {...inputProps}
           variant="standard"
           required={required}
+          InputLabelProps={{ shrink: value !== undefined }}
           label={withLabel && (label || formatMessage("label"))}
           placeholder={!readOnly && withPlaceholder && (placeholder || formatMessage("placeholder"))}
         />

@@ -31,6 +31,7 @@ class SelectInput extends Component {
       disabled = false,
       readOnly = false,
       required = false,
+      placeholder,
     } = this.props;
     if (!options) return null;
     let valueStr = null;
@@ -41,22 +42,25 @@ class SelectInput extends Component {
       <Fragment>
         {!readOnly && (
           <FormControl required={required} fullWidth>
-            {!!label && (
-              <InputLabel className={classes.label}>
-                <FormattedMessage module={module} id={label} />
-              </InputLabel>
-            )}
-            {!!strLabel && <InputLabel className={classes.label}>{strLabel}</InputLabel>}
+            <InputLabel shrink={value !== undefined} className={classes.label}>
+              {strLabel ?? <FormattedMessage module={module} id={label} />}
+            </InputLabel>
             <Select
               readOnly={readOnly}
               inputProps={{
                 name: name,
                 id: `${_.uuid()}-input`,
               }}
-              value={!!value ? JSON.stringify(value) : "null"}
+              value={!!value ? JSON.stringify(value) : null}
               onChange={this._onChange}
               disabled={disabled}
+              displayEmpty
             >
+              {placeholder && (
+                <MenuItem disabled value="">
+                  <FormattedMessage module={module} id={placeholder} />
+                </MenuItem>
+              )}
               {options.map((option, idx) => (
                 <MenuItem key={`${module}-${name}-option-${idx}`} value={JSON.stringify(option.value)}>
                   {option.label}

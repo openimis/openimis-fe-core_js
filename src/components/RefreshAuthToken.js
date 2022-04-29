@@ -3,17 +3,17 @@ import { useAuthentication } from "../helpers/hooks";
 
 const RefreshAuthToken = () => {
   const auth = useAuthentication();
-  const timeoutRef = useRef();
+  const intervalRef = useRef();
 
   useEffect(() => {
-    if (auth.refreshToken && auth.isAuthenticated) {
-      timeoutRef.current = setTimeout(auth.refresh, 5 * 60 * 1000); // Refresh the token every 5 minutes
+    if (auth.isAuthenticated) {
+      intervalRef.current = setInterval(auth.refresh, 2 * 60 * 1000); // Refresh the token every 2 minutes
     }
 
     return () => {
-      clearTimeout(timeoutRef.current);
+      clearTimeout(intervalRef.current);
     };
-  }, [auth.refreshToken, auth.isAuthenticated]);
+  }, [auth.isAuthenticated]);
 
   return null;
 };

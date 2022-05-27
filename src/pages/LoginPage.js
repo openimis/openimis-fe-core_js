@@ -23,6 +23,7 @@ const useStyles = makeStyles((theme) => ({
   paper: theme.paper.paper,
   logo: {
     maxHeight: 100,
+    width: 100
   },
 }));
 

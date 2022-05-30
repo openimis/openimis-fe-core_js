@@ -1,28 +1,25 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
+import React from "react";
+import { useLocation, useHistory, useParams, useRouteMatch } from "react-router";
+import { Link, NavLink, Redirect } from "react-router-dom";
 
-function withHistory(C) {
-  return class ManagedComponent extends Component {
-    static contextTypes = {
-      history: PropTypes.object.isRequired,
-    };
-    render() {
-      const { history } = this.context;
-      return <C {...this.props} history={history} />;
-    }
+export { Link, NavLink, Redirect };
+export { useLocation, useHistory, useParams, useRouteMatch };
+
+export default function withHistory(C) {
+  console.warn("[Deprecated]: Prefer using directly the `useHistory` hook to get the history");
+  return (props) => {
+    const history = useHistory();
+    return <C {...props} history={history} />;
   };
 }
 
-export default withHistory;
-
-export function _historyPush(mm, history, route, newTab) {
-  if (!!newTab && mm.getConf("fe-core", "useDynPermalinks", false)) {
-    let r = btoa(`${process.env.PUBLIC_URL || ""}${route}`);
-    window.open(`${process.env.PUBLIC_URL || ""}?dyn=${r}`);
-  } else if (!!newTab) {
-    window.open(`${process.env.PUBLIC_URL || ""}${route}`);
+export function _historyPush(mm, history, route, asNewTab) {
+  if (asNewTab) {
+    const hasDynLink = mm.getConf("fe-core", "useDynPermalinks", false);
+    const link = history.createHref({ pathname: route });
+    window.open(hasDynLink ? `/?dyn=${btoa(link)}` : link);
   } else {
-    history.push(`${process.env.PUBLIC_URL || ""}${route}`);
+    history.push(route);
   }
 }
 

@@ -9,9 +9,9 @@ import {
   dispatchMutationErr,
 } from "./helpers/api";
 import _ from "lodash";
+
 function reducer(
   state = {
-    authenticating: false,
     user: null,
     fatalError: null,
     fetchingHistoricalMutations: false,
@@ -37,6 +37,8 @@ function reducer(
     fetchedRoleRights: false,
     roleRights: [],
     errorRoleRights: null,
+    isInitialized: false,
+    authError: null,
   },
   action,
 ) {
@@ -63,21 +65,14 @@ function reducer(
       };
       delete s.confirm;
       return s;
-    case "CORE_USERS_CURRENT_USER_REQ":
-      return {
-        ...state,
-        authenticating: true,
-      };
     case "CORE_USERS_CURRENT_USER_RESP":
       return {
         ...state,
-        authenticating: false,
         user: action.payload,
       };
     case "CORE_USERS_CURRENT_USER_ERR":
       return {
         ...state,
-        authenticating: false,
         error: {
           code: action.payload.status,
           message: action.payload.statusText,
@@ -258,10 +253,41 @@ function reducer(
       return dispatchMutationResp(state, "createRole", action);
     case "CORE_UPDATE_ROLE_RESP":
       return dispatchMutationResp(state, "updateRole", action);
-    case "CORE_DUPLICATE_ROLE_RESP":
-      return dispatchMutationResp(state, "duplicateRole", action);
     case "CORE_DELETE_ROLE_RESP":
       return dispatchMutationResp(state, "deleteRole", action);
+
+    // AUTH
+    case "CORE_AUTH_LOGIN_RESP": {
+      if (action.payload?.errors) {
+        return {
+          ...state,
+          authError: formatGraphQLError(action.payload),
+        };
+      }
+      return {
+        ...state,
+        authError: null,
+      };
+    }
+    case "CORE_AUTH_ERR": {
+      return {
+        ...state,
+        user: null,
+        authError: formatServerError(action.payload),
+      };
+    }
+
+    case "CORE_INITIALIZED":
+      return {
+        ...state,
+        isInitialized: true,
+      };
+    case "CORE_AUTH_LOGOUT":
+      return {
+        ...state,
+        user: null,
+      };
+
     default:
       return state;
   }

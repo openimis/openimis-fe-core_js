@@ -1,8 +1,7 @@
-import React, { Component } from "react";
+import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { IconButton } from "@material-ui/core";
 import { HelpOutline } from "@material-ui/icons";
-import withHistory from "../helpers/history";
 
 const styles = (theme) => ({
   button: {
@@ -11,20 +10,16 @@ const styles = (theme) => ({
   },
 });
 
-class Help extends Component {
-  help = () => {
-    this.props.history.push("/Manual/IMIS_manual.pdf");
-    window.location.reload();
+const Help = ({ classes }) => {
+  const onClick = () => {
+    window.open("/Manual/IMIS_manual.pdf");
   };
 
-  render() {
-    const { classes } = this.props;
-    return (
-      <IconButton className={classes.button} onClick={this.help}>
-        <HelpOutline />
-      </IconButton>
-    );
-  }
-}
+  return (
+    <IconButton className={classes.button} onClick={onClick}>
+      <HelpOutline />
+    </IconButton>
+  );
+};
 
-export default withHistory(withStyles(styles)(Help));
+export default withStyles(styles)(Help);

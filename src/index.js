@@ -5,6 +5,7 @@ import KeepLegacyAlive from "./components/KeepLegacyAlive";
 import AutoSuggestion from "./components/inputs/AutoSuggestion";
 import Autocomplete from "./components/inputs/Autocomplete";
 import Contributions from "./components/generics/Contributions";
+import Block from "./components/generics/Block";
 import ControlledField from "./components/generics/ControlledField";
 import Error from "./components/generics/Error";
 import FatalError from "./components/generics/FatalError";
@@ -82,18 +83,37 @@ import {
   formatGQLString,
   formatNodeQuery,
 } from "./helpers/api";
-import { useDebounceCb, usePrevious, useGraphqlQuery, useGraphqlMutation } from "./helpers/hooks";
-import withHistory, { historyPush } from "./helpers/history";
+import {
+  useDebounceCb,
+  usePrevious,
+  useGraphqlQuery,
+  useBoolean,
+  useGraphqlMutation,
+  useAuthentication,
+  useUserQuery,
+} from "./helpers/hooks";
+import withHistory, {
+  historyPush,
+  useLocation,
+  useHistory,
+  useParams,
+  useRouteMatch,
+  Link,
+  Redirect,
+  NavLink,
+} from "./helpers/history";
 import withModulesManager, { useModulesManager } from "./helpers/modules";
 import { formatJsonField } from "./helpers/jsonExt";
 import { RIGHT_ROLE_SEARCH } from "./constants";
-
+import { authMiddleware } from "./middlewares";
+import RefreshAuthToken from "./components/RefreshAuthToken";
 const ROUTE_ROLES = "roles";
 const ROUTE_ROLE = "roles/role";
 
 const DEFAULT_CONFIG = {
   "translations": [{ key: "en", messages: messages_en }],
   "reducers": [{ key: "core", reducer: reducer }],
+  "middlewares": [authMiddleware],
   "refs": [
     { key: "core.JournalDrawer.pollInterval", ref: 2000 },
     { key: "core.KeepLegacyAlive.pollInterval", ref: 300000 },
@@ -102,7 +122,7 @@ const DEFAULT_CONFIG = {
     { key: "core.LanguagePicker", ref: LanguagePicker },
     { key: "core.route.role", ref: ROUTE_ROLE },
   ],
-  "core.Boot": [KeepLegacyAlive],
+  "core.Boot": [KeepLegacyAlive, RefreshAuthToken],
   "core.Router": [
     { path: ROUTE_ROLES, component: Roles },
     { path: ROUTE_ROLE + "/:role_uuid?", component: Role },
@@ -151,6 +171,13 @@ export {
   sort,
   formatSorter,
   withHistory,
+  useLocation,
+  useHistory,
+  useParams,
+  useRouteMatch,
+  Link,
+  Redirect,
+  NavLink,
   historyPush,
   decodeId,
   encodeId,
@@ -179,6 +206,7 @@ export {
   App,
   Autocomplete,
   AutoSuggestion,
+  Block,
   Contributions,
   ControlledField,
   Picker,
@@ -213,5 +241,8 @@ export {
   usePrevious,
   useGraphqlQuery,
   useGraphqlMutation,
+  useUserQuery,
   ConfirmDialog,
+  useAuthentication,
+  useBoolean,
 };

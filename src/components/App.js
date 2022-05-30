@@ -1,24 +1,29 @@
-import React, { Component } from "react";
+import React, { useMemo, useEffect } from "react";
 import { connect } from "react-redux";
 import { IntlProvider } from "react-intl";
-import { Redirect, Route, Router, Switch } from "react-router-dom";
-import { CssBaseline, CircularProgress } from "@material-ui/core";
+import { Redirect, Route, BrowserRouter, Switch } from "react-router-dom";
+import { CssBaseline } from "@material-ui/core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import withHistory from "../helpers/history";
 import withModulesManager, { ModulesManagerProvider } from "../helpers/modules";
 import Helmet from "../helpers/Helmet";
-import AppWrapper from "./AppWrapper";
+import RequireAuth from "./RequireAuth";
 import FatalError from "./generics/FatalError";
-import kebabCase from "lodash/kebabCase";
-import { auth, clearConfirm } from "../actions";
+import { clearConfirm } from "../actions";
 import AlertDialog from "./dialogs/AlertDialog";
 import ConfirmDialog from "./dialogs/ConfirmDialog";
 import { bindActionCreators } from "redux";
+import Contributions from "./generics/Contributions";
+import LoginPage from "../pages/LoginPage";
+import { useAuthentication } from "../helpers/hooks";
+import ForgotPasswordPage from "../pages/ForgotPasswordPage";
+import SetPasswordPage from "../pages/SetPasswordPage";
+import { ErrorBoundary } from "@openimis/fe-core";
 
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";
+export const APP_BOOT_CONTRIBUTION_KEY = "core.Boot";
 export const TRANSLATION_CONTRIBUTION_KEY = "translations";
 
-const styles = (theme) => ({
+const styles = () => ({
   fetching: {
     margin: 0,
     position: "absolute",
@@ -27,95 +32,107 @@ const styles = (theme) => ({
   },
 });
 
-class RootApp extends Component {
-  constructor(props) {
-    super(props);
-    this.routerContributions = props.modulesManager.getContribs(ROUTER_CONTRIBUTION_KEY);
-  }
+const App = (props) => {
+  const {
+    history,
+    classes,
+    error,
+    confirm,
+    user,
+    messages,
+    clearConfirm,
+    localesManager,
+    modulesManager,
+    basename = process.env.PUBLIC_URL,
+    ...others
+  } = props;
 
-  componentDidMount() {
-    this.props.auth();
-  }
+  const auth = useAuthentication();
+  const routes = useMemo(() => {
+    return modulesManager.getContribs(ROUTER_CONTRIBUTION_KEY);
+  }, []);
 
-  buildMessages(messages, lang) {
-    const { localesManager, modulesManager } = this.props;
-    const filename = localesManager.getFileNameByLang(lang);
+  const locale = useMemo(() => {
+    if (user) {
+      localesManager.getLocale(user.language);
+    }
+  }, [user?.language]);
+
+  const allMessages = useMemo(() => {
+    let lang;
+    if (user) {
+      lang = localesManager.getFileNameByLang(user.language);
+    } else {
+      lang = localesManager.getFileNameByLang(navigator.language) ?? "en";
+    }
     var msgs = modulesManager
       .getContribs(TRANSLATION_CONTRIBUTION_KEY)
-      .filter((msgs) => msgs.key === filename)
+      .filter((msgs) => msgs.key === lang)
       .reduce((allmsgs, msgs) => Object.assign(allmsgs, msgs.messages), {});
     return { ...messages, ...msgs };
-  }
+  }, [user?.language, messages]);
 
-  render() {
-    const { history, classes, error, confirm, user, messages, clearConfirm, ...others } = this.props;
-    if (error) {
-      return <FatalError error={error} />;
+  useEffect(() => {
+    auth.initialize();
+    if (process.env.NODE_ENV == "development") {
+      // In development, redirect the browser to the basename if
+      // the location is currently the root path
+      if (location.pathname === "/") {
+        location.replace(basename);
+      }
     }
-    if (!user) {
-      return (
-        <div>
-          <CircularProgress className={classes.fetching} />
-        </div>
-      );
-    }
-    return (
-      <ModulesManagerProvider value={this.props.modulesManager}>
-        <IntlProvider
-          locale={this.props.localesManager.getLocale(user.language)}
-          messages={this.buildMessages(messages, user.language)}
-        >
+  }, []);
+
+  if (error) {
+    return <FatalError error={error} />;
+  }
+  if (!auth.isInitialized) return null;
+
+  return (
+    <>
+      <Helmet titleTemplate="%s - openIMIS" defaultTitle="openIMIS" />
+      <CssBaseline />
+      <ModulesManagerProvider value={modulesManager}>
+        <IntlProvider locale={locale} messages={allMessages}>
+          <AlertDialog />
+          <ConfirmDialog confirm={confirm} onConfirm={clearConfirm} />
           <div className="App">
-            <Helmet titleTemplate="%s - openIMIS" defaultTitle="openIMIS" />
-            <CssBaseline />
-            <AlertDialog />
-            <ConfirmDialog confirm={confirm} onConfirm={clearConfirm} />
-            <Router history={history}>
+            {auth.isAuthenticated && <Contributions contributionKey={APP_BOOT_CONTRIBUTION_KEY} />}
+            <BrowserRouter basename={basename}>
               <Switch>
-                <Route
-                  exact
-                  path={`${process.env.PUBLIC_URL || ""}/`}
-                  render={() =>
-                    history.location.search ? (
-                      <Redirect to={`${atob(history.location.search.substring(5))}`} />
-                    ) : (
-                      <Redirect to={`${process.env.PUBLIC_URL || ""}/home`} />
-                    )
-                  }
-                />
-                {this.routerContributions.map((route, index) => {
-                  const Comp = route.component;
-                  return (
-                    <Route
-                      exact
-                      key={`route_${kebabCase(route.path)}_${index}`}
-                      path={`${process.env.PUBLIC_URL || ""}/${route.path}`}
-                      render={(props) => (
-                        <AppWrapper {...props} {...others}>
-                          <Comp {...props} {...others} />
-                        </AppWrapper>
-                      )}
-                    />
-                  );
-                })}
+                <Route exact path="/" render={() => <Redirect to={"/home"} />} />
+                <Route path={"/login"} render={() => <LoginPage {...others} />} />
+                <Route path={"/forgot_password"} render={() => <ForgotPasswordPage {...others} />} />
+                <Route path={"/set_password"} render={() => <SetPasswordPage {...others} />} />
+                {routes.map((route) => (
+                  <Route
+                    exact
+                    key={route.path}
+                    path={"/" + route.path}
+                    render={(props) => (
+                      <ErrorBoundary>
+                        <RequireAuth {...props} {...others} redirectTo={"/login"}>
+                          <route.component modulesManager={modulesManager} {...props} {...others} />
+                        </RequireAuth>
+                      </ErrorBoundary>
+                    )}
+                  />
+                ))}
               </Switch>
-            </Router>
+            </BrowserRouter>
           </div>
         </IntlProvider>
       </ModulesManagerProvider>
-    );
-  }
-}
+    </>
+  );
+};
 
 const mapStateToProps = (state) => ({
-  authenticating: state.core.authenticating,
-  user: !!state.core.user && state.core.user.i_user,
+  user: state.core.user?.i_user,
   error: state.core.error,
   confirm: state.core.confirm,
 });
 
-const mapDispatchToProps = (dispatch) => bindActionCreators({ auth, clearConfirm }, dispatch);
+const mapDispatchToProps = (dispatch) => bindActionCreators({ clearConfirm }, dispatch);
 
-export default withHistory(
-  connect(mapStateToProps, mapDispatchToProps)(withModulesManager(withTheme(withStyles(styles)(RootApp)))),
-);
+export default connect(mapStateToProps, mapDispatchToProps)(withTheme(withStyles(styles)(withModulesManager(App))));

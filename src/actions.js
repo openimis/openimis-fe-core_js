@@ -27,16 +27,12 @@ const LANGUAGE_FULL_PROJECTION = () => ["name", "code", "sortOrder"];
 
 const MODULEPERMISSION_FULL_PROJECTION = () => ["modulePermsList{moduleName, permissions{permsName, permsValue}}"];
 
-export const baseApiUrl = process.env.NODE_ENV === "development" ? "/api" : "/iapi";
+export const baseApiUrl =  "/api";
 
 export function apiHeaders() {
   let headers = {
     "Content-Type": "application/json",
   };
-  if (process.env.NODE_ENV === "development") {
-    headers["remote-user"] = "Admin";
-    // headers['remote-user'] = "user";
-  }
   return headers;
 }
 
@@ -53,7 +49,7 @@ export function journalize(mutation, meta) {
   };
 }
 
-export function graphql(payload, type, params = {}) {
+export function graphql(payload, type = "GRAPHQL_QUERY", params = {}) {
   let req = type + "_REQ";
   let resp = type + "_RESP";
   let err = type + "_ERR";
@@ -62,11 +58,10 @@ export function graphql(payload, type, params = {}) {
   }
   return async (dispatch) => {
     try {
-      const response = await dispatch({
-        [RSAA]: {
+      const response = await dispatch(
+        fetch({
           endpoint: `${baseApiUrl}/graphql`,
           method: "POST",
-          headers: apiHeaders(),
           body: JSON.stringify({ query: payload }),
           types: [
             {
@@ -82,8 +77,8 @@ export function graphql(payload, type, params = {}) {
               meta: params,
             },
           ],
-        },
-      });
+        }),
+      );
       if (response.error) {
         dispatch(coreAlert(formatServerError(response.payload)));
       }
@@ -94,44 +89,38 @@ export function graphql(payload, type, params = {}) {
   };
 }
 
-export function graphqlWithVariables(operation, variables, type, params = {}) {
-  let req = type + "_REQ";
-  let resp = type + "_RESP";
-  let err = type + "_ERR";
+export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY", params = {}) {
+  let req, resp, err;
   if (Array.isArray(type)) {
     [req, resp, err] = type;
+  } else {
+    req = type + "_REQ";
+    resp = type + "_RESP";
+    err = type + "_ERR";
   }
   return async (dispatch) => {
-    try {
-      const response = await dispatch({
-        [RSAA]: {
-          endpoint: `${baseApiUrl}/graphql`,
-          method: "POST",
-          headers: apiHeaders(),
-          body: JSON.stringify({ query: operation, variables }),
-          types: [
-            {
-              type: req,
-              meta: params,
-            },
-            {
-              type: resp,
-              meta: params,
-            },
-            {
-              type: err,
-              meta: params,
-            },
-          ],
-        },
-      });
-      if (response.error) {
-        dispatch(coreAlert(formatServerError(response.payload)));
-      }
-      return response;
-    } catch (err) {
-      console.error(err);
-    }
+    const response = await dispatch(
+      fetch({
+        endpoint: `${baseApiUrl}/graphql`,
+        method: "POST",
+        body: JSON.stringify({ query: operation, variables }),
+        types: [
+          {
+            type: req,
+            meta: params,
+          },
+          {
+            type: resp,
+            meta: params,
+          },
+          {
+            type: err,
+            meta: params,
+          },
+        ],
+      }),
+    );
+    return response;
   };
 }
 
@@ -150,7 +139,46 @@ export function prepareMutation(operation, input, params = {}) {
   return { operation, variables, clientMutationId: params.clientMutationId };
 }
 
-export function graphqlMutation(mutation, variables, type = "CORE_TRIGGER_MUTATION", params = {}) {
+export function waitForMutation(clientMutationId) {
+  return async (dispatch) => {
+    let attempts = 0;
+    let res;
+    do {
+      if (res) {
+        await new Promise((resolve) => setTimeout(resolve, 100 * attempts));
+      }
+      const response = await dispatch(
+        graphqlWithVariables(
+          `
+        query ($clientMutationId: String) {
+          mutationLogs (clientMutationId: $clientMutationId) {
+            edges {
+              node {
+                status
+                clientMutationId
+                jsonContent
+                error
+              }
+            }
+          }
+        }
+      `,
+          { clientMutationId },
+        ),
+      );
+      if (response.error) {
+        return null;
+      }
+      res = response.payload.data.mutationLogs?.edges[0]?.node;
+    } while ((!res || res.status === 0) && attempts++ < 10);
+    if (res && res.status === 1 && res.error) {
+      res.error = JSON.parse(res.error);
+    }
+    return res;
+  };
+}
+
+export function graphqlMutation(mutation, variables, type = "CORE_TRIGGER_MUTATION", params = {}, wait = true) {
   let clientMutationId;
   if (variables?.input) {
     clientMutationId = uuid.uuid();
@@ -158,19 +186,102 @@ export function graphqlMutation(mutation, variables, type = "CORE_TRIGGER_MUTATI
   }
   return async (dispatch) => {
     const response = await dispatch(graphqlWithVariables(mutation, variables, type, params));
-    if (clientMutationId) dispatch(fetchMutation(clientMutationId));
+    if (clientMutationId) {
+      dispatch(fetchMutation(clientMutationId));
+      if (wait) {
+        return dispatch(waitForMutation(clientMutationId));
+      } else {
+        return response?.payload?.data;
+      }
+    }
     return response;
   };
 }
 
-export function auth() {
+export function fetch(config) {
+  return async (dispatch) => {
+    return dispatch({
+      [RSAA]: {
+        ...config,
+        headers: {
+          "Content-Type": "application/json",
+          ...config.headers,
+        },
+      },
+    });
+  };
+}
+
+export function loadUser() {
+  return fetch({
+    endpoint: `${baseApiUrl}/core/users/current_user/`,
+    method: "GET",
+    types: ["CORE_USERS_CURRENT_USER_REQ", "CORE_USERS_CURRENT_USER_RESP", "CORE_USERS_CURRENT_USER_ERR"],
+  });
+}
+
+export function login(credentials) {
+  return async (dispatch) => {
+    if (credentials) {
+      // We log in the user using the credentials
+      const mutation = `mutation authenticate($username: String!, $password: String!) {
+            tokenAuth(username: $username, password: $password) {
+              refreshExpiresIn
+            }
+          }`;
+      await dispatch(
+        graphqlMutation(mutation, credentials, ["CORE_AUTH_LOGIN_REQ", "CORE_AUTH_LOGIN_RESP", "CORE_AUTH_ERR"]),
+      );
+    } else {
+      // Try to refresh the token using the cookie (if present)
+      await dispatch(refreshAuthToken());
+    }
+    const action = await dispatch(loadUser());
+    return action.type !== "CORE_AUTH_ERR";
+  };
+}
+
+export function refreshAuthToken() {
+  return (dispatch) => {
+    const mutation = `
+    mutation refreshAuthToken {
+      refreshToken {
+        refreshExpiresIn
+      }
+    }
+  `;
+    return dispatch(graphqlMutation(mutation, {}, "CORE_AUTH_REFRESH_TOKEN"));
+  };
+}
+
+export function initialize() {
+  return async (dispatch) => {
+    await dispatch(login());
+    return dispatch({ type: "CORE_INITIALIZED" });
+  };
+}
+
+export function authError(error) {
   return {
-    [RSAA]: {
-      endpoint: `${baseApiUrl}/core/users/current_user/`,
-      method: "GET",
-      headers: apiHeaders(),
-      types: ["CORE_USERS_CURRENT_USER_REQ", "CORE_USERS_CURRENT_USER_RESP", "CORE_USERS_CURRENT_USER_ERR"],
-    },
+    type: "CORE_AUTH_ERR",
+    payload: error,
+  };
+}
+
+export function logout() {
+  return async (dispatch, getState) => {
+    const mutation = `
+      mutation logout {
+        deleteTokenCookie {
+          deleted
+        }
+        deleteRefreshTokenCookie {
+          deleted
+        } 
+      }
+    `;
+    await dispatch(graphqlMutation(mutation, {}));
+    return dispatch({ type: "CORE_AUTH_LOGOUT" });
   };
 }
 
@@ -287,16 +398,6 @@ export function updateRole(role, clientMutationLabel) {
   let mutation = formatMutation("updateRole", formatRoleGQL(role), clientMutationLabel);
   var requestedDateTime = new Date();
   return graphql(mutation.payload, ["CORE_ROLE_MUTATION_REQ", "CORE_UPDATE_ROLE_RESP", "CORE_ROLE_MUTATION_ERR"], {
-    clientMutationId: mutation.clientMutationId,
-    clientMutationLabel,
-    requestedDateTime,
-  });
-}
-
-export function duplicateRole(role, clientMutationLabel) {
-  let mutation = formatMutation("duplicateRole", formatRoleGQL(role), clientMutationLabel);
-  var requestedDateTime = new Date();
-  return graphql(mutation.payload, ["CORE_ROLE_MUTATION_REQ", "CORE_DUPLICATE_ROLE_RESP", "CORE_ROLE_MUTATION_ERR"], {
     clientMutationId: mutation.clientMutationId,
     clientMutationLabel,
     requestedDateTime,

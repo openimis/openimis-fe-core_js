@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from "react";
-import { useDispatch } from "react-redux";
-import { graphqlWithVariables, graphqlMutation } from "../actions";
+import { useModulesManager } from "@openimis/fe-core";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { refreshAuthToken, login, logout, initialize, graphqlWithVariables, graphqlMutation } from "../actions";
 
 export const useDebounceCb = (cb, duration = 0) => {
   const [payload, setPayload] = useState();
@@ -86,7 +87,11 @@ export const useGraphqlQuery = (operation, variables, config = {}) => {
   };
 };
 
-export const useGraphqlMutation = (operation, config = {}) => {
+const DEFAULT_GRAPHQL_MUTATION_CONFIG = {
+  wait: true,
+};
+export const useGraphqlMutation = (operation, config) => {
+  config = { ...DEFAULT_GRAPHQL_MUTATION_CONFIG, ...config };
   const dispatch = useDispatch();
   const [state, setState] = useState({ isLoading: false, error: null });
 
@@ -101,12 +106,22 @@ export const useGraphqlMutation = (operation, config = {}) => {
         const variables = {
           input,
         };
-        const action = await dispatch(graphqlMutation(operation, variables, config.type, { operation, input }));
-        setState({ isLoading: false, error: null });
+        const result = await dispatch(
+          graphqlMutation(operation, variables, config.type, { operation, input }, config.wait),
+        );
+
+        // Handle graphql errors
+        const error = result?.error?.map((err) => err.detail).join("; ");
+
+        if (error) {
+          throw new Error(error);
+        }
+
+        setState({ isLoading: false, error: error });
         if (config.onSuccess) {
-          resolve(config.onSuccess(action.payload.data));
+          resolve(config.onSuccess(result));
         } else {
-          resolve(action.payload.data);
+          resolve(result);
         }
       } catch (err) {
         setState({
@@ -127,4 +142,86 @@ export const useGraphqlMutation = (operation, config = {}) => {
     error: state.error,
     mutate,
   };
+};
+
+export const useAuthentication = () => {
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.core.user);
+  const isInitialized = useSelector((state) => state.core.isInitialized);
+  const error = useSelector((state) => state.core.authError);
+  const refresh = async () => {
+    await dispatch(refreshAuthToken());
+  };
+
+  return {
+    user,
+    error,
+    isAuthenticated: Boolean(user),
+    isInitialized,
+    initialize: () => dispatch(initialize()),
+    login: (credentials) => dispatch(login(credentials)),
+    refresh,
+    logout: () => dispatch(logout()),
+  };
+};
+
+export const useUserQuery = () => {
+  const modulesManager = useModulesManager();
+  const { data, isLoading } = useGraphqlQuery(`
+    query useUserQuery {
+      user {
+        healthFacility ${modulesManager.getProjection("location.HealthFacilityPicker.projection")}
+        id
+        username
+        rights
+        email
+        lastName
+        otherNames
+        phone
+        iUser {
+          id
+          uuid
+          language {
+            code
+            name
+          }
+        }
+        claimAdmin {
+          id
+          code
+          uuid
+        }
+        officer {
+          id
+          uuid
+          code
+          dob
+          address
+          location {
+            id
+            uuid
+            code
+            name
+            parent {
+              id
+              uuid
+              code
+              name
+            }
+          }
+        }
+      }
+    }
+  `);
+  return { user: data?.user, isLoading };
+};
+
+export const useBoolean = (defaultValue = false) => {
+  const [bool, setBool] = useState(defaultValue);
+
+  const toggle = useCallback(() => setBool(!bool), [bool]);
+  const on = useCallback(() => setBool(true), []);
+  const off = useCallback(() => setBool(false), []);
+
+  return [bool, { toggle, on, off }];
 };

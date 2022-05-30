@@ -79,7 +79,7 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 
   Note: depends on the selected calendar (Gregorian vs. Nepali)
 
-### history
+### navigation
 
 - `withHistory`: helper to inject history to any openIMIS component (allow navigation)
 - `historyPush`: helper to push a new route to openIMIS navigation
@@ -140,3 +140,4 @@ None
 - `core.KeepLegacyAlive.pollInterval`: poll interval (in ms) to send the ping to legacy openIMIS (to prevent session timeout). (Default: 300000 = 5')
 - `journalDrawer.pageSize`: page size when loading (historical) mutations (Default: `5`)
 - `AutoSuggestion.limitDisplay`: threshold to limit the number of items in the auto suggestions (adding 'more options...' message), default: 10
+- `AmountInput.currencyPosition`: position of the currency for the AmountInput. Choices are `start` and `end` (default: `start`)

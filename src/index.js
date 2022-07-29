@@ -26,6 +26,7 @@ import ProgressOrError from "./components/generics/ProgressOrError";
 import ProxyPage from "./components/generics/ProxyPage";
 import PublishedComponent from "./components/generics/PublishedComponent";
 import Table from "./components/generics/Table";
+import TableService from "./components/generics/TableService";
 import Searcher from "./components/generics/Searcher";
 import SearcherPane from "./components/generics/SearcherPane";
 import AdDatePicker from "./pickers/AdDatePicker";
@@ -232,6 +233,7 @@ export {
   ProxyPage,
   PublishedComponent,
   Table,
+  TableService,
   Searcher,
   SearcherPane,
   ConstantBasedPicker,

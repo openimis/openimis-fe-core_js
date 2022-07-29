@@ -254,8 +254,8 @@ class Table extends Component {
 
                       );
                     })}
-                    <td width={170}>Quantity</td>
-                    <td width={210}>Price</td>
+                    <td width={212}>Quantity</td>
+                    <td width={250}>Price</td>
                     <td>Explanation</td>
                   </TableRow>
                 </TableHead>
@@ -295,9 +295,9 @@ class Table extends Component {
                   <tr>
                     <table style={{ marginLeft: 20, marginTop: 10 }}>
                       <tr>
-                        <td width={203}>Code</td>
-                        <td width={212}>Type</td>
-                        <td width={211}>Quantity Approved</td>
+                        <td width={206}>Code</td>
+                        <td width={433}>Name</td>
+                        <td width={207}>Quantity Approved</td>
                         <td>Price Approved</td>
                       </tr>
                     </table>

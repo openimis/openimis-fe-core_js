@@ -147,6 +147,7 @@ class Table extends Component {
       headerActions = [],
       colSpans = [],
       detailsFormatters,
+      itemType,
       items,
       itemFormatters,
       rowHighlighted = null,
@@ -269,25 +270,27 @@ class Table extends Component {
                         })}
                     </tr>
                   </table>
-                  <table style={{ marginTop: 10, width: "90%" }}>
-                    <tr>
-                      <TableCell>Code</TableCell>
-                      <TableCell>Name</TableCell>
-                      <TableCell>Quantity Approved</TableCell>
-                      <TableCell>Price Approved</TableCell>
-                    </tr>
-                    <tr>
-                      {detailsFormatters &&
-                        detailsFormatters.map((f, fidx) => {
-                          if (colSpans.length > fidx && !colSpans[fidx]) return null;
-                          return (
-                            <TableCell>
-                              {f(i, iidx)}
-                            </TableCell>
-                          );
-                        })}
-                    </tr>
-                  </table>
+                  {itemType === "C" && (
+                    <table style={{ marginTop: 10, width: "90%" }}>
+                      <tr>
+                        <TableCell>Code</TableCell>
+                        <TableCell>Name</TableCell>
+                        <TableCell>Quantity Approved</TableCell>
+                        <TableCell>Price Approved</TableCell>
+                      </tr>
+                      <tr>
+                        {detailsFormatters &&
+                          detailsFormatters.map((s, ffidx) => {
+                            if (colSpans.length > ffidx && !colSpans[ffidx]) return null;
+                            return (
+                              <TableCell>
+                                {s(i,iidx)}
+                              </TableCell>
+                            );
+                          })}
+                      </tr>
+                    </table>
+                  )}
                 </Box>
               ))}
           </TableBody>

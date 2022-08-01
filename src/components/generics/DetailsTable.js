@@ -6,9 +6,10 @@ function DetailsTable({code,type,validFrom}){
     ]
     return <p><table style={{marginLeft: 20, marginTop: 10}}>
         <tr >
-            <td align='left'>Code</td>
-            <td align='left'>Type</td>
-            <td align='left'>Valid from</td>
+            <td >Code</td>
+            <td >Name</td>
+            <td >Quantity Approved</td>
+            <td>Price Approved</td>
         </tr>
         {list.map((val, key) => {
             return (

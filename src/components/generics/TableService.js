@@ -146,9 +146,6 @@ class Table extends Component {
       headerSpans = [],
       headerActions = [],
       colSpans = [],
-      code,
-      type,
-      validFrom,
       detailsFormatters,
       items,
       itemFormatters,
@@ -205,8 +202,8 @@ class Table extends Component {
         )}
         <MUITable className={classes.table} size={size}>
           {!!localPreHeaders && localPreHeaders.length > 0 && (
-            <TableHead>
-              <TableRow>
+            <table style={{ width: "100%" }}>
+              <tr>
                 {localPreHeaders.map((h, idx) => {
                   if (headerSpans.length > idx && !headerSpans[idx]) return null;
                   return (
@@ -219,58 +216,38 @@ class Table extends Component {
                     </TableCell>
                   );
                 })}
-              </TableRow>
-            </TableHead>
+              </tr>
+            </table>
           )}
           {!!localHeaders && localHeaders.length > 0 && (
             <table>
               <tr>
-                <TableHead>
-                  <TableRow>
-                    {localHeaders.map((h, idx) => {
-                      if (headerSpans.length > idx && !headerSpans[idx]) return null;
-                      return (
-                        <td width={223}>
-                          <TableCell colSpan={headerSpans.length > idx ? headerSpans[idx] : 1} key={`h-${idx}`}>
-                            {!!h && (
-                              <Box
-                                style={{
-                                  cursor: headerActions.length > idx && !!headerActions[idx][0] ? "pointer" : "",
-                                }}
-                                onClick={headerActions.length > idx ? headerActions[idx][0] : null}
-                                display="flex"
-                                className={classes.tableHeader}
-                                alignItems="center"
-                                justifyContent={aligns.length > idx ? aligns[idx] : "left"}
-                              >
-                                <Box>
-                                  <FormattedMessage module={module} id={h} />
-                                </Box>
-                                {headerActions.length > idx ? this.headerAction(headerActions[idx][1]) : null}
-                              </Box>
-                            )}
-                          </TableCell>
-                        </td>
-
-                      );
-                    })}
-                    <td width={212}>Quantity</td>
-                    <td width={250}>Price</td>
-                    <td>Explanation</td>
-                  </TableRow>
-                </TableHead>
+                {localHeaders.map((h, idx) => {
+                  if (headerSpans.length > idx && !headerSpans[idx]) return null;
+                  return (
+                    <TableCell style={{ width: 222 }}>
+                      {!!h && (
+                        <Box>
+                          <FormattedMessage module={module} id={h} />
+                        </Box>
+                      )}
+                    </TableCell>
+                  );
+                })}
+                <TableCell style={{ width: 217 }}>Quantity</TableCell>
+                <TableCell style={{ width: 256 }}>Price</TableCell>
+                <TableCell >Explanation</TableCell>
               </tr>
             </table>
           )}
-
 
           <TableBody>
             {items &&
               items.length > 0 &&
               items.map((i, iidx) => (
-                <table>
-                  <tr>
-                    <table>
+                <Box style={{ width: "100%" }}>
+                  <table style={{ width: "100%" }}>
+                    <tr>
                       {localItemFormatters &&
                         localItemFormatters.map((f, fidx) => {
                           if (colSpans.length > fidx && !colSpans[fidx]) return null;
@@ -290,42 +267,28 @@ class Table extends Component {
                             </TableCell>
                           );
                         })}
-                    </table>
-                  </tr>
-                  <tr>
-                    <table style={{ marginLeft: 20, marginTop: 10 }}>
-                      <tr>
-                        <td width={206}>Code</td>
-                        <td width={433}>Name</td>
-                        <td width={207}>Quantity Approved</td>
-                        <td>Price Approved</td>
-                      </tr>
-                    </table>
-                  </tr>
-                  <tr>
-                    <table>
+                    </tr>
+                  </table>
+                  <table style={{ marginTop: 10, width: "90%" }}>
+                    <tr>
+                      <TableCell>Code</TableCell>
+                      <TableCell>Name</TableCell>
+                      <TableCell>Quantity Approved</TableCell>
+                      <TableCell>Price Approved</TableCell>
+                    </tr>
+                    <tr>
                       {detailsFormatters &&
                         detailsFormatters.map((f, fidx) => {
                           if (colSpans.length > fidx && !colSpans[fidx]) return null;
                           return (
-                            <TableCell
-                              colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
-                              className={clsx(
-                                !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
-                                !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
-                                !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
-                                !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
-                                aligns.length > fidx && classes[aligns[fidx]],
-                              )}
-                              key={`v-${iidx}-${fidx}`}
-                            >
+                            <TableCell>
                               {f(i, iidx)}
                             </TableCell>
                           );
                         })}
-                    </table>
-                  </tr>
-                </table>
+                    </tr>
+                  </table>
+                </Box>
               ))}
           </TableBody>
 

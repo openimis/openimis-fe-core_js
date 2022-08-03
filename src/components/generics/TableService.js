@@ -276,7 +276,7 @@ class Table extends Component {
                     {localItemFormatters[0](i, iidx).props.children.props.value != undefined &&
                       (
                         localItemFormatters[0](i, iidx).props.children.props.value.packagetype != undefined &&
-                        localItemFormatters[0](i, iidx).props.children.props.value.packagetype !== "N" && (
+                        localItemFormatters[0](i, iidx).props.children.props.value.packagetype !== "S" && (
                           <table style={{ marginTop: 10, width: "90%" }}>
                             <tr>
                               <TableCell>Code</TableCell>

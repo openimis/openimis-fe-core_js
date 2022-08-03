@@ -147,7 +147,6 @@ class Table extends Component {
       headerActions = [],
       colSpans = [],
       detailsFormatters,
-      itemType,
       items,
       itemFormatters,
       rowHighlighted = null,
@@ -166,10 +165,12 @@ class Table extends Component {
       onDelete = null,
       fetching = null,
       error = null,
+      itemType,
     } = this.props;
     let localHeaders = [...(headers || [])];
     let localPreHeaders = !!preHeaders ? [...preHeaders] : null;
     let localItemFormatters = [...itemFormatters];
+
     var i = !!headers && headers.length;
     while (localHeaders && i--) {
       if (modulesManager?.hideField(module, localHeaders[i])) {
@@ -245,54 +246,62 @@ class Table extends Component {
           <TableBody>
             {items &&
               items.length > 0 &&
-              items.map((i, iidx) => (
-                <Box style={{ width: "100%" }}>
-                  <table style={{ width: "100%" }}>
-                    <tr>
-                      {localItemFormatters &&
-                        localItemFormatters.map((f, fidx) => {
-                          if (colSpans.length > fidx && !colSpans[fidx]) return null;
-                          return (
-                            <TableCell
-                              colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
-                              className={clsx(
-                                !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
-                                !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
-                                !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
-                                !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
-                                aligns.length > fidx && classes[aligns[fidx]],
-                              )}
-                              key={`v-${iidx}-${fidx}`}
-                            >
-                              {f(i, iidx)}
-                            </TableCell>
-                          );
-                        })}
-                    </tr>
-                  </table>
-                  {itemType === "C" && (
-                    <table style={{ marginTop: 10, width: "90%" }}>
+              items.map((i, iidx) => {
+                return (
+                  <Box style={{ width: "100%" }}>
+                    <table style={{ width: "100%" }}>
                       <tr>
-                        <TableCell>Code</TableCell>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Quantity Approved</TableCell>
-                        <TableCell>Price Approved</TableCell>
-                      </tr>
-                      <tr>
-                        {detailsFormatters &&
-                          detailsFormatters.map((s, ffidx) => {
-                            if (colSpans.length > ffidx && !colSpans[ffidx]) return null;
+                        {localItemFormatters &&
+                          localItemFormatters.map((f, fidx) => {
+                            if (colSpans.length > fidx && !colSpans[fidx]) return null;
                             return (
-                              <TableCell>
-                                {s(i,iidx)}
+                              <TableCell
+                                colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
+                                className={clsx(
+                                  !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
+                                  !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
+                                  !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
+                                  !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
+                                  aligns.length > fidx && classes[aligns[fidx]],
+                                )}
+                                key={`v-${iidx}-${fidx}`}
+                              >
+                                {f(i, iidx)}
+
                               </TableCell>
                             );
                           })}
                       </tr>
                     </table>
-                  )}
-                </Box>
-              ))}
+                    {localItemFormatters[0](i, iidx).props.children.props.value != undefined &&
+                      (
+                        localItemFormatters[0](i, iidx).props.children.props.value.packagetype != undefined &&
+                        localItemFormatters[0](i, iidx).props.children.props.value.packagetype !== "N" && (
+                          <table style={{ marginTop: 10, width: "90%" }}>
+                            <tr>
+                              <TableCell>Code</TableCell>
+                              <TableCell>Name</TableCell>
+                              <TableCell>Quantity Approved</TableCell>
+                              <TableCell>Price Approved</TableCell>
+                            </tr>
+                            <tr>
+                              {detailsFormatters &&
+                                detailsFormatters.map((e, ffidx) => {
+                                  if (colSpans.length > ffidx && !colSpans[ffidx]) return null;
+                                  return (
+                                    <TableCell>
+                                      {e(i, iidx)}
+                                    </TableCell>
+                                  );
+                                })}
+                            </tr>
+                          </table>
+                        ))
+                    }
+                  </Box>
+                )
+              }
+              )}
           </TableBody>
 
           {!!withPagination && !!count && (

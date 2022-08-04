@@ -146,6 +146,7 @@ class Table extends Component {
       headerSpans = [],
       headerActions = [],
       colSpans = [],
+      detailsFormatters,
       items,
       itemFormatters,
       rowHighlighted = null,
@@ -164,10 +165,12 @@ class Table extends Component {
       onDelete = null,
       fetching = null,
       error = null,
+      itemType,
     } = this.props;
     let localHeaders = [...(headers || [])];
     let localPreHeaders = !!preHeaders ? [...preHeaders] : null;
     let localItemFormatters = [...itemFormatters];
+
     var i = !!headers && headers.length;
     while (localHeaders && i--) {
       if (modulesManager?.hideField(module, localHeaders[i])) {
@@ -201,8 +204,8 @@ class Table extends Component {
         )}
         <MUITable className={classes.table} size={size}>
           {!!localPreHeaders && localPreHeaders.length > 0 && (
-            <TableHead>
-              <TableRow>
+            <table style={{ width: "100%" }}>
+              <tr>
                 {localPreHeaders.map((h, idx) => {
                   if (headerSpans.length > idx && !headerSpans[idx]) return null;
                   return (
@@ -215,79 +218,90 @@ class Table extends Component {
                     </TableCell>
                   );
                 })}
-              </TableRow>
-            </TableHead>
+              </tr>
+            </table>
           )}
           {!!localHeaders && localHeaders.length > 0 && (
-            <TableHead>
-              <TableRow>
+            <table>
+              <tr>
                 {localHeaders.map((h, idx) => {
                   if (headerSpans.length > idx && !headerSpans[idx]) return null;
                   return (
-                    <TableCell colSpan={headerSpans.length > idx ? headerSpans[idx] : 1} key={`h-${idx}`}>
+                    <TableCell style={{ width: 222 }}>
                       {!!h && (
-                        <Box
-                          style={{
-                            width: "100%",
-                            cursor: headerActions.length > idx && !!headerActions[idx][0] ? "pointer" : "",
-                          }}
-                          onClick={headerActions.length > idx ? headerActions[idx][0] : null}
-                          display="flex"
-                          className={classes.tableHeader}
-                          alignItems="center"
-                          justifyContent={aligns.length > idx ? aligns[idx] : "left"}
-                        >
-                          <Box>
-                            <FormattedMessage module={module} id={h} />
-                          </Box>
-                          {headerActions.length > idx ? this.headerAction(headerActions[idx][1]) : null}
+                        <Box>
+                          <FormattedMessage module={module} id={h} />
                         </Box>
                       )}
                     </TableCell>
                   );
                 })}
-              </TableRow>
-            </TableHead>
+                <TableCell style={{ width: 217 }}>Quantity</TableCell>
+                <TableCell style={{ width: 256 }}>Price</TableCell>
+                <TableCell >Explanation</TableCell>
+              </tr>
+            </table>
           )}
+
           <TableBody>
             {items &&
               items.length > 0 &&
-              items.map((i, iidx) => (
-                    <TableRow
-                      key={iidx}
-                      selected={this.isSelected(i)}
-                      onClick={() => this.select(i)}
-                      onDoubleClick={onDoubleClick ? () => onDoubleClick(i) : undefined}
-                      className={clsx(
-                        classes.tableRow,
-                        !!rowLocked && rowLocked(i) ? classes.tableLockedRow : null,
-                        !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedRow : null,
-                        !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltRow : null,
-                        !!rowDisabled && rowDisabled(i) ? classes.tableDisabledRow : null,
-                        !!onDoubleClick && classes.clickable,
-                      )}
-                    >
-                      {localItemFormatters &&
-                        localItemFormatters.map((f, fidx) => {
-                          if (colSpans.length > fidx && !colSpans[fidx]) return null;
-                          return (
-                            <TableCell
-                              colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
-                              className={clsx(
-                                !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
-                                !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
-                                !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
-                                !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
-                                aligns.length > fidx && classes[aligns[fidx]],
-                              )}
-                              key={`v-${iidx}-${fidx}`}
-                            >
-                              {f(i, iidx)}
-                            </TableCell>
-                          );
-                        })}
-                    </TableRow>
-              ))}
+              items.map((i, iidx) => {
+                return (
+                  <Box style={{ width: "100%" }}>
+                    <table style={{ width: "100%" }}>
+                      <tr>
+                        {localItemFormatters &&
+                          localItemFormatters.map((f, fidx) => {
+                            if (colSpans.length > fidx && !colSpans[fidx]) return null;
+                            return (
+                              <TableCell
+                                colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
+                                className={clsx(
+                                  !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
+                                  !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
+                                  !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
+                                  !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
+                                  aligns.length > fidx && classes[aligns[fidx]],
+                                )}
+                                key={`v-${iidx}-${fidx}`}
+                              >
+                                {f(i, iidx)}
+
+                              </TableCell>
+                            );
+                          })}
+                      </tr>
+                    </table>
+                    {localItemFormatters[0](i, iidx).props.children.props.value != undefined &&
+                      (
+                        localItemFormatters[0](i, iidx).props.children.props.value.packagetype != undefined &&
+                        localItemFormatters[0](i, iidx).props.children.props.value.packagetype !== "S" && (
+                          <table style={{ marginTop: 10, width: "90%" }}>
+                            <tr>
+                              <TableCell>Code</TableCell>
+                              <TableCell>Name</TableCell>
+                              <TableCell>Quantity Approved</TableCell>
+                              <TableCell>Price Approved</TableCell>
+                            </tr>
+                            <tr>
+                              {detailsFormatters &&
+                                detailsFormatters.map((e, ffidx) => {
+                                  if (colSpans.length > ffidx && !colSpans[ffidx]) return null;
+                                  return (
+                                    <TableCell>
+                                      {e(i, iidx)}
+                                    </TableCell>
+                                  );
+                                })}
+                            </tr>
+                          </table>
+                        ))
+                    }
+                  </Box>
+                )
+              }
+              )}
           </TableBody>
 
           {!!withPagination && !!count && (

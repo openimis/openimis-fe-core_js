@@ -279,10 +279,7 @@ class Table extends Component {
                         localItemFormatters[0](i, iidx).props.children.props.value.packagetype !== "S" && (
                           <table style={{ marginTop: 10, width: "90%" }}>
                             <tr>
-                              <TableCell>Code</TableCell>
-                              <TableCell>Name</TableCell>
-                              <TableCell>Quantity Approved</TableCell>
-                              <TableCell>Price Approved</TableCell>
+                              
                             </tr>
                             <tr>
                               {detailsFormatters &&

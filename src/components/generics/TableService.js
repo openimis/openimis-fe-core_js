@@ -22,7 +22,9 @@ import FormattedMessage from "./FormattedMessage";
 import ProgressOrError from "./ProgressOrError";
 import withModulesManager from "../../helpers/modules";
 import { formatMessage, formatMessageWithValues } from "../../helpers/i18n";
-import DetailsTable from "./DetailsTable";
+import TextInput from "../inputs/TextInput";
+import NumberInput from "../inputs/NumberInput";
+import AmountInput from "../inputs/AmountInput";
 
 const styles = (theme) => ({
   table: theme.table,
@@ -284,17 +286,74 @@ class Table extends Component {
                               <TableCell>Quantity Approved</TableCell>
                               <TableCell>Price Approved</TableCell>
                             </tr>
-                            <tr>
-                              {detailsFormatters &&
-                                detailsFormatters.map((e, ffidx) => {
-                                  if (colSpans.length > ffidx && !colSpans[ffidx]) return null;
-                                  return (
-                                    <TableCell>
-                                      {e(i, iidx)}
+                            {
+                              localItemFormatters[0](i, iidx).props.children.props.value.serviceserviceSet &&
+                              localItemFormatters[0](i, iidx).props.children.props.value.serviceserviceSet.length > 0 &&
+                              localItemFormatters[0](i, iidx).props.children.props.value.serviceserviceSet.map((u, ufidx) => {
+                                return (
+                                  <tr>
+                                    <TableCell style={{ width: 150 }}>
+                                      <TextInput
+                                        readOnly={true}
+                                        value={localItemFormatters[0](i, iidx).props.children.props.value.serviceserviceSet[ufidx].service.code}
+                                      />
                                     </TableCell>
-                                  );
-                                })}
-                            </tr>
+                                    <TableCell style={{ width: 400 }}>
+                                      <TextInput
+                                        readOnly={true}
+                                        value={localItemFormatters[0](i, iidx).props.children.props.value.serviceserviceSet[ufidx].service.name}
+                                      />
+                                    </TableCell>
+                                    <TableCell style={{ width: 150 }}>
+                                      <NumberInput
+                                        readOnly={false}
+                                        value={localItemFormatters[0](i, iidx).props.children.props.value.serviceserviceSet[ufidx].qtyProvided}
+                                      />
+                                    </TableCell>
+                                    <TableCell style={{ width: 150 }}>
+                                      <AmountInput
+                                        readOnly={true}
+                                        value={localItemFormatters[0](i, iidx).props.children.props.value.serviceserviceSet[ufidx].priceAsked}
+                                      />
+                                    </TableCell>
+                                  </tr>
+                                )
+                              })
+                            }
+                            {
+                              localItemFormatters[0](i, iidx).props.children.props.value.servicesLinked &&
+                              localItemFormatters[0](i, iidx).props.children.props.value.servicesLinked.length > 0 &&
+                              localItemFormatters[0](i, iidx).props.children.props.value.servicesLinked.map((u, ufidx) => {
+                                return (
+                                  <tr>
+                                    <TableCell style={{ width: 150 }}>
+                                      <TextInput
+                                        readOnly={true}
+                                        value={localItemFormatters[0](i, iidx).props.children.props.value.servicesLinked[ufidx].item.code}
+                                      />
+                                    </TableCell>
+                                    <TableCell style={{ width: 400 }}>
+                                      <TextInput
+                                        readOnly={true}
+                                        value={localItemFormatters[0](i, iidx).props.children.props.value.servicesLinked[ufidx].item.name}
+                                      />
+                                    </TableCell>
+                                    <TableCell style={{ width: 150 }}>
+                                      <NumberInput
+                                        readOnly={false}
+                                        value={localItemFormatters[0](i, iidx).props.children.props.value.servicesLinked[ufidx].qtyProvided}
+                                      />
+                                    </TableCell>
+                                    <TableCell style={{ width: 150 }}>
+                                      <AmountInput
+                                        readOnly={true}
+                                        value={localItemFormatters[0](i, iidx).props.children.props.value.servicesLinked[ufidx].priceAsked}
+                                      />
+                                    </TableCell>
+                                  </tr>
+                                )
+                              })
+                            }
                           </table>
                         ))
                     }
@@ -304,26 +363,28 @@ class Table extends Component {
               )}
           </TableBody>
 
-          {!!withPagination && !!count && (
-            <TableFooter className={classes.tableFooter}>
-              <TableRow>
-                <TablePagination
-                  className={classes.pager}
-                  colSpan={localItemFormatters.length}
-                  labelRowsPerPage={formatMessage(intl, "core", "rowsPerPage")}
-                  labelDisplayedRows={({ from, to, count }) =>
-                    `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`
-                  }
-                  count={count}
-                  page={page}
-                  rowsPerPage={rowsPerPage}
-                  rowsPerPageOptions={rowsPerPageOptions}
-                  onRowsPerPageChange={(e) => onChangeRowsPerPage(e.target.value)}
-                  onPageChange={onChangePage}
-                />
-              </TableRow>
-            </TableFooter>
-          )}
+          {
+            !!withPagination && !!count && (
+              <TableFooter className={classes.tableFooter}>
+                <TableRow>
+                  <TablePagination
+                    className={classes.pager}
+                    colSpan={localItemFormatters.length}
+                    labelRowsPerPage={formatMessage(intl, "core", "rowsPerPage")}
+                    labelDisplayedRows={({ from, to, count }) =>
+                      `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`
+                    }
+                    count={count}
+                    page={page}
+                    rowsPerPage={rowsPerPage}
+                    rowsPerPageOptions={rowsPerPageOptions}
+                    onRowsPerPageChange={(e) => onChangeRowsPerPage(e.target.value)}
+                    onPageChange={onChangePage}
+                  />
+                </TableRow>
+              </TableFooter>
+            )
+          }
         </MUITable>
         {(fetching || error) && (
           <Grid className={classes.loader} container justifyContent="center" alignItems="center">

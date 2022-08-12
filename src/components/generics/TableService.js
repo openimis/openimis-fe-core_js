@@ -148,7 +148,6 @@ class Table extends Component {
       headerSpans = [],
       headerActions = [],
       colSpans = [],
-      detailsFormatters,
       items,
       itemFormatters,
       rowHighlighted = null,
@@ -167,11 +166,12 @@ class Table extends Component {
       onDelete = null,
       fetching = null,
       error = null,
-      itemType,
+      subServicesItemsFormatters,
     } = this.props;
     let localHeaders = [...(headers || [])];
     let localPreHeaders = !!preHeaders ? [...preHeaders] : null;
     let localItemFormatters = [...itemFormatters];
+    let localSubServicesItemsFormatters = [...subServicesItemsFormatters];
 
     var i = !!headers && headers.length;
     while (localHeaders && i--) {
@@ -279,6 +279,7 @@ class Table extends Component {
                       (
                         localItemFormatters[0](i, iidx).props.children.props.value.packagetype != undefined &&
                         localItemFormatters[0](i, iidx).props.children.props.value.packagetype !== "S" && (
+
                           <table style={{ marginTop: 10, width: "90%" }}>
                             <tr>
                               <TableCell>Code</TableCell>
@@ -286,77 +287,17 @@ class Table extends Component {
                               <TableCell>Quantity Approved</TableCell>
                               <TableCell>Price Approved</TableCell>
                             </tr>
-                            {
-                              localItemFormatters[0](i, iidx).props.children.props.value.serviceserviceSet &&
-                              localItemFormatters[0](i, iidx).props.children.props.value.serviceserviceSet.length > 0 &&
-                              localItemFormatters[0](i, iidx).props.children.props.value.serviceserviceSet.map((u, ufidx) => {
+                            {localSubServicesItemsFormatters &&
+                              localSubServicesItemsFormatters.map((s, sfidx) => {
                                 return (
-                                  <tr>
-                                    <TableCell style={{ width: 150 }}>
-                                      <TextInput
-                                        readOnly={true}
-                                        value={localItemFormatters[0](i, iidx).props.children.props.value.serviceserviceSet[ufidx].service.code}
-                                      />
-                                    </TableCell>
-                                    <TableCell style={{ width: 400 }}>
-                                      <TextInput
-                                        readOnly={true}
-                                        value={localItemFormatters[0](i, iidx).props.children.props.value.serviceserviceSet[ufidx].service.name}
-                                      />
-                                    </TableCell>
-                                    <TableCell style={{ width: 150 }}>
-                                      <NumberInput
-                                        readOnly={false}
-                                        value={localItemFormatters[0](i, iidx).props.children.props.value.serviceserviceSet[ufidx].qtyProvided}
-                                      />
-                                    </TableCell>
-                                    <TableCell style={{ width: 150 }}>
-                                      <AmountInput
-                                        readOnly={true}
-                                        value={localItemFormatters[0](i, iidx).props.children.props.value.serviceserviceSet[ufidx].priceAsked}
-                                      />
-                                    </TableCell>
-                                  </tr>
-                                )
-                              })
-                            }
-                            {
-                              localItemFormatters[0](i, iidx).props.children.props.value.servicesLinked &&
-                              localItemFormatters[0](i, iidx).props.children.props.value.servicesLinked.length > 0 &&
-                              localItemFormatters[0](i, iidx).props.children.props.value.servicesLinked.map((u, ufidx) => {
-                                return (
-                                  <tr>
-                                    <TableCell style={{ width: 150 }}>
-                                      <TextInput
-                                        readOnly={true}
-                                        value={localItemFormatters[0](i, iidx).props.children.props.value.servicesLinked[ufidx].item.code}
-                                      />
-                                    </TableCell>
-                                    <TableCell style={{ width: 400 }}>
-                                      <TextInput
-                                        readOnly={true}
-                                        value={localItemFormatters[0](i, iidx).props.children.props.value.servicesLinked[ufidx].item.name}
-                                      />
-                                    </TableCell>
-                                    <TableCell style={{ width: 150 }}>
-                                      <NumberInput
-                                        readOnly={false}
-                                        value={localItemFormatters[0](i, iidx).props.children.props.value.servicesLinked[ufidx].qtyProvided}
-                                      />
-                                    </TableCell>
-                                    <TableCell style={{ width: 150 }}>
-                                      <AmountInput
-                                        readOnly={true}
-                                        value={localItemFormatters[0](i, iidx).props.children.props.value.servicesLinked[ufidx].priceAsked}
-                                      />
-                                    </TableCell>
-                                  </tr>
-                                )
-                              })
-                            }
+                                  s(i, iidx)
+                                );
+                              })}
                           </table>
+
                         ))
                     }
+
                   </Box>
                 )
               }

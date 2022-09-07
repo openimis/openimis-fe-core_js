@@ -167,11 +167,13 @@ class Table extends Component {
       fetching = null,
       error = null,
       subServicesItemsFormatters,
+      subServicesItemsFormattersEdit,
     } = this.props;
     let localHeaders = [...(headers || [])];
     let localPreHeaders = !!preHeaders ? [...preHeaders] : null;
     let localItemFormatters = [...itemFormatters];
     let localSubServicesItemsFormatters = [...subServicesItemsFormatters];
+    let localSubServicesItemsFormattersEdit = [...subServicesItemsFormattersEdit];
 
     var i = !!headers && headers.length;
     while (localHeaders && i--) {
@@ -249,57 +251,123 @@ class Table extends Component {
             {items &&
               items.length > 0 &&
               items.map((i, iidx) => {
-                return (
-                  <Box style={{ width: "100%" }}>
-                    <table style={{ width: "100%" }}>
-                      <tr>
-                        {localItemFormatters &&
-                          localItemFormatters.map((f, fidx) => {
-                            if (colSpans.length > fidx && !colSpans[fidx]) return null;
-                            return (
-                              <TableCell
-                                colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
-                                className={clsx(
-                                  !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
-                                  !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
-                                  !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
-                                  !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
-                                  aligns.length > fidx && classes[aligns[fidx]],
-                                )}
-                                key={`v-${iidx}-${fidx}`}
-                              >
-                                {f(i, iidx)}
+                if (i.claimlinkedService != undefined) {
+                  console.log(i);
+                  return (
+                    <Box style={{ width: "100%" }}>
+                      <table style={{ width: "100%" }}>
+                        <tr>
+                          {localItemFormatters &&
+                            localItemFormatters.map((f, fidx) => {
+                              if (colSpans.length > fidx && !colSpans[fidx]) return null;
+                              return (
+                                <TableCell
+                                  colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
+                                  className={clsx(
+                                    !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
+                                    !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
+                                    !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
+                                    !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
+                                    aligns.length > fidx && classes[aligns[fidx]],
+                                  )}
+                                  key={`v-${iidx}-${fidx}`}
+                                >
+                                  {f(i, iidx)}
 
-                              </TableCell>
-                            );
-                          })}
-                      </tr>
-                    </table>
-                    {localItemFormatters[0](i, iidx).props.children.props.value != undefined &&
-                      (
-                        localItemFormatters[0](i, iidx).props.children.props.value.packagetype != undefined &&
-                        localItemFormatters[0](i, iidx).props.children.props.value.packagetype !== "S" && (
+                                </TableCell>
+                              );
+                            })}
+                        </tr>
+                      </table>
+                      {localItemFormatters[0](i, iidx).props.children.props.value != undefined &&
+                        (
+                          localItemFormatters[0](i, iidx).props.children.props.value.packagetype != undefined &&
+                          localItemFormatters[0](i, iidx).props.children.props.value.packagetype !== "S" && (
 
-                          <table style={{ marginTop: 10, width: "90%" }}>
-                            <tr>
-                              <TableCell>Code</TableCell>
-                              <TableCell>Name</TableCell>
-                              <TableCell>Quantity Approved</TableCell>
-                              <TableCell>Price Approved</TableCell>
-                            </tr>
-                            {localSubServicesItemsFormatters &&
-                              localSubServicesItemsFormatters.map((s, sfidx) => {
-                                return (
-                                  s(i, iidx)
-                                );
-                              })}
-                          </table>
+                            <table style={{ marginTop: 10, width: "90%" }}>
+                              <tr>
+                                <TableCell>Code</TableCell>
+                                <TableCell>Name</TableCell>
+                                <TableCell>Quantity Approved</TableCell>
+                                <TableCell>Price Approved</TableCell>
+                              </tr>
+                              {i.claimlinkedService != undefined &&
+                                i.claimlinkedService.length > 0 && (
+                                  i.claimlinkedService.map((s, sfidx) => {
+                                    return (
+                                      <tr>
+                                        <TableCell>s.service.code</TableCell>
+                                        <TableCell>s.service.name</TableCell>
+                                        <TableCell>s.qtyApproved</TableCell>
+                                        <TableCell>s.priceAsked</TableCell>
+                                      </tr>
+                                    );
+                                  }
+                                  )
+                                )
+                              }
 
-                        ))
-                    }
+                            </table>
 
-                  </Box>
-                )
+                          ))
+                      }
+
+                    </Box>
+                  )
+                } else {
+
+                  return (
+                    <Box style={{ width: "100%" }}>
+                      <table style={{ width: "100%" }}>
+                        <tr>
+                          {localItemFormatters &&
+                            localItemFormatters.map((f, fidx) => {
+                              if (colSpans.length > fidx && !colSpans[fidx]) return null;
+                              return (
+                                <TableCell
+                                  colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
+                                  className={clsx(
+                                    !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
+                                    !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
+                                    !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
+                                    !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
+                                    aligns.length > fidx && classes[aligns[fidx]],
+                                  )}
+                                  key={`v-${iidx}-${fidx}`}
+                                >
+                                  {f(i, iidx)}
+
+                                </TableCell>
+                              );
+                            })}
+                        </tr>
+                      </table>
+                      {localItemFormatters[0](i, iidx).props.children.props.value != undefined &&
+                        (
+                          localItemFormatters[0](i, iidx).props.children.props.value.packagetype != undefined &&
+                          localItemFormatters[0](i, iidx).props.children.props.value.packagetype !== "S" && (
+
+                            <table style={{ marginTop: 10, width: "90%" }}>
+                              <tr>
+                                <TableCell>Code</TableCell>
+                                <TableCell>Name</TableCell>
+                                <TableCell>Quantity Approved</TableCell>
+                                <TableCell>Price Approved</TableCell>
+                              </tr>
+                              {localSubServicesItemsFormatters &&
+                                localSubServicesItemsFormatters.map((s, sfidx) => {
+                                  return (
+                                    s(i, iidx)
+                                  );
+                                })}
+                            </table>
+                          ))
+                      }
+                    </Box>
+                  )
+
+                }
+
               }
               )}
           </TableBody>

@@ -167,7 +167,6 @@ class Table extends Component {
       fetching = null,
       error = null,
       subServicesItemsFormatters,
-      subServicesItemsFormattersEdit,
     } = this.props;
     let localHeaders = [...(headers || [])];
     let localPreHeaders = !!preHeaders ? [...preHeaders] : null;

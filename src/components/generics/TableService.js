@@ -295,17 +295,16 @@ class Table extends Component {
                                   i.claimlinkedService.map((s, sfidx) => {
                                     return (
                                       <tr>
-                                        <TableCell>s.service.code</TableCell>
-                                        <TableCell>s.service.name</TableCell>
-                                        <TableCell>s.qtyApproved</TableCell>
-                                        <TableCell>s.priceAsked</TableCell>
+                                        <TableCell>i.claimlinkedService.service.code</TableCell>
+                                        <TableCell>i.claimlinkedService.service.name</TableCell>
+                                        <TableCell>i.claimlinkedService.qtyApproved</TableCell>
+                                        <TableCell>i.claimlinkedService.priceAsked</TableCell>
                                       </tr>
                                     );
                                   }
                                   )
                                 )
                               }
-
                             </table>
 
                           ))
@@ -314,7 +313,6 @@ class Table extends Component {
                     </Box>
                   )
                 } else {
-
                   return (
                     <Box style={{ width: "100%" }}>
                       <table style={{ width: "100%" }}>

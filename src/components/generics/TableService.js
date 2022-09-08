@@ -173,7 +173,6 @@ class Table extends Component {
     let localPreHeaders = !!preHeaders ? [...preHeaders] : null;
     let localItemFormatters = [...itemFormatters];
     let localSubServicesItemsFormatters = [...subServicesItemsFormatters];
-    let localSubServicesItemsFormattersEdit = [...subServicesItemsFormattersEdit];
     var i = !!headers && headers.length;
     while (localHeaders && i--) {
       if (modulesManager?.hideField(module, localHeaders[i])) {
@@ -285,20 +284,37 @@ class Table extends Component {
 
                             <table style={{ marginTop: 10, width: "90%" }}>
                               <tr>
-                                <TableCell>Code</TableCell>
-                                <TableCell>Name</TableCell>
-                                <TableCell>Quantity Approved</TableCell>
-                                <TableCell>Price Approved</TableCell>
+                                <TableCell>{formatMessage(intl, "core", "Code")}</TableCell>
+                                <TableCell>{formatMessage(intl, "core", "Name")}</TableCell>
+                                <TableCell>{formatMessage(intl, "core", "Quantity")}</TableCell>
+                                <TableCell>{formatMessage(intl, "core", "Price Appro")}</TableCell>
                               </tr>
                               {i.claimlinkedService != undefined &&
                                 i.claimlinkedService.length > 0 && (
                                   i.claimlinkedService.map((s, sfidx) => {
+                                    console.log(i);
                                     return (
                                       <tr>
-                                        <TableCell>i.claimlinkedService.service.code</TableCell>
-                                        <TableCell>i.claimlinkedService.service.name</TableCell>
-                                        <TableCell>i.claimlinkedService.qtyApproved</TableCell>
-                                        <TableCell>i.claimlinkedService.priceAsked</TableCell>
+                                        <TableCell>{s.service.code}</TableCell>
+                                        <TableCell>{s.service.name}</TableCell>
+                                        <TableCell>{s.qtyDisplayed}</TableCell>
+                                        <TableCell>{s.priceAsked}</TableCell>
+                                      </tr>
+                                    );
+                                  }
+                                  )
+                                )
+                              }
+                              {i.claimlinkedItem != undefined &&
+                                i.claimlinkedItem.length > 0 && (
+                                  i.claimlinkedItem.map((s, sfidx) => {
+                                    console.log(i);
+                                    return (
+                                      <tr>
+                                        <TableCell>{s.item.code}</TableCell>
+                                        <TableCell>{s.item.name}</TableCell>
+                                        <TableCell>{s.qtyDisplayed}</TableCell>
+                                        <TableCell>{s.priceAsked}</TableCell>
                                       </tr>
                                     );
                                   }
@@ -346,10 +362,10 @@ class Table extends Component {
 
                             <table style={{ marginTop: 10, width: "90%" }}>
                               <tr>
-                                <TableCell>Code</TableCell>
-                                <TableCell>Name</TableCell>
-                                <TableCell>Quantity Approved</TableCell>
-                                <TableCell>Price Approved</TableCell>
+                                <TableCell>{formatMessage(intl, "core", "Code")}</TableCell>
+                                <TableCell>{formatMessage(intl, "core", "Name")}</TableCell>
+                                <TableCell>{formatMessage(intl, "core", "Quantity")}</TableCell>
+                                <TableCell>{formatMessage(intl, "core", "Price Appro")}</TableCell>
                               </tr>
                               {localSubServicesItemsFormatters &&
                                 localSubServicesItemsFormatters.map((s, sfidx) => {

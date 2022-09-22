@@ -237,7 +237,15 @@ class Table extends Component {
                           justifyContent={aligns.length > idx ? aligns[idx] : "left"}
                         >
                           <Box>
+                            {typeof h === 'function' ? (
+                              <Box>
+                              {() => (h(this.state, this.props))}
+                              </Box>
+                            ): ( 
                             <FormattedMessage module={module} id={h} />
+                            ) 
+                            }
+                           
                           </Box>
                           {headerActions.length > idx ? this.headerAction(headerActions[idx][1]) : null}
                         </Box>

@@ -167,13 +167,11 @@ class Table extends Component {
       fetching = null,
       error = null,
       subServicesItemsFormatters,
-      subServicesItemsFormattersReview,
     } = this.props;
     let localHeaders = [...(headers || [])];
     let localPreHeaders = !!preHeaders ? [...preHeaders] : null;
     let localItemFormatters = [...itemFormatters];
     let localSubServicesItemsFormatters = [...subServicesItemsFormatters];
-    let localsubServicesItemsFormattersReview = [...subServicesItemsFormattersReview];
     var i = !!headers && headers.length;
     while (localHeaders && i--) {
       if (modulesManager?.hideField(module, localHeaders[i])) {
@@ -227,7 +225,7 @@ class Table extends Component {
           {!!localHeaders && localHeaders.length > 0 && (
             <table>
               <tr>
-              {localHeaders.map((h, idx) => {
+                {localHeaders.map((h, idx) => {
                   if (headerSpans.length > idx && !headerSpans[idx]) return null;
                   return (
                     <TableCell style={{ width: 430 }}>
@@ -293,12 +291,38 @@ class Table extends Component {
                                 <TableCell>{formatMessage(intl, "core", "Quantity")}</TableCell>
                                 <TableCell>{formatMessage(intl, "core", "Price Appro")}</TableCell>
                               </tr>
-                              {localsubServicesItemsFormattersReview &&
-                                localsubServicesItemsFormattersReview.map((s, sfidx) => {
-                                  return (
-                                    s(i, iidx)
-                                  );
-                                })}
+                              {i.claimlinkedService != undefined &&
+                                i.claimlinkedService.length > 0 && (
+                                  i.claimlinkedService.map((s, sfidx) => {
+                                    console.log(i);
+                                    return (
+                                      <tr>
+                                        <TableCell>{s.service.code}</TableCell>
+                                        <TableCell>{s.service.name}</TableCell>
+                                        <TableCell>{s.qtyDisplayed}</TableCell>
+                                        <TableCell>{s.priceAsked}</TableCell>
+                                      </tr>
+                                    );
+                                  }
+                                  )
+                                )
+                              }
+                              {i.claimlinkedItem != undefined &&
+                                i.claimlinkedItem.length > 0 && (
+                                  i.claimlinkedItem.map((s, sfidx) => {
+                                    console.log(i);
+                                    return (
+                                      <tr>
+                                        <TableCell>{s.item.code}</TableCell>
+                                        <TableCell>{s.item.name}</TableCell>
+                                        <TableCell>{s.qtyDisplayed}</TableCell>
+                                        <TableCell>{s.priceAsked}</TableCell>
+                                      </tr>
+                                    );
+                                  }
+                                  )
+                                )
+                              }
                             </table>
 
                           ))

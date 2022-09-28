@@ -299,7 +299,6 @@ class Table extends Component {
                                   s(i, iidx)
                                 );
                               })}
-
                           </table>
 
                         ))

@@ -242,9 +242,9 @@ class Table extends Component {
                   </TableCell>
                 );
               })}
-              <TableCell style={{ width: 217 }}>Quantity</TableCell>
-              <TableCell style={{ width: 256 }}>Price</TableCell>
-              <TableCell >Explanation</TableCell>
+              <TableCell style={{ width: 217 }}>{formatMessage(intl, "core", "Quantity")}</TableCell>
+              <TableCell style={{ width: 256 }}>{formatMessage(intl, "core", "Price")}</TableCell>
+              <TableCell >{formatMessage(intl, "core", "Explanation")}</TableCell>
             </tr>
           </table>
           )}

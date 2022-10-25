@@ -222,30 +222,6 @@ class Table extends Component {
               </tr>
             </table>
           )}
-          {!!localHeaders && localHeaders.length > 0 && (
-            <table>
-              <tr>
-                {localHeaders.map((h, idx) => {
-                  if (headerSpans.length > idx && !headerSpans[idx]) return null;
-                  return (
-                    <TableCell style={{ width: 430 }}>
-                      {!!h && (
-                        <Box>
-                          <FormattedMessage module={module} id={h} />
-                        </Box>
-                      )}
-                    </TableCell>
-                  );
-                })}
-                <TableCell style={{ width: 125 }}>Quantity</TableCell>
-                <TableCell style={{ width: 160 }}>Price</TableCell>
-                <td style={{ paddingRight: 50, paddingLeft: 10 }}>Explanation</td>
-                <td style={{ paddingRight: 35 }}>App. Quantity</td>
-                <td style={{ paddingRight: 40 }}>Justification</td>
-                <td >Status</td>
-              </tr>
-            </table>
-          )}
 
           <TableBody>
             {items &&
@@ -256,6 +232,15 @@ class Table extends Component {
                   return (
                     <Box style={{ width: "100%" }}>
                       <table style={{ width: "100%" }}>
+                        <tr>
+                          <TableCell><FormattedMessage module={module} id={localHeaders[0]} /></TableCell>
+                          <TableCell><FormattedMessage module={module} id={localHeaders[1]} /></TableCell>
+                          <TableCell><FormattedMessage module={module} id={localHeaders[2]} /></TableCell>
+                          <TableCell><FormattedMessage module={module} id={localHeaders[3]} /></TableCell>
+                          <TableCell><FormattedMessage module={module} id={localHeaders[4]} /></TableCell>
+                          <TableCell><FormattedMessage module={module} id={localHeaders[5]} /></TableCell>
+                          <TableCell><FormattedMessage module={module} id={localHeaders[6]} /></TableCell>
+                        </tr>
                         <tr>
                           {localItemFormatters &&
                             localItemFormatters.map((f, fidx) => {

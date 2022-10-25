@@ -227,173 +227,163 @@ class Table extends Component {
             </table>
           )}
 
-          {!!localHeaders && localHeaders.length > 0 && (
-            <table>
-            <tr>
-              {localHeaders.map((h, idx) => {
-                if (headerSpans.length > idx && !headerSpans[idx]) return null;
-                return (
-                  <TableCell style={{ width: 222 }}>
-                    {!!h && (
-                      <Box>
-                        <FormattedMessage module={module} id={h} />
-                      </Box>
-                    )}
-                  </TableCell>
-                );
-              })}
-              <TableCell style={{ width: 217 }}>{formatMessage(intl, "core", "Quantity")}</TableCell>
-              <TableCell style={{ width: 256 }}>{formatMessage(intl, "core", "Price")}</TableCell>
-              <TableCell >{formatMessage(intl, "core", "Explanation")}</TableCell>
-            </tr>
-          </table>
-          )}
+          <TableBody>
+            {items &&
+              items.length > 0 &&
+              items.map((i, iidx) => {
+                if (i.claimlinkedService != undefined) {
+                  console.log(i);
+                  return (
+                    <Box style={{ width: "100%" }}>
+                      <table style={{ width: "100%" }}>
+                        <tr>
+                          <TableCell><FormattedMessage module={module} id={localHeaders[0]} /></TableCell>
+                          <TableCell><FormattedMessage module={module} id={localHeaders[1]} /></TableCell>
+                          <TableCell><FormattedMessage module={module} id={localHeaders[2]} /></TableCell>
+                          <TableCell><FormattedMessage module={module} id={localHeaders[3]} /></TableCell>
+                        </tr>
+                        <tr>
+                          {localItemFormatters &&
+                            localItemFormatters.map((f, fidx) => {
+                              if (colSpans.length > fidx && !colSpans[fidx]) return null;
+                              return (
+                                <TableCell
+                                  colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
+                                  className={clsx(
+                                    !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
+                                    !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
+                                    !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
+                                    !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
+                                    aligns.length > fidx && classes[aligns[fidx]],
+                                  )}
+                                  key={`v-${iidx}-${fidx}`}
+                                >
+                                  {f(i, iidx)}
 
-        <TableBody>
-          {items &&
-            items.length > 0 &&
-            items.map((i, iidx) => {
-              if (i.claimlinkedService != undefined) {
-                console.log(i);
-                return (
-                  <Box style={{ width: "100%" }}>
-                    <table style={{ width: "100%" }}>
-                      <tr>
-                        {localItemFormatters &&
-                          localItemFormatters.map((f, fidx) => {
-                            if (colSpans.length > fidx && !colSpans[fidx]) return null;
-                            return (
-                              <TableCell
-                                colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
-                                className={clsx(
-                                  !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
-                                  !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
-                                  !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
-                                  !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
-                                  aligns.length > fidx && classes[aligns[fidx]],
-                                )}
-                                key={`v-${iidx}-${fidx}`}
-                              >
-                                {f(i, iidx)}
+                                </TableCell>
+                              );
+                            })}
+                        </tr>
+                      </table>
+                      {localItemFormatters[0](i, iidx).props.children.props.value != undefined &&
+                        (
+                          localItemFormatters[0](i, iidx).props.children.props.value.packagetype != undefined &&
+                          localItemFormatters[0](i, iidx).props.children.props.value.packagetype !== "S" && (
 
-                              </TableCell>
-                            );
-                          })}
-                      </tr>
-                    </table>
-                    {localItemFormatters[0](i, iidx).props.children.props.value != undefined &&
-                      (
-                        localItemFormatters[0](i, iidx).props.children.props.value.packagetype != undefined &&
-                        localItemFormatters[0](i, iidx).props.children.props.value.packagetype !== "S" && (
+                            <table style={{ marginTop: 10, width: "90%" }}>
+                              <tr>
+                                <TableCell>{formatMessage(intl, "core", "Code")}</TableCell>
+                                <TableCell>{formatMessage(intl, "core", "Name")}</TableCell>
+                                <TableCell>{formatMessage(intl, "core", "Quantity")}</TableCell>
+                                <TableCell>{formatMessage(intl, "core", "Price Appro")}</TableCell>
+                              </tr>
+                              {localsubServicesItemsFormattersReview &&
+                                localsubServicesItemsFormattersReview.map((s, sfidx) => {
+                                  return (
+                                    s(i, iidx)
+                                  );
+                                })}
+                            </table>
 
-                          <table style={{ marginTop: 10, width: "90%" }}>
-                            <tr>
-                              <TableCell>{formatMessage(intl, "core", "Code")}</TableCell>
-                              <TableCell>{formatMessage(intl, "core", "Name")}</TableCell>
-                              <TableCell>{formatMessage(intl, "core", "Quantity")}</TableCell>
-                              <TableCell>{formatMessage(intl, "core", "Price Appro")}</TableCell>
-                            </tr>
-                            {localsubServicesItemsFormattersReview &&
-                              localsubServicesItemsFormattersReview.map((s, sfidx) => {
-                                return (
-                                  s(i, iidx)
-                                );
-                              })}
-                          </table>
+                          ))
+                      }
 
-                        ))
-                    }
+                    </Box>
+                  )
+                } else {
+                  return (
+                    <Box style={{ width: "100%" }}>
+                      <table style={{ width: "100%" }}>
+                        <tr>
+                          <TableCell><FormattedMessage module={module} id={localHeaders[0]} /></TableCell>
+                          <TableCell><FormattedMessage module={module} id={localHeaders[1]} /></TableCell>
+                          <TableCell><FormattedMessage module={module} id={localHeaders[2]} /></TableCell>
+                          <TableCell><FormattedMessage module={module} id={localHeaders[3]} /></TableCell>
+                        </tr>
+                        <tr>
+                          {localItemFormatters &&
+                            localItemFormatters.map((f, fidx) => {
+                              if (colSpans.length > fidx && !colSpans[fidx]) return null;
+                              return (
+                                <TableCell
+                                  colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
+                                  className={clsx(
+                                    !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
+                                    !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
+                                    !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
+                                    !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
+                                    aligns.length > fidx && classes[aligns[fidx]],
+                                  )}
+                                  key={`v-${iidx}-${fidx}`}
+                                >
+                                  {f(i, iidx)}
 
-                  </Box>
-                )
-              } else {
-                return (
-                  <Box style={{ width: "100%" }}>
-                    <table style={{ width: "100%" }}>
-                      <tr>
-                        {localItemFormatters &&
-                          localItemFormatters.map((f, fidx) => {
-                            if (colSpans.length > fidx && !colSpans[fidx]) return null;
-                            return (
-                              <TableCell
-                                colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
-                                className={clsx(
-                                  !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
-                                  !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
-                                  !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
-                                  !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
-                                  aligns.length > fidx && classes[aligns[fidx]],
-                                )}
-                                key={`v-${iidx}-${fidx}`}
-                              >
-                                {f(i, iidx)}
+                                </TableCell>
+                              );
+                            })}
+                        </tr>
+                      </table>
+                      {localItemFormatters[0](i, iidx).props.children.props.value != undefined &&
+                        (
+                          localItemFormatters[0](i, iidx).props.children.props.value.packagetype != undefined &&
+                          localItemFormatters[0](i, iidx).props.children.props.value.packagetype !== "S" && (
 
-                              </TableCell>
-                            );
-                          })}
-                      </tr>
-                    </table>
-                    {localItemFormatters[0](i, iidx).props.children.props.value != undefined &&
-                      (
-                        localItemFormatters[0](i, iidx).props.children.props.value.packagetype != undefined &&
-                        localItemFormatters[0](i, iidx).props.children.props.value.packagetype !== "S" && (
+                            <table style={{ marginTop: 10, width: "90%" }}>
+                              <tr>
+                                <TableCell>{formatMessage(intl, "core", "Code")}</TableCell>
+                                <TableCell>{formatMessage(intl, "core", "Name")}</TableCell>
+                                <TableCell>{formatMessage(intl, "core", "Quantity")}</TableCell>
+                                <TableCell>{formatMessage(intl, "core", "Price Appro")}</TableCell>
+                              </tr>
+                              {localSubServicesItemsFormatters &&
+                                localSubServicesItemsFormatters.map((s, sfidx) => {
+                                  return (
+                                    s(i, iidx)
+                                  );
+                                })}
+                            </table>
+                          ))
+                      }
+                    </Box>
+                  )
 
-                          <table style={{ marginTop: 10, width: "90%" }}>
-                            <tr>
-                              <TableCell>{formatMessage(intl, "core", "Code")}</TableCell>
-                              <TableCell>{formatMessage(intl, "core", "Name")}</TableCell>
-                              <TableCell>{formatMessage(intl, "core", "Quantity")}</TableCell>
-                              <TableCell>{formatMessage(intl, "core", "Price Appro")}</TableCell>
-                            </tr>
-                            {localSubServicesItemsFormatters &&
-                              localSubServicesItemsFormatters.map((s, sfidx) => {
-                                return (
-                                  s(i, iidx)
-                                );
-                              })}
-                          </table>
-                        ))
-                    }
-                  </Box>
-                )
+                }
 
               }
+              )}
+          </TableBody>
 
-            }
-            )}
-        </TableBody>
-
+          {
+            !!withPagination && !!count && (
+              <TableFooter className={classes.tableFooter}>
+                <TableRow>
+                  <TablePagination
+                    className={classes.pager}
+                    colSpan={localItemFormatters.length}
+                    labelRowsPerPage={formatMessage(intl, "core", "rowsPerPage")}
+                    labelDisplayedRows={({ from, to, count }) =>
+                      `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`
+                    }
+                    count={count}
+                    page={page}
+                    rowsPerPage={rowsPerPage}
+                    rowsPerPageOptions={rowsPerPageOptions}
+                    onRowsPerPageChange={(e) => onChangeRowsPerPage(e.target.value)}
+                    onPageChange={onChangePage}
+                  />
+                </TableRow>
+              </TableFooter>
+            )
+          }
+        </MUITable>
         {
-          !!withPagination && !!count && (
-            <TableFooter className={classes.tableFooter}>
-              <TableRow>
-                <TablePagination
-                  className={classes.pager}
-                  colSpan={localItemFormatters.length}
-                  labelRowsPerPage={formatMessage(intl, "core", "rowsPerPage")}
-                  labelDisplayedRows={({ from, to, count }) =>
-                    `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`
-                  }
-                  count={count}
-                  page={page}
-                  rowsPerPage={rowsPerPage}
-                  rowsPerPageOptions={rowsPerPageOptions}
-                  onRowsPerPageChange={(e) => onChangeRowsPerPage(e.target.value)}
-                  onPageChange={onChangePage}
-                />
-              </TableRow>
-            </TableFooter>
+          (fetching || error) && (
+            <Grid className={classes.loader} container justifyContent="center" alignItems="center">
+              <ProgressOrError progress={items?.length && fetching} error={error} />{" "}
+              {/* We do not want to display the spinner with the empty table */}
+            </Grid>
           )
         }
-      </MUITable>
-        {
-      (fetching || error) && (
-        <Grid className={classes.loader} container justifyContent="center" alignItems="center">
-          <ProgressOrError progress={items?.length && fetching} error={error} />{" "}
-          {/* We do not want to display the spinner with the empty table */}
-        </Grid>
-      )
-    }
       </Box >
     );
   }

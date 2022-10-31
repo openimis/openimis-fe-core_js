@@ -169,8 +169,10 @@ class Table extends Component {
       forReview,
       subServicesItemsFormatters,
       subServicesItemsFormattersReview,
+      subServiceHeaders
     } = this.props;
     let localHeaders = [...(headers || [])];
+    let localSubServiceHeaders = [...(subServiceHeaders || [])];
     let localPreHeaders = !!preHeaders ? [...preHeaders] : null;
     let localItemFormatters = [...itemFormatters];
     let localSubServicesItemsFormatters = [...subServicesItemsFormatters];
@@ -236,12 +238,14 @@ class Table extends Component {
                   return (
                     <Box style={{ width: "100%" }}>
                       <table style={{ width: "100%" }}>
-                        <tr>
-                          <TableCell><FormattedMessage module={module} id={localHeaders[0]} /></TableCell>
-                          <TableCell><FormattedMessage module={module} id={localHeaders[1]} /></TableCell>
-                          <TableCell><FormattedMessage module={module} id={localHeaders[2]} /></TableCell>
-                          <TableCell><FormattedMessage module={module} id={localHeaders[3]} /></TableCell>
-                        </tr>
+                        {(items.length - iidx) == items.length && (
+                          <tr>
+                            <TableCell><FormattedMessage module={module} id={localHeaders[0]} /></TableCell>
+                            <TableCell><FormattedMessage module={module} id={localHeaders[1]} /></TableCell>
+                            <TableCell><FormattedMessage module={module} id={localHeaders[2]} /></TableCell>
+                            <TableCell><FormattedMessage module={module} id={localHeaders[3]} /></TableCell>
+                          </tr>
+                        )}
                         <tr>
                           {localItemFormatters &&
                             localItemFormatters.map((f, fidx) => {
@@ -272,10 +276,10 @@ class Table extends Component {
 
                             <table style={{ marginTop: 10, width: "90%" }}>
                               <tr>
-                                <TableCell>{formatMessage(intl, "core", "Code")}</TableCell>
-                                <TableCell>{formatMessage(intl, "core", "Name")}</TableCell>
-                                <TableCell>{formatMessage(intl, "core", "Quantity")}</TableCell>
-                                <TableCell>{formatMessage(intl, "core", "Price Appro")}</TableCell>
+                                <TableCell><FormattedMessage module={module} id={localSubServiceHeaders[0]} /></TableCell>
+                                <TableCell><FormattedMessage module={module} id={localSubServiceHeaders[1]} /></TableCell>
+                                <TableCell><FormattedMessage module={module} id={localSubServiceHeaders[2]} /></TableCell>
+                                <TableCell><FormattedMessage module={module} id={localSubServiceHeaders[3]} /></TableCell>
                               </tr>
                               {localsubServicesItemsFormattersReview &&
                                 localsubServicesItemsFormattersReview.map((s, sfidx) => {
@@ -294,12 +298,14 @@ class Table extends Component {
                   return (
                     <Box style={{ width: "100%" }}>
                       <table style={{ width: "100%" }}>
-                        <tr>
-                          <TableCell><FormattedMessage module={module} id={localHeaders[0]} /></TableCell>
-                          <TableCell><FormattedMessage module={module} id={localHeaders[1]} /></TableCell>
-                          <TableCell><FormattedMessage module={module} id={localHeaders[2]} /></TableCell>
-                          <TableCell><FormattedMessage module={module} id={localHeaders[3]} /></TableCell>
-                        </tr>
+                        {(items.length - iidx) == items.length && (
+                          <tr>
+                            <TableCell><FormattedMessage module={module} id={localHeaders[0]} /></TableCell>
+                            <TableCell><FormattedMessage module={module} id={localHeaders[1]} /></TableCell>
+                            <TableCell><FormattedMessage module={module} id={localHeaders[2]} /></TableCell>
+                            <TableCell><FormattedMessage module={module} id={localHeaders[3]} /></TableCell>
+                          </tr>
+                        )}
                         <tr>
                           {localItemFormatters &&
                             localItemFormatters.map((f, fidx) => {
@@ -330,10 +336,10 @@ class Table extends Component {
 
                             <table style={{ marginTop: 10, width: "90%" }}>
                               <tr>
-                                <TableCell>{formatMessage(intl, "core", "Code")}</TableCell>
-                                <TableCell>{formatMessage(intl, "core", "Name")}</TableCell>
-                                <TableCell>{formatMessage(intl, "core", "Quantity")}</TableCell>
-                                <TableCell>{formatMessage(intl, "core", "Price Appro")}</TableCell>
+                                <TableCell><FormattedMessage module={module} id={localSubServiceHeaders[0]} /></TableCell>
+                                <TableCell><FormattedMessage module={module} id={localSubServiceHeaders[1]} /></TableCell>
+                                <TableCell><FormattedMessage module={module} id={localSubServiceHeaders[2]} /></TableCell>
+                                <TableCell><FormattedMessage module={module} id={localSubServiceHeaders[3]} /></TableCell>
                               </tr>
                               {localSubServicesItemsFormatters &&
                                 localSubServicesItemsFormatters.map((s, sfidx) => {

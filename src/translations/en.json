@@ -57,5 +57,8 @@
   "core.SetPasswordPage.submitBtn": "Submit",
   "core.table.resultsLoading": "Loading...",
   "LanguagePicker.label": "Language",
-  "core.Language.null": ""
+  "core.Language.null": "",
+  "claim.edit.services.code": "Code",
+  "claim.edit.services.name": "Name",
+  "claim.edit.services.priceAppro": "Price Appro."
 }

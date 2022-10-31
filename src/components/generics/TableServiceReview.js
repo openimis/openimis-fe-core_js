@@ -166,9 +166,11 @@ class Table extends Component {
       onDelete = null,
       fetching = null,
       error = null,
-      subServicesItemsFormattersReview
+      subServicesItemsFormattersReview,
+      subServiceHeaders
     } = this.props;
     let localHeaders = [...(headers || [])];
+    let localSubServiceHeaders = [...(subServiceHeaders || [])];
     let localPreHeaders = !!preHeaders ? [...preHeaders] : null;
     let localItemFormatters = [...itemFormatters];
     let localsubServicesItemsFormattersReview = [...subServicesItemsFormattersReview];
@@ -273,10 +275,10 @@ class Table extends Component {
 
                             <table style={{ marginTop: 10, width: "90%" }}>
                               <tr>
-                                <TableCell>{formatMessage(intl, "core", "Code")}</TableCell>
-                                <TableCell>{formatMessage(intl, "core", "Name")}</TableCell>
-                                <TableCell>{formatMessage(intl, "core", "Quantity")}</TableCell>
-                                <TableCell>{formatMessage(intl, "core", "Price Appro")}</TableCell>
+                                <TableCell><FormattedMessage module={module} id={localSubServiceHeaders[0]} /></TableCell>
+                                <TableCell><FormattedMessage module={module} id={localSubServiceHeaders[1]} /></TableCell>
+                                <TableCell><FormattedMessage module={module} id={localSubServiceHeaders[2]} /></TableCell>
+                                <TableCell><FormattedMessage module={module} id={localSubServiceHeaders[3]} /></TableCell>
                               </tr>
                               {localsubServicesItemsFormattersReview &&
                                 localsubServicesItemsFormattersReview.map((s, sfidx) => {

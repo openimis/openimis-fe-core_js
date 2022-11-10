@@ -183,7 +183,7 @@ class Roles extends Component {
   itemFormatters = () => {
     const { intl, rights, modulesManager, language } = this.props;
     const result = [
-      (role) => (language === null ? role.name : language === LANGUAGE_EN ? role.name : role.altLanguage),
+      (role) => (language === null ? role.name : (language === LANGUAGE_EN ? role.name : (role.altLanguage === null ? role.name : role.altLanguage))),
       (role) => (role.isSystem !== null ? <Checkbox checked={!!role.isSystem} disabled /> : ""),
       (role) => (role.isBlocked !== null ? <Checkbox checked={role.isBlocked} disabled /> : ""),
       (role) => (!!role.validityFrom ? formatDateFromISO(modulesManager, intl, role.validityFrom) : ""),

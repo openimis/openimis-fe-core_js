@@ -26,6 +26,7 @@ import ProgressOrError from "./components/generics/ProgressOrError";
 import ProxyPage from "./components/generics/ProxyPage";
 import PublishedComponent from "./components/generics/PublishedComponent";
 import Table from "./components/generics/Table";
+import SearcherExport from "./components/generics/SearcherExport";
 import Searcher from "./components/generics/Searcher";
 import SearcherPane from "./components/generics/SearcherPane";
 import AdDatePicker from "./pickers/AdDatePicker";
@@ -52,7 +53,7 @@ import {
   coreAlert,
   coreConfirm,
   fetchMutation,
-  prepareMutation,
+  prepareMutation
 } from "./actions";
 import {
   formatMessage,
@@ -81,8 +82,11 @@ import {
   sort,
   formatSorter,
   formatGQLString,
-  formatNodeQuery,
+  formatNodeQuery
 } from "./helpers/api";
+import {
+  downloadExport
+} from "./helpers/downloadExport"
 import {
   useDebounceCb,
   usePrevious,
@@ -165,6 +169,7 @@ export {
   journalize,
   fetchMutation,
   prepareMutation,
+  downloadExport,
   coreAlert,
   coreConfirm,
   openBlob,
@@ -232,6 +237,7 @@ export {
   ProxyPage,
   PublishedComponent,
   Table,
+  SearcherExport,
   Searcher,
   SearcherPane,
   ConstantBasedPicker,

@@ -56,6 +56,8 @@
   "core.SetPasswordPage.error": "Unknown error",
   "core.SetPasswordPage.submitBtn": "Submit",
   "core.table.resultsLoading": "Loading...",
+  "core.exportSearchResult": "Export search result",
+  "core.exportSearchResult.tooltip": "Export result",
   "LanguagePicker.label": "Language",
   "core.Language.null": ""
 }

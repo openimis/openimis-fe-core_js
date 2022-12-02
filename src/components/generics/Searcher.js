@@ -16,6 +16,7 @@ import {
   CircularProgress,
 } from "@material-ui/core";
 import MoreHoriz from "@material-ui/icons/MoreHoriz";
+import SearcherExport from "./SearcherExport";
 import SearcherPane from "./SearcherPane";
 import Contributions from "./Contributions";
 import FormattedMessage from "./FormattedMessage";
@@ -83,6 +84,13 @@ class SelectionMenu extends Component {
             <Button onClick={(e) => this.action(i.action)}>{i.text}</Button>
           </Grid>
         ))}
+        {this.props.exportable && (<SearcherExport 
+          selection={this.props.selection} 
+          filters={this.props.filters} 
+          exportFetch={this.props.exportFetch}
+          exportFields={this.props.exportFields}
+          exportFieldsColumns={this.props.exportFieldsColumns}
+        />)}
         {!!contributionKey && (
           <Contributions
             actionHandler={this.action}
@@ -110,6 +118,11 @@ class SelectionMenu extends Component {
               {i.text}
             </MenuItem>
           ))}
+          {this.props.exportable && (
+            <SearcherExport 
+              selection={this.props.selection} filters={this.props.filters} exportFetch={this.props.exportFetch}
+              exportFields={this.props.exportFields} exportFieldsColumns={this.props.exportFieldsColumns}
+            />)}
           {!!contributionKey && (
             <Contributions
               actionHandler={this.action}
@@ -121,7 +134,6 @@ class SelectionMenu extends Component {
       </Grid>
     );
   };
-
   render() {
     const {
       modulesManager,
@@ -155,7 +167,7 @@ class SelectionMenu extends Component {
         entries.push({ text: formatMessage(intl, "claim", a.label), action: a.action });
       }
     });
-    if (entries.length > 2) {
+    if (entries.length > 2 || (this.props.exportable && entries.length>=1)) {
       return this.renderMenu(entries, actionsContributionKey);
     } else {
       return this.renderButtons(entries, actionsContributionKey);
@@ -383,6 +395,10 @@ class Searcher extends Component {
       withSelection = null,
       actionsContributionKey = null,
       withPagination = true,
+      exportable = false,
+      exportFetch = null,
+      exportFields = ['id'],
+      exportFieldsColumns,
       intl,
     } = this.props;
     return (
@@ -424,7 +440,7 @@ class Searcher extends Component {
                   </Grid>
                 </Grid>
                 <Grid container alignItems="center" item xs={4} className={classes.paperHeader}>
-                  {fetchedItems && (
+                  {fetchedItems && (  
                     <Grid container direction="row" justify="flex-end" className={classes.paperHeaderAction}>
                       <StyledSelectionMenu
                         canSelectAll={canSelectAll}
@@ -436,6 +452,11 @@ class Searcher extends Component {
                         actions={actions}
                         processing={processing}
                         actionsContributionKey={actionsContributionKey}
+                        filters={this.state.filters}
+                        exportable={exportable}
+                        exportFetch={exportFetch}
+                        exportFields={exportFields}
+                        exportFieldsColumns={exportFieldsColumns}
                       />
                     </Grid>
                   )}

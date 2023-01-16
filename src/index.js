@@ -17,6 +17,7 @@ import FormattedMessage from "./components/generics/FormattedMessage";
 import PagedDataHandler from "./components/generics/PagedDataHandler";
 import SelectInput from "./components/inputs/SelectInput";
 import TextInput from "./components/inputs/TextInput";
+import ValidatedTextInput from "./components/inputs/ValidatedTextInput";
 import TextAreaInput from "./components/inputs/TextAreaInput";
 import AmountInput from "./components/inputs/AmountInput";
 import NumberInput from "./components/inputs/NumberInput";
@@ -220,6 +221,7 @@ export {
   AlertForwarder,
   SelectInput,
   TextInput,
+  ValidatedTextInput,
   TextAreaInput,
   AmountInput,
   FakeInput,

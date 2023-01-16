@@ -21,9 +21,7 @@ const UniqueValueValidation = ({
   action,
   className,
   clearAction,
-  codeMaxLength,
   codeTakenLabel,
-  feModule,
   inputProps,
   isValid,
   isValidating,
@@ -60,9 +58,7 @@ const UniqueValueValidation = ({
       placeholder={placeholder}
       error={validationError || (!isValidating && !isValid && value) ? formatMessage(codeTakenLabel) : null}
       value={value}
-      inputProps={{
-        maxLength: modulesManager.getConf(feModule, codeMaxLength, inputProps.maxLength),
-      }}
+      inputProps={inputProps}
       endAdornment={
         <InputAdornment
           position="end"

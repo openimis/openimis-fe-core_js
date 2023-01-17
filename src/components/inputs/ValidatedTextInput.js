@@ -1,23 +1,16 @@
-import { debounce } from "lodash";
-import { InputAdornment, CircularProgress, Box } from "@material-ui/core";
-import { makeStyles } from "@material-ui/styles";
-import { TextInput, useModulesManager, useTranslations } from "@openimis/fe-core";
+import React, { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
+
+import { Box, CircularProgress, InputAdornment } from "@material-ui/core";
 import CheckOutlinedIcon from "@material-ui/icons/CheckOutlined";
 import clsx from "clsx";
+import { debounce } from "lodash";
 import ErrorOutlineOutlinedIcon from "@material-ui/icons/ErrorOutlineOutlined";
-import React, { useEffect, useRef } from "react";
 
-const useStyles = makeStyles((theme) => ({
-  validIcon: {
-    color: "green",
-  },
-  invalidIcon: {
-    color: theme.palette.error.main,
-  },
-}));
+import { TextInput, useModulesManager, useTranslations } from "@openimis/fe-core";
+import { useStyles } from "../../styles";
 
-const UniqueValueValidation = ({
+const ValidatedTextInput = ({
   action,
   className,
   clearAction,
@@ -80,4 +73,4 @@ const UniqueValueValidation = ({
   );
 };
 
-export default UniqueValueValidation;
+export default ValidatedTextInput;

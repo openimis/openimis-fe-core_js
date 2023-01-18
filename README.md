@@ -36,6 +36,7 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 - `Contributions`: generic component to open business components for contributions
 - `ControlledField`: field that is skipped based on module configuration
 - `TextInput`,`NumberInput`, `AmountInput` & `SelectInput`: generic input components for the various data types
+- `ValidatedTextInput`: generic input component which checks the uniqueness of entered data and gives the appropriate information about it
 - `FieldLabel`: formatting a label in a form
 - `FormattedMessage`: translated text (module/key)
 - `ProgressOrError`: display progress during component's asynchronous calls... and hide or diaply error message when asynchronous call returns

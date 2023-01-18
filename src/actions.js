@@ -27,7 +27,15 @@ const LANGUAGE_FULL_PROJECTION = () => ["name", "code", "sortOrder"];
 
 const MODULEPERMISSION_FULL_PROJECTION = () => ["modulePermsList{moduleName, permissions{permsName, permsValue}}"];
 
-export const baseApiUrl =  "/api";
+function getApiUrl() {
+  let _baseApiUrl = process.env.REACT_APP_API_URL ?? '/api';
+  if (_baseApiUrl.indexOf('/') !== 0) {
+    _baseApiUrl = `/${_baseApiUrl}`;
+  }
+  return _baseApiUrl;
+}
+
+export const baseApiUrl = getApiUrl();
 
 export function apiHeaders() {
   let headers = {

@@ -26,50 +26,82 @@ const ValidatedTextInput = ({
   required,
   validationError,
   value,
+  shouldValidate,
+  itemQueryIdentifier,
 }) => {
   const modulesManager = useModulesManager();
   const classes = useStyles();
   const dispatch = useDispatch();
   const { formatMessage } = useTranslations(module, modulesManager);
-
+  const shouldBeValidated = shouldValidate(value);
+  const queryVariables = { code: value };
   const debounceResponse = useRef(
-    debounce((value) => dispatch(action(modulesManager, { healthFacilityCode: value })), 800),
+    debounce((queryVariables) => dispatch(action(modulesManager, queryVariables)), 800),
   ).current;
 
   useEffect(() => {
-    if (value) debounceResponse(value);
-    return () => (!value || isValid) && dispatch(clearAction());
+    if (shouldBeValidated) {
+      queryVariables[itemQueryIdentifier] = value;
+      if (value) debounceResponse(queryVariables);
+      return () => (!value || isValid) && dispatch(clearAction());
+    } else {
+      return () => (!value || isValid) && dispatch(clearAction());
+    }
   }, [value]);
 
   return (
-    <TextInput
-      module={module}
-      className={className}
-      disabled={readOnly}
-      required={required}
-      label={label}
-      placeholder={placeholder}
-      error={validationError || (!isValidating && !isValid && value) ? formatMessage(codeTakenLabel) : null}
-      value={value}
-      inputProps={inputProps}
-      endAdornment={
-        <InputAdornment
-          position="end"
-          className={clsx(isValid && value && classes.validIcon, !isValid && value && classes.invalidIcon)}
-        >
-          <>
-            {isValidating && value && (
-              <Box mr={1}>
-                <CircularProgress size={20} />
-              </Box>
-            )}
-            {!isValidating && isValid && value && <CheckOutlinedIcon size={20} />}
-            {!isValidating && !isValid && value && <ErrorOutlineOutlinedIcon size={20} />}
-          </>
-        </InputAdornment>
-      }
-      onChange={onChange}
-    />
+    <>
+      {shouldBeValidated ? (
+        <TextInput
+          module={module}
+          className={className}
+          disabled={readOnly}
+          required={required}
+          label={label}
+          placeholder={placeholder}
+          error={validationError || (!isValidating && !isValid && value) ? formatMessage(codeTakenLabel) : null}
+          value={value}
+          inputProps={inputProps}
+          endAdornment={
+            <InputAdornment
+              position="end"
+              className={clsx(isValid && value && classes.validIcon, !isValid && value && classes.invalidIcon)}
+            >
+              <>
+                {isValidating && value && (
+                  <Box mr={1}>
+                    <CircularProgress size={20} />
+                  </Box>
+                )}
+                {!isValidating && isValid && value && <CheckOutlinedIcon size={20} />}
+                {!isValidating && !isValid && value && <ErrorOutlineOutlinedIcon size={20} />}
+              </>
+            </InputAdornment>
+          }
+          onChange={onChange}
+        />
+      ) : (
+        <TextInput
+          module={module}
+          label={label}
+          value={value}
+          readOnly={readOnly}
+          required={required}
+          onChange={onChange}
+          inputProps={inputProps}
+          endAdornment={
+            <InputAdornment
+              position="end"
+              className={classes.validIcon}
+            >
+              <>
+                { value && <CheckOutlinedIcon size={20} />}
+              </>
+            </InputAdornment>
+          }
+        />
+      )}
+    </>
   );
 };
 

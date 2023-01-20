@@ -32,7 +32,7 @@ function getApiUrl() {
   if (_baseApiUrl.indexOf('/') !== 0) {
     _baseApiUrl = `/${_baseApiUrl}`;
   }
-  return _baseApiUrl
+  return _baseApiUrl;
 }
 
 export const baseApiUrl = getApiUrl();

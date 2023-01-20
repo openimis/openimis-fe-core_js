@@ -34,7 +34,7 @@ const ValidatedTextInput = ({
   const dispatch = useDispatch();
   const { formatMessage } = useTranslations(module, modulesManager);
   const shouldBeValidated = shouldValidate(value);
-  const queryVariables = { code: value };
+  const queryVariables = {};
   const debounceResponse = useRef(
     debounce((queryVariables) => dispatch(action(modulesManager, queryVariables)), 800),
   ).current;

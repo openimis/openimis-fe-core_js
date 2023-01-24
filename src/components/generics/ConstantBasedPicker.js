@@ -45,7 +45,7 @@ class ConstantBasedPicker extends Component {
       readOnly = false,
       required = false,
     } = this.props;
-    const { value } = this.state?.value === undefined? {value: null}: this.state;
+    const value = this.state?.value ?? null;
     if (!withNull && value === null) return null;
     const options = withNull
       ? [

@@ -208,12 +208,16 @@ class Searcher extends Component {
     let prms = Object.keys(this.state.filters)
       .filter((f) => !!this.state.filters[f]["filter"])
       .map((f) => this.state.filters[f]["filter"]);
-    prms.push(`first: ${this.state.pageSize}`);
+    if (!this.state.beforeCursor && !this.state.afterCursor) {
+      prms.push(`first: ${this.state.pageSize}`);
+    }
     if (!!this.state.afterCursor) {
       prms.push(`after: "${this.state.afterCursor}"`);
+      prms.push(`first: ${this.state.pageSize}`);
     }
     if (!!this.state.beforeCursor) {
       prms.push(`before: "${this.state.beforeCursor}"`);
+      prms.push(`last: ${this.state.pageSize}`);
     }
     if (!!this.state.orderBy) {
       prms.push(`orderBy: ["${this.state.orderBy}"]`);

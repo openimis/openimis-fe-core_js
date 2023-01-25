@@ -285,7 +285,7 @@ export function logout() {
         }
         deleteRefreshTokenCookie {
           deleted
-        } 
+        }
       }
     `;
     await dispatch(graphqlMutation(mutation, {}));
@@ -421,4 +421,22 @@ export function deleteRole(role, clientMutationLabel, clientMutationDetails = nu
     clientMutationLabel,
     requestedDateTime,
   });
+}
+
+export function roleNameValidationCheck(mm, variables) {
+  return graphqlWithVariables(
+    `
+      query ($roleName: String!) {
+        isValid: validateRoleName(roleName: $roleName)
+      }
+    `,
+    variables,
+    `CORE_ROLE_NAME_VALIDATION_FIELDS`,
+  );
+}
+
+export function roleNameValidationClear() {
+  return (dispatch) => {
+    dispatch({ type: `CORE_ROLE_NAME_VALIDATION_FIELDS_CLEAR` });
+  };
 }

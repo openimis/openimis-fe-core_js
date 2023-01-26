@@ -42,7 +42,7 @@ class SelectInput extends Component {
       <Fragment>
         {!readOnly && (
           <FormControl required={required} fullWidth>
-            <InputLabel shrink={value !== undefined} className={classes.label}>
+            <InputLabel shrink={true} className={classes.label}>
               {strLabel ?? <FormattedMessage module={module} id={label} />}
             </InputLabel>
             <Select

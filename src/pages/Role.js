@@ -115,9 +115,13 @@ class Role extends Component {
 
   back = () => this.props.history.goBack();
 
-  isRequiredFieldsEmpty = () => (!!this.state.role && !!this.state.role.name ? false : true);
+  isRequiredFieldsEmpty = () => (!(!!this.state.role && !!this.state.role.name));
 
-  canSave = () => !this.isRequiredFieldsEmpty();
+  isFormValid = () => {
+    return this.props.isRoleNameValid && !this.props.isRoleNameValidating
+  }
+
+  canSave = () => !this.isRequiredFieldsEmpty() && this.isFormValid();
 
   onEditedChanged = (role) => this.setState({ role });
 
@@ -174,6 +178,8 @@ const mapStateToProps = (state, props) => ({
   submittingMutation: state.core.submittingMutation,
   mutation: state.core.mutation,
   confirmed: state.core.confirmed,
+  isRoleNameValid: state.core.validationFields?.roleName?.isValid,
+  isRoleNameValidating: state.core.validationFields?.roleName?.isValidating,
 });
 
 const mapDispatchToProps = (dispatch) => {

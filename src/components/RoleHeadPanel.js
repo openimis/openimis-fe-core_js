@@ -34,6 +34,7 @@ class RoleHeadPanel extends FormPanel {
           <Grid item className={classes.item}>
             <ValidatedTextInput
               itemQueryIdentifier="roleName"
+              codeTakenLabel={"core.roleManagement.duplicateButton.tooltip"}
               shouldValidate={this.shouldValidate}
               isValid={isRoleNameValid}
               validationError={roleNameValidationError}

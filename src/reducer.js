@@ -244,7 +244,54 @@ function reducer(
         ...state,
         fetchingRoleRights: false,
         errorRoleRights: formatServerError(action.payload),
-      };
+      };case "CORE_ROLE_NAME_VALIDATION_FIELDS_REQ":
+      return {
+        ...state,
+        validationFields: {
+          ...state.validationFields,
+          roleName: {
+            isValidating: true,
+            isValid: false,
+            validationError: null,
+        },
+      },
+    };
+    case "CORE_ROLE_NAME_VALIDATION_FIELDS_RESP":
+      return {
+        ...state,
+        validationFields: {
+          ...state.validationFields,
+          roleName: {
+            isValidating: false,
+            isValid: action.payload?.data.isValid,
+            validationError: formatGraphQLError(action.payload),
+        },
+      },
+    };
+    case "CORE_ROLE_NAME_VALIDATION_FIELDS_ERR":
+      return {
+        ...state,
+        validationFields: {
+          ...state.validationFields,
+          roleName: {
+            isValidating: false,
+            isValid: false,
+            validationError: formatServerError(action.payload),
+        },
+      },
+    };
+    case "CORE_ROLE_NAME_VALIDATION_FIELDS_CLEAR":
+      return {
+        ...state,
+        validationFields: {
+          ...state.validationFields,
+          roleName: {
+            isValidating: true,
+            isValid: false,
+            validationError: null,
+        },
+      },
+    };
     case "CORE_ROLE_MUTATION_REQ":
       return dispatchMutationReq(state, action);
     case "CORE_ROLE_MUTATION_ERR":

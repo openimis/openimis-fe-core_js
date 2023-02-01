@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
 import { Box, CircularProgress, InputAdornment } from "@material-ui/core";
@@ -9,6 +9,7 @@ import ErrorOutlineOutlinedIcon from "@material-ui/icons/ErrorOutlineOutlined";
 
 import { TextInput, useModulesManager, useTranslations } from "@openimis/fe-core";
 import { useStyles } from "../../styles";
+import { DEFAULT_DEBOUNCE_TIME } from "../../constants";
 
 const ValidatedTextInput = ({
   action,
@@ -35,14 +36,12 @@ const ValidatedTextInput = ({
   const { formatMessage } = useTranslations(module, modulesManager);
   const shouldBeValidated = shouldValidate(value);
   const queryVariables = {};
-  const debounceResponse = useRef(
-    debounce((queryVariables) => dispatch(action(modulesManager, queryVariables)), 800),
-  ).current;
+  const checkValidity = (queryVariables) => dispatch(action(modulesManager, queryVariables));
 
   useEffect(() => {
     if (shouldBeValidated) {
       queryVariables[itemQueryIdentifier] = value;
-      if (value) debounceResponse(queryVariables);
+      if (value) checkValidity(queryVariables);
       return () => (!value || isValid) && dispatch(clearAction());
     } else {
       return () => (!value || isValid) && dispatch(clearAction());
@@ -78,7 +77,7 @@ const ValidatedTextInput = ({
               </>
             </InputAdornment>
           }
-          onChange={onChange}
+          onChange={debounce(onChange, DEFAULT_DEBOUNCE_TIME)}
         />
       ) : (
         <TextInput
@@ -87,16 +86,11 @@ const ValidatedTextInput = ({
           value={value}
           readOnly={readOnly}
           required={required}
-          onChange={onChange}
+          onChange={debounce(onChange, DEFAULT_DEBOUNCE_TIME)}
           inputProps={inputProps}
           endAdornment={
-            <InputAdornment
-              position="end"
-              className={classes.validIcon}
-            >
-              <>
-                { value && <CheckOutlinedIcon size={20} />}
-              </>
+            <InputAdornment position="end" className={classes.validIcon}>
+              <>{value && <CheckOutlinedIcon size={20} />}</>
             </InputAdornment>
           }
         />

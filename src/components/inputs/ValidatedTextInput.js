@@ -29,6 +29,7 @@ const ValidatedTextInput = ({
   value,
   shouldValidate,
   itemQueryIdentifier,
+  additionalQueryArgs,
 }) => {
   const modulesManager = useModulesManager();
   const classes = useStyles();
@@ -41,6 +42,7 @@ const ValidatedTextInput = ({
   useEffect(() => {
     if (shouldBeValidated) {
       queryVariables[itemQueryIdentifier] = value;
+      if (additionalQueryArgs) Object.entries(additionalQueryArgs).map((arg) => (queryVariables[arg?.[0]] = arg?.[1]));
       if (value) checkValidity(queryVariables);
       return () => (!value || isValid) && dispatch(clearAction());
     } else {

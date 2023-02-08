@@ -12,6 +12,7 @@ import { useStyles } from "../../styles";
 import { DEFAULT_DEBOUNCE_TIME } from "../../constants";
 
 const ValidatedTextInput = ({
+  autoFocus,
   action,
   className,
   clearAction,
@@ -40,6 +41,7 @@ const ValidatedTextInput = ({
   const checkValidity = (queryVariables) => dispatch(action(modulesManager, queryVariables));
 
   useEffect(() => {
+    dispatch(clearAction());
     if (shouldBeValidated) {
       queryVariables[itemQueryIdentifier] = value;
       if (additionalQueryArgs) Object.entries(additionalQueryArgs).map((arg) => (queryVariables[arg?.[0]] = arg?.[1]));
@@ -55,6 +57,7 @@ const ValidatedTextInput = ({
       {shouldBeValidated ? (
         <TextInput
           module={module}
+          autoFocus={autoFocus}
           className={className}
           disabled={readOnly}
           required={required}
@@ -85,6 +88,7 @@ const ValidatedTextInput = ({
         <TextInput
           module={module}
           label={label}
+          autoFocus={autoFocus}
           value={value}
           readOnly={readOnly}
           required={required}

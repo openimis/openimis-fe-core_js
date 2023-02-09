@@ -1,24 +1,23 @@
-import React, {Fragment} from "react";
-import {formatMessage, FormattedMessage, FormPanel, TextInput, withModulesManager} from "@openimis/fe-core";
-import {Checkbox, Divider, FormControlLabel, Grid} from "@material-ui/core";
-import {injectIntl} from "react-intl";
-import {withStyles, withTheme} from "@material-ui/core/styles";
-import {ValidatedTextInput} from "../index";
+import React, { Fragment } from "react";
+import { formatMessage, FormattedMessage, FormPanel, TextInput, withModulesManager } from "@openimis/fe-core";
+import { Checkbox, Divider, FormControlLabel, Grid } from "@material-ui/core";
+import { withStyles, withTheme } from "@material-ui/core/styles";
+import { ValidatedTextInput } from "../index";
 import { connect } from "react-redux";
-import {roleNameValidationCheck, roleNameValidationClear} from "../actions";
+import { roleNameValidationCheck, roleNameValidationClear, roleNameSetValid } from "../actions";
 
 const styles = (theme) => ({
   item: theme.paper.item,
 });
 
 class RoleHeadPanel extends FormPanel {
-
   shouldValidate = (inputValue) => {
     const { savedRoleName } = this.props;
     return inputValue !== savedRoleName;
   };
   render() {
-    const { intl, classes, edited, isRequiredFieldsEmpty, isReadOnly, isRoleNameValid, roleNameValidationError } = this.props;
+    const { intl, classes, edited, isRequiredFieldsEmpty, isReadOnly, isRoleNameValid, roleNameValidationError } =
+      this.props;
     return (
       <Fragment>
         <Divider />
@@ -40,6 +39,7 @@ class RoleHeadPanel extends FormPanel {
               validationError={roleNameValidationError}
               action={roleNameValidationCheck}
               clearAction={roleNameValidationClear}
+              setValidAction={roleNameSetValid}
               module="core"
               label="roleManagement.roleName"
               value={!!edited && !!edited.name ? edited.name : ""}
@@ -88,10 +88,10 @@ class RoleHeadPanel extends FormPanel {
 }
 
 const mapStateToProps = (state) => ({
-    isRoleNameValid: state.core.validationFields?.roleName?.isValid,
-    isRoleNameValidating: state.core.validationFields?.roleName?.isValidating,
-    roleNameValidationError: state.core.validationFields?.roleName?.validationError,
-    savedRoleName: state.core?.role?.name,
-  });
+  isRoleNameValid: state.core.validationFields?.roleName?.isValid,
+  isRoleNameValidating: state.core.validationFields?.roleName?.isValidating,
+  roleNameValidationError: state.core.validationFields?.roleName?.validationError,
+  savedRoleName: state.core?.role?.name,
+});
 
 export default withModulesManager(connect(mapStateToProps)(withTheme(withStyles(styles)(RoleHeadPanel))));

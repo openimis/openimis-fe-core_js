@@ -440,3 +440,9 @@ export function roleNameValidationClear() {
     dispatch({ type: `CORE_ROLE_NAME_VALIDATION_FIELDS_CLEAR` });
   };
 }
+
+export function roleNameSetValid() {
+  return (dispatch) => {
+    dispatch({ type: `CORE_ROLE_NAME_VALIDATION_FIELDS_SET_VALID` });
+  };
+}

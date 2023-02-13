@@ -244,7 +244,8 @@ function reducer(
         ...state,
         fetchingRoleRights: false,
         errorRoleRights: formatServerError(action.payload),
-      };case "CORE_ROLE_NAME_VALIDATION_FIELDS_REQ":
+      };
+    case "CORE_ROLE_NAME_VALIDATION_FIELDS_REQ":
       return {
         ...state,
         validationFields: {
@@ -253,9 +254,9 @@ function reducer(
             isValidating: true,
             isValid: false,
             validationError: null,
+          },
         },
-      },
-    };
+      };
     case "CORE_ROLE_NAME_VALIDATION_FIELDS_RESP":
       return {
         ...state,
@@ -265,9 +266,9 @@ function reducer(
             isValidating: false,
             isValid: action.payload?.data.isValid,
             validationError: formatGraphQLError(action.payload),
+          },
         },
-      },
-    };
+      };
     case "CORE_ROLE_NAME_VALIDATION_FIELDS_ERR":
       return {
         ...state,
@@ -277,9 +278,9 @@ function reducer(
             isValidating: false,
             isValid: false,
             validationError: formatServerError(action.payload),
+          },
         },
-      },
-    };
+      };
     case "CORE_ROLE_NAME_VALIDATION_FIELDS_CLEAR":
       return {
         ...state,
@@ -289,9 +290,21 @@ function reducer(
             isValidating: true,
             isValid: false,
             validationError: null,
+          },
         },
-      },
-    };
+      };
+    case "CORE_ROLE_NAME_VALIDATION_FIELDS_SET_VALID":
+      return {
+        ...state,
+        validationFields: {
+          ...state.validationFields,
+          roleName: {
+            isValidating: false,
+            isValid: true,
+            validationError: null,
+          },
+        },
+      };
     case "CORE_ROLE_MUTATION_REQ":
       return dispatchMutationReq(state, action);
     case "CORE_ROLE_MUTATION_ERR":

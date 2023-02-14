@@ -336,7 +336,6 @@ function reducer(
         authError: formatServerError(action.payload),
       };
     }
-
     case "CORE_INITIALIZED":
       return {
         ...state,
@@ -346,6 +345,14 @@ function reducer(
       return {
         ...state,
         user: null,
+        mutations: [],
+        filtersCache: {},
+        roles: [],
+        rolesPageInfo: {},
+        rolesTotalCount: 0,
+        modulePermissions: [],
+        role: null,
+        roleRights: [],
       };
 
     default:

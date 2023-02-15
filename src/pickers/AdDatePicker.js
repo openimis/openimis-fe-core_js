@@ -38,6 +38,7 @@ class AdDatePicker extends Component {
     const {
       intl,
       classes,
+      disablePast,
       module,
       label,
       readOnly = false,
@@ -63,6 +64,7 @@ class AdDatePicker extends Component {
           label={!!label ? formatMessage(intl, module, label) : null}
           onChange={this.dateChange}
           reset={reset}
+          disablePast={disablePast}
         />
       </FormControl>
     );

@@ -12,26 +12,27 @@ import { useStyles } from "../../styles";
 import { DEFAULT_DEBOUNCE_TIME } from "../../constants";
 
 const ValidatedTextInput = ({
-  autoFocus,
   action,
-  setValidAction,
+  additionalQueryArgs,
+  autoFocus,
   className,
   clearAction,
   codeTakenLabel,
   inputProps,
   isValid,
   isValidating,
+  itemQueryIdentifier,
   label,
   module,
   onChange,
   placeholder,
   readOnly,
   required,
+  setValidAction,
+  shouldValidate,
+  type,
   validationError,
   value,
-  shouldValidate,
-  itemQueryIdentifier,
-  additionalQueryArgs,
 }) => {
   const modulesManager = useModulesManager();
   const classes = useStyles();
@@ -60,10 +61,11 @@ const ValidatedTextInput = ({
           module={module}
           autoFocus={autoFocus}
           className={className}
-          disabled={readOnly}
+          readOnly={readOnly}
           required={required}
           label={label}
           placeholder={placeholder}
+          type={type}
           error={validationError || (!isValidating && !isValid && value) ? formatMessage(codeTakenLabel) : null}
           value={value}
           inputProps={inputProps}
@@ -93,6 +95,7 @@ const ValidatedTextInput = ({
           value={value}
           readOnly={readOnly}
           required={required}
+          type={type}
           onChange={debounce(onChange, DEFAULT_DEBOUNCE_TIME)}
           inputProps={inputProps}
           endAdornment={

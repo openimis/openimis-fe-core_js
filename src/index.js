@@ -44,6 +44,7 @@ import Role from "./pages/Role";
 import reducer from "./reducer";
 import ErrorBoundary from "./helpers/ErrorBoundary";
 import ConfirmDialog from "./components/dialogs/ConfirmDialog";
+import SelectDialog from "./components/dialogs/SelectDialog";
 import {
   baseApiUrl,
   apiHeaders,
@@ -242,6 +243,7 @@ export {
   SearcherExport,
   Searcher,
   SearcherPane,
+  SelectDialog,
   ConstantBasedPicker,
   ErrorBoundary,
   useTranslations,

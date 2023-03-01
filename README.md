@@ -19,6 +19,7 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 - `JournalDrawer`: side bar in which mutation journal is displayed
 - `AlertDialog`: pop up (modal) dialog to display an alert message (one 'ok' button)
 - `ConfirmDialog`: pop up (modal) dialog to display a confirmation message (with 'cancel' / 'confirm' buttons)
+- `SelectDialog`: pop up (modal) dialog to display a message and take an action between two options (yes/no, do/do not, continue/go back) - with editable (through the props) button labels, message content and dialog title, without using Redux store and actions
 - `FataError`: page for non-recoverable backend access errors
 - `Help`: main menu entry for Help (link to manual)
 - `Logout`: main menu entry to logout

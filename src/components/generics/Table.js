@@ -107,21 +107,24 @@ class Table extends Component {
 
   isSelected = (i) => !!this.props.withSelection && !!this.state.selection[this.itemIdentifier(i)];
 
-  select = (i) => {
-    if (!this.props.withSelection) return;
-    let s = this.state.selection;
-    let id = this.itemIdentifier(i);
-    if (!!s[id]) {
-      delete s[id];
-    } else if (this.props.withSelection === "multiple") {
-      s[id] = i;
-    } else {
-      s = { [id]: i };
+  select = (i,e,route) => {
+    // block normal href only for left click
+    if (e.type === 'click') {   
+      if (!this.props.withSelection) return;
+      let s = this.state.selection;
+      let id = this.itemIdentifier(i);
+      if (!!s[id]) {
+        delete s[id];
+      } else if (this.props.withSelection === "multiple") {
+        s[id] = i;
+      } else {
+        s = { [id]: i };
+      }
+      this.setState(
+        { selection: s },
+        (e) => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection)),
+      );
     }
-    this.setState(
-      { selection: s },
-      (e) => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection)),
-    );
   };
 
   headerAction = (a) => (
@@ -263,7 +266,8 @@ class Table extends Component {
                 <TableRow
                   key={iidx}
                   selected={this.isSelected(i)}
-                  onClick={() => this.select(i)}
+                  onClick={(e) => this.select(i,e)}
+                  href={`${process.env.PUBLIC_URL || ""}${item.route}`}
                   onDoubleClick={onDoubleClick ? () => onDoubleClick(i) : undefined}
                   className={clsx(
                     classes.tableRow,

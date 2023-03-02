@@ -267,7 +267,7 @@ class Table extends Component {
                   key={iidx}
                   selected={this.isSelected(i)}
                   onClick={(e) => this.select(i,e)}
-                  href={`${process.env.PUBLIC_URL || ""}${item.route}`}
+                  href={`${process.env.PUBLIC_URL || ""}${i.route}`}
                   onDoubleClick={onDoubleClick ? () => onDoubleClick(i) : undefined}
                   className={clsx(
                     classes.tableRow,

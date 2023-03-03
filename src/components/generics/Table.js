@@ -125,7 +125,7 @@ class Table extends Component {
         (e) => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection)),
       );
     }
-    if (e.button === 1 ) {
+    if (e.nativeEvent.button === 1 ) {
       // middle mouse click
       onDoubleClick(i,true);
     }
@@ -271,6 +271,7 @@ class Table extends Component {
                   key={iidx}
                   selected={this.isSelected(i)}
                   onClick={(e) => this.select(i,e)}
+                  onContextMenu={onDoubleClick ? () => onDoubleClick(i,true) : undefined}
                   onDoubleClick={onDoubleClick ? () => onDoubleClick(i) : undefined}
                   className={clsx(
                     classes.tableRow,

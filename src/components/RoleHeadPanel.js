@@ -1,9 +1,17 @@
 import React, { Fragment } from "react";
-import { formatMessage, FormattedMessage, FormPanel, TextInput, withModulesManager } from "@openimis/fe-core";
+import { connect } from "react-redux";
+
 import { Checkbox, Divider, FormControlLabel, Grid } from "@material-ui/core";
 import { withStyles, withTheme } from "@material-ui/core/styles";
-import { ValidatedTextInput } from "../index";
-import { connect } from "react-redux";
+
+import {
+  formatMessage,
+  FormattedMessage,
+  FormPanel,
+  TextInput,
+  ValidatedTextInput,
+  withModulesManager,
+} from "@openimis/fe-core";
 import { roleNameValidationCheck, roleNameValidationClear, roleNameSetValid } from "../actions";
 
 const styles = (theme) => ({

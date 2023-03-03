@@ -107,7 +107,7 @@ class Table extends Component {
 
   isSelected = (i) => !!this.props.withSelection && !!this.state.selection[this.itemIdentifier(i)];
 
-  select = (i,e,route) => {
+  select = (i,e) => {
     // block normal href only for left click
     if (e.type === 'click') {   
       if (!this.props.withSelection) return;
@@ -124,6 +124,10 @@ class Table extends Component {
         { selection: s },
         (e) => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection)),
       );
+    }
+    if (e.button === 1 ) {
+      // middle mouse click
+      onDoubleClick(i,true);
     }
   };
 
@@ -267,7 +271,6 @@ class Table extends Component {
                   key={iidx}
                   selected={this.isSelected(i)}
                   onClick={(e) => this.select(i,e)}
-                  href={`${process.env.PUBLIC_URL || ""}${i.route}`}
                   onDoubleClick={onDoubleClick ? () => onDoubleClick(i) : undefined}
                   className={clsx(
                     classes.tableRow,

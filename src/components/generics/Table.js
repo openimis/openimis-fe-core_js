@@ -125,10 +125,6 @@ class Table extends Component {
         (e) => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection)),
       );
     }
-    if (e.nativeEvent.button === 1 ) {
-      // middle mouse click
-      onDoubleClick(i,true);
-    }
   };
 
   headerAction = (a) => (

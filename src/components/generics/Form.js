@@ -156,7 +156,7 @@ class Form extends Component {
           )}
         </form>
         {!this.state.dirty &&
-          !!add &&
+          !!add && !save && 
           withTooltip(
             <div className={classes.fab}>
               <Fab color="primary" onClick={add}>

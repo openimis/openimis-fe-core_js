@@ -59,5 +59,6 @@
   "core.exportSearchResult": "Export search result",
   "core.exportSearchResult.tooltip": "Export result",
   "LanguagePicker.label": "Language",
-  "core.Language.null": ""
+  "core.Language.null": "",
+  "core.NumberInput.notApplicable": "N/A"
 }

@@ -15,7 +15,7 @@ class TextInput extends Component {
     value: "",
   };
   componentDidMount() {
-    let value = this.props.value || "";
+    let value = this.props.value;
     if (!!this.props.formatInput) {
       value = this.props.formatInput(value);
     }
@@ -25,7 +25,7 @@ class TextInput extends Component {
   }
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (prevProps.reset !== this.props.reset || prevProps.value !== this.props.value) {
-      let value = this.props.value || "";
+      let value = this.props.value;
       if (!!this.props.formatInput) {
         value = this.props.formatInput(value);
       }

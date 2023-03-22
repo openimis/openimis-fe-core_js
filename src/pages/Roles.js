@@ -31,6 +31,7 @@ import {
   RIGHT_ROLE_DUPLICATE,
   RIGHT_ROLE_DELETE,
   QUERY_STRING_DUPLICATE,
+  MODULE_NAME,
 } from "../constants";
 import AddIcon from "@material-ui/icons/Add";
 import EditIcon from "@material-ui/icons/Edit";
@@ -270,9 +271,8 @@ class Roles extends Component {
   isOnDoubleClickEnabled = (role) => !this.isRowDisabled(_, role);
 
   componentDidMount = () => {
-    const moduleName = "core";
     const { module } = this.props;
-    if (module !== moduleName) this.props.clearCurrentPaginationPage();
+    if (module !== MODULE_NAME) this.props.clearCurrentPaginationPage();
   };
 
   render() {

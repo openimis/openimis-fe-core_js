@@ -1,9 +1,9 @@
 import React, { Component, Fragment } from "react";
-import { connect } from "react-redux";
-import { bindActionCreators } from "redux";
-import { injectIntl } from "react-intl";
 import _ from "lodash";
-import { withTheme, withStyles } from "@material-ui/core/styles";
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
+import { injectIntl } from "react-intl";
+
 import {
   Grid,
   Paper,
@@ -15,17 +15,19 @@ import {
   MenuItem,
   CircularProgress,
 } from "@material-ui/core";
+import { withTheme, withStyles } from "@material-ui/core/styles";
 import MoreHoriz from "@material-ui/icons/MoreHoriz";
+
+import { cacheFilters, saveCurrentPaginationPage } from "../../actions";
+import { formatMessage } from "../../helpers/i18n";
+import { sort, formatSorter } from "../../helpers/api";
+import withModulesManager from "../../helpers/modules";
 import SearcherExport from "./SearcherExport";
 import SearcherPane from "./SearcherPane";
 import Contributions from "./Contributions";
 import FormattedMessage from "./FormattedMessage";
 import ProgressOrError from "./ProgressOrError";
 import Table from "./Table";
-import withModulesManager from "../../helpers/modules";
-import { formatMessage } from "../../helpers/i18n";
-import { sort, formatSorter } from "../../helpers/api";
-import { cacheFilters } from "../../actions";
 
 const styles = (theme) => ({
   root: {
@@ -204,6 +206,9 @@ class Searcher extends Component {
   }
 
   filtersToQueryParams = () => {
+    const { page, afterCursor, beforeCursor } = this.state;
+    const { module, saveCurrentPaginationPage } = this.props;
+    saveCurrentPaginationPage(page, afterCursor, beforeCursor, module);
     if (this.props.filtersToQueryParams) return this.props.filtersToQueryParams(this.state);
     let prms = Object.keys(this.state.filters)
       .filter((f) => !!this.state.filters[f]["filter"])
@@ -260,9 +265,9 @@ class Searcher extends Component {
   applyFilters = () => {
     this.setState(
       (state, props) => ({
-        page: 0,
-        afterCursor: null,
-        beforeCursor: null,
+        page: props.paginationPage || 0,
+        afterCursor: props.afterCursor || null,
+        beforeCursor: props.beforeCursor || null,
         clearAll: state.clearAll + 1,
       }),
       this._cacheAndApply
@@ -510,10 +515,13 @@ class Searcher extends Component {
 
 const mapStateToProps = (state) => ({
   filtersCache: !!state.core && state.core.filtersCache,
+  paginationPage: state.core?.savedPagination?.paginationPage,
+  afterCursor: state.core?.savedPagination?.afterCursor,
+  beforeCursor: state.core?.savedPagination?.beforeCursor,
 });
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ cacheFilters }, dispatch);
+  return bindActionCreators({ cacheFilters, saveCurrentPaginationPage }, dispatch);
 };
 
 export default withModulesManager(

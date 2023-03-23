@@ -39,6 +39,10 @@ function reducer(
     errorRoleRights: null,
     isInitialized: false,
     authError: null,
+    paginationPage: 0,
+    afterCursor: null,
+    beforeCursor: null,
+    module: null,
   },
   action,
 ) {
@@ -354,7 +358,26 @@ function reducer(
         role: null,
         roleRights: [],
       };
-
+    case "CORE_PAGINATION_PAGE":
+      return {
+        ...state,
+        savedPagination: {
+          paginationPage: action.payload?.page,
+          afterCursor: action.payload?.afterCursor,
+          beforeCursor: action.payload?.beforeCursor,
+          module: action.payload?.module,
+        },
+      };
+    case "CORE_PAGINATION_PAGE_CLEAR":
+      return {
+        ...state,
+        savedPagination: {
+          paginationPage: 0,
+          afterCursor: null,
+          beforeCursor: null,
+          module: null,
+        },
+      };
     default:
       return state;
   }

@@ -96,6 +96,8 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 - `core.AppBar`: ability to add entries in the AppBar (known usage: insuree Enquiry component)
 - `core.MainMenu`: ability to add main menu entries from modules (known usage: claim, insuree,...)
 - `core.Router`: ability to register routes in client-side routing (known usage: claim, insuree,...)
+- `core.UnauthenticatedRouter`: ability to register routes in client-side routing for pages that don't require user authentication
+- `core.LoginPage`: ability to add components to the menu login page
 
 ## Contributions
 

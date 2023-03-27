@@ -14,7 +14,7 @@ class NumberInput extends Component {
     if (!v && displayNa && !this.state.isEdited) return formatMessage(this.props.intl, this.props.module, "core.NumberInput.notApplicable");
     if (v === 0 && displayZero) return '0';
     if (v == 0 && !displayZero) return '';
-    if (!v) return "";
+    if (!v || isNaN(v)) return "";
     return parseFloat(v);
   };
 

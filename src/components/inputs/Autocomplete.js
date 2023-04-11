@@ -36,6 +36,7 @@ const Autocomplete = (props) => {
     placeholder,
     onInputChange,
     multiple = false,
+    renderInput,
   } = props;
   const modulesManager = useModulesManager();
   const minCharLookup = modulesManager.getConf("fe-admin", "usersMinCharLookup", 2);
@@ -92,16 +93,20 @@ const Autocomplete = (props) => {
       filterOptions={filterOptions}
       filterSelectedOptions={filterSelectedOptions}
       onInputChange={(__, query) => handleInputChange(query)}
-      renderInput={(inputProps) => (
-        <TextField
-          {...inputProps}
-          variant="standard"
-          required={required}
-          InputLabelProps={{ shrink: value !== undefined }}
-          label={withLabel && (label || formatMessage("label"))}
-          placeholder={!readOnly && withPlaceholder && (placeholder || formatMessage("placeholder"))}
-        />
-      )}
+      renderInput={
+        !!renderInput
+          ? renderInput
+          : (inputProps) => (
+              <TextField
+                {...inputProps}
+                variant="standard"
+                required={required}
+                InputLabelProps={{ shrink: value !== undefined }}
+                label={withLabel && (label || formatMessage("label"))}
+                placeholder={!readOnly && withPlaceholder && (placeholder || formatMessage("placeholder"))}
+              />
+            )
+      }
     />
   );
 };

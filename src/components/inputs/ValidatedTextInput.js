@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 
 import { Box, CircularProgress, InputAdornment } from "@material-ui/core";
@@ -33,6 +33,8 @@ const ValidatedTextInput = ({
   type,
   validationError,
   value,
+  invalidValueFormatLabel,
+  invalidValueFormat,
 }) => {
   const modulesManager = useModulesManager();
   const classes = useStyles();
@@ -41,6 +43,16 @@ const ValidatedTextInput = ({
   const shouldBeValidated = shouldValidate(value);
   const queryVariables = {};
   const checkValidity = (queryVariables) => dispatch(action(modulesManager, queryVariables));
+  const checkError = () => {
+    if (validationError || (!isValidating && !isValid && value)) {
+      return formatMessage(codeTakenLabel);
+    }
+    if (invalidValueFormat) {
+      return formatMessage(invalidValueFormatLabel);
+    }
+    return null;
+  };
+  const error = checkError();
 
   useEffect(() => {
     if (shouldBeValidated) {
@@ -66,22 +78,19 @@ const ValidatedTextInput = ({
           label={label}
           placeholder={placeholder}
           type={type}
-          error={validationError || (!isValidating && !isValid && value) ? formatMessage(codeTakenLabel) : null}
+          error={error}
           value={value}
           inputProps={inputProps}
           endAdornment={
-            <InputAdornment
-              position="end"
-              className={clsx(isValid && value && classes.validIcon, !isValid && value && classes.invalidIcon)}
-            >
+            <InputAdornment position="end" className={clsx(!error && classes.validIcon, error && classes.invalidIcon)}>
               <>
                 {isValidating && value && (
                   <Box mr={1}>
                     <CircularProgress size={20} />
                   </Box>
                 )}
-                {!isValidating && isValid && value && <CheckOutlinedIcon size={20} />}
-                {!isValidating && !isValid && value && <ErrorOutlineOutlinedIcon size={20} />}
+                {value && !error && <CheckOutlinedIcon size={20} />}
+                {value && error && <ErrorOutlineOutlinedIcon size={20} />}
               </>
             </InputAdornment>
           }
@@ -94,13 +103,22 @@ const ValidatedTextInput = ({
           autoFocus={autoFocus}
           value={value}
           readOnly={readOnly}
+          error={error}
           required={required}
           type={type}
           onChange={debounce(onChange, DEFAULT_DEBOUNCE_TIME)}
           inputProps={inputProps}
           endAdornment={
-            <InputAdornment position="end" className={classes.validIcon}>
-              <>{value && <CheckOutlinedIcon size={20} />}</>
+            <InputAdornment position="end" className={clsx(!error && classes.validIcon, error && classes.invalidIcon)}>
+              <>
+                {isValidating && value && (
+                  <Box mr={1}>
+                    <CircularProgress size={20} />
+                  </Box>
+                )}
+                {value && !error && <CheckOutlinedIcon size={20} />}
+                {value && error && <ErrorOutlineOutlinedIcon size={20} />}
+              </>
             </InputAdornment>
           }
         />

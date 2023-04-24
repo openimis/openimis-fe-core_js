@@ -446,3 +446,15 @@ export function roleNameSetValid() {
     dispatch({ type: `CORE_ROLE_NAME_VALIDATION_FIELDS_SET_VALID` });
   };
 }
+
+export function saveCurrentPaginationPage(page, afterCursor, beforeCursor, module) {
+  return (dispatch) => {
+    dispatch({ type: "CORE_PAGINATION_PAGE", payload: { page, afterCursor, beforeCursor, module} });
+  };
+}
+
+export function clearCurrentPaginationPage() {
+  return (dispatch) => {
+    dispatch({ type: "CORE_PAGINATION_PAGE_CLEAR" })
+  }
+}

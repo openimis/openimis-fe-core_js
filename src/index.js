@@ -55,7 +55,8 @@ import {
   coreAlert,
   coreConfirm,
   fetchMutation,
-  prepareMutation
+  prepareMutation,
+  clearCurrentPaginationPage,
 } from "./actions";
 import {
   formatMessage,
@@ -174,6 +175,7 @@ export {
   downloadExport,
   coreAlert,
   coreConfirm,
+  clearCurrentPaginationPage,
   openBlob,
   sort,
   formatSorter,

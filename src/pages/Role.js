@@ -161,6 +161,7 @@ class Role extends Component {
             isReadOnly={!!this.state.isSystemRole || !rights.includes(RIGHT_ROLE_UPDATE)}
             reset={this.state.reset}
             roleUuid={roleUuid}
+            openDirty={rights.includes(RIGHT_ROLE_UPDATE) ? this.save : null}
           />
         </div>
       )

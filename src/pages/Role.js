@@ -136,6 +136,7 @@ class Role extends Component {
 
     if (!_.isEqual(propsRole, stateRole)) return true;
     if (!_.isEqual(_.sortBy(convertedRoleRights), _.sortBy(roleRights))) return true;
+
     return false;
   };
 

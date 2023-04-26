@@ -1,4 +1,11 @@
 import React, { Component } from "react";
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
+import { injectIntl } from "react-intl";
+import _ from "lodash";
+
+import { withTheme, withStyles } from "@material-ui/core/styles";
+
 import {
   withModulesManager,
   withHistory,
@@ -9,14 +16,11 @@ import {
   coreConfirm,
   Helmet,
 } from "@openimis/fe-core";
-import { injectIntl } from "react-intl";
-import { bindActionCreators } from "redux";
-import { connect } from "react-redux";
-import { withTheme, withStyles } from "@material-ui/core/styles";
 import { createRole, updateRole, fetchRole, fetchRoleRights } from "../actions";
+import { RIGHT_ROLE_SEARCH, RIGHT_ROLE_CREATE, RIGHT_ROLE_UPDATE, QUERY_STRING_DUPLICATE } from "../constants";
+import { prepareForComparison } from "../helpers/utils";
 import RoleHeadPanel from "../components/RoleHeadPanel";
 import RoleRightsPanel from "../components/RoleRightsPanel";
-import { RIGHT_ROLE_SEARCH, RIGHT_ROLE_CREATE, RIGHT_ROLE_UPDATE, QUERY_STRING_DUPLICATE } from "../constants";
 
 const styles = (theme) => ({
   page: theme.page,
@@ -71,6 +75,7 @@ class Role extends Component {
       this.props.journalize(this.props.mutation);
       if (!!this.state.role.uuid && !this.state.isDuplicate) {
         this.props.fetchRole([`uuid: "${this.state.role.uuid}"`]);
+        this.props.fetchRoleRights([`role_Uuid: "${this.props.roleUuid}"`]);
       } else {
         this.setState({ isDuplicate: false }, () =>
           this.props.fetchRole([`clientMutationId: "${this.props.mutation.clientMutationId}"`]),
@@ -115,13 +120,26 @@ class Role extends Component {
 
   back = () => this.props.history.goBack();
 
-  isRequiredFieldsEmpty = () => (!(!!this.state.role && !!this.state.role.name));
+  isRequiredFieldsEmpty = () => !(!!this.state.role && !!this.state.role.name);
 
   isFormValid = () => {
-    return this.props.isRoleNameValid && !this.props.isRoleNameValidating
-  }
+    return this.props.isRoleNameValid && !this.props.isRoleNameValidating;
+  };
 
-  canSave = () => !this.isRequiredFieldsEmpty() && this.isFormValid();
+  doesRoleChange = () => {
+    const { roleRights } = this.state.role;
+    const { stateRole, propsRole, convertedRoleRights } = prepareForComparison(
+      this.state.role,
+      this.props.role,
+      this.props.roleRights,
+    );
+
+    if (!_.isEqual(propsRole, stateRole)) return true;
+    if (!_.isEqual(_.sortBy(convertedRoleRights), _.sortBy(roleRights))) return true;
+    return false;
+  };
+
+  canSave = () => !this.isRequiredFieldsEmpty() && this.isFormValid() && this.doesRoleChange();
 
   onEditedChanged = (role) => this.setState({ role });
 

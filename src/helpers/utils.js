@@ -7,3 +7,18 @@ export const ensureArray = (maybeArray) => {
     return [];
   }
 };
+
+export const prepareForComparison = (stateRole, propsRole, roleRights) => {
+  const tempStateRole = { ...stateRole };
+  delete tempStateRole.roleRights;
+
+  const tempPropsRole = { ...propsRole, isSystem: !!propsRole?.isSystem };
+
+  const tempRoleRights = roleRights?.map((right) => right?.rightId);
+
+  return {
+    stateRole: tempStateRole,
+    propsRole: tempPropsRole,
+    convertedRoleRights: tempRoleRights || [],
+  };
+};

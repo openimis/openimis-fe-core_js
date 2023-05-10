@@ -3,6 +3,7 @@ import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
 import _ from "lodash";
+import clsx from "clsx";
 
 import { withTheme, withStyles } from "@material-ui/core/styles";
 
@@ -24,6 +25,7 @@ import RoleRightsPanel from "../components/RoleRightsPanel";
 
 const styles = (theme) => ({
   page: theme.page,
+  locked: theme.page.locked,
 });
 
 class Role extends Component {
@@ -34,6 +36,7 @@ class Role extends Component {
       roleRights: [],
     },
     reset: 0,
+    isLocked: false,
   };
 
   componentDidMount() {
@@ -104,6 +107,10 @@ class Role extends Component {
     } else if (!!role.id && this.state.isDuplicate) {
       delete role["id"];
       delete role["uuid"];
+      this.setState((state) => ({
+        ...state,
+        isLocked: true,
+      }));
       createRole(
         role,
         formatMessageWithValues(intl, "core", "roleManagement.DuplicateRole.mutationLabel", {
@@ -111,6 +118,10 @@ class Role extends Component {
         }),
       );
     } else {
+      this.setState((state) => ({
+        ...state,
+        isLocked: true,
+      }));
       createRole(
         role,
         formatMessageWithValues(intl, "core", "roleManagement.CreateRole.mutationLabel", this.titleParams(role)),
@@ -120,11 +131,11 @@ class Role extends Component {
 
   back = () => this.props.history.goBack();
 
+  isFormLocked = () => this.state.isLocked;
+
   isRequiredFieldsEmpty = () => !(!!this.state.role && !!this.state.role.name);
 
-  isFormValid = () => {
-    return this.props.isRoleNameValid && !this.props.isRoleNameValidating;
-  };
+  isFormValid = () => this.props.isRoleNameValid && !this.props.isRoleNameValidating;
 
   doesRoleChange = () => {
     const { roleRights } = this.state.role;
@@ -140,7 +151,7 @@ class Role extends Component {
     return false;
   };
 
-  canSave = () => !this.isRequiredFieldsEmpty() && this.isFormValid() && this.doesRoleChange();
+  canSave = () => !this.isRequiredFieldsEmpty() && this.isFormValid() && this.doesRoleChange() && !this.isFormLocked();
 
   onEditedChanged = (role) => this.setState({ role });
 
@@ -151,7 +162,7 @@ class Role extends Component {
     return (
       rights.includes(RIGHT_ROLE_SEARCH) &&
       rights.includes(RIGHT_ROLE_CREATE) && (
-        <div className={classes.page}>
+        <div className={clsx(classes.page, this.state.isLocked && classes.locked)}>
           <Helmet
             title={formatMessageWithValues(
               this.props.intl,
@@ -177,7 +188,7 @@ class Role extends Component {
               "core",
               `roleManagement.saveButton.tooltip.${this.canSave() ? "enabled" : "disabled"}`,
             )}
-            isReadOnly={!!this.state.isSystemRole || !rights.includes(RIGHT_ROLE_UPDATE)}
+            isReadOnly={!!this.state.isSystemRole || !rights.includes(RIGHT_ROLE_UPDATE) || this.state.isLocked}
             reset={this.state.reset}
             roleUuid={roleUuid}
             openDirty={rights.includes(RIGHT_ROLE_UPDATE) ? this.save : null}

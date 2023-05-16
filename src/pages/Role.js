@@ -1,4 +1,12 @@
 import React, { Component } from "react";
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
+import { injectIntl } from "react-intl";
+import _ from "lodash";
+import clsx from "clsx";
+
+import { withTheme, withStyles } from "@material-ui/core/styles";
+
 import {
   withModulesManager,
   withHistory,
@@ -9,17 +17,15 @@ import {
   coreConfirm,
   Helmet,
 } from "@openimis/fe-core";
-import { injectIntl } from "react-intl";
-import { bindActionCreators } from "redux";
-import { connect } from "react-redux";
-import { withTheme, withStyles } from "@material-ui/core/styles";
 import { createRole, updateRole, fetchRole, fetchRoleRights } from "../actions";
+import { RIGHT_ROLE_SEARCH, RIGHT_ROLE_CREATE, RIGHT_ROLE_UPDATE, QUERY_STRING_DUPLICATE } from "../constants";
+import { prepareForComparison } from "../helpers/utils";
 import RoleHeadPanel from "../components/RoleHeadPanel";
 import RoleRightsPanel from "../components/RoleRightsPanel";
-import { RIGHT_ROLE_SEARCH, RIGHT_ROLE_CREATE, RIGHT_ROLE_UPDATE, QUERY_STRING_DUPLICATE } from "../constants";
 
 const styles = (theme) => ({
   page: theme.page,
+  locked: theme.page.locked,
 });
 
 class Role extends Component {
@@ -30,6 +36,7 @@ class Role extends Component {
       roleRights: [],
     },
     reset: 0,
+    isLocked: false,
   };
 
   componentDidMount() {
@@ -71,6 +78,7 @@ class Role extends Component {
       this.props.journalize(this.props.mutation);
       if (!!this.state.role.uuid && !this.state.isDuplicate) {
         this.props.fetchRole([`uuid: "${this.state.role.uuid}"`]);
+        this.props.fetchRoleRights([`role_Uuid: "${this.props.roleUuid}"`]);
       } else {
         this.setState({ isDuplicate: false }, () =>
           this.props.fetchRole([`clientMutationId: "${this.props.mutation.clientMutationId}"`]),
@@ -99,6 +107,10 @@ class Role extends Component {
     } else if (!!role.id && this.state.isDuplicate) {
       delete role["id"];
       delete role["uuid"];
+      this.setState((state) => ({
+        ...state,
+        isLocked: true,
+      }));
       createRole(
         role,
         formatMessageWithValues(intl, "core", "roleManagement.DuplicateRole.mutationLabel", {
@@ -106,6 +118,10 @@ class Role extends Component {
         }),
       );
     } else {
+      this.setState((state) => ({
+        ...state,
+        isLocked: true,
+      }));
       createRole(
         role,
         formatMessageWithValues(intl, "core", "roleManagement.CreateRole.mutationLabel", this.titleParams(role)),
@@ -115,13 +131,27 @@ class Role extends Component {
 
   back = () => this.props.history.goBack();
 
-  isRequiredFieldsEmpty = () => (!(!!this.state.role && !!this.state.role.name));
+  isFormLocked = () => this.state.isLocked;
 
-  isFormValid = () => {
-    return this.props.isRoleNameValid && !this.props.isRoleNameValidating
-  }
+  isRequiredFieldsEmpty = () => !(!!this.state.role && !!this.state.role.name);
 
-  canSave = () => !this.isRequiredFieldsEmpty() && this.isFormValid();
+  isFormValid = () => this.props.isRoleNameValid && !this.props.isRoleNameValidating;
+
+  doesRoleChange = () => {
+    const { roleRights } = this.state.role;
+    const { stateRole, propsRole, convertedRoleRights } = prepareForComparison(
+      this.state.role,
+      this.props.role,
+      this.props.roleRights,
+    );
+
+    if (!_.isEqual(propsRole, stateRole)) return true;
+    if (!_.isEqual(_.sortBy(convertedRoleRights), _.sortBy(roleRights))) return true;
+
+    return false;
+  };
+
+  canSave = () => !this.isRequiredFieldsEmpty() && this.isFormValid() && this.doesRoleChange() && !this.isFormLocked();
 
   onEditedChanged = (role) => this.setState({ role });
 
@@ -132,7 +162,7 @@ class Role extends Component {
     return (
       rights.includes(RIGHT_ROLE_SEARCH) &&
       rights.includes(RIGHT_ROLE_CREATE) && (
-        <div className={classes.page}>
+        <div className={clsx(classes.page, this.state.isLocked && classes.locked)}>
           <Helmet
             title={formatMessageWithValues(
               this.props.intl,
@@ -158,7 +188,7 @@ class Role extends Component {
               "core",
               `roleManagement.saveButton.tooltip.${this.canSave() ? "enabled" : "disabled"}`,
             )}
-            isReadOnly={!!this.state.isSystemRole || !rights.includes(RIGHT_ROLE_UPDATE)}
+            isReadOnly={!!this.state.isSystemRole || !rights.includes(RIGHT_ROLE_UPDATE) || this.state.isLocked}
             reset={this.state.reset}
             roleUuid={roleUuid}
             openDirty={rights.includes(RIGHT_ROLE_UPDATE) ? this.save : null}

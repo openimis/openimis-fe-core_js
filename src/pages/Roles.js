@@ -57,6 +57,11 @@ class RawRoleFilter extends Component {
     return !!filters[k] ? filters[k].value : null;
   };
 
+  _filterTextFieldValue = (k) => {
+    const { filters } = this.props;
+    return !!filters[k] ? filters[k].value : "";
+  };
+
   _onChangeFilter = (k, v) => {
     this.props.onChangeFilters([
       {
@@ -95,7 +100,7 @@ class RawRoleFilter extends Component {
           <TextInput
             module="core"
             label="roleManagement.roleName"
-            value={this._filterValue("name")}
+            value={this._filterTextFieldValue("name")}
             onChange={(v) => this._onChangeStringFilter("name", v, CONTAINS_LOOKUP)}
           />
         </Grid>

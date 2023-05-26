@@ -35,6 +35,7 @@ const Autocomplete = (props) => {
     filterSelectedOptions,
     placeholder,
     onInputChange,
+    setCurrentString,
     multiple = false,
     renderInput,
   } = props;
@@ -45,6 +46,8 @@ const Autocomplete = (props) => {
   const [resetKey, setResetKey] = useState(Date.now());
 
   const handleInputChange = useDebounceCb((searchString) => {
+    setCurrentString && setCurrentString(searchString);
+
     if (open && (!searchString || searchString.length > minCharLookup)) {
       onInputChange(searchString);
     }

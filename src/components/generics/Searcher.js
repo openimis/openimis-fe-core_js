@@ -86,9 +86,9 @@ class SelectionMenu extends Component {
             <Button onClick={(e) => this.action(i.action)}>{i.text}</Button>
           </Grid>
         ))}
-        {this.props.exportable && (<SearcherExport 
-          selection={this.props.selection} 
-          filters={this.props.filters} 
+        {this.props.exportable && (<SearcherExport
+          selection={this.props.selection}
+          filters={this.props.filters}
           exportFetch={this.props.exportFetch}
           exportFields={this.props.exportFields}
           exportFieldsColumns={this.props.exportFieldsColumns}
@@ -121,7 +121,7 @@ class SelectionMenu extends Component {
             </MenuItem>
           ))}
           {this.props.exportable && (
-            <SearcherExport 
+            <SearcherExport
               selection={this.props.selection} filters={this.props.filters} exportFetch={this.props.exportFetch}
               exportFields={this.props.exportFields} exportFieldsColumns={this.props.exportFieldsColumns}
             />)}
@@ -265,9 +265,9 @@ class Searcher extends Component {
   applyFilters = () => {
     this.setState(
       (state, props) => ({
-        page: props.paginationPage || 0,
-        afterCursor: props.afterCursor || null,
-        beforeCursor: props.beforeCursor || null,
+        page: 0,
+        afterCursor: null,
+        beforeCursor: null,
         clearAll: state.clearAll + 1,
       }),
       this._cacheAndApply
@@ -449,7 +449,7 @@ class Searcher extends Component {
                   </Grid>
                 </Grid>
                 <Grid container alignItems="center" item xs={4} className={classes.paperHeader}>
-                  {fetchedItems && (  
+                  {fetchedItems && (
                     <Grid container direction="row" justify="flex-end" className={classes.paperHeaderAction}>
                       <StyledSelectionMenu
                         canSelectAll={canSelectAll}

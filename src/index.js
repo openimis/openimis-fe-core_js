@@ -18,6 +18,7 @@ import PagedDataHandler from "./components/generics/PagedDataHandler";
 import SelectInput from "./components/inputs/SelectInput";
 import TextInput from "./components/inputs/TextInput";
 import ValidatedTextInput from "./components/inputs/ValidatedTextInput";
+import ValidatedTextAreaInput from "./components/inputs/ValidatedTextAreaInput";
 import TextAreaInput from "./components/inputs/TextAreaInput";
 import AmountInput from "./components/inputs/AmountInput";
 import NumberInput from "./components/inputs/NumberInput";
@@ -225,6 +226,7 @@ export {
   SelectInput,
   TextInput,
   ValidatedTextInput,
+  ValidatedTextAreaInput,
   TextAreaInput,
   AmountInput,
   FakeInput,

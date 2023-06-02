@@ -108,21 +108,24 @@ class Table extends Component {
 
   isSelected = (i) => !!this.props.withSelection && !!this.state.selection[this.itemIdentifier(i)];
 
-  select = (i) => {
-    if (!this.props.withSelection) return;
-    let s = this.state.selection;
-    let id = this.itemIdentifier(i);
-    if (!!s[id]) {
-      delete s[id];
-    } else if (this.props.withSelection === "multiple") {
-      s[id] = i;
-    } else {
-      s = { [id]: i };
+  select = (i,e) => {
+    // block normal href only for left click
+    if (e.type === 'click') {   
+      if (!this.props.withSelection) return;
+      let s = this.state.selection;
+      let id = this.itemIdentifier(i);
+      if (!!s[id]) {
+        delete s[id];
+      } else if (this.props.withSelection === "multiple") {
+        s[id] = i;
+      } else {
+        s = { [id]: i };
+      }
+      this.setState(
+        { selection: s },
+        (e) => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection)),
+      );
     }
-    this.setState(
-      { selection: s },
-      (e) => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection)),
-    );
   };
 
   headerAction = (a) => (
@@ -238,7 +241,15 @@ class Table extends Component {
                           justifyContent={aligns.length > idx ? aligns[idx] : "left"}
                         >
                           <Box>
+                            {typeof h === 'function' ? (
+                              <Box>
+                              {() => (h(this.state, this.props))}
+                              </Box>
+                            ): ( 
                             <FormattedMessage module={module} id={h} />
+                            ) 
+                            }
+                           
                           </Box>
                           {headerActions.length > idx ? this.headerAction(headerActions[idx][1]) : null}
                         </Box>
@@ -253,6 +264,7 @@ class Table extends Component {
             {items &&
               items.length > 0 &&
               items.map((i, iidx) => (
+<<<<<<< HEAD
                     <TableRow
                       key={iidx}
                       selected={this.isSelected(i)}
@@ -287,6 +299,43 @@ class Table extends Component {
                           );
                         })}
                     </TableRow>
+=======
+                <TableRow
+                  key={iidx}
+                  selected={this.isSelected(i)}
+                  onClick={(e) => this.select(i,e)}
+                  onContextMenu={onDoubleClick ? () => onDoubleClick(i,true) : undefined}
+                  onDoubleClick={onDoubleClick ? () => onDoubleClick(i) : undefined}
+                  className={clsx(
+                    classes.tableRow,
+                    !!rowLocked && rowLocked(i) ? classes.tableLockedRow : null,
+                    !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedRow : null,
+                    !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltRow : null,
+                    !!rowDisabled && rowDisabled(i) ? classes.tableDisabledRow : null,
+                    !!onDoubleClick && classes.clickable,
+                  )}
+                >
+                  {localItemFormatters &&
+                    localItemFormatters.map((f, fidx) => {
+                      if (colSpans.length > fidx && !colSpans[fidx]) return null;
+                      return (
+                        <TableCell
+                          colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
+                          className={clsx(
+                            !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
+                            !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
+                            !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
+                            !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
+                            aligns.length > fidx && classes[aligns[fidx]],
+                          )}
+                          key={`v-${iidx}-${fidx}`}
+                        >
+                          {f(i, iidx)}
+                        </TableCell>
+                      );
+                    })}
+                </TableRow>
+>>>>>>> 5afb7e64cdad9352f2efa6c4c123c1fa8994a7eb
               ))}
           </TableBody>
 

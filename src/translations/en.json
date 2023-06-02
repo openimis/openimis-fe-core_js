@@ -24,7 +24,7 @@
   "core.roleManagement.DeleteRole.mutationLabel": "Delete Role {label}",
   "core.roleManagement.deleteButton.tooltip": "Delete",
   "core.roleManagement.deleteRole.confirm.title": "Are you sure you want to delete {label}?",
-  "core.roleManagement.deleteRole.confirm.message": "Deleting data does not mean erasing it from OpenIMIS database. The data will only be deactivated from the viewed list.",
+  "core.roleManagement.deleteRole.confirm.message": "Deleting data does not mean erasing it from openIMIS database. The data will only be deactivated from the viewed list.",
   "core.roleManagement.UpdateRole.mutationLabel": "Update Role {label}",
   "core.roleManagement.editButton.tooltip": "Edit",
   "core.roleManagement.updateRole.confirm.title": "Save changes in {label}?",
@@ -56,9 +56,12 @@
   "core.SetPasswordPage.error": "Unknown error",
   "core.SetPasswordPage.submitBtn": "Submit",
   "core.table.resultsLoading": "Loading...",
+  "core.exportSearchResult": "Export search result",
+  "core.exportSearchResult.tooltip": "Export result",
   "LanguagePicker.label": "Language",
   "core.Language.null": "",
   "claim.edit.services.code": "Code",
   "claim.edit.services.name": "Name",
-  "claim.edit.services.priceAppro": "Price Appro."
+  "claim.edit.services.priceAppro": "Price Appro.",
+  "core.NumberInput.notApplicable": "N/A"
 }

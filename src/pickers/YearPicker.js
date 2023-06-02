@@ -16,6 +16,7 @@ class YearPicker extends Component {
       onChange,
       min,
       max,
+      required,
       withNull = true,
     } = this.props;
     const options = withNull
@@ -33,7 +34,7 @@ class YearPicker extends Component {
       }))
     );
     return (
-      <SelectInput module={module} label={label} options={options} name={name} value={value} onChange={onChange} />
+      <SelectInput module={module} label={label} options={options} name={name} value={value} required={required} onChange={onChange} />
     );
   }
 }

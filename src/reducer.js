@@ -39,6 +39,10 @@ function reducer(
     errorRoleRights: null,
     isInitialized: false,
     authError: null,
+    paginationPage: 0,
+    afterCursor: null,
+    beforeCursor: null,
+    module: null,
   },
   action,
 ) {
@@ -245,6 +249,66 @@ function reducer(
         fetchingRoleRights: false,
         errorRoleRights: formatServerError(action.payload),
       };
+    case "CORE_ROLE_NAME_VALIDATION_FIELDS_REQ":
+      return {
+        ...state,
+        validationFields: {
+          ...state.validationFields,
+          roleName: {
+            isValidating: true,
+            isValid: false,
+            validationError: null,
+          },
+        },
+      };
+    case "CORE_ROLE_NAME_VALIDATION_FIELDS_RESP":
+      return {
+        ...state,
+        validationFields: {
+          ...state.validationFields,
+          roleName: {
+            isValidating: false,
+            isValid: action.payload?.data.isValid,
+            validationError: formatGraphQLError(action.payload),
+          },
+        },
+      };
+    case "CORE_ROLE_NAME_VALIDATION_FIELDS_ERR":
+      return {
+        ...state,
+        validationFields: {
+          ...state.validationFields,
+          roleName: {
+            isValidating: false,
+            isValid: false,
+            validationError: formatServerError(action.payload),
+          },
+        },
+      };
+    case "CORE_ROLE_NAME_VALIDATION_FIELDS_CLEAR":
+      return {
+        ...state,
+        validationFields: {
+          ...state.validationFields,
+          roleName: {
+            isValidating: true,
+            isValid: false,
+            validationError: null,
+          },
+        },
+      };
+    case "CORE_ROLE_NAME_VALIDATION_FIELDS_SET_VALID":
+      return {
+        ...state,
+        validationFields: {
+          ...state.validationFields,
+          roleName: {
+            isValidating: false,
+            isValid: true,
+            validationError: null,
+          },
+        },
+      };
     case "CORE_ROLE_MUTATION_REQ":
       return dispatchMutationReq(state, action);
     case "CORE_ROLE_MUTATION_ERR":
@@ -276,7 +340,6 @@ function reducer(
         authError: formatServerError(action.payload),
       };
     }
-
     case "CORE_INITIALIZED":
       return {
         ...state,
@@ -286,8 +349,35 @@ function reducer(
       return {
         ...state,
         user: null,
+        mutations: [],
+        filtersCache: {},
+        roles: [],
+        rolesPageInfo: {},
+        rolesTotalCount: 0,
+        modulePermissions: [],
+        role: null,
+        roleRights: [],
       };
-
+    case "CORE_PAGINATION_PAGE":
+      return {
+        ...state,
+        savedPagination: {
+          paginationPage: action.payload?.page,
+          afterCursor: action.payload?.afterCursor,
+          beforeCursor: action.payload?.beforeCursor,
+          module: action.payload?.module,
+        },
+      };
+    case "CORE_PAGINATION_PAGE_CLEAR":
+      return {
+        ...state,
+        savedPagination: {
+          paginationPage: 0,
+          afterCursor: null,
+          beforeCursor: null,
+          module: null,
+        },
+      };
     default:
       return state;
   }

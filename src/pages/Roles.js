@@ -1,5 +1,15 @@
 import React, { Component } from "react";
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
+
+import { Grid, FormControlLabel, Checkbox, Fab, IconButton } from "@material-ui/core";
+import { withTheme, withStyles } from "@material-ui/core/styles";
+import AddIcon from "@material-ui/icons/Add";
+import DeleteIcon from "@material-ui/icons/Delete";
+import EditIcon from "@material-ui/icons/Edit";
+import SupervisedUserCircleIcon from "@material-ui/icons/SupervisedUserCircle";
+
 import {
   withModulesManager,
   formatMessage,
@@ -13,11 +23,8 @@ import {
   coreConfirm,
   journalize,
   SelectInput,
+  clearCurrentPaginationPage,
 } from "@openimis/fe-core";
-import { Grid, FormControlLabel, Checkbox, Fab, IconButton } from "@material-ui/core";
-import { withTheme, withStyles } from "@material-ui/core/styles";
-import { bindActionCreators } from "redux";
-import { connect } from "react-redux";
 import { fetchRoles, deleteRole } from "../actions";
 import {
   DEFAULT_PAGE_SIZE,
@@ -30,11 +37,8 @@ import {
   RIGHT_ROLE_DUPLICATE,
   RIGHT_ROLE_DELETE,
   QUERY_STRING_DUPLICATE,
+  MODULE_NAME,
 } from "../constants";
-import AddIcon from "@material-ui/icons/Add";
-import EditIcon from "@material-ui/icons/Edit";
-import SupervisedUserCircleIcon from "@material-ui/icons/SupervisedUserCircle";
-import DeleteIcon from "@material-ui/icons/Delete";
 
 const styles = (theme) => ({
   page: theme.page,
@@ -53,6 +57,11 @@ class RawRoleFilter extends Component {
   _filterValue = (k) => {
     const { filters } = this.props;
     return !!filters[k] ? filters[k].value : null;
+  };
+
+  _filterTextFieldValue = (k) => {
+    const { filters } = this.props;
+    return !!filters[k] ? filters[k].value : "";
   };
 
   _onChangeFilter = (k, v) => {
@@ -93,7 +102,7 @@ class RawRoleFilter extends Component {
           <TextInput
             module="core"
             label="roleManagement.roleName"
-            value={this._filterValue("name")}
+            value={this._filterTextFieldValue("name")}
             onChange={(v) => this._onChangeStringFilter("name", v, CONTAINS_LOOKUP)}
           />
         </Grid>
@@ -183,7 +192,14 @@ class Roles extends Component {
   itemFormatters = () => {
     const { intl, rights, modulesManager, language } = this.props;
     const result = [
-      (role) => (language === null ? role.name : (language === LANGUAGE_EN ? role.name : (role.altLanguage === null ? role.name : role.altLanguage))),
+      (role) =>
+        language === null
+          ? role.name
+          : language === LANGUAGE_EN
+          ? role.name
+          : role.altLanguage === null
+          ? role.name
+          : role.altLanguage,
       (role) => (role.isSystem !== null ? <Checkbox checked={!!role.isSystem} disabled /> : ""),
       (role) => (role.isBlocked !== null ? <Checkbox checked={role.isBlocked} disabled /> : ""),
       (role) => (!!role.validityFrom ? formatDateFromISO(modulesManager, intl, role.validityFrom) : ""),
@@ -261,6 +277,11 @@ class Roles extends Component {
 
   isOnDoubleClickEnabled = (role) => !this.isRowDisabled(_, role);
 
+  componentDidMount = () => {
+    const { module } = this.props;
+    if (module !== MODULE_NAME) this.props.clearCurrentPaginationPage();
+  };
+
   render() {
     const { intl, rights, classes, fetchingRoles, fetchedRoles, errorRoles, roles, rolesPageInfo, rolesTotalCount } =
       this.props;
@@ -317,10 +338,11 @@ const mapStateToProps = (state) => ({
   confirmed: state.core.confirmed,
   submittingMutation: state.core.submittingMutation,
   mutation: state.core.mutation,
+  module: state.core?.savedPagination?.module,
 });
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ fetchRoles, deleteRole, coreConfirm, journalize }, dispatch);
+  return bindActionCreators({ fetchRoles, deleteRole, coreConfirm, journalize, clearCurrentPaginationPage }, dispatch);
 };
 
 export default withModulesManager(

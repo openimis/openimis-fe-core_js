@@ -17,6 +17,8 @@ import FormattedMessage from "./components/generics/FormattedMessage";
 import PagedDataHandler from "./components/generics/PagedDataHandler";
 import SelectInput from "./components/inputs/SelectInput";
 import TextInput from "./components/inputs/TextInput";
+import ValidatedTextInput from "./components/inputs/ValidatedTextInput";
+import ValidatedTextAreaInput from "./components/inputs/ValidatedTextAreaInput";
 import TextAreaInput from "./components/inputs/TextAreaInput";
 import AmountInput from "./components/inputs/AmountInput";
 import NumberInput from "./components/inputs/NumberInput";
@@ -28,6 +30,7 @@ import PublishedComponent from "./components/generics/PublishedComponent";
 import Table from "./components/generics/Table";
 import TableService from "./components/generics/TableService";
 import TableServiceReview from "./components/generics/TableServiceReview";
+import SearcherExport from "./components/generics/SearcherExport";
 import Searcher from "./components/generics/Searcher";
 import SearcherPane from "./components/generics/SearcherPane";
 import AdDatePicker from "./pickers/AdDatePicker";
@@ -44,6 +47,7 @@ import Role from "./pages/Role";
 import reducer from "./reducer";
 import ErrorBoundary from "./helpers/ErrorBoundary";
 import ConfirmDialog from "./components/dialogs/ConfirmDialog";
+import SelectDialog from "./components/dialogs/SelectDialog";
 import {
   baseApiUrl,
   apiHeaders,
@@ -55,6 +59,7 @@ import {
   coreConfirm,
   fetchMutation,
   prepareMutation,
+  clearCurrentPaginationPage,
 } from "./actions";
 import {
   formatMessage,
@@ -83,8 +88,11 @@ import {
   sort,
   formatSorter,
   formatGQLString,
-  formatNodeQuery,
+  formatNodeQuery
 } from "./helpers/api";
+import {
+  downloadExport
+} from "./helpers/downloadExport"
 import {
   useDebounceCb,
   usePrevious,
@@ -167,8 +175,10 @@ export {
   journalize,
   fetchMutation,
   prepareMutation,
+  downloadExport,
   coreAlert,
   coreConfirm,
+  clearCurrentPaginationPage,
   openBlob,
   sort,
   formatSorter,
@@ -217,6 +227,8 @@ export {
   AlertForwarder,
   SelectInput,
   TextInput,
+  ValidatedTextInput,
+  ValidatedTextAreaInput,
   TextAreaInput,
   AmountInput,
   FakeInput,
@@ -236,8 +248,10 @@ export {
   Table,
   TableService,
   TableServiceReview,
+  SearcherExport,
   Searcher,
   SearcherPane,
+  SelectDialog,
   ConstantBasedPicker,
   ErrorBoundary,
   useTranslations,

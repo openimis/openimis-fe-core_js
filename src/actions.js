@@ -27,7 +27,15 @@ const LANGUAGE_FULL_PROJECTION = () => ["name", "code", "sortOrder"];
 
 const MODULEPERMISSION_FULL_PROJECTION = () => ["modulePermsList{moduleName, permissions{permsName, permsValue}}"];
 
-export const baseApiUrl =  "/api";
+function getApiUrl() {
+  let _baseApiUrl = process.env.REACT_APP_API_URL ?? '/api';
+  if (_baseApiUrl.indexOf('/') !== 0) {
+    _baseApiUrl = `/${_baseApiUrl}`;
+  }
+  return _baseApiUrl;
+}
+
+export const baseApiUrl = getApiUrl();
 
 export function apiHeaders() {
   let headers = {
@@ -277,7 +285,7 @@ export function logout() {
         }
         deleteRefreshTokenCookie {
           deleted
-        } 
+        }
       }
     `;
     await dispatch(graphqlMutation(mutation, {}));
@@ -413,4 +421,40 @@ export function deleteRole(role, clientMutationLabel, clientMutationDetails = nu
     clientMutationLabel,
     requestedDateTime,
   });
+}
+
+export function roleNameValidationCheck(mm, variables) {
+  return graphqlWithVariables(
+    `
+      query ($roleName: String!) {
+        isValid: validateRoleName(roleName: $roleName)
+      }
+    `,
+    variables,
+    `CORE_ROLE_NAME_VALIDATION_FIELDS`,
+  );
+}
+
+export function roleNameValidationClear() {
+  return (dispatch) => {
+    dispatch({ type: `CORE_ROLE_NAME_VALIDATION_FIELDS_CLEAR` });
+  };
+}
+
+export function roleNameSetValid() {
+  return (dispatch) => {
+    dispatch({ type: `CORE_ROLE_NAME_VALIDATION_FIELDS_SET_VALID` });
+  };
+}
+
+export function saveCurrentPaginationPage(page, afterCursor, beforeCursor, module) {
+  return (dispatch) => {
+    dispatch({ type: "CORE_PAGINATION_PAGE", payload: { page, afterCursor, beforeCursor, module} });
+  };
+}
+
+export function clearCurrentPaginationPage() {
+  return (dispatch) => {
+    dispatch({ type: "CORE_PAGINATION_PAGE_CLEAR" })
+  }
 }

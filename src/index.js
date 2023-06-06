@@ -46,6 +46,7 @@ import reducer from "./reducer";
 import ErrorBoundary from "./helpers/ErrorBoundary";
 import ConfirmDialog from "./components/dialogs/ConfirmDialog";
 import SelectDialog from "./components/dialogs/SelectDialog";
+import AdvancedFiltersDialog from "./components/dialogs/AdvancedFiltersDialog";
 import {
   baseApiUrl,
   apiHeaders,
@@ -166,6 +167,7 @@ export * from "./helpers/utils";
 export {
   Helmet,
   baseApiUrl,
+  AdvancedFiltersDialog,
   apiHeaders,
   graphql,
   graphqlWithVariables,

@@ -5,6 +5,7 @@ import { Grid, Paper, Divider, IconButton } from "@material-ui/core";
 import { YoutubeSearchedFor as ResetFilterIcon, Search as DefaultSearchIcon } from "@material-ui/icons";
 import FormattedMessage from "./FormattedMessage";
 import { withTooltip, formatMessage } from "../../helpers/i18n";
+import AdvancedFiltersDialog from "../dialogs/AdvancedFiltersDialog";
 
 const styles = (theme) => ({
   paper: theme.paper.body,
@@ -29,6 +30,10 @@ class SearcherPane extends Component {
       refreshTooltip,
       actions,
       SearchIcon = null,
+      isCustomFiltering = false,
+      objectForCustomFiltering = null,
+      moduleName = null,
+      objectType = null
     } = this.props;
     return (
       <Paper className={classes.paper}>
@@ -61,6 +66,15 @@ class SearcherPane extends Component {
                     </Grid>,
                     refreshTooltip || formatMessage(this.props.intl, module, "refreshFilterTooltip")
                   )}
+                {isCustomFiltering === true ? (
+                  <AdvancedFiltersDialog
+                    object={objectForCustomFiltering}
+                    moduleName={moduleName}
+                    objectType={objectType}
+                  />
+                ) : (
+                  <></>
+                )}
               </Grid>
             )}
           </Grid>

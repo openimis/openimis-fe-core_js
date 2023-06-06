@@ -10,3 +10,11 @@ export const RIGHT_ROLE_UPDATE = 122003;
 export const RIGHT_ROLE_DELETE = 122004;
 export const RIGHT_ROLE_DUPLICATE = 122005;
 export const MODULE_NAME = "core";
+
+// consts relate do custom filters
+export const BOOL_OPTIONS = [
+  { value: true, label: "True" },
+  { value: false, label: "False" },
+];
+export const CLEARED_STATE_FILTER = { field: "", filter: "", type: "", value: "" }
+export const BENEFIT_PLAN = "BenefitPlan";

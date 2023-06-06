@@ -199,7 +199,7 @@ class Searcher extends Component {
       (state, props) => ({
         filters,
         pageSize: props.defaultPageSize || 10,
-        orderBy: props.defaultOrderBy,
+        orderBy: props.defaultOrowsPerPageOptionsrderBy,
       }),
       (e) => this.applyFilters()
     );
@@ -409,6 +409,10 @@ class Searcher extends Component {
       exportFields = ['id'],
       exportFieldsColumns,
       intl,
+      isCustomFiltering = false,
+      objectForCustomFiltering = null,
+      moduleName = null,
+      objectType = null,
     } = this.props;
     return (
       <Fragment>
@@ -427,6 +431,10 @@ class Searcher extends Component {
                 filterPaneContributionsKey={filterPaneContributionsKey}
               />
             }
+            isCustomFiltering={isCustomFiltering}
+            objectForCustomFiltering={objectForCustomFiltering}
+            moduleName={moduleName}
+            objectType={objectType}
           />
         )}
         {!!contributionKey && <Contributions contributionKey={contributionKey} />}

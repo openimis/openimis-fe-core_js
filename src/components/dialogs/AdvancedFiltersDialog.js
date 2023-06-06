@@ -213,10 +213,10 @@ const AdvancedFiltersDialog = ({
 const mapStateToProps = (state, props) => ({
   rights: !!state.core && !!state.core.user && !!state.core.user.i_user ? state.core.user.i_user.rights : [],
   confirmed: state.core.confirmed,
-  fetchingCustomFilters: state.socialProtection.fetchingCustomFilters,
-  errorCustomFilters: state.socialProtection.errorCustomFilters,
-  fetchedCustomFilters: state.socialProtection.fetchedCustomFilters,
-  customFilters: state.socialProtection.customFilters,
+  fetchingCustomFilters: state.core.fetchingCustomFilters,
+  errorCustomFilters: state.core.errorCustomFilters,
+  fetchedCustomFilters: state.core.fetchedCustomFilters,
+  customFilters: state.core.customFilters,
 });
 
 const mapDispatchToProps = (dispatch) => bindActionCreators({

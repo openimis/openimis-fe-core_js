@@ -15,6 +15,7 @@ const CustomFilterFieldStatusPicker = ({
   required = false,
   customFilters,
 }) => {
+  
   const options = Array.isArray(customFilters) && customFilters !== undefined ?  [
     ...customFilters.map((customFilter) => ({
         value: { field: customFilter.field, type: customFilter.type },

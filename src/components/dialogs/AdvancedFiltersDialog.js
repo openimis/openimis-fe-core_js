@@ -33,6 +33,8 @@ const AdvancedFiltersDialog = ({
   customFilters,
   moduleName,
   objectType,
+  setAppliedCustomFilters,
+  onChangeFilters
 }) => {
 
   const [isOpen, setIsOpen] = useState(false);
@@ -70,7 +72,15 @@ const AdvancedFiltersDialog = ({
   };
 
   const applyFilter = () => {
-    // TODO - apply filter to current context
+    const outputFilters = JSON.stringify(filters.map(({ filter, value, field, type }) => `${field}__${filter}__${type}=${JSON.stringify(value)}`));
+    onChangeFilters([
+      {
+        id: 'customFilters',
+        outputFilters,
+        filter: `customFilters: ${outputFilters}`,
+      },
+    ]);
+    setAppliedCustomFilters(outputFilters);
     handleClose();
   };
 

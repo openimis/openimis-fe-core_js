@@ -33,7 +33,9 @@ class SearcherPane extends Component {
       isCustomFiltering = false,
       objectForCustomFiltering = null,
       moduleName = null,
-      objectType = null
+      objectType = null,
+      setAppliedCustomFilters = null,
+      onChangeFilters
     } = this.props;
     return (
       <Paper className={classes.paper}>
@@ -49,6 +51,8 @@ class SearcherPane extends Component {
                     object={objectForCustomFiltering}
                     moduleName={moduleName}
                     objectType={objectType}
+                    setAppliedCustomFilters={setAppliedCustomFilters}
+                    onChangeFilters={onChangeFilters}
                   />
                 ) : (
                   <></>

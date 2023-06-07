@@ -21,7 +21,7 @@ const CustomFilterTypeStatusPicker = ({
   const filterTypes = customFilters
     ? customFilters
         .filter((filter) => filter.field === customFilterField)
-        .map((filter) => { console.log(filter.filter); return (
+        .map((filter) => { return (
            filter.filter
         )}).flat()
     : [];

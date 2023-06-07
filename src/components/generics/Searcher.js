@@ -413,6 +413,7 @@ class Searcher extends Component {
       objectForCustomFiltering = null,
       moduleName = null,
       objectType = null,
+      setAppliedCustomFilters = null,
     } = this.props;
     return (
       <Fragment>
@@ -435,6 +436,8 @@ class Searcher extends Component {
             objectForCustomFiltering={objectForCustomFiltering}
             moduleName={moduleName}
             objectType={objectType}
+            setAppliedCustomFilters={setAppliedCustomFilters}
+            onChangeFilters={this.onChangeFilters}
           />
         )}
         {!!contributionKey && <Contributions contributionKey={contributionKey} />}

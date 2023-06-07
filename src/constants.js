@@ -13,8 +13,8 @@ export const MODULE_NAME = "core";
 
 // consts relate do custom filters
 export const BOOL_OPTIONS = [
-  { value: true, label: "True" },
-  { value: false, label: "False" },
+  { value: "True", label: "True" },
+  { value: "False", label: "False" },
 ];
 export const CLEARED_STATE_FILTER = { field: "", filter: "", type: "", value: "" }
 export const BENEFIT_PLAN = "BenefitPlan";

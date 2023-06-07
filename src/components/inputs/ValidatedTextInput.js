@@ -56,7 +56,7 @@ const ValidatedTextInput = ({
 
   useEffect(() => {
     if (shouldBeValidated) {
-      queryVariables[itemQueryIdentifier] = value;
+      queryVariables[itemQueryIdentifier] = value.trim();
       if (additionalQueryArgs) Object.entries(additionalQueryArgs).map((arg) => (queryVariables[arg?.[0]] = arg?.[1]));
       if (value) checkValidity(queryVariables);
       return () => (!value || isValid) && dispatch(clearAction());

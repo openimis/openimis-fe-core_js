@@ -105,8 +105,6 @@ const AdvancedFilterRowValue = ({
     }
   };
 
-  console.log('ooooo', filters);
-
   return (
     <Grid 
       container 

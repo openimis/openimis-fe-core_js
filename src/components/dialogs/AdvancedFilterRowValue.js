@@ -159,7 +159,4 @@ const AdvancedFilterRowValue = ({
   );
 };
 
-
-//export default injectIntl(connect(mapStateToProps, mapDispatchToProps)(BeneficiaryAdvancedFiltersDialog));
-
 export default injectIntl(withTheme(withStyles(styles)(connect(null, null)(AdvancedFilterRowValue))));

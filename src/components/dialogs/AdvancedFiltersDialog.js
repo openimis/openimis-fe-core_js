@@ -108,7 +108,7 @@ const AdvancedFiltersDialog = ({
           border: "0px", 
         }}
       >
-        {formatMessage(intl, "socialProtection", "advancedFilters")}
+        {formatMessage(intl, "core", "advancedFilters")}
       </Button>
       <Dialog 
         open={isOpen} 

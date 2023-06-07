@@ -44,6 +44,15 @@ class SearcherPane extends Component {
           <Grid item xs={12 - split} className={classes.paperHeader}>
             {(!!actions || !!refresh) && (
               <Grid container justify="flex-end">
+                {isCustomFiltering === true ? (
+                  <AdvancedFiltersDialog
+                    object={objectForCustomFiltering}
+                    moduleName={moduleName}
+                    objectType={objectType}
+                  />
+                ) : (
+                  <></>
+                )}
                 {!!actions &&
                   actions.map((a, idx) => (
                     <Grid item key={`action-${idx}`} className={classes.paperHeaderAction}>
@@ -66,15 +75,6 @@ class SearcherPane extends Component {
                     </Grid>,
                     refreshTooltip || formatMessage(this.props.intl, module, "refreshFilterTooltip")
                   )}
-                {isCustomFiltering === true ? (
-                  <AdvancedFiltersDialog
-                    object={objectForCustomFiltering}
-                    moduleName={moduleName}
-                    objectType={objectType}
-                  />
-                ) : (
-                  <></>
-                )}
               </Grid>
             )}
           </Grid>

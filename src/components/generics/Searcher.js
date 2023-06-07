@@ -413,6 +413,7 @@ class Searcher extends Component {
       objectForCustomFiltering = null,
       moduleName = null,
       objectType = null,
+      appliedCustomFilters = null,
       setAppliedCustomFilters = null,
     } = this.props;
     return (
@@ -437,6 +438,7 @@ class Searcher extends Component {
             moduleName={moduleName}
             objectType={objectType}
             setAppliedCustomFilters={setAppliedCustomFilters}
+            appliedCustomFilters={appliedCustomFilters}
             onChangeFilters={this.onChangeFilters}
           />
         )}

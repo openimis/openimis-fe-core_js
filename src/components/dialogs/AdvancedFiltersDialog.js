@@ -33,6 +33,7 @@ const AdvancedFiltersDialog = ({
   customFilters,
   moduleName,
   objectType,
+  appliedCustomFilters,
   setAppliedCustomFilters,
   onChangeFilters
 }) => {

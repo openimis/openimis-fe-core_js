@@ -113,7 +113,7 @@ import withHistory, {
 } from "./helpers/history";
 import withModulesManager, { useModulesManager } from "./helpers/modules";
 import { formatJsonField } from "./helpers/jsonExt";
-import { RIGHT_ROLE_SEARCH } from "./constants";
+import { RIGHT_ROLE_SEARCH, CLEARED_STATE_FILTER } from "./constants";
 import { authMiddleware } from "./middlewares";
 import RefreshAuthToken from "./components/RefreshAuthToken";
 const ROUTE_ROLES = "roles";
@@ -261,4 +261,5 @@ export {
   ConfirmDialog,
   useAuthentication,
   useBoolean,
+  CLEARED_STATE_FILTER
 };

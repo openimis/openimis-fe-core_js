@@ -11,7 +11,14 @@ import { withTheme, withStyles } from "@material-ui/core/styles";
 import { connect } from "react-redux";
 import CustomFilterFieldStatusPicker from "../../pickers/CustomFilterFieldStatusPicker";
 import CustomFilterTypeStatusPicker from "../../pickers/CustomFilterTypeStatusPicker";
-import { BOOL_OPTIONS, CLEARED_STATE_FILTER } from "../../constants";
+import { 
+  BOOL_OPTIONS, 
+  CLEARED_STATE_FILTER,
+  INTEGER,
+  DATE,
+  STRING,
+  BOOLEAN
+} from "../../constants";
 
 const styles = (theme) => ({
   item: theme.paper.item,
@@ -68,14 +75,14 @@ const AdvancedFilterRowValue = ({
     };
   
     switch (type) {
-      case "boolean":
+      case BOOLEAN:
         return (
           <SelectInput
             options={BOOL_OPTIONS}
             {...commonProps}
           />
         );
-      case "integer":
+      case INTEGER:
         return (
           <NumberInput
             min={0}
@@ -83,9 +90,9 @@ const AdvancedFilterRowValue = ({
             {...commonProps}
           />
         );
-      case "string":
+      case STRING:
       default:
-        if (currentFilter.field.toLowerCase().includes('date')) {
+        if (currentFilter.field.toLowerCase().includes(DATE)) {
           return (
             <PublishedComponent
               pubRef="core.DatePicker"

@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { injectIntl } from "react-intl";
 import {
-  FormattedMessage,
   PublishedComponent,
   TextInput,
   NumberInput,
   SelectInput,
-  formatMessageWithValues,
-  formatMessage,
 } from "@openimis/fe-core";
 import { Grid } from "@material-ui/core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
@@ -65,7 +62,7 @@ const AdvancedFilterRowValue = ({
   const renderInputBasedOnType = (type) => {
     const commonProps = {
       module: "core",
-      label: "Value",
+      label: "core.advancedFilters.value",
       value: currentFilter.value,
       onChange: onAttributeChange("value"),
     };
@@ -130,8 +127,7 @@ const AdvancedFilterRowValue = ({
       <Grid item xs={3} className={classes.item}>
         <CustomFilterFieldStatusPicker
           module="core"
-          //label="social_protection.field"
-          label="Field"
+          label="core.advancedFilters.field"
           value={{ field: currentFilter.field, type: currentFilter.type }}
           onChange={onAttributeChange("field")}
           customFilters={customFilters}
@@ -141,8 +137,7 @@ const AdvancedFilterRowValue = ({
           <Grid item xs={3} className={classes.item}>
             <CustomFilterTypeStatusPicker
               module="core"
-              //label="social_protection.filter"
-              label="Filter"
+              label="core.advancedFilters.filter"
               value={currentFilter.filter}
               onChange={onAttributeChange("filter")}
               customFilters={customFilters}

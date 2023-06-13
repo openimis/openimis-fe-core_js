@@ -6,8 +6,6 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import {
-  FormattedMessage,
-  formatMessageWithValues,
   formatMessage,
 } from "@openimis/fe-core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
@@ -16,7 +14,7 @@ import { bindActionCreators } from "redux";
 import AdvancedFilterRowValue from "./AdvancedFilterRowValue";
 import { fetchCustomFilter } from "../../actions";
 import AddCircle from '@material-ui/icons/Add';
-import { BENEFIT_PLAN, CLEARED_STATE_FILTER } from "../../constants";
+import { BENEFIT_PLAN, CLEARED_STATE_FILTER, CUSTOM_FILTERS } from "../../constants";
 
 const styles = (theme) => ({
   item: theme.paper.item,
@@ -27,9 +25,6 @@ const AdvancedFiltersDialog = ({
   classes,
   object,
   fetchCustomFilter,
-  fetchingCustomFilters,
-  errorCustomFilters,
-  fetchedCustomFilters,
   customFilters,
   moduleName,
   objectType,
@@ -114,7 +109,7 @@ const AdvancedFiltersDialog = ({
   }
 
   function hasCustomFilters() {
-    return 'customFilters' in searchCriteria;
+    return CUSTOM_FILTERS in searchCriteria;
   }
 
   useEffect(() => {
@@ -177,7 +172,7 @@ const AdvancedFiltersDialog = ({
             marginTop: "10px",
           }}
         >
-          Advanced filters
+          {formatMessage(intl, "core", "advancedFilters.button.AdvancedFilters")}
         </DialogTitle>
         <DialogContent>
           {filters.map((filter, index) => {
@@ -211,7 +206,7 @@ const AdvancedFiltersDialog = ({
                 fontSize: "0.8rem" 
               }}
             >
-              Add Filter
+              {formatMessage(intl, "core", "core.advancedFilters.button.addFilters")}
             </Button>
           </div>
         </DialogContent>
@@ -230,7 +225,7 @@ const AdvancedFiltersDialog = ({
                 variant="outlined"
                 style={{ border: "0px" }}
               >
-                Clear All Filters
+                {formatMessage(intl, "core", "core.advancedFilters.button.clearAllFilters")}
               </Button>
             </div>
             <div style={{ 
@@ -244,7 +239,7 @@ const AdvancedFiltersDialog = ({
                 autoFocus
                 style={{ margin: "0 16px" }} 
               >
-                Cancel
+                {formatMessage(intl, "core", "core.advancedFilters.button.cancel")}
               </Button>
               <Button 
                 onClick={applyFilter} 
@@ -252,7 +247,7 @@ const AdvancedFiltersDialog = ({
                 color="primary" 
                 autoFocus
               >
-                Filter
+                {formatMessage(intl, "core", "core.advancedFilters.button.filter")}
               </Button>
             </div>
           </div>

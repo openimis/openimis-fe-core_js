@@ -18,3 +18,4 @@ export const BOOL_OPTIONS = [
 ];
 export const CLEARED_STATE_FILTER = { field: "", filter: "", type: "", value: "" }
 export const BENEFIT_PLAN = "BenefitPlan";
+export const CUSTOM_FILTERS = "customFilters"

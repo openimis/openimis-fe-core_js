@@ -35,7 +35,12 @@ const AdvancedFiltersDialog = ({
   objectType,
   appliedCustomFilters,
   setAppliedCustomFilters,
-  onChangeFilters
+  onChangeFilters,
+  appliedFiltersRowStructure,
+  setAppliedFiltersRowStructure,
+  applyNumberCircle,
+  searchCriteria,
+  deleteFilter,
 }) => {
 
   const [isOpen, setIsOpen] = useState(false);
@@ -53,17 +58,18 @@ const AdvancedFiltersDialog = ({
   const fetchFilters = (params) => fetchCustomFilter(params);
   
   const handleOpen = () => {
+    setFilters(appliedFiltersRowStructure);
     setIsOpen(true);
   };
 
   const handleClose = () => {
     setCurrentFilter(CLEARED_STATE_FILTER);
-    setFilters([CLEARED_STATE_FILTER]);
     setIsOpen(false);
   };
 
-  const handleRemoveFilter = (index) => {
+  const handleRemoveFilter = () => {
     setCurrentFilter(CLEARED_STATE_FILTER);
+    setAppliedFiltersRowStructure([CLEARED_STATE_FILTER]);
     setFilters([CLEARED_STATE_FILTER]);
   };
 
@@ -73,17 +79,43 @@ const AdvancedFiltersDialog = ({
   };
 
   const applyFilter = () => {
-    const outputFilters = JSON.stringify(filters.map(({ filter, value, field, type }) => `${field}__${filter}__${type}=${JSON.stringify(value)}`));
-    onChangeFilters([
-      {
-        id: 'customFilters',
-        outputFilters,
-        filter: `customFilters: ${outputFilters}`,
-      },
-    ]);
-    setAppliedCustomFilters(outputFilters);
+    setAppliedFiltersRowStructure(filters);
+    const outputFilters = JSON.stringify(
+      filters.map(({ filter, value, field, type }) => 
+        `${field}__${filter}__${type}=${JSON.stringify(value)}`)
+    );
+    if(checkArrayFilterStructure() === false){
+      onChangeFilters([
+        {
+          id: 'customFilters',
+          outputFilters,
+          filter: `customFilters: ${outputFilters}`,
+        },
+      ]);
+      setAppliedCustomFilters(outputFilters);
+    } else {
+      deleteFilter('customFilters');
+    }
     handleClose();
   };
+
+  function checkArrayFilterStructure() {
+    if (filters.length === 1) {
+      const firstObj = filters[0];
+      if (checkFilterFields(firstObj)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function checkFilterFields(dict) {
+    return Object.entries(dict).some(([key, value]) => key !== 'value' && (value === null || value === ''));
+  }
+
+  function hasCustomFilters() {
+    return 'customFilters' in searchCriteria;
+  }
 
   useEffect(() => {
     if (object) {
@@ -108,6 +140,12 @@ const AdvancedFiltersDialog = ({
   // refresh component when list of filters is changed
   useEffect(() => {}, [filters]);
 
+  useEffect(() => {
+    if ( hasCustomFilters() === false ) {
+      handleRemoveFilter();
+    } 
+  }, [searchCriteria]);
+
   return (
     <>
       <Button 
@@ -121,6 +159,9 @@ const AdvancedFiltersDialog = ({
       >
         {formatMessage(intl, "core", "advancedFilters")}
       </Button>
+      { appliedFiltersRowStructure.length > 0 && hasCustomFilters()  
+          ? (applyNumberCircle(appliedFiltersRowStructure.length)) : ( <></>) 
+      }
       <Dialog 
         open={isOpen} 
         onClose={handleClose} 

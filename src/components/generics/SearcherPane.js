@@ -20,9 +20,11 @@ class SearcherPane extends Component {
     const {
       classes,
       module,
+      del,
       title = "search.title",
       split = 8,
       filterPane,
+      filters,
       resultsPane = null,
       reset,
       resetTooltip,
@@ -36,7 +38,10 @@ class SearcherPane extends Component {
       objectType = null,
       setAppliedCustomFilters = null,
       appliedCustomFilters = null,
-      onChangeFilters
+      onChangeFilters,
+      appliedFiltersRowStructure = null,
+      setAppliedFiltersRowStructure = null,
+      applyNumberCircle = null,
     } = this.props;
     return (
       <Paper className={classes.paper}>
@@ -55,6 +60,11 @@ class SearcherPane extends Component {
                     setAppliedCustomFilters={setAppliedCustomFilters}
                     appliedCustomFilters={appliedCustomFilters}
                     onChangeFilters={onChangeFilters}
+                    appliedFiltersRowStructure={appliedFiltersRowStructure}
+                    setAppliedFiltersRowStructure={setAppliedFiltersRowStructure}
+                    applyNumberCircle={applyNumberCircle}
+                    searchCriteria={filters}
+                    deleteFilter={del}
                   />
                 ) : (
                   <></>

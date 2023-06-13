@@ -28,6 +28,7 @@ import Contributions from "./Contributions";
 import FormattedMessage from "./FormattedMessage";
 import ProgressOrError from "./ProgressOrError";
 import Table from "./Table";
+import { CLEARED_STATE_FILTER } from "../../constants";
 
 const styles = (theme) => ({
   root: {
@@ -415,6 +416,9 @@ class Searcher extends Component {
       objectType = null,
       appliedCustomFilters = null,
       setAppliedCustomFilters = null,
+      appliedFiltersRowStructure = null,
+      setAppliedFiltersRowStructure = null,
+      applyNumberCircle = null,
     } = this.props;
     return (
       <Fragment>
@@ -440,6 +444,9 @@ class Searcher extends Component {
             setAppliedCustomFilters={setAppliedCustomFilters}
             appliedCustomFilters={appliedCustomFilters}
             onChangeFilters={this.onChangeFilters}
+            appliedFiltersRowStructure={appliedFiltersRowStructure}
+            setAppliedFiltersRowStructure={setAppliedFiltersRowStructure}
+            applyNumberCircle={applyNumberCircle}
           />
         )}
         {!!contributionKey && <Contributions contributionKey={contributionKey} />}

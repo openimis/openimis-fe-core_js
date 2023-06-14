@@ -93,6 +93,7 @@ class SelectionMenu extends Component {
           exportFetch={this.props.exportFetch}
           exportFields={this.props.exportFields}
           exportFieldsColumns={this.props.exportFieldsColumns}
+          label={this.props.exportFieldLabel}
         />)}
         {!!contributionKey && (
           <Contributions
@@ -419,6 +420,7 @@ class Searcher extends Component {
       appliedFiltersRowStructure = null,
       setAppliedFiltersRowStructure = null,
       applyNumberCircle = null,
+      exportFieldLabel = null
     } = this.props;
     return (
       <Fragment>
@@ -486,6 +488,7 @@ class Searcher extends Component {
                         exportFetch={exportFetch}
                         exportFields={exportFields}
                         exportFieldsColumns={exportFieldsColumns}
+                        exportFieldLabel={exportFieldLabel}
                       />
                     </Grid>
                   )}

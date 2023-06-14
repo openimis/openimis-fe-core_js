@@ -3,6 +3,7 @@ import _ from "lodash";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
+import { isEqual } from 'lodash';
 
 import {
   Grid,
@@ -204,6 +205,23 @@ class Searcher extends Component {
       (e) => this.applyFilters()
     );
   }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (
+      this.props.defaultFilters !== prevProps.defaultFilters &&
+      !isEqual(this.state.filters, { ...prevState.filters, ...this.props.defaultFilters })
+    ) {
+      this.resetFilters();
+      this.setState(
+        (state, props) => ({
+          filters: { ...state.filters, ...props.defaultFilters }
+        }),
+        () => this.applyFilters()
+      );
+    }
+  }
+
+
 
   filtersToQueryParams = () => {
     const { page, afterCursor, beforeCursor } = this.state;

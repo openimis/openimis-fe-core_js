@@ -46,6 +46,7 @@ import reducer from "./reducer";
 import ErrorBoundary from "./helpers/ErrorBoundary";
 import ConfirmDialog from "./components/dialogs/ConfirmDialog";
 import SelectDialog from "./components/dialogs/SelectDialog";
+import AdvancedFiltersDialog from "./components/dialogs/AdvancedFiltersDialog";
 import {
   baseApiUrl,
   apiHeaders,
@@ -113,7 +114,7 @@ import withHistory, {
 } from "./helpers/history";
 import withModulesManager, { useModulesManager } from "./helpers/modules";
 import { formatJsonField } from "./helpers/jsonExt";
-import { RIGHT_ROLE_SEARCH } from "./constants";
+import { RIGHT_ROLE_SEARCH, CLEARED_STATE_FILTER } from "./constants";
 import { authMiddleware } from "./middlewares";
 import RefreshAuthToken from "./components/RefreshAuthToken";
 const ROUTE_ROLES = "roles";
@@ -167,6 +168,7 @@ export * from "./helpers/utils";
 export {
   Helmet,
   baseApiUrl,
+  AdvancedFiltersDialog,
   apiHeaders,
   graphql,
   graphqlWithVariables,
@@ -261,4 +263,5 @@ export {
   ConfirmDialog,
   useAuthentication,
   useBoolean,
+  CLEARED_STATE_FILTER
 };

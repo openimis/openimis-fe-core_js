@@ -3,7 +3,6 @@ import _ from "lodash";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
-import { isEqual } from 'lodash';
 
 import {
   Grid,
@@ -197,7 +196,9 @@ class Searcher extends Component {
   };
 
   componentDidMount() {
-    var filters = this.props.filtersCache[this.props.cacheFiltersKey] || this.props.defaultFilters || {};
+    const { cachePerTab, cacheTabName, cacheFiltersKey } = this.props;
+    const cacheKey = cachePerTab && cacheTabName ? `${cacheFiltersKey}-${cacheTabName}` : cacheFiltersKey;
+    var filters = this.props.filtersCache[cacheKey] || this.props.defaultFilters || {};
     this.setState(
       (state, props) => ({
         filters,
@@ -210,10 +211,8 @@ class Searcher extends Component {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (
-      this.props.defaultFilters !== prevProps.defaultFilters &&
-      !isEqual(this.state.filters, { ...prevState.filters, ...this.props.defaultFilters })
+      !_.isEqual(this.state.filters, { ...prevState.filters, ...this.props.defaultFilters })
     ) {
-      this.resetFilters();
       this.setState(
         (state, props) => ({
           filters: { ...state.filters, ...props.defaultFilters }
@@ -275,7 +274,9 @@ class Searcher extends Component {
   _cacheAndApply = () => {
     var filters = this.filtersToQueryParams();
     if (!!this.props.cacheFiltersKey) {
-      this.props.cacheFilters(this.props.cacheFiltersKey, this.state.filters);
+      const { cachePerTab, cacheTabName, cacheFiltersKey } = this.props;
+      const cacheKey = cachePerTab && cacheTabName ? `${cacheFiltersKey}-${cacheTabName}` : cacheFiltersKey;
+      this.props.cacheFilters(cacheKey, this.state.filters);
       this.props.fetch(filters);
     } else {
       this.props.fetch(filters);

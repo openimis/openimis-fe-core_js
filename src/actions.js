@@ -27,6 +27,21 @@ const LANGUAGE_FULL_PROJECTION = () => ["name", "code", "sortOrder"];
 
 const MODULEPERMISSION_FULL_PROJECTION = () => ["modulePermsList{moduleName, permissions{permsName, permsValue}}"];
 
+const CUSTOM_FILTER_FULL_PROJECTION = () => [
+  'type',
+  'code',
+  'possibleFilters {field, filter, type}',
+];
+
+export function fetchCustomFilter(params) {
+  const payload = formatQuery(
+    "customFilters",
+    params,
+    CUSTOM_FILTER_FULL_PROJECTION()
+  );
+  return graphql(payload, "FETCH_CUSTOM_FILTER");
+}
+
 function getApiUrl() {
   let _baseApiUrl = process.env.REACT_APP_API_URL ?? '/api';
   if (_baseApiUrl.indexOf('/') !== 0) {

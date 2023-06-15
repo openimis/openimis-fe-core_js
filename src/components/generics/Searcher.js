@@ -29,6 +29,7 @@ import Contributions from "./Contributions";
 import FormattedMessage from "./FormattedMessage";
 import ProgressOrError from "./ProgressOrError";
 import Table from "./Table";
+import { CLEARED_STATE_FILTER } from "../../constants";
 
 const styles = (theme) => ({
   root: {
@@ -93,6 +94,7 @@ class SelectionMenu extends Component {
           exportFetch={this.props.exportFetch}
           exportFields={this.props.exportFields}
           exportFieldsColumns={this.props.exportFieldsColumns}
+          label={this.props.exportFieldLabel}
         />)}
         {!!contributionKey && (
           <Contributions
@@ -200,7 +202,7 @@ class Searcher extends Component {
       (state, props) => ({
         filters,
         pageSize: props.defaultPageSize || 10,
-        orderBy: props.defaultOrderBy,
+        orderBy: props.defaultOrowsPerPageOptionsrderBy,
       }),
       (e) => this.applyFilters()
     );
@@ -427,6 +429,16 @@ class Searcher extends Component {
       exportFields = ['id'],
       exportFieldsColumns,
       intl,
+      isCustomFiltering = false,
+      objectForCustomFiltering = null,
+      moduleName = null,
+      objectType = null,
+      appliedCustomFilters = null,
+      setAppliedCustomFilters = null,
+      appliedFiltersRowStructure = null,
+      setAppliedFiltersRowStructure = null,
+      applyNumberCircle = null,
+      exportFieldLabel = null
     } = this.props;
     return (
       <Fragment>
@@ -445,6 +457,16 @@ class Searcher extends Component {
                 filterPaneContributionsKey={filterPaneContributionsKey}
               />
             }
+            isCustomFiltering={isCustomFiltering}
+            objectForCustomFiltering={objectForCustomFiltering}
+            moduleName={moduleName}
+            objectType={objectType}
+            setAppliedCustomFilters={setAppliedCustomFilters}
+            appliedCustomFilters={appliedCustomFilters}
+            onChangeFilters={this.onChangeFilters}
+            appliedFiltersRowStructure={appliedFiltersRowStructure}
+            setAppliedFiltersRowStructure={setAppliedFiltersRowStructure}
+            applyNumberCircle={applyNumberCircle}
           />
         )}
         {!!contributionKey && <Contributions contributionKey={contributionKey} />}
@@ -484,6 +506,7 @@ class Searcher extends Component {
                         exportFetch={exportFetch}
                         exportFields={exportFields}
                         exportFieldsColumns={exportFieldsColumns}
+                        exportFieldLabel={exportFieldLabel}
                       />
                     </Grid>
                   )}

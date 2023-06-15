@@ -17,7 +17,7 @@ const styles = (theme) => ({
 });
 
 function SearcherExport(props) {
-  const { intl, rights, selection, filters, exportFetch, exportFields, exportFieldsColumns } = props;
+  const { intl, rights, selection, filters, exportFetch, exportFields, exportFieldsColumns, label=null } = props;
   const [exportStatus, setExport] = useState(0);
   const enabled = (selection) => {return exportStatus == 0};
 
@@ -32,7 +32,7 @@ function SearcherExport(props) {
   };
 
   let entries = [{ 
-    text: formatMessage(intl, "core", "exportSearchResult"), 
+    text: label || formatMessage(intl, "core", "exportSearchResult"), 
     action: exportData 
   }];
 

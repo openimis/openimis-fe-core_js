@@ -66,7 +66,7 @@ class ConstantBasedPicker extends Component {
     return (
       <SelectInput
         module={module}
-        label={!!withLabel && label}
+        label={!!withLabel && label? label: " "}
         options={options}
         name={name}
         value={value}

@@ -66,7 +66,6 @@ export function cacheFilters(key, filters) {
 }
 
 export function resetCacheFilters(key) {
-  console.log('bbbbbbbbb')
   return (dispatch) => {
     dispatch({ type: "CORE_CACHE_FILTER_RESET", payload: key });
   };

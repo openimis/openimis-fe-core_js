@@ -96,7 +96,6 @@ function reducer(
     case "CORE_CACHE_FILTER_RESET":
       const key = action.payload;
       const { [key]: _, ...remainingFilters } = state.filtersCache;
-      console.log('ccccccccccc', remainingFilters)
       return {
         ...state,
         filtersCache: remainingFilters,

@@ -196,9 +196,7 @@ class Searcher extends Component {
   };
 
   componentDidMount() {
-    const { cachePerTab, cacheTabName, cacheFiltersKey } = this.props;
-    const cacheKey = cachePerTab && cacheTabName ? `${cacheFiltersKey}-${cacheTabName}` : cacheFiltersKey;
-    var filters = this.props.filtersCache[cacheKey] || this.props.defaultFilters || {};
+    var filters = this.props.filtersCache[this.props.cacheFiltersKey] || this.props.defaultFilters || {};
     this.setState(
       (state, props) => ({
         filters,
@@ -208,21 +206,6 @@ class Searcher extends Component {
       (e) => this.applyFilters()
     );
   }
-
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    if (
-      !_.isEqual(this.state.filters, { ...prevState.filters, ...this.props.defaultFilters })
-    ) {
-      this.setState(
-        (state, props) => ({
-          filters: { ...state.filters, ...props.defaultFilters }
-        }),
-        () => this.applyFilters()
-      );
-    }
-  }
-
-
 
   filtersToQueryParams = () => {
     const { page, afterCursor, beforeCursor } = this.state;
@@ -274,9 +257,7 @@ class Searcher extends Component {
   _cacheAndApply = () => {
     var filters = this.filtersToQueryParams();
     if (!!this.props.cacheFiltersKey) {
-      const { cachePerTab, cacheTabName, cacheFiltersKey } = this.props;
-      const cacheKey = cachePerTab && cacheTabName ? `${cacheFiltersKey}-${cacheTabName}` : cacheFiltersKey;
-      this.props.cacheFilters(cacheKey, this.state.filters);
+      this.props.cacheFilters(this.props.cacheFiltersKey, this.state.filters);
       this.props.fetch(filters);
     } else {
       this.props.fetch(filters);

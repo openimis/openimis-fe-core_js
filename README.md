@@ -81,6 +81,11 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 
   Note: depends on the selected calendar (Gregorian vs. Nepali)
 
+### JSON handler
+
+- `createFieldsBasedOnJSON`: Creates additional fields from a JSON string and returns an array of field objects.
+- `renderInputComponent`: Renders the appropriate input component based on the field type and value.
+
 ### navigation
 
 - `withHistory`: helper to inject history to any openIMIS component (allow navigation)

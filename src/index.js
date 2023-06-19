@@ -112,6 +112,7 @@ import withHistory, {
   Redirect,
   NavLink,
 } from "./helpers/history";
+import { createFieldsBasedOnJSON, renderInputComponent } from "./helpers/json-handler-utils";
 import withModulesManager, { useModulesManager } from "./helpers/modules";
 import { formatJsonField } from "./helpers/jsonExt";
 import { RIGHT_ROLE_SEARCH, CLEARED_STATE_FILTER } from "./constants";
@@ -263,5 +264,7 @@ export {
   ConfirmDialog,
   useAuthentication,
   useBoolean,
-  CLEARED_STATE_FILTER
+  CLEARED_STATE_FILTER,
+  createFieldsBasedOnJSON,
+  renderInputComponent,
 };

@@ -208,19 +208,6 @@ class Searcher extends Component {
     );
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    if (
-      !_.isEqual(this.state.filters, { ...prevState.filters, ...this.props.defaultFilters })
-    ) {
-      this.setState(
-        (state, props) => ({
-          filters: { ...state.filters, ...props.defaultFilters }
-        }),
-        () => this.applyFilters()
-      );
-    }
-  }
-
   componentWillUnmount() {
     if (this.props.resetFiltersOnUnmount) {
       const cacheKey = this._getCacheKey();

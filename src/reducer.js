@@ -93,6 +93,14 @@ function reducer(
         ...state,
         filtersCache,
       };
+    case "CORE_CACHE_FILTER_RESET":
+      const key = action.payload;
+      const { [key]: _, ...remainingFilters } = state.filtersCache;
+      return {
+        ...state,
+        filtersCache: remainingFilters,
+      };
+
     case "CORE_MUTATION_ADD":
       return {
         ...state,

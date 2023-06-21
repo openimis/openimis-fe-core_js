@@ -18,7 +18,7 @@ import {
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import MoreHoriz from "@material-ui/icons/MoreHoriz";
 
-import { cacheFilters, saveCurrentPaginationPage } from "../../actions";
+import {cacheFilters, resetCacheFilters, saveCurrentPaginationPage} from "../../actions";
 import { formatMessage } from "../../helpers/i18n";
 import { sort, formatSorter } from "../../helpers/api";
 import withModulesManager from "../../helpers/modules";
@@ -196,7 +196,8 @@ class Searcher extends Component {
   };
 
   componentDidMount() {
-    var filters = this.props.filtersCache[this.props.cacheFiltersKey] || this.props.defaultFilters || {};
+    const cacheKey = this._getCacheKey();
+    var filters = this.props.filtersCache[cacheKey] || this.props.defaultFilters || {};
     this.setState(
       (state, props) => ({
         filters,
@@ -206,6 +207,20 @@ class Searcher extends Component {
       (e) => this.applyFilters()
     );
   }
+
+  componentWillUnmount() {
+    if (this.props.resetFiltersOnUnmount) {
+      const cacheKey = this._getCacheKey();
+      this.props.resetCacheFilters(cacheKey)
+      this.resetFilters();
+    }
+  }
+
+  _getCacheKey() {
+    const { cachePerTab, cacheTabName, cacheFiltersKey } = this.props;
+    return cachePerTab && cacheTabName ? `${cacheFiltersKey}-${cacheTabName}` : cacheFiltersKey;
+  }
+
 
   filtersToQueryParams = () => {
     const { page, afterCursor, beforeCursor } = this.state;
@@ -257,7 +272,8 @@ class Searcher extends Component {
   _cacheAndApply = () => {
     var filters = this.filtersToQueryParams();
     if (!!this.props.cacheFiltersKey) {
-      this.props.cacheFilters(this.props.cacheFiltersKey, this.state.filters);
+      const cacheKey = this._getCacheKey();
+      this.props.cacheFilters(cacheKey, this.state.filters);
       this.props.fetch(filters);
     } else {
       this.props.fetch(filters);
@@ -544,7 +560,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ cacheFilters, saveCurrentPaginationPage }, dispatch);
+  return bindActionCreators({ cacheFilters, resetCacheFilters, saveCurrentPaginationPage }, dispatch);
 };
 
 export default withModulesManager(

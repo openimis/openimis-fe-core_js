@@ -479,3 +479,9 @@ export function clearCurrentPaginationPage() {
     dispatch({ type: "CORE_PAGINATION_PAGE_CLEAR" })
   }
 }
+
+export function toggleCurrentCalendarType(isSecondaryCalendarEnabled) {
+  return (dispatch) => {
+    dispatch({ type: "CORE_CALENDAR_TYPE_TOGGLE", payload: { isSecondaryCalendarEnabled } })
+  }
+}

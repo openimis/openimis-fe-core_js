@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import withWidth from "@material-ui/core/withWidth";
 import { Redirect } from "../helpers/history";
 import { alpha, useTheme, makeStyles } from "@material-ui/core/styles";
@@ -23,6 +23,11 @@ import Contributions from "./generics/Contributions";
 import FormattedMessage from "./generics/FormattedMessage";
 import JournalDrawer from "./JournalDrawer";
 import { useBoolean, useAuthentication } from "../helpers/hooks";
+
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import {Switch } from "@material-ui/core";
+import {toggleCurrentCalendarType} from "../actions"
+import { useDispatch } from 'react-redux';
 
 export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
 export const MAIN_MENU_CONTRIBUTION_KEY = "core.MainMenu";
@@ -161,7 +166,18 @@ const RequireAuth = (props) => {
   const modulesManager = useModulesManager();
   const auth = useAuthentication();
 
+  const calendarSwitch = modulesManager.getConf(
+    "fe-core",
+    "allowSecondCalendar",
+    true,
+  );
+
   const isAppBarMenu = useMemo(() => theme.menu.variant.toUpperCase() === "APPBAR", [theme.menu.variant]);
+
+  const [isSecondaryCalendar, setSecondaryCalendar] = useBoolean();
+  const dispatch = useDispatch();
+
+  useEffect(() => {dispatch(toggleCurrentCalendarType(!isSecondaryCalendar))}, [isSecondaryCalendar])
 
   if (!auth.isAuthenticated) {
     return <Redirect to={redirectTo} />;
@@ -208,6 +224,18 @@ const RequireAuth = (props) => {
           <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
             <div className={classes.grow} />
           </Contributions>
+          {!!calendarSwitch &&
+          <FormControlLabel
+            control={
+            <Switch
+              color="secondary"
+              checked={isSecondaryCalendar}
+              onChange={setSecondaryCalendar.toggle}
+            />}
+            label= {isSecondaryCalendar ? "EN" : "NP"}
+            labelPlacement="start"
+          />
+          }
           <LogoutButton />
           <Help />
         </Toolbar>

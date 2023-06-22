@@ -148,12 +148,14 @@ const DEFAULT_CONFIG = {
   ],
 };
 
+import DatePicker from "./pickers/DatePicker";
+
 export const CoreModule = (cfg) => {
   let def = { ...DEFAULT_CONFIG };
-  let DatePicker = AdDatePicker;
-  if (cfg.datePicker === "ne") {
-    DatePicker = NeDatePicker;
-  }
+  // let DatePicker = AdDatePicker;
+  // if (cfg.datePicker === "ne") {
+    // DatePicker = NeDatePicker;
+  // }
   def.refs.push({ key: "core.DatePicker", ref: DatePicker });
   return { ...def, ...cfg };
 };

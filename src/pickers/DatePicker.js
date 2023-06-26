@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { useSelector } from "react-redux";
 import { connect } from "react-redux";
 import moment from "moment";
 import { withTheme, withStyles } from "@material-ui/core/styles";
@@ -7,15 +6,12 @@ import { injectIntl } from "react-intl";
 import { FormControl } from "@material-ui/core";
 import { DatePicker as MUIDatePicker } from "@material-ui/pickers";
 import { formatMessage, toISODate } from "../helpers/i18n";
-import NeDatePicker from "./NeDatePicker";
-import AdDatePicker from "./AdDatePicker";
+import Calendar from '@sbmdkl/nepali-datepicker-reactjs';
+import '@sbmdkl/nepali-datepicker-reactjs/dist/index.css';
 
 import {
-    historyPush,
     withModulesManager,
     withHistory,
-    withTooltip,
-    clearCurrentPaginationPage,
   } from "@openimis/fe-core";
 
 const styles = (theme) => ({
@@ -49,7 +45,12 @@ class DatePicker extends Component {
     this.setState({ value: d }, (i) => this.props.onChange(toISODate(d)));
   };
 
+  onChangeNepal = ({ bsDate, adDate }) => {
+		this.setState({ value: toISODate(adDate) });
+	};
+
   render() {
+    if (!this.props.isSecondaryCalendarEnabled){
     const {
       intl,
       classes,
@@ -63,47 +64,39 @@ class DatePicker extends Component {
       reset,
       ...otherProps
     } = this.props;
-    console.log(this.props.isSecondaryCalendarEnabled);
-                
-    if (this.props.isSecondaryCalendarEnabled===true){
-        console.log("Not Nepal!")
-        return (
-        <AdDatePicker fullWidth={fullWidth}>
-            {...otherProps}
-            format={format}
-            disabled={readOnly}
-            required={required}
-            clearable
-            value={this.state.value}
-            InputLabelProps={{
-                className: classes.label,
-            }}
-            label={!!label ? formatMessage(intl, module, label) : null}
-            onChange={this.dateChange}
-            reset={reset}
-            disablePast={disablePast}
-        </AdDatePicker>
-        );
-    }else{
-        console.log("Nepal!")
-        return (
-            <NeDatePicker fullWidth={fullWidth}>
-                {...otherProps}
-                format={format}
-                disabled={readOnly}
-                required={required}
-                clearable
-                value={this.state.value}
-                InputLabelProps={{
-                    className: classes.label,
-                }}
-                label={!!label ? formatMessage(intl, module, label) : null}
-                onChange={this.dateChange}
-                reset={reset}
-                disablePast={disablePast}
-            </NeDatePicker>
-        );
-    }
+
+    return (
+      <FormControl fullWidth={fullWidth}>
+        <MUIDatePicker
+          {...otherProps}
+          format={format}
+          disabled={readOnly}
+          required={required}
+          clearable
+          value={this.state.value}
+          InputLabelProps={{
+            className: classes.label,
+          }}
+          label={!!label ? formatMessage(intl, module, label) : null}
+          onChange={this.dateChange}
+          reset={reset}
+          disablePast={disablePast}
+        />
+      </FormControl>
+    );
+  }
+  else{
+    return (
+      <Calendar 
+        onChange={this.onChangeNepal}
+        defaultDate={this.value} 
+        language="en"
+        theme="deepdark" 
+        dateFormat="DDDD, YYYY-MM-DD"
+        placeholder="Select date"
+      />
+    );
+  }
   }
 }
 

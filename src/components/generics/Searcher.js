@@ -202,7 +202,7 @@ class Searcher extends Component {
       (state, props) => ({
         filters,
         pageSize: props.defaultPageSize || 10,
-        orderBy: props.defaultOrowsPerPageOptionsrderBy,
+        orderBy: props.defaultOrderBy,
       }),
       (e) => this.applyFilters()
     );

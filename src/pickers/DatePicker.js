@@ -3,11 +3,12 @@ import { connect } from "react-redux";
 import moment from "moment";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { injectIntl } from "react-intl";
-import { FormControl } from "@material-ui/core";
+import { FormControl} from "@material-ui/core";
 import { DatePicker as MUIDatePicker } from "@material-ui/pickers";
 import { formatMessage, toISODate } from "../helpers/i18n";
 import Calendar from '@sbmdkl/nepali-datepicker-reactjs';
 import '@sbmdkl/nepali-datepicker-reactjs/dist/index.css';
+import NepaliDate from "nepali-date-converter"
 
 import {
     withModulesManager,
@@ -46,11 +47,10 @@ class DatePicker extends Component {
   };
 
   onChangeNepal = ({ bsDate, adDate }) => {
-		this.setState({ value: toISODate(adDate) });
+    this.setState({ value: toISODate(adDate)}, (i) => this.props.onChange(toISODate(adDate)));
 	};
 
   render() {
-    if (!this.props.isSecondaryCalendarEnabled){
     const {
       intl,
       classes,
@@ -60,11 +60,12 @@ class DatePicker extends Component {
       readOnly = false,
       required = false,
       fullWidth = true,
-      format = "YYYY-MM-DD",
+      format = "DD-MM-YYYY",
       reset,
       ...otherProps
     } = this.props;
 
+    if (!this.props.isSecondaryCalendarEnabled){
     return (
       <FormControl fullWidth={fullWidth}>
         <MUIDatePicker
@@ -86,15 +87,19 @@ class DatePicker extends Component {
     );
   }
   else{
+    let nepaliDate = (!!this.state.value ? new NepaliDate(new Date(this.state.value)).format('YYYY-MM-DD'): new NepaliDate().format('YYYY-MM-DD'))
     return (
-      <Calendar 
-        onChange={this.onChangeNepal}
-        defaultDate={this.value} 
-        language="en"
-        theme="deepdark" 
-        dateFormat="DDDD, YYYY-MM-DD"
-        placeholder="Select date"
-      />
+      <FormControl fullWidth={fullWidth}>
+        <label>{!!label ? formatMessage(intl, module, label) : null}</label>
+        <Calendar       
+          onChange={this.onChangeNepal}
+          defaultDate={nepaliDate} 
+          language="en"
+          style={{width:"100%", display: "flex", position:"static"}}
+          dateFormat="DD/MM/YYYY"
+          placeholder="Select date"
+        />
+      </FormControl>
     );
   }
   }

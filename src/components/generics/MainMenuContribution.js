@@ -31,7 +31,7 @@ const styles = (theme) => ({
   },
   drawerHeading: {
     fontSize: theme.menu.drawer.fontSize,
-    color: theme.palette.text.primary,
+    color: theme.menu.drawer.textColor,
     paddingTop: theme.menu.drawer.fontSize / 2,
   },
   drawerDivider: {
@@ -54,7 +54,6 @@ const styles = (theme) => ({
 
 const Accordion = withStyles({
   root: {
-    border: "1px solid rgba(0, 0, 0, .125)",
     boxShadow: "none",
     "&:not(:last-child)": {
       borderBottom: 0,
@@ -71,9 +70,8 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
   root: {
-    backgroundColor: "rgba(0, 0, 0, .03)",
-    borderBottom: "1px solid rgba(0, 0, 0, .125)",
-    marginBottom: -1,
+    backgroundColor: "#006273",
+
     minHeight: 56,
     "&$expanded": {
       minHeight: 56,
@@ -193,7 +191,7 @@ class MainMenuContribution extends Component {
                   }}
                 >
                   <ListItemIcon>{entry.icon}</ListItemIcon>
-                  <ListItemText primary={entry.text} />
+                  <ListItemText primary={entry.text}/>
                 </ListItem>
                 {entry.withDivider && (
                   <Divider key={`${this.props.header}_${idx}_divider`} className={this.props.classes.drawerDivider} />

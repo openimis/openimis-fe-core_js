@@ -48,6 +48,25 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.leavingScreen,
     }),
   },
+  appBarDrawer: {
+    margin: theme.spacing(-1, 0, -1, 0),
+    paddingRight: theme.jrnlDrawer.close.width,
+    transition: theme.transitions.create(["margin", "width"], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    backgroundColor: theme.palette.secondary.second,
+    color: theme.palette.text.primary
+  },
+  
+  toolbarDrawerLogout: {
+    color: theme.palette.text.primary,
+    button: {
+      margin: theme.spacing(2),
+      color: theme.palette.text.primary,
+    },
+  },
+  
   appBarShift: {
     width: `calc(100% - ${theme.menu.drawer.width})`,
     marginLeft: theme.menu.drawer.width,
@@ -194,6 +213,15 @@ const RequireAuth = (props) => {
   if (cfg['openimis-fe-core_js']?.menuLeft === true) {
     return (
     <>
+      <AppBar position="fixed" className={classes.appBarDrawer}>
+        <Toolbar className={classes.toolbarDrawer}>
+          <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
+            <div className={classes.grow} />
+          </Contributions>
+          <LogoutButton className={classes.toolbarDrawerLogout}/>
+          <Help />
+        </Toolbar>
+      </AppBar>
       <Drawer
         className={classes.drawer}
         variant="permanent"
@@ -217,15 +245,13 @@ const RequireAuth = (props) => {
             </Tooltip>
           </Hidden>
           </Button>
-          
-          <Divider />
             <div className={classes.drawerContainer}></div>
                   <Contributions {...others} contributionKey={MAIN_MENU_CONTRIBUTION_KEY} menuVariant="Drawer">
                     <Divider />
 
               </Contributions>
             <div/>
-            </Drawer>
+            </Drawer>  
           <JournalDrawer open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />
       <main
         className={classes.contentShiftLeftSideMenu}

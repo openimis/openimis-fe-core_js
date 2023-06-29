@@ -64,8 +64,7 @@ class DatePicker extends Component {
       reset,
       ...otherProps
     } = this.props;
-
-    if (!this.props.isSecondaryCalendarEnabled){
+    if (this.props.isSecondaryCalendarEnabled){
     return (
       <FormControl fullWidth={fullWidth}>
         <MUIDatePicker

@@ -173,8 +173,8 @@ const RequireAuth = (props) => {
   );
 
   const isAppBarMenu = useMemo(() => theme.menu.variant.toUpperCase() === "APPBAR", [theme.menu.variant]);
-
-  const [isSecondaryCalendar, setSecondaryCalendar] = useBoolean();
+  const defaultValue = false;
+  const [isSecondaryCalendar, setSecondaryCalendar] = useBoolean(defaultValue);
   const dispatch = useDispatch();
 
   useEffect(() => {dispatch(toggleCurrentCalendarType(!isSecondaryCalendar))}, [isSecondaryCalendar])
@@ -232,7 +232,7 @@ const RequireAuth = (props) => {
               checked={isSecondaryCalendar}
               onChange={setSecondaryCalendar.toggle}
             />}
-            label= {isSecondaryCalendar ? "EN" : "NP"}
+            label= {"AD/BS"}
             labelPlacement="start"
           />
           }

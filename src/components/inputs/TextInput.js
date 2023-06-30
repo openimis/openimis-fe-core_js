@@ -56,7 +56,6 @@ class TextInput extends Component {
       inputProps = {},
       formatInput = null,
       helperText,
-      type,
       ...others
     } = this.props;
     return (
@@ -73,7 +72,6 @@ class TextInput extends Component {
         value={this.state.value}
         error={Boolean(error)}
         helperText={error ?? helperText}
-        type={type}
       />
     );
   }

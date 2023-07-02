@@ -147,7 +147,6 @@ const DEFAULT_CONFIG = {
   ],
 };
 
-
 export const CoreModule = (cfg) => {
   let def = { ...DEFAULT_CONFIG };
   def.refs.push({ key: "core.DatePicker", ref: DatePicker });

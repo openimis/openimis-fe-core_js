@@ -9,7 +9,6 @@ import { formatMessage, toISODate } from "../helpers/i18n";
 import Calendar from '@sbmdkl/nepali-datepicker-reactjs';
 import '@sbmdkl/nepali-datepicker-reactjs/dist/index.css';
 import NepaliDate from "nepali-date-converter"
-
 import {
     withModulesManager,
     withHistory,
@@ -62,9 +61,10 @@ class DatePicker extends Component {
       fullWidth = true,
       format = "DD-MM-YYYY",
       reset,
+      isSecondaryCalendarEnabled,
       ...otherProps
     } = this.props;
-    if (this.props.isSecondaryCalendarEnabled){
+    if (isSecondaryCalendarEnabled){
     return (
       <FormControl fullWidth={fullWidth}>
         <MUIDatePicker
@@ -86,7 +86,7 @@ class DatePicker extends Component {
     );
   }
   else{
-    let nepaliDate = (!!this.state.value ? new NepaliDate(new Date(this.state.value)).format('YYYY-MM-DD'): new NepaliDate().format('YYYY-MM-DD'))
+    const nepaliDate = (!!this.state.value ? new NepaliDate(new Date(this.state.value)).format('YYYY-MM-DD'): new NepaliDate().format('YYYY-MM-DD'))
     return (
       <FormControl fullWidth={fullWidth}>
         <label>{!!label ? formatMessage(intl, module, label) : null}</label>
@@ -110,7 +110,7 @@ const mapStateToProps = (state) => ({
 
 export default injectIntl(
     withModulesManager(
-      withHistory(connect(mapStateToProps, {})(withTheme(withStyles(styles)(DatePicker)))),
+      withHistory(connect(mapStateToProps, null)(withTheme(withStyles(styles)(DatePicker)))),
     ),
   );
   

@@ -4,7 +4,6 @@ import { Redirect } from "../helpers/history";
 import { alpha, useTheme, makeStyles } from "@material-ui/core/styles";
 import { useModulesManager } from "../helpers/modules";
 import LogoutButton from "./LogoutButton";
-import { connect } from "react-redux";
 import Help from "../pages/Help";
 import clsx from "clsx";
 import {
@@ -26,8 +25,8 @@ import JournalDrawer from "./JournalDrawer";
 import { useBoolean, useAuthentication } from "../helpers/hooks";
 
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import {Switch } from "@material-ui/core";
-import {toggleCurrentCalendarType} from "../actions"
+import { Switch } from "@material-ui/core";
+import { toggleCurrentCalendarType } from "../actions"
 import { useDispatch } from 'react-redux';
 
 export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
@@ -216,11 +215,10 @@ const RequireAuth = (props) => {
   );
 
   const isAppBarMenu = useMemo(() => theme.menu.variant.toUpperCase() === "APPBAR", [theme.menu.variant]);
-  const defaultValue = false;
-  const [isSecondaryCalendar, setSecondaryCalendar] = useBoolean(defaultValue);
+  const [isSecondaryCalendar, setSecondaryCalendar] = useBoolean(false);
   const dispatch = useDispatch();
 
-  useEffect(() => {dispatch(toggleCurrentCalendarType(!isSecondaryCalendar))}, [isSecondaryCalendar])
+  useEffect(() => dispatch(toggleCurrentCalendarType(!isSecondaryCalendar)), [isSecondaryCalendar])
 
   if (!auth.isAuthenticated) {
     return <Redirect to={redirectTo} />;

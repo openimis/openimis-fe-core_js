@@ -412,6 +412,11 @@ function reducer(
           module: null,
         },
       };
+    case "CORE_CALENDAR_TYPE_TOGGLE":
+      return {
+        ...state,
+        isSecondaryCalendarEnabled: action.payload.isSecondaryCalendarEnabled,
+      };
     default:
       return state;
   }

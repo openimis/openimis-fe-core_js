@@ -1,10 +1,18 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import moment from "moment";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { injectIntl } from "react-intl";
-import { FormControl } from "@material-ui/core";
+import { FormControl} from "@material-ui/core";
 import { DatePicker as MUIDatePicker } from "@material-ui/pickers";
 import { formatMessage, toISODate } from "../helpers/i18n";
+import Calendar from '@sbmdkl/nepali-datepicker-reactjs';
+import '@sbmdkl/nepali-datepicker-reactjs/dist/index.css';
+import NepaliDate from "nepali-date-converter"
+import {
+    withModulesManager,
+    withHistory,
+  } from "@openimis/fe-core";
 
 const styles = (theme) => ({
   label: {
@@ -17,8 +25,11 @@ function fromISODate(s) {
   return moment(s).toDate();
 }
 
-class AdDatePicker extends Component {
-  state = { value: null };
+class DatePicker extends Component {
+  state = { 
+    value: null 
+    };
+  
 
   componentDidMount() {
     this.setState((state, props) => ({ value: props.value || null }));
@@ -34,6 +45,10 @@ class AdDatePicker extends Component {
     this.setState({ value: d }, (i) => this.props.onChange(toISODate(d)));
   };
 
+  onChangeNepal = ({ bsDate, adDate }) => {
+    this.setState({ value: toISODate(adDate)}, (i) => this.props.onChange(toISODate(adDate)));
+	};
+
   render() {
     const {
       intl,
@@ -44,11 +59,12 @@ class AdDatePicker extends Component {
       readOnly = false,
       required = false,
       fullWidth = true,
-      format = "YYYY-MM-DD",
+      format = "DD-MM-YYYY",
       reset,
+      isSecondaryCalendarEnabled,
       ...otherProps
     } = this.props;
-
+    if (isSecondaryCalendarEnabled){
     return (
       <FormControl fullWidth={fullWidth}>
         <MUIDatePicker
@@ -69,6 +85,32 @@ class AdDatePicker extends Component {
       </FormControl>
     );
   }
+  else{
+    const nepaliDate = (!!this.state.value ? new NepaliDate(new Date(this.state.value)).format('YYYY-MM-DD'): new NepaliDate().format('YYYY-MM-DD'))
+    return (
+      <FormControl fullWidth={fullWidth}>
+        <label>{!!label ? formatMessage(intl, module, label) : null}</label>
+        <Calendar       
+          onChange={this.onChangeNepal}
+          defaultDate={nepaliDate} 
+          language="en"
+          style={{width:"100%", display: "flex", position:"static"}}
+          dateFormat="DD/MM/YYYY"
+          placeholder="Select date"
+        />
+      </FormControl>
+    );
+  }
+  }
 }
 
-export default injectIntl(withTheme(withStyles(styles)(AdDatePicker)));
+const mapStateToProps = (state) => ({
+    isSecondaryCalendarEnabled: state.core.isSecondaryCalendarEnabled ?? false,
+  });
+
+export default injectIntl(
+    withModulesManager(
+      withHistory(connect(mapStateToProps, null)(withTheme(withStyles(styles)(DatePicker)))),
+    ),
+  );
+  

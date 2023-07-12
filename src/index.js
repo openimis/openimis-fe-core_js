@@ -31,8 +31,7 @@ import Table from "./components/generics/Table";
 import SearcherExport from "./components/generics/SearcherExport";
 import Searcher from "./components/generics/Searcher";
 import SearcherPane from "./components/generics/SearcherPane";
-import AdDatePicker from "./pickers/AdDatePicker";
-import NeDatePicker from "./pickers/NeDatePicker";
+import DatePicker from "./pickers/DatePicker";
 import Picker from "./components/generics/Picker";
 import ConstantBasedPicker from "./components/generics/ConstantBasedPicker";
 import YearPicker from "./pickers/YearPicker";
@@ -150,10 +149,6 @@ const DEFAULT_CONFIG = {
 
 export const CoreModule = (cfg) => {
   let def = { ...DEFAULT_CONFIG };
-  let DatePicker = AdDatePicker;
-  if (cfg.datePicker === "ne") {
-    DatePicker = NeDatePicker;
-  }
   def.refs.push({ key: "core.DatePicker", ref: DatePicker });
   return { ...def, ...cfg };
 };

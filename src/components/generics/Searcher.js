@@ -18,7 +18,7 @@ import {
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import MoreHoriz from "@material-ui/icons/MoreHoriz";
 
-import { cacheFilters, saveCurrentPaginationPage } from "../../actions";
+import {cacheFilters, resetCacheFilters, saveCurrentPaginationPage} from "../../actions";
 import { formatMessage } from "../../helpers/i18n";
 import { sort, formatSorter } from "../../helpers/api";
 import withModulesManager from "../../helpers/modules";
@@ -28,6 +28,7 @@ import Contributions from "./Contributions";
 import FormattedMessage from "./FormattedMessage";
 import ProgressOrError from "./ProgressOrError";
 import Table from "./Table";
+import { CLEARED_STATE_FILTER } from "../../constants";
 
 const styles = (theme) => ({
   root: {
@@ -86,12 +87,13 @@ class SelectionMenu extends Component {
             <Button onClick={(e) => this.action(i.action)}>{i.text}</Button>
           </Grid>
         ))}
-        {this.props.exportable && (<SearcherExport 
-          selection={this.props.selection} 
-          filters={this.props.filters} 
+        {this.props.exportable && (<SearcherExport
+          selection={this.props.selection}
+          filters={this.props.filters}
           exportFetch={this.props.exportFetch}
           exportFields={this.props.exportFields}
           exportFieldsColumns={this.props.exportFieldsColumns}
+          label={this.props.exportFieldLabel}
         />)}
         {!!contributionKey && (
           <Contributions
@@ -121,7 +123,7 @@ class SelectionMenu extends Component {
             </MenuItem>
           ))}
           {this.props.exportable && (
-            <SearcherExport 
+            <SearcherExport
               selection={this.props.selection} filters={this.props.filters} exportFetch={this.props.exportFetch}
               exportFields={this.props.exportFields} exportFieldsColumns={this.props.exportFieldsColumns}
             />)}
@@ -194,7 +196,8 @@ class Searcher extends Component {
   };
 
   componentDidMount() {
-    var filters = this.props.filtersCache[this.props.cacheFiltersKey] || this.props.defaultFilters || {};
+    const cacheKey = this._getCacheKey();
+    var filters = this.props.filtersCache[cacheKey] || this.props.defaultFilters || {};
     this.setState(
       (state, props) => ({
         filters,
@@ -204,6 +207,20 @@ class Searcher extends Component {
       (e) => this.applyFilters()
     );
   }
+
+  componentWillUnmount() {
+    if (this.props.resetFiltersOnUnmount) {
+      const cacheKey = this._getCacheKey();
+      this.props.resetCacheFilters(cacheKey)
+      this.resetFilters();
+    }
+  }
+
+  _getCacheKey() {
+    const { cachePerTab, cacheTabName, cacheFiltersKey } = this.props;
+    return cachePerTab && cacheTabName ? `${cacheFiltersKey}-${cacheTabName}` : cacheFiltersKey;
+  }
+
 
   filtersToQueryParams = () => {
     const { page, afterCursor, beforeCursor } = this.state;
@@ -255,7 +272,8 @@ class Searcher extends Component {
   _cacheAndApply = () => {
     var filters = this.filtersToQueryParams();
     if (!!this.props.cacheFiltersKey) {
-      this.props.cacheFilters(this.props.cacheFiltersKey, this.state.filters);
+      const cacheKey = this._getCacheKey();
+      this.props.cacheFilters(cacheKey, this.state.filters);
       this.props.fetch(filters);
     } else {
       this.props.fetch(filters);
@@ -265,9 +283,9 @@ class Searcher extends Component {
   applyFilters = () => {
     this.setState(
       (state, props) => ({
-        page: props.paginationPage || 0,
-        afterCursor: props.afterCursor || null,
-        beforeCursor: props.beforeCursor || null,
+        page: 0,
+        afterCursor: null,
+        beforeCursor: null,
         clearAll: state.clearAll + 1,
       }),
       this._cacheAndApply
@@ -409,6 +427,16 @@ class Searcher extends Component {
       exportFields = ['id'],
       exportFieldsColumns,
       intl,
+      isCustomFiltering = false,
+      objectForCustomFiltering = null,
+      moduleName = null,
+      objectType = null,
+      appliedCustomFilters = null,
+      setAppliedCustomFilters = null,
+      appliedFiltersRowStructure = null,
+      setAppliedFiltersRowStructure = null,
+      applyNumberCircle = null,
+      exportFieldLabel = null
     } = this.props;
     return (
       <Fragment>
@@ -427,6 +455,16 @@ class Searcher extends Component {
                 filterPaneContributionsKey={filterPaneContributionsKey}
               />
             }
+            isCustomFiltering={isCustomFiltering}
+            objectForCustomFiltering={objectForCustomFiltering}
+            moduleName={moduleName}
+            objectType={objectType}
+            setAppliedCustomFilters={setAppliedCustomFilters}
+            appliedCustomFilters={appliedCustomFilters}
+            onChangeFilters={this.onChangeFilters}
+            appliedFiltersRowStructure={appliedFiltersRowStructure}
+            setAppliedFiltersRowStructure={setAppliedFiltersRowStructure}
+            applyNumberCircle={applyNumberCircle}
           />
         )}
         {!!contributionKey && <Contributions contributionKey={contributionKey} />}
@@ -449,7 +487,7 @@ class Searcher extends Component {
                   </Grid>
                 </Grid>
                 <Grid container alignItems="center" item xs={4} className={classes.paperHeader}>
-                  {fetchedItems && (  
+                  {fetchedItems && (
                     <Grid container direction="row" justify="flex-end" className={classes.paperHeaderAction}>
                       <StyledSelectionMenu
                         canSelectAll={canSelectAll}
@@ -466,6 +504,7 @@ class Searcher extends Component {
                         exportFetch={exportFetch}
                         exportFields={exportFields}
                         exportFieldsColumns={exportFieldsColumns}
+                        exportFieldLabel={exportFieldLabel}
                       />
                     </Grid>
                   )}
@@ -521,7 +560,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ cacheFilters, saveCurrentPaginationPage }, dispatch);
+  return bindActionCreators({ cacheFilters, resetCacheFilters, saveCurrentPaginationPage }, dispatch);
 };
 
 export default withModulesManager(

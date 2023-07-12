@@ -43,6 +43,10 @@ function reducer(
     afterCursor: null,
     beforeCursor: null,
     module: null,
+    fetchingCustomFilters: false,
+    errorCustomFilters: null,
+    fetchedCustomFilters: false,
+    customFilters: []
   },
   action,
 ) {
@@ -89,6 +93,14 @@ function reducer(
         ...state,
         filtersCache,
       };
+    case "CORE_CACHE_FILTER_RESET":
+      const key = action.payload;
+      const { [key]: _, ...remainingFilters } = state.filtersCache;
+      return {
+        ...state,
+        filtersCache: remainingFilters,
+      };
+
     case "CORE_MUTATION_ADD":
       return {
         ...state,
@@ -308,6 +320,28 @@ function reducer(
             validationError: null,
           },
         },
+      };
+    case "FETCH_CUSTOM_FILTER_REQ":
+      return {
+        ...state,
+        fetchingCustomFilters: true,
+        fetchedCustomFilters: false,
+        customFilters: [],
+        errorCustomFilters: null,
+      };
+    case "FETCH_CUSTOM_FILTER_RESP":
+      return {
+        ...state,
+        fetchingCustomFilters: false,
+        fetchedCustomFilters: true,
+        customFilters: !!action.payload.data.customFilters ? action.payload.data.customFilters.possibleFilters : [],
+        errorCustomFilters: formatGraphQLError(action.payload),
+      };
+    case "FETCH_CUSTOM_FILTER_ERR":
+      return {
+        ...state,
+        fetchingCustomFilters: false,
+        errorCustomFilters: formatServerError(action.payload),
       };
     case "CORE_ROLE_MUTATION_REQ":
       return dispatchMutationReq(state, action);

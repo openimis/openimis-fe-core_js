@@ -81,6 +81,11 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 
   Note: depends on the selected calendar (Gregorian vs. Nepali)
 
+### JSON handler
+
+- `createFieldsBasedOnJSON`: Creates additional fields from a JSON string and returns an array of field objects.
+- `renderInputComponent`: Renders the appropriate input component based on the field type and value.
+
 ### navigation
 
 - `withHistory`: helper to inject history to any openIMIS component (allow navigation)
@@ -145,3 +150,4 @@ None
 - `journalDrawer.pageSize`: page size when loading (historical) mutations (Default: `5`)
 - `AutoSuggestion.limitDisplay`: threshold to limit the number of items in the auto suggestions (adding 'more options...' message), default: 10
 - `AmountInput.currencyPosition`: position of the currency for the AmountInput. Choices are `start` and `end` (default: `start`)
+- `menuLeft`: position menu in the Drawer component on the left site of the application

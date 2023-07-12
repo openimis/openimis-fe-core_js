@@ -18,6 +18,7 @@ import PagedDataHandler from "./components/generics/PagedDataHandler";
 import SelectInput from "./components/inputs/SelectInput";
 import TextInput from "./components/inputs/TextInput";
 import ValidatedTextInput from "./components/inputs/ValidatedTextInput";
+import ValidatedTextAreaInput from "./components/inputs/ValidatedTextAreaInput";
 import TextAreaInput from "./components/inputs/TextAreaInput";
 import AmountInput from "./components/inputs/AmountInput";
 import NumberInput from "./components/inputs/NumberInput";
@@ -45,6 +46,7 @@ import reducer from "./reducer";
 import ErrorBoundary from "./helpers/ErrorBoundary";
 import ConfirmDialog from "./components/dialogs/ConfirmDialog";
 import SelectDialog from "./components/dialogs/SelectDialog";
+import AdvancedFiltersDialog from "./components/dialogs/AdvancedFiltersDialog";
 import {
   baseApiUrl,
   apiHeaders,
@@ -54,6 +56,7 @@ import {
   journalize,
   coreAlert,
   coreConfirm,
+  clearConfirm,
   fetchMutation,
   prepareMutation,
   clearCurrentPaginationPage,
@@ -109,9 +112,10 @@ import withHistory, {
   Redirect,
   NavLink,
 } from "./helpers/history";
+import { createFieldsBasedOnJSON, renderInputComponent } from "./helpers/json-handler-utils";
 import withModulesManager, { useModulesManager } from "./helpers/modules";
 import { formatJsonField } from "./helpers/jsonExt";
-import { RIGHT_ROLE_SEARCH } from "./constants";
+import { RIGHT_ROLE_SEARCH, CLEARED_STATE_FILTER } from "./constants";
 import { authMiddleware } from "./middlewares";
 import RefreshAuthToken from "./components/RefreshAuthToken";
 import UserActivityReport from "./reports/UserActivityReport";
@@ -188,6 +192,7 @@ export * from "./helpers/utils";
 export {
   Helmet,
   baseApiUrl,
+  AdvancedFiltersDialog,
   apiHeaders,
   graphql,
   graphqlWithVariables,
@@ -198,6 +203,7 @@ export {
   downloadExport,
   coreAlert,
   coreConfirm,
+  clearConfirm,
   clearCurrentPaginationPage,
   openBlob,
   sort,
@@ -248,6 +254,7 @@ export {
   SelectInput,
   TextInput,
   ValidatedTextInput,
+  ValidatedTextAreaInput,
   TextAreaInput,
   AmountInput,
   FakeInput,
@@ -280,4 +287,7 @@ export {
   ConfirmDialog,
   useAuthentication,
   useBoolean,
+  CLEARED_STATE_FILTER,
+  createFieldsBasedOnJSON,
+  renderInputComponent,
 };

@@ -1,5 +1,15 @@
 import React, { Component } from "react";
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
+
+import { Grid, FormControlLabel, Checkbox, Fab, IconButton } from "@material-ui/core";
+import { withTheme, withStyles } from "@material-ui/core/styles";
+import AddIcon from "@material-ui/icons/Add";
+import DeleteIcon from "@material-ui/icons/Delete";
+import EditIcon from "@material-ui/icons/Edit";
+import SupervisedUserCircleIcon from "@material-ui/icons/SupervisedUserCircle";
+
 import {
   withModulesManager,
   formatMessage,
@@ -15,10 +25,6 @@ import {
   SelectInput,
   clearCurrentPaginationPage,
 } from "@openimis/fe-core";
-import { Grid, FormControlLabel, Checkbox, Fab, IconButton } from "@material-ui/core";
-import { withTheme, withStyles } from "@material-ui/core/styles";
-import { bindActionCreators } from "redux";
-import { connect } from "react-redux";
 import { fetchRoles, deleteRole } from "../actions";
 import {
   DEFAULT_PAGE_SIZE,
@@ -33,10 +39,6 @@ import {
   QUERY_STRING_DUPLICATE,
   MODULE_NAME,
 } from "../constants";
-import AddIcon from "@material-ui/icons/Add";
-import EditIcon from "@material-ui/icons/Edit";
-import SupervisedUserCircleIcon from "@material-ui/icons/SupervisedUserCircle";
-import DeleteIcon from "@material-ui/icons/Delete";
 
 const styles = (theme) => ({
   page: theme.page,
@@ -55,6 +57,11 @@ class RawRoleFilter extends Component {
   _filterValue = (k) => {
     const { filters } = this.props;
     return !!filters[k] ? filters[k].value : null;
+  };
+
+  _filterTextFieldValue = (k) => {
+    const { filters } = this.props;
+    return !!filters[k] ? filters[k].value : "";
   };
 
   _onChangeFilter = (k, v) => {
@@ -95,7 +102,7 @@ class RawRoleFilter extends Component {
           <TextInput
             module="core"
             label="roleManagement.roleName"
-            value={this._filterValue("name")}
+            value={this._filterTextFieldValue("name")}
             onChange={(v) => this._onChangeStringFilter("name", v, CONTAINS_LOOKUP)}
           />
         </Grid>

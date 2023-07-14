@@ -136,6 +136,7 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 - `CORE_UPDATE_ROLE_RESP`: receive a result of update Role mutation
 - `CORE_DUPLICATE_ROLE_RESP`: receive a result of duplicate Role mutation
 - `CORE_DELETE_ROLE_RESP`: receive a result of delete Role mutation
+- `CORE_CALENDAR_TYPE_TOGGLE`: set calendar switch status between gregorian and other calendar
 
 ## Other Modules Listened Redux Actions
 

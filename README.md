@@ -136,6 +136,7 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 - `CORE_UPDATE_ROLE_RESP`: receive a result of update Role mutation
 - `CORE_DUPLICATE_ROLE_RESP`: receive a result of duplicate Role mutation
 - `CORE_DELETE_ROLE_RESP`: receive a result of delete Role mutation
+- `CORE_CALENDAR_TYPE_TOGGLE`: set calendar switch status between gregorian and other calendar
 
 ## Other Modules Listened Redux Actions
 
@@ -151,3 +152,4 @@ None
 - `AutoSuggestion.limitDisplay`: threshold to limit the number of items in the auto suggestions (adding 'more options...' message), default: 10
 - `AmountInput.currencyPosition`: position of the currency for the AmountInput. Choices are `start` and `end` (default: `start`)
 - `menuLeft`: position menu in the Drawer component on the left site of the application
+- `calendarSwitch`: enable calendar switcher toggle on the navbar of the webpage. Currently supports nepali calendar. Default false.

@@ -211,7 +211,7 @@ const RequireAuth = (props) => {
   const calendarSwitch = modulesManager.getConf(
     "fe-core",
     "allowSecondCalendar",
-    true,
+    false,
   );
 
   const isAppBarMenu = useMemo(() => theme.menu.variant.toUpperCase() === "APPBAR", [theme.menu.variant]);

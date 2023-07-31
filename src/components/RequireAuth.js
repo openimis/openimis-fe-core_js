@@ -1,6 +1,7 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import withWidth from "@material-ui/core/withWidth";
-import { Redirect } from "../helpers/history";
+import {Redirect, useHistory} from "../helpers/history";
 import { alpha, useTheme, makeStyles } from "@material-ui/core/styles";
 import { useModulesManager } from "../helpers/modules";
 import LogoutButton from "./LogoutButton";
@@ -23,6 +24,8 @@ import Contributions from "./generics/Contributions";
 import FormattedMessage from "./generics/FormattedMessage";
 import JournalDrawer from "./JournalDrawer";
 import { useBoolean, useAuthentication } from "../helpers/hooks";
+import { useIdleTimer } from "react-idle-timer/dist/index.legacy.cjs.js"; // otherwise not building: https://github.com/SupremeTechnopriest/react-idle-timer/issues/350
+import { logout } from "../actions";
 
 export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
 export const MAIN_MENU_CONTRIBUTION_KEY = "core.MainMenu";
@@ -153,6 +156,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const RequireAuth = (props) => {
+  const dispatch = useDispatch();
+  const history = useHistory();
   const { children, logo, redirectTo, ...others } = props;
   const [isOpen, setOpen] = useBoolean();
   const [isDrawerOpen, setDrawerOpen] = useBoolean();
@@ -162,6 +167,19 @@ const RequireAuth = (props) => {
   const auth = useAuthentication();
 
   const isAppBarMenu = useMemo(() => theme.menu.variant.toUpperCase() === "APPBAR", [theme.menu.variant]);
+  const idleTimeout = modulesManager.getConf("fe-core", "auth.idleTimeout", 900_000); // TODO: fix modulesManager - is always empty at this stage, so always using default value
+  const onIdle = async () => {
+    await dispatch(logout());
+    history.push("/");
+  };
+  const { startIdleTimer } = useIdleTimer({
+    onIdle: onIdle,
+    timeout: idleTimeout,
+    throttle: 500,
+  })
+  useEffect(() => {
+    startIdleTimer
+  }, [startIdleTimer]);
 
   if (!auth.isAuthenticated) {
     return <Redirect to={redirectTo} />;

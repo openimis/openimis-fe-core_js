@@ -26,8 +26,8 @@ export function formatAmount(intl, amount) {
   return `${intl.formatMessage({ id: "currency" })} ${amount || 0}`;
 }
 
-export function formatDateFromISO(mm, intl, date) {
-  if (mm.getConf("fe-core", "datePicker") === "ne") {
+export function formatDateFromISO(mm, intl, date, isSecondaryCalendar=false) {
+  if (isSecondaryCalendar) {
     return neFormateDateFromISO(date);
   }
   return adFormateDateFromISO(mm, intl, date);

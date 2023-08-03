@@ -22,3 +22,17 @@ export const prepareForComparison = (stateRole, propsRole, roleRights) => {
     convertedRoleRights: tempRoleRights || [],
   };
 };
+
+export function getTimeDifferenceInDays(_firstDate, _secondDate) {
+  let firstDate = new Date(_firstDate);
+  let secondDate = new Date(_secondDate);
+  const timeDelta = firstDate.getTime() - secondDate.getTime();
+  const timeInDays = Math.ceil(timeDelta / (1000 * 60 * 60 * 24));
+
+  return timeInDays;
+}
+
+export function getTimeDifferenceInDaysFromToday(dateToCheck) {
+  const currentDate = new Date();
+  return getTimeDifferenceInDays(dateToCheck, currentDate);
+}

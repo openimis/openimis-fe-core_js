@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import withWidth from "@material-ui/core/withWidth";
 import { Redirect } from "../helpers/history";
 import { alpha, useTheme, makeStyles } from "@material-ui/core/styles";
@@ -24,6 +24,11 @@ import FormattedMessage from "./generics/FormattedMessage";
 import JournalDrawer from "./JournalDrawer";
 import { useBoolean, useAuthentication } from "../helpers/hooks";
 
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import { Switch } from "@material-ui/core";
+import { toggleCurrentCalendarType } from "../actions"
+import { useDispatch } from 'react-redux';
+
 export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
 export const MAIN_MENU_CONTRIBUTION_KEY = "core.MainMenu";
 export const MAIN_SEARCHER_CONTRIBUTION_KEY = "core.MainSearcher";
@@ -47,6 +52,25 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.leavingScreen,
     }),
   },
+  appBarDrawer: {
+    margin: theme.spacing(-1, 0, -1, 0),
+    paddingRight: theme.jrnlDrawer.close.width,
+    transition: theme.transitions.create(["margin", "width"], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    backgroundColor: theme.palette.secondary.second,
+    color: theme.palette.text.primary
+  },
+  
+  toolbarDrawerLogout: {
+    color: theme.palette.text.primary,
+    button: {
+      margin: theme.spacing(2),
+      color: theme.palette.text.primary,
+    },
+  },
+  
   appBarShift: {
     width: `calc(100% - ${theme.menu.drawer.width})`,
     marginLeft: theme.menu.drawer.width,
@@ -73,13 +97,16 @@ const useStyles = makeStyles((theme) => ({
       width: theme.menu.drawer.width,
       flexShrink: 0,
     },
+    backgroundColor: theme.menu.drawer.backgroundColor
   },
   drawerHeader: {
     ...theme.mixins.toolbar,
     margin: theme.spacing(1, 0, 1, 0),
+    backgroundColor: theme.menu.drawer.backgroundColor
   },
   drawerPaper: {
     width: theme.menu.drawer.width,
+    backgroundColor: theme.menu.drawer.backgroundColor
   },
   content: {
     flexGrow: 1,
@@ -150,6 +177,26 @@ const useStyles = makeStyles((theme) => ({
       },
     },
   },
+  drawer: {
+    ...theme.mixins.toolbar,
+    width: theme.menu.drawer.width,
+    flexShrink: 0,
+  },
+  drawerPaper: {
+    width: theme.menu.drawer.width,
+    backgroundColor: theme.menu.drawer.backgroundColor
+  },
+  drawerContainer: {
+    overflow: 'auto',
+  },
+  contentShiftLeftSideMenu: {
+    transition: theme.transitions.create("margin", {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    marginLeft: theme.menu.drawer.width,
+    marginRight: theme.jrnlDrawer.close.width
+  },
 }));
 
 const RequireAuth = (props) => {
@@ -160,13 +207,74 @@ const RequireAuth = (props) => {
   const classes = useStyles();
   const modulesManager = useModulesManager();
   const auth = useAuthentication();
+  const cfg = children.props.modulesManager.cfg;
+  const calendarSwitch = modulesManager.getConf(
+    "fe-core",
+    "allowSecondCalendar",
+    false,
+  );
 
   const isAppBarMenu = useMemo(() => theme.menu.variant.toUpperCase() === "APPBAR", [theme.menu.variant]);
+  const [isSecondaryCalendar, setSecondaryCalendar] = useBoolean(false);
+  const dispatch = useDispatch();
+
+  useEffect(() => dispatch(toggleCurrentCalendarType(!isSecondaryCalendar)), [isSecondaryCalendar])
 
   if (!auth.isAuthenticated) {
     return <Redirect to={redirectTo} />;
   }
+  if (cfg['openimis-fe-core_js']?.menuLeft === true) {
+    return (
+    <>
+      <AppBar position="fixed" className={classes.appBarDrawer}>
+        <Toolbar className={classes.toolbarDrawer}>
+          <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
+            <div className={classes.grow} />
+          </Contributions>
+          <LogoutButton className={classes.toolbarDrawerLogout}/>
+          <Help />
+        </Toolbar>
+      </AppBar>
+      <Drawer
+        className={classes.drawer}
+        variant="permanent"
+        classes={{
+          paper: classes.drawerPaper,
+        }}
+        anchor="left"
+      >
+          <Button className={classes.appName} onClick={(e) => (window.location.href = "/front")}>
+            {isAppBarMenu && (
+              <Hidden smDown implementation="css">
+                <img className={classes.logo} src={logo} />
+              </Hidden>
+            )}
+            <FormattedMessage module="core" id="appName" defaultMessage={<FormattedMessage id="root.appName" />} />
+            <Hidden smDown implementation="css">
+            <Tooltip title={modulesManager.getModulesVersions().join(", ")}>
+              <Typography variant="caption" className={classes.appVersions}>
+                {modulesManager.getOpenIMISVersion()}
+              </Typography>
+            </Tooltip>
+          </Hidden>
+          </Button>
+            <div className={classes.drawerContainer}></div>
+                  <Contributions {...others} contributionKey={MAIN_MENU_CONTRIBUTION_KEY} menuVariant="Drawer">
+                    <Divider />
 
+              </Contributions>
+            <div/>
+            </Drawer>  
+          <JournalDrawer open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />
+      <main
+        className={classes.contentShiftLeftSideMenu}
+      >
+        {children}
+      </main>
+    </>
+    )
+  }
+  
   return (
     <>
       <AppBar
@@ -208,6 +316,18 @@ const RequireAuth = (props) => {
           <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
             <div className={classes.grow} />
           </Contributions>
+          {!!calendarSwitch &&
+          <FormControlLabel
+            control={
+            <Switch
+              color="secondary"
+              checked={isSecondaryCalendar}
+              onChange={setSecondaryCalendar.toggle}
+            />}
+            label= {"AD/BS"}
+            labelPlacement="start"
+          />
+          }
           <LogoutButton />
           <Help />
         </Toolbar>

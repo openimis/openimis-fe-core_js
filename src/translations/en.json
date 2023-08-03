@@ -63,5 +63,14 @@
   "claim.edit.services.code": "Code",
   "claim.edit.services.name": "Name",
   "claim.edit.services.priceAppro": "Price Appro.",
-  "core.NumberInput.notApplicable": "N/A"
+  "core.NumberInput.notApplicable": "N/A",
+  "core.advancedFilters": "Advanced Filters",
+  "core.advancedFilters.field": "Field",
+  "core.advancedFilters.filter": "Filter",
+  "core.advancedFilters.value": "Value",
+  "core.advancedFilters.button.AdvancedFilters": "Advanced Filters",
+  "core.advancedFilters.button.addFilters": "Add filter",
+  "core.advancedFilters.button.clearAllFilters": "Clear All Filters",
+  "core.advancedFilters.button.cancel": "Cancel",
+  "core.advancedFilters.button.filter": "Filter"
 }

@@ -33,10 +33,11 @@ import TableServiceReview from "./components/generics/TableServiceReview";
 import SearcherExport from "./components/generics/SearcherExport";
 import Searcher from "./components/generics/Searcher";
 import SearcherPane from "./components/generics/SearcherPane";
-import AdDatePicker from "./pickers/AdDatePicker";
-import NeDatePicker from "./pickers/NeDatePicker";
+import DatePicker from "./pickers/DatePicker";
 import Picker from "./components/generics/Picker";
 import ConstantBasedPicker from "./components/generics/ConstantBasedPicker";
+import CustomFilterFieldStatusPicker from "./pickers/CustomFilterFieldStatusPicker";
+import CustomFilterTypeStatusPicker from "./pickers/CustomFilterTypeStatusPicker";
 import YearPicker from "./pickers/YearPicker";
 import MonthPicker from "./pickers/MonthPicker";
 import LanguagePicker from "./pickers/LanguagePicker";
@@ -48,6 +49,7 @@ import reducer from "./reducer";
 import ErrorBoundary from "./helpers/ErrorBoundary";
 import ConfirmDialog from "./components/dialogs/ConfirmDialog";
 import SelectDialog from "./components/dialogs/SelectDialog";
+import AdvancedFiltersDialog from "./components/dialogs/AdvancedFiltersDialog";
 import {
   baseApiUrl,
   apiHeaders,
@@ -57,9 +59,11 @@ import {
   journalize,
   coreAlert,
   coreConfirm,
+  clearConfirm,
   fetchMutation,
   prepareMutation,
   clearCurrentPaginationPage,
+  fetchCustomFilter
 } from "./actions";
 import {
   formatMessage,
@@ -112,9 +116,10 @@ import withHistory, {
   Redirect,
   NavLink,
 } from "./helpers/history";
+import { createFieldsBasedOnJSON, renderInputComponent } from "./helpers/json-handler-utils";
 import withModulesManager, { useModulesManager } from "./helpers/modules";
 import { formatJsonField } from "./helpers/jsonExt";
-import { RIGHT_ROLE_SEARCH } from "./constants";
+import { RIGHT_ROLE_SEARCH, CLEARED_STATE_FILTER } from "./constants";
 import { authMiddleware } from "./middlewares";
 import RefreshAuthToken from "./components/RefreshAuthToken";
 const ROUTE_ROLES = "roles";
@@ -149,10 +154,6 @@ const DEFAULT_CONFIG = {
 
 export const CoreModule = (cfg) => {
   let def = { ...DEFAULT_CONFIG };
-  let DatePicker = AdDatePicker;
-  if (cfg.datePicker === "ne") {
-    DatePicker = NeDatePicker;
-  }
   def.refs.push({ key: "core.DatePicker", ref: DatePicker });
   return { ...def, ...cfg };
 };
@@ -168,6 +169,8 @@ export * from "./helpers/utils";
 export {
   Helmet,
   baseApiUrl,
+  AdvancedFiltersDialog,
+  fetchCustomFilter,
   apiHeaders,
   graphql,
   graphqlWithVariables,
@@ -178,6 +181,7 @@ export {
   downloadExport,
   coreAlert,
   coreConfirm,
+  clearConfirm,
   clearCurrentPaginationPage,
   openBlob,
   sort,
@@ -253,6 +257,8 @@ export {
   SearcherPane,
   SelectDialog,
   ConstantBasedPicker,
+  CustomFilterFieldStatusPicker,
+  CustomFilterTypeStatusPicker,
   ErrorBoundary,
   useTranslations,
   useDebounceCb,
@@ -263,4 +269,7 @@ export {
   ConfirmDialog,
   useAuthentication,
   useBoolean,
+  CLEARED_STATE_FILTER,
+  createFieldsBasedOnJSON,
+  renderInputComponent,
 };

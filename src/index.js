@@ -117,6 +117,7 @@ import { RIGHT_ROLE_SEARCH } from "./constants";
 import { authMiddleware } from "./middlewares";
 import RefreshAuthToken from "./components/RefreshAuthToken";
 import UserActivityReport from "./reports/UserActivityReport";
+import RegistersStatusReport from "./reports/RegistersStatusReport";
 const ROUTE_ROLES = "roles";
 const ROUTE_ROLE = "roles/role";
 
@@ -141,6 +142,21 @@ const DEFAULT_CONFIG = {
         }
         params.date_start = values.dateFrom;
         params.date_end = values.dateTo;
+        return params;
+      },
+    },
+    {
+      key: "registers_status",
+      component: RegistersStatusReport,
+      isValid: (values) => true,
+      getParams: (values) => {
+        const params = {}
+        if (values.region) {
+          params.requested_region_id = decodeId(values.region.id);
+        }
+        if (values.district) {
+          params.requested_district_id = decodeId(values.district.id);
+        }
         return params;
       },
     },

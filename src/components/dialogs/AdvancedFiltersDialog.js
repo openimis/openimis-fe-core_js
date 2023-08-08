@@ -5,15 +5,13 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import {
-  formatMessage,
-} from "@openimis/fe-core";
-import { withTheme, withStyles } from "@material-ui/core/styles";
+import { formatMessage } from "@openimis/fe-core";
+import { withStyles, withTheme } from "@material-ui/core/styles";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import AdvancedFilterRowValue from "./AdvancedFilterRowValue";
 import { fetchCustomFilter } from "../../actions";
-import AddCircle from '@material-ui/icons/Add';
+import AddCircle from "@material-ui/icons/Add";
 import { BENEFIT_PLAN, CLEARED_STATE_FILTER, CUSTOM_FILTERS } from "../../constants";
 
 const styles = (theme) => ({
@@ -42,6 +40,26 @@ const AdvancedFiltersDialog = ({
   const [currentFilter, setCurrentFilter] = useState({ field: "", filter: "", type: "", value: "" })
   const [filters, setFilters] = useState([currentFilter]);
 
+  const searchCriteriaToArray = () => {
+    if(!hasCustomFilters()) return appliedFiltersRowStructure;
+    const stringFilters = searchCriteria[CUSTOM_FILTERS]?.filter;
+    return JSON.parse(stringFilters.split(" ")[1]);
+  }
+
+  const jsonFiltersToRowFilters = () => {
+    const arrayFilters = searchCriteriaToArray();
+    return arrayFilters.map((filterString) => {
+      const [field, filter, typeValue] = filterString.split("__");
+      const [type, value] = typeValue.split("=");
+      return {
+        field,
+        filter,
+        type,
+        value: JSON.parse(value),
+      };
+    });
+  }
+
   const createParams = (moduleName, objectTypeName, uuidOfObject=null) => {
     return [
       `moduleName: "${moduleName}"`,
@@ -51,11 +69,22 @@ const AdvancedFiltersDialog = ({
   };
 
   const fetchFilters = (params) => fetchCustomFilter(params);
-  
+
   const handleOpen = () => {
-    setFilters(appliedFiltersRowStructure);
+    hasCustomFilters() && isAppliedFiltersRowStructureEmpty()?
+       setFilters(jsonFiltersToRowFilters()) : setFilters(appliedFiltersRowStructure);
     setIsOpen(true);
   };
+
+  const isAppliedFiltersRowStructureEmpty = () => {
+    return !(
+      !!appliedFiltersRowStructure.length &&
+      !!appliedFiltersRowStructure[0].filter &&
+      !!appliedFiltersRowStructure[0].field &&
+      !!appliedFiltersRowStructure[0].type
+    );
+  }
+
 
   const handleClose = () => {
     setCurrentFilter(CLEARED_STATE_FILTER);
@@ -76,7 +105,7 @@ const AdvancedFiltersDialog = ({
   const applyFilter = () => {
     setAppliedFiltersRowStructure(filters);
     const outputFilters = JSON.stringify(
-      filters.map(({ filter, value, field, type }) => 
+      filters.map(({ filter, value, field, type }) =>
         `${field}__${filter}__${type}=${JSON.stringify(value)}`)
     );
     if(checkArrayFilterStructure() === false){
@@ -131,35 +160,35 @@ const AdvancedFiltersDialog = ({
       fetchFilters(paramsToFetchFilters);
     }
   }, [object]);
- 
+
   // refresh component when list of filters is changed
   useEffect(() => {}, [filters]);
 
   useEffect(() => {
     if ( hasCustomFilters() === false ) {
       handleRemoveFilter();
-    } 
+    }
   }, [searchCriteria]);
 
   return (
     <>
-      <Button 
-        onClick={handleOpen} 
-        variant="outlined" 
-        color="#DFEDEF" 
+      <Button
+        onClick={handleOpen}
+        variant="outlined"
+        color="#DFEDEF"
         className={classes.button}
-        style={{ 
-          border: "0px", 
+        style={{
+          border: "0px",
         }}
       >
         {formatMessage(intl, "core", "advancedFilters")}
       </Button>
-      { appliedFiltersRowStructure.length > 0 && hasCustomFilters()  
-          ? (applyNumberCircle(appliedFiltersRowStructure.length)) : ( <></>) 
+      { appliedFiltersRowStructure.length > 0 && hasCustomFilters()
+          ? (applyNumberCircle(searchCriteriaToArray().length)) : ( <></>)
       }
-      <Dialog 
-        open={isOpen} 
-        onClose={handleClose} 
+      <Dialog
+        open={isOpen}
+        onClose={handleClose}
         PaperProps={{
           style: {
             width: 900,
@@ -167,8 +196,8 @@ const AdvancedFiltersDialog = ({
           },
         }}
       >
-        <DialogTitle 
-          style={{ 
+        <DialogTitle
+          style={{
             marginTop: "10px",
           }}
         >
@@ -176,7 +205,7 @@ const AdvancedFiltersDialog = ({
         </DialogTitle>
         <DialogContent>
           {filters.map((filter, index) => {
-            return (<AdvancedFilterRowValue 
+            return (<AdvancedFilterRowValue
               customFilters={customFilters}
               currentFilter={filter}
               setCurrentFilter={setCurrentFilter}
@@ -185,66 +214,66 @@ const AdvancedFiltersDialog = ({
               setFilters={setFilters}
             />)
           })}
-          <div 
+          <div
             style={{ backgroundColor: "#DFEDEF", paddingLeft: "10px", paddingBottom: "10px" }}
           >
-            <AddCircle 
-              style={{ 
-                border: "thin solid", 
-                borderRadius: "40px", 
-                width: "16px", 
-                height: "16px" 
-              }} 
+            <AddCircle
+              style={{
+                border: "thin solid",
+                borderRadius: "40px",
+                width: "16px",
+                height: "16px"
+              }}
               onClick={handleAddFilter}
             />
-            <Button 
-              onClick={handleAddFilter} 
+            <Button
+              onClick={handleAddFilter}
               variant="outlined"
-              style={{ 
-                border: "0px", 
-                "marginBottom": "6px", 
-                fontSize: "0.8rem" 
+              style={{
+                border: "0px",
+                "marginBottom": "6px",
+                fontSize: "0.8rem"
               }}
             >
               {formatMessage(intl, "core", "core.advancedFilters.button.addFilters")}
             </Button>
           </div>
         </DialogContent>
-        <DialogActions 
-          style={{ 
-            display: "inline", 
+        <DialogActions
+          style={{
+            display: "inline",
             paddingLeft: "10px",
             marginTop: "25px",
-            marginBottom: "15px"  
+            marginBottom: "15px"
           }}
         >
           <div>
             <div style={{ float: "left" }}>
-              <Button 
-                onClick={handleRemoveFilter} 
+              <Button
+                onClick={handleRemoveFilter}
                 variant="outlined"
                 style={{ border: "0px" }}
               >
                 {formatMessage(intl, "core", "core.advancedFilters.button.clearAllFilters")}
               </Button>
             </div>
-            <div style={{ 
-                float: "right", 
-                paddingRight: "16px" 
+            <div style={{
+                float: "right",
+                paddingRight: "16px"
               }}
             >
-              <Button 
-                onClick={handleClose} 
-                variant="outlined" 
+              <Button
+                onClick={handleClose}
+                variant="outlined"
                 autoFocus
-                style={{ margin: "0 16px" }} 
+                style={{ margin: "0 16px" }}
               >
                 {formatMessage(intl, "core", "core.advancedFilters.button.cancel")}
               </Button>
-              <Button 
-                onClick={applyFilter} 
-                variant="contained" 
-                color="primary" 
+              <Button
+                onClick={applyFilter}
+                variant="contained"
+                color="primary"
                 autoFocus
               >
                 {formatMessage(intl, "core", "core.advancedFilters.button.filter")}

@@ -120,12 +120,30 @@ import { formatJsonField } from "./helpers/jsonExt";
 import { RIGHT_ROLE_SEARCH, CLEARED_STATE_FILTER } from "./constants";
 import { authMiddleware } from "./middlewares";
 import RefreshAuthToken from "./components/RefreshAuthToken";
+import RegistersStatusReport from "./reports/RegistersStatusReport";
 const ROUTE_ROLES = "roles";
 const ROUTE_ROLE = "roles/role";
 
 const DEFAULT_CONFIG = {
   "translations": [{ key: "en", messages: messages_en }],
   "reducers": [{ key: "core", reducer: reducer }],
+  "reports": [
+    {
+      key: "registers_status",
+      component: RegistersStatusReport,
+      isValid: (values) => true,
+      getParams: (values) => {
+        const params = {}
+        if (values.region) {
+          params.requested_region_id = decodeId(values.region.id);
+        }
+        if (values.district) {
+          params.requested_district_id = decodeId(values.district.id);
+        }
+        return params;
+      },
+    },
+  ],
   "middlewares": [authMiddleware],
   "refs": [
     { key: "core.JournalDrawer.pollInterval", ref: 2000 },

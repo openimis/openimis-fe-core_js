@@ -12,7 +12,14 @@ import { bindActionCreators } from "redux";
 import AdvancedFilterRowValue from "./AdvancedFilterRowValue";
 import { fetchCustomFilter } from "../../actions";
 import AddCircle from "@material-ui/icons/Add";
-import { BENEFIT_PLAN, CLEARED_STATE_FILTER, CUSTOM_FILTERS } from "../../constants";
+import {
+  BENEFIT_PLAN,
+  CLEARED_STATE_FILTER,
+  CUSTOM_FILTERS,
+  DOUBLE_UNDERSCORE,
+  EQUALS_SIGN,
+  WHITE_SPACE
+} from "../../constants";
 
 const styles = (theme) => ({
   item: theme.paper.item,
@@ -41,16 +48,17 @@ const AdvancedFiltersDialog = ({
   const [filters, setFilters] = useState([currentFilter]);
 
   const searchCriteriaToArray = () => {
-    if(!hasCustomFilters()) return appliedFiltersRowStructure;
-    const stringFilters = searchCriteria[CUSTOM_FILTERS]?.filter;
-    return JSON.parse(stringFilters.split(" ")[1]);
+    return hasCustomFilters() ?
+      JSON.parse(searchCriteria[CUSTOM_FILTERS]?.filter.split(WHITE_SPACE)[1]) :
+      appliedFiltersRowStructure;
   }
+
 
   const jsonFiltersToRowFilters = () => {
     const arrayFilters = searchCriteriaToArray();
     return arrayFilters.map((filterString) => {
-      const [field, filter, typeValue] = filterString.split("__");
-      const [type, value] = typeValue.split("=");
+      const [field, filter, typeValue] = filterString.split(DOUBLE_UNDERSCORE);
+      const [type, value] = typeValue.split(EQUALS_SIGN);
       return {
         field,
         filter,
@@ -77,12 +85,8 @@ const AdvancedFiltersDialog = ({
   };
 
   const isAppliedFiltersRowStructureEmpty = () => {
-    return !(
-      !!appliedFiltersRowStructure.length &&
-      !!appliedFiltersRowStructure[0].filter &&
-      !!appliedFiltersRowStructure[0].field &&
-      !!appliedFiltersRowStructure[0].type
-    );
+    const [firstFilter = {}] = appliedFiltersRowStructure;
+    return !(firstFilter.filter && firstFilter.field && firstFilter.type);
   }
 
 

@@ -120,7 +120,9 @@ import { formatJsonField } from "./helpers/jsonExt";
 import { RIGHT_ROLE_SEARCH, CLEARED_STATE_FILTER } from "./constants";
 import { authMiddleware } from "./middlewares";
 import RefreshAuthToken from "./components/RefreshAuthToken";
+import UserActivityReport from "./reports/UserActivityReport";
 import RegistersStatusReport from "./reports/RegistersStatusReport";
+
 const ROUTE_ROLES = "roles";
 const ROUTE_ROLE = "roles/role";
 
@@ -128,6 +130,26 @@ const DEFAULT_CONFIG = {
   "translations": [{ key: "en", messages: messages_en }],
   "reducers": [{ key: "core", reducer: reducer }],
   "reports": [
+    {
+      key: "user_activity",
+      component: UserActivityReport,
+      isValid: (values) => values.dateFrom && values.dateTo,
+      getParams: (values) => {
+        const params = {}
+        if (values.user) {
+          params.requested_user_id = decodeId(values.user.iUser.id);
+        }
+        if (values.action) {
+          params.action = values.action;
+        }
+        if (values.entity) {
+          params.entity = values.entity;
+        }
+        params.date_start = values.dateFrom;
+        params.date_end = values.dateTo;
+        return params;
+      },
+    },
     {
       key: "registers_status",
       component: RegistersStatusReport,

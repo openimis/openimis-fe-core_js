@@ -92,3 +92,6 @@ export const FIELD_TYPES = {
   INTEGER, NUMBER, STRING, BOOLEAN, DATE
 }
 
+export const WHITE_SPACE = " ";
+export const DOUBLE_UNDERSCORE = "__";
+export const EQUALS_SIGN = "=";

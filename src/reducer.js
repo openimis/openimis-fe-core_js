@@ -95,10 +95,11 @@ function reducer(
       };
     case "CORE_CACHE_FILTER_RESET":
       const key = action.payload;
-      const { [key]: _, ...remainingFilters } = state.filtersCache;
+      const filtersCacheCopy = { ...state.filtersCache };
+      delete filtersCacheCopy[key];
       return {
         ...state,
-        filtersCache: remainingFilters,
+        filtersCache: filtersCacheCopy,
       };
 
     case "CORE_MUTATION_ADD":
@@ -411,6 +412,11 @@ function reducer(
           beforeCursor: null,
           module: null,
         },
+      };
+    case "CORE_CALENDAR_TYPE_TOGGLE":
+      return {
+        ...state,
+        isSecondaryCalendarEnabled: action.payload.isSecondaryCalendarEnabled,
       };
     default:
       return state;

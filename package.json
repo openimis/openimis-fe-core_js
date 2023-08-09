@@ -14,7 +14,7 @@
     "build": "rollup -c",
     "start": "rollup -c -w",
     "format": "prettier src -w",
-    "prepare":"npm run build"
+    "prepare": "npm run build"
   },
   "peerDependency": {
     "react-intl": "^5.8.1",
@@ -50,7 +50,9 @@
     "src"
   ],
   "dependencies": {
+    "@sbmdkl/nepali-datepicker-reactjs": "^1.2.1",
     "history": "^5.2.0",
+    "nepali-date-converter": "^3.3.1",
     "react-router": "^5.2.1",
     "react-router-dom": "^5.2.1"
   }

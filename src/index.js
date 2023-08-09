@@ -31,10 +31,11 @@ import Table from "./components/generics/Table";
 import SearcherExport from "./components/generics/SearcherExport";
 import Searcher from "./components/generics/Searcher";
 import SearcherPane from "./components/generics/SearcherPane";
-import AdDatePicker from "./pickers/AdDatePicker";
-import NeDatePicker from "./pickers/NeDatePicker";
+import DatePicker from "./pickers/DatePicker";
 import Picker from "./components/generics/Picker";
 import ConstantBasedPicker from "./components/generics/ConstantBasedPicker";
+import CustomFilterFieldStatusPicker from "./pickers/CustomFilterFieldStatusPicker";
+import CustomFilterTypeStatusPicker from "./pickers/CustomFilterTypeStatusPicker";
 import YearPicker from "./pickers/YearPicker";
 import MonthPicker from "./pickers/MonthPicker";
 import LanguagePicker from "./pickers/LanguagePicker";
@@ -60,6 +61,7 @@ import {
   fetchMutation,
   prepareMutation,
   clearCurrentPaginationPage,
+  fetchCustomFilter
 } from "./actions";
 import {
   formatMessage,
@@ -119,6 +121,8 @@ import { RIGHT_ROLE_SEARCH, CLEARED_STATE_FILTER } from "./constants";
 import { authMiddleware } from "./middlewares";
 import RefreshAuthToken from "./components/RefreshAuthToken";
 import UserActivityReport from "./reports/UserActivityReport";
+import RegistersStatusReport from "./reports/RegistersStatusReport";
+
 const ROUTE_ROLES = "roles";
 const ROUTE_ROLE = "roles/role";
 
@@ -143,6 +147,21 @@ const DEFAULT_CONFIG = {
         }
         params.date_start = values.dateFrom;
         params.date_end = values.dateTo;
+        return params;
+      },
+    },
+    {
+      key: "registers_status",
+      component: RegistersStatusReport,
+      isValid: (values) => true,
+      getParams: (values) => {
+        const params = {}
+        if (values.region) {
+          params.requested_region_id = decodeId(values.region.id);
+        }
+        if (values.district) {
+          params.requested_district_id = decodeId(values.district.id);
+        }
         return params;
       },
     },
@@ -173,10 +192,6 @@ const DEFAULT_CONFIG = {
 
 export const CoreModule = (cfg) => {
   let def = { ...DEFAULT_CONFIG };
-  let DatePicker = AdDatePicker;
-  if (cfg.datePicker === "ne") {
-    DatePicker = NeDatePicker;
-  }
   def.refs.push({ key: "core.DatePicker", ref: DatePicker });
   return { ...def, ...cfg };
 };
@@ -193,6 +208,7 @@ export {
   Helmet,
   baseApiUrl,
   AdvancedFiltersDialog,
+  fetchCustomFilter,
   apiHeaders,
   graphql,
   graphqlWithVariables,
@@ -277,6 +293,8 @@ export {
   SearcherPane,
   SelectDialog,
   ConstantBasedPicker,
+  CustomFilterFieldStatusPicker,
+  CustomFilterTypeStatusPicker,
   ErrorBoundary,
   useTranslations,
   useDebounceCb,

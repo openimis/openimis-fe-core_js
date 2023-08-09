@@ -108,5 +108,6 @@
   "core.advancedFilters.button.clearAllFilters": "Clear All Filters",
   "core.advancedFilters.button.cancel": "Cancel",
   "core.advancedFilters.button.filter": "Filter"
-
+  "core.RegistersStatusReport.region": "Region",
+  "core.RegistersStatusReport.district": "District"
 }

@@ -14,6 +14,7 @@ class YearPicker extends Component {
       label,
       nullLabel = "year.null",
       onChange,
+      readOnly,
       min,
       max,
       required,
@@ -34,7 +35,7 @@ class YearPicker extends Component {
       }))
     );
     return (
-      <SelectInput module={module} label={label} options={options} name={name} value={value} required={required} onChange={onChange} />
+      <SelectInput module={module} label={label} options={options} readOnly={readOnly} name={name} value={value} required={required} onChange={onChange} />
     );
   }
 }

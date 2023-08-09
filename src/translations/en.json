@@ -97,8 +97,7 @@
   "core.UserActivityReport.entity.InteractiveUser": "User",
   "core.UserActivityReport.entity.UserDistrict": "User District",
   "core.UserActivityReport.user": "User",
-  "core.UserActivityReport.user.null": "All users"
-
+  "core.UserActivityReport.user.null": "All users",
   "core.advancedFilters": "Advanced Filters",
   "core.advancedFilters.field": "Field",
   "core.advancedFilters.filter": "Filter",
@@ -107,7 +106,7 @@
   "core.advancedFilters.button.addFilters": "Add filter",
   "core.advancedFilters.button.clearAllFilters": "Clear All Filters",
   "core.advancedFilters.button.cancel": "Cancel",
-  "core.advancedFilters.button.filter": "Filter"
+  "core.advancedFilters.button.filter": "Filter",
   "core.RegistersStatusReport.region": "Region",
   "core.RegistersStatusReport.district": "District"
 }

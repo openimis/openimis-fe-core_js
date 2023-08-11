@@ -20,7 +20,6 @@ import SetPasswordPage from "../pages/SetPasswordPage";
 import { ErrorBoundary } from "@openimis/fe-core";
 
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";
-export const UNAUTHENTICATED_ROUTER_CONTRIBUTION_KEY = "core.UnauthenticatedRouter";
 export const APP_BOOT_CONTRIBUTION_KEY = "core.Boot";
 export const TRANSLATION_CONTRIBUTION_KEY = "translations";
 
@@ -51,10 +50,6 @@ const App = (props) => {
   const auth = useAuthentication();
   const routes = useMemo(() => {
     return modulesManager.getContribs(ROUTER_CONTRIBUTION_KEY);
-  }, []);
-
-  const unauthenticatedRoutes = useMemo(() => {
-    return modulesManager.getContribs(UNAUTHENTICATED_ROUTER_CONTRIBUTION_KEY);
   }, []);
 
   const locale = useMemo(() => {
@@ -109,18 +104,6 @@ const App = (props) => {
                 <Route path={"/login"} render={() => <LoginPage {...others} />} />
                 <Route path={"/forgot_password"} render={() => <ForgotPasswordPage {...others} />} />
                 <Route path={"/set_password"} render={() => <SetPasswordPage {...others} />} />
-                {unauthenticatedRoutes.map((route) => (
-                  <Route
-                    exact
-                    key={route.path}
-                    path={"/" + route.path}
-                    render={(props) => (
-                      <ErrorBoundary>
-                          <route.component modulesManager={modulesManager} {...props} {...others} />
-                      </ErrorBoundary>
-                    )}
-                  />
-                ))}
                 {routes.map((route) => (
                   <Route
                     exact

@@ -9,22 +9,16 @@ import {
   FormattedMessage,
   FormPanel,
   TextInput,
-  ValidatedTextInput,
   withModulesManager,
 } from "@openimis/fe-core";
-import { roleNameValidationCheck, roleNameValidationClear, roleNameSetValid } from "../actions";
 
 const styles = (theme) => ({
   item: theme.paper.item,
 });
 
 class RoleHeadPanel extends FormPanel {
-  shouldValidate = (inputValue) => {
-    const { savedRoleName } = this.props;
-    return inputValue !== savedRoleName;
-  };
   render() {
-    const { intl, classes, edited, isRequiredFieldsEmpty, isReadOnly, isRoleNameValid, roleNameValidationError } =
+    const { intl, classes, edited, isRequiredFieldsEmpty, isReadOnly } =
       this.props;
     return (
       <Fragment>
@@ -39,15 +33,7 @@ class RoleHeadPanel extends FormPanel {
         )}
         <Grid container>
           <Grid item className={classes.item}>
-            <ValidatedTextInput
-              itemQueryIdentifier="roleName"
-              codeTakenLabel={"core.roleManagement.duplicateButton.tooltip"}
-              shouldValidate={this.shouldValidate}
-              isValid={isRoleNameValid}
-              validationError={roleNameValidationError}
-              action={roleNameValidationCheck}
-              clearAction={roleNameValidationClear}
-              setValidAction={roleNameSetValid}
+            <TextInput
               module="core"
               label="roleManagement.roleName"
               value={!!edited && !!edited.name ? edited.name : ""}
@@ -95,11 +81,4 @@ class RoleHeadPanel extends FormPanel {
   }
 }
 
-const mapStateToProps = (state) => ({
-  isRoleNameValid: state.core.validationFields?.roleName?.isValid,
-  isRoleNameValidating: state.core.validationFields?.roleName?.isValidating,
-  roleNameValidationError: state.core.validationFields?.roleName?.validationError,
-  savedRoleName: state.core?.role?.name,
-});
-
-export default withModulesManager(connect(mapStateToProps)(withTheme(withStyles(styles)(RoleHeadPanel))));
+export default withModulesManager((withTheme(withStyles(styles)(RoleHeadPanel))));

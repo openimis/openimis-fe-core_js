@@ -166,6 +166,7 @@ class Table extends Component {
       onDelete = null,
       fetching = null,
       error = null,
+      showOrdinalNumber = false,
     } = this.props;
     let localHeaders = [...(headers || [])];
     let localPreHeaders = !!preHeaders ? [...preHeaders] : null;
@@ -193,6 +194,9 @@ class Table extends Component {
     }
 
     const rowsPerPage = pageSize || rowsPerPageOptions[0];
+    if (showOrdinalNumber) {
+      localHeaders.unshift("core.Table.ordinalNumberHeader");
+    }
     return (
       <Box position="relative" overflow="auto">
         {header && (
@@ -278,6 +282,20 @@ class Table extends Component {
                     !!onDoubleClick && classes.clickable,
                   )}
                 >
+                {showOrdinalNumber && 
+                  <TableCell
+                    className={clsx(
+                      !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
+                      !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
+                      !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
+                      !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
+                      aligns.length > 0 && classes[aligns[0]]
+                    )}
+                    key={`v-${iidx}-0`}
+                  >
+                    <span>{iidx + 1}</span>
+                  </TableCell>
+                }
                   {localItemFormatters &&
                     localItemFormatters.map((f, fidx) => {
                       if (colSpans.length > fidx && !colSpans[fidx]) return null;

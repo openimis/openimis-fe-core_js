@@ -436,7 +436,8 @@ class Searcher extends Component {
       appliedFiltersRowStructure = null,
       setAppliedFiltersRowStructure = null,
       applyNumberCircle = null,
-      exportFieldLabel = null
+      exportFieldLabel = null,
+      showOrdinalNumber = false
     } = this.props;
     return (
       <Fragment>
@@ -541,6 +542,7 @@ class Searcher extends Component {
                     onChangePage={this.onChangePage}
                     rowsPerPageOptions={rowsPerPageOptions}
                     onChangeRowsPerPage={this.onChangeRowsPerPage}
+                    showOrdinalNumber = {showOrdinalNumber}
                   />
                 </Grid>
               </Fragment>

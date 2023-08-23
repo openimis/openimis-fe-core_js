@@ -38,8 +38,8 @@ export function toISODate(d) {
   return moment(d).format().slice(0, 10);
 }
 
-export function withTooltip(c, t) {
-  return !!t ? <Tooltip title={t}>{c}</Tooltip> : c;
+export function withTooltip(c, t, placement='bottom') {
+  return !!t ? <Tooltip title={t} placement={placement}>{c}</Tooltip> : c;
 }
 
 export function useTranslations(moduleName, modulesManager) {

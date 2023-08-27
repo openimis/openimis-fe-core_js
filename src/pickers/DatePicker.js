@@ -64,7 +64,24 @@ class DatePicker extends Component {
       isSecondaryCalendarEnabled,
       ...otherProps
     } = this.props;
-    if (isSecondaryCalendarEnabled){
+
+  if (isSecondaryCalendarEnabled){
+    const nepaliDate = (!!this.state.value ? new NepaliDate(new Date(this.state.value)).format('YYYY-MM-DD'): new NepaliDate().format('YYYY-MM-DD'))
+    return (
+      <FormControl fullWidth={fullWidth}>
+        <label>{!!label ? formatMessage(intl, module, label) : null}</label>
+        <Calendar       
+          onChange={this.onChangeNepal}
+          defaultDate={nepaliDate} 
+          language="en"
+          style={{width:"100%", display: "flex", position:"static"}}
+          dateFormat="DD/MM/YYYY"
+          placeholder="Select date"
+        />
+      </FormControl>
+    );
+  }
+  else{
     return (
       <FormControl fullWidth={fullWidth}>
         <MUIDatePicker
@@ -81,22 +98,6 @@ class DatePicker extends Component {
           onChange={this.dateChange}
           reset={reset}
           disablePast={disablePast}
-        />
-      </FormControl>
-    );
-  }
-  else{
-    const nepaliDate = (!!this.state.value ? new NepaliDate(new Date(this.state.value)).format('YYYY-MM-DD'): new NepaliDate().format('YYYY-MM-DD'))
-    return (
-      <FormControl fullWidth={fullWidth}>
-        <label>{!!label ? formatMessage(intl, module, label) : null}</label>
-        <Calendar       
-          onChange={this.onChangeNepal}
-          defaultDate={nepaliDate} 
-          language="en"
-          style={{width:"100%", display: "flex", position:"static"}}
-          dateFormat="DD/MM/YYYY"
-          placeholder="Select date"
         />
       </FormControl>
     );

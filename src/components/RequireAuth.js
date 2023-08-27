@@ -28,6 +28,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { Switch } from "@material-ui/core";
 import { toggleCurrentCalendarType } from "../actions"
 import { useDispatch } from 'react-redux';
+import { useTranslations } from "../helpers/i18n";
 
 export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
 export const MAIN_MENU_CONTRIBUTION_KEY = "core.MainMenu";
@@ -215,10 +216,14 @@ const RequireAuth = (props) => {
   );
 
   const isAppBarMenu = useMemo(() => theme.menu.variant.toUpperCase() === "APPBAR", [theme.menu.variant]);
-  const [isSecondaryCalendar, setSecondaryCalendar] = useBoolean(false);
+  const [isSecondaryCalendar, setSecondaryCalendar] = useBoolean(true);
   const dispatch = useDispatch();
 
-  useEffect(() => dispatch(toggleCurrentCalendarType(!isSecondaryCalendar)), [isSecondaryCalendar])
+  useEffect(() =>{
+      localStorage.setItem("isSecondaryCalendarEnabled",  JSON.stringify(!isSecondaryCalendar));
+      dispatch(toggleCurrentCalendarType(!isSecondaryCalendar)), [isSecondaryCalendar]
+    }
+     )
 
   if (!auth.isAuthenticated) {
     return <Redirect to={redirectTo} />;
@@ -274,7 +279,7 @@ const RequireAuth = (props) => {
     </>
     )
   }
-  
+  const { formatMessage } = useTranslations(module, modulesManager);
   return (
     <>
       <AppBar
@@ -324,7 +329,7 @@ const RequireAuth = (props) => {
               checked={isSecondaryCalendar}
               onChange={setSecondaryCalendar.toggle}
             />}
-            label= {"AD/BS"}
+            label={formatMessage("core.calendarSwitcher")}
             labelPlacement="start"
           />
           }

@@ -559,6 +559,8 @@ const mapStateToProps = (state) => ({
   paginationPage: state.core?.savedPagination?.paginationPage,
   afterCursor: state.core?.savedPagination?.afterCursor,
   beforeCursor: state.core?.savedPagination?.beforeCursor,
+  // This is not used directly, but is needed for Searcher component to be rerendered on change of calendar type
+  isSecondaryCalendarEnabled: state.core.isSecondaryCalendarEnabled ?? false
 });
 
 const mapDispatchToProps = (dispatch) => {

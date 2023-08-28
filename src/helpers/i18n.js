@@ -26,7 +26,8 @@ export function formatAmount(intl, amount) {
   return `${intl.formatMessage({ id: "currency" })} ${amount || 0}`;
 }
 
-export function formatDateFromISO(mm, intl, date, isSecondaryCalendar=false) {
+export function formatDateFromISO(mm, intl, date) {
+  let isSecondaryCalendar = JSON.parse(localStorage.getItem('isSecondaryCalendarEnabled'));
   if (isSecondaryCalendar) {
     return neFormateDateFromISO(date);
   }

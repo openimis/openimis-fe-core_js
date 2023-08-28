@@ -109,5 +109,6 @@
   "core.advancedFilters.button.filter": "Filter",
   "core.RegistersStatusReport.region": "Region",
   "core.RegistersStatusReport.district": "District",
-  "core.Table.ordinalNumberHeader": "Number"
+  "core.Table.ordinalNumberHeader": "Number",
+  "core.calendarSwitcher": "BS/AD"
 }

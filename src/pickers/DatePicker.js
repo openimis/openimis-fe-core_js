@@ -10,9 +10,9 @@ import Calendar from '@sbmdkl/nepali-datepicker-reactjs';
 import '@sbmdkl/nepali-datepicker-reactjs/dist/index.css';
 import NepaliDate from "nepali-date-converter"
 import {
-    withModulesManager,
-    withHistory,
-  } from "@openimis/fe-core";
+  withModulesManager,
+  withHistory,
+} from "@openimis/fe-core";
 
 const styles = (theme) => ({
   label: {
@@ -26,10 +26,10 @@ function fromISODate(s) {
 }
 
 class DatePicker extends Component {
-  state = { 
-    value: null 
+  state = {
+    value: null
     };
-  
+
 
   componentDidMount() {
     this.setState((state, props) => ({ value: props.value || null }));
@@ -42,12 +42,12 @@ class DatePicker extends Component {
   }
 
   dateChange = (d) => {
-    this.setState({ value: d }, (i) => this.props.onChange(toISODate(d)));
+    this.setState({ value: toISODate(d) }, (i) => !!this.props.onChange ? this.props.onChange(toISODate(d)) : null);
   };
 
   onChangeNepal = ({ bsDate, adDate }) => {
-    this.setState({ value: toISODate(adDate)}, (i) => this.props.onChange(toISODate(adDate)));
-	};
+    this.setState({ value: toISODate(adDate)}, (i) => !!this.props.onChange ? this.props.onChange(toISODate(adDate)) : null);
+  };
 
   render() {
     const {
@@ -70,9 +70,10 @@ class DatePicker extends Component {
     return (
       <FormControl fullWidth={fullWidth}>
         <label>{!!label ? formatMessage(intl, module, label) : null}</label>
-        <Calendar       
+        <Calendar
           onChange={this.onChangeNepal}
-          defaultDate={nepaliDate} 
+          hideDefaultValue={!this.state?.value}
+          defaultDate={nepaliDate}
           language="en"
           style={{width:"100%", display: "flex", position:"static"}}
           dateFormat="DD/MM/YYYY"
@@ -114,4 +115,3 @@ export default injectIntl(
       withHistory(connect(mapStateToProps, null)(withTheme(withStyles(styles)(DatePicker)))),
     ),
   );
-  

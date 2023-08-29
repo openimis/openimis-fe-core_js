@@ -33,6 +33,8 @@ const styles = (theme) => ({
   tableHighlightedRow: theme.table.highlightedRow,
   tableHighlightedCell: theme.table.highlightedCell,
   tableHighlightedAltRow: theme.table.highlightedAltRow,
+  tableSecondaryHighlightedRow: theme.table.secondaryHighlightedRow,
+  tableSecondaryHighlightedCell: theme.table.secondaryHighlightedCell,
   tableHighlightedAltCell: theme.table.highlightedAltCell,
   tableDisabledRow: theme.table.disabledRow,
   tableDisabledCell: theme.table.disabledCell,
@@ -109,7 +111,7 @@ class Table extends Component {
 
   select = (i,e) => {
     // block normal href only for left click
-    if (e.type === 'click') {   
+    if (e.type === 'click') {
       if (!this.props.withSelection) return;
       let s = this.state.selection;
       let id = this.itemIdentifier(i);
@@ -152,6 +154,7 @@ class Table extends Component {
       itemFormatters,
       rowHighlighted = null,
       rowHighlightedAlt = null,
+      rowSecondaryHighlighted = null,
       rowDisabled = null,
       rowLocked = null,
       withPagination = false,
@@ -248,11 +251,11 @@ class Table extends Component {
                               <Box>
                               {() => (h(this.state, this.props))}
                               </Box>
-                            ): ( 
+                            ): (
                             <FormattedMessage module={module} id={h} />
-                            ) 
+                            )
                             }
-                           
+
                           </Box>
                           {headerActions.length > idx ? this.headerAction(headerActions[idx][1]) : null}
                         </Box>
@@ -278,16 +281,18 @@ class Table extends Component {
                     !!rowLocked && rowLocked(i) ? classes.tableLockedRow : null,
                     !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedRow : null,
                     !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltRow : null,
+                    !!rowSecondaryHighlighted && rowSecondaryHighlighted(i) ? classes.tableSecondaryHighlightedRow : null,
                     !!rowDisabled && rowDisabled(i) ? classes.tableDisabledRow : null,
                     !!onDoubleClick && classes.clickable,
                   )}
                 >
-                {showOrdinalNumber && 
+                {showOrdinalNumber &&
                   <TableCell
                     className={clsx(
                       !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
                       !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
                       !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
+                      !!rowSecondaryHighlighted && rowSecondaryHighlighted(i) ? classes.tableSecondaryHighlightedCell : null,
                       !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
                       aligns.length > 0 && classes[aligns[0]]
                     )}
@@ -306,6 +311,7 @@ class Table extends Component {
                             !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
                             !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
                             !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
+                            !!rowSecondaryHighlighted && rowSecondaryHighlighted(i) ? classes.tableSecondaryHighlightedCell : null,
                             !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
                             aligns.length > fidx && classes[aligns[fidx]],
                           )}

@@ -318,7 +318,7 @@ export function fetchMutation(clientMutationId) {
   const payload = formatPageQuery(
     "mutationLogs",
     [`clientMutationId: "${clientMutationId}"`],
-    ["id", "status", "error", "clientMutationId", "clientMutationLabel", "clientMutationDetails", "requestDateTime"],
+    ["id", "status", "error", "clientMutationId", "clientMutationLabel", "clientMutationDetails", "requestDateTime", "jsonExt"],
   );
   return graphql(payload, "CORE_MUTATION");
 }
@@ -337,6 +337,7 @@ export function fetchHistoricalMutations(pageSize, afterCursor) {
     "clientMutationLabel",
     "clientMutationDetails",
     "requestDateTime",
+    "jsonExt",
   ]);
   return graphql(payload, "CORE_HISTORICAL_MUTATIONS");
 }

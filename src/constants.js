@@ -94,4 +94,17 @@ export const FIELD_TYPES = {
 
 export const WHITE_SPACE = " ";
 export const DOUBLE_UNDERSCORE = "__";
+export const GLOBAL_UNDERSCORE = /_/g;;
 export const EQUALS_SIGN = "=";
+
+export const CLAIM_STATS_ORDER = [
+  "submitted",
+  "checked",
+  "processed",
+  "valuated",
+  "rejected",
+  "items_passed",
+  "items_rejected",
+  "services_passed",
+  "services_rejected"
+]

@@ -1,9 +1,9 @@
 import React, { Component, Fragment } from "react";
-import { connect } from "react-redux";
-import { bindActionCreators } from "redux";
-import { injectIntl } from "react-intl";
 import _ from "lodash";
-import { withTheme, withStyles } from "@material-ui/core/styles";
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
+import { injectIntl } from "react-intl";
+
 import {
   Grid,
   Paper,
@@ -15,16 +15,19 @@ import {
   MenuItem,
   CircularProgress,
 } from "@material-ui/core";
+import { withTheme, withStyles } from "@material-ui/core/styles";
 import MoreHoriz from "@material-ui/icons/MoreHoriz";
+
+import { cacheFilters, saveCurrentPaginationPage } from "../../actions";
+import { formatMessage } from "../../helpers/i18n";
+import { sort, formatSorter } from "../../helpers/api";
+import withModulesManager from "../../helpers/modules";
+import SearcherExport from "./SearcherExport";
 import SearcherPane from "./SearcherPane";
 import Contributions from "./Contributions";
 import FormattedMessage from "./FormattedMessage";
 import ProgressOrError from "./ProgressOrError";
 import Table from "./Table";
-import withModulesManager from "../../helpers/modules";
-import { formatMessage } from "../../helpers/i18n";
-import { sort, formatSorter } from "../../helpers/api";
-import { cacheFilters } from "../../actions";
 
 const styles = (theme) => ({
   root: {
@@ -83,6 +86,13 @@ class SelectionMenu extends Component {
             <Button onClick={(e) => this.action(i.action)}>{i.text}</Button>
           </Grid>
         ))}
+        {this.props.exportable && (<SearcherExport 
+          selection={this.props.selection} 
+          filters={this.props.filters} 
+          exportFetch={this.props.exportFetch}
+          exportFields={this.props.exportFields}
+          exportFieldsColumns={this.props.exportFieldsColumns}
+        />)}
         {!!contributionKey && (
           <Contributions
             actionHandler={this.action}
@@ -110,6 +120,11 @@ class SelectionMenu extends Component {
               {i.text}
             </MenuItem>
           ))}
+          {this.props.exportable && (
+            <SearcherExport 
+              selection={this.props.selection} filters={this.props.filters} exportFetch={this.props.exportFetch}
+              exportFields={this.props.exportFields} exportFieldsColumns={this.props.exportFieldsColumns}
+            />)}
           {!!contributionKey && (
             <Contributions
               actionHandler={this.action}
@@ -121,7 +136,6 @@ class SelectionMenu extends Component {
       </Grid>
     );
   };
-
   render() {
     const {
       modulesManager,
@@ -155,7 +169,7 @@ class SelectionMenu extends Component {
         entries.push({ text: formatMessage(intl, "claim", a.label), action: a.action });
       }
     });
-    if (entries.length > 2) {
+    if (entries.length > 2 || (this.props.exportable && entries.length>=1)) {
       return this.renderMenu(entries, actionsContributionKey);
     } else {
       return this.renderButtons(entries, actionsContributionKey);
@@ -192,16 +206,23 @@ class Searcher extends Component {
   }
 
   filtersToQueryParams = () => {
+    const { page, afterCursor, beforeCursor } = this.state;
+    const { module, saveCurrentPaginationPage } = this.props;
+    saveCurrentPaginationPage(page, afterCursor, beforeCursor, module);
     if (this.props.filtersToQueryParams) return this.props.filtersToQueryParams(this.state);
     let prms = Object.keys(this.state.filters)
       .filter((f) => !!this.state.filters[f]["filter"])
       .map((f) => this.state.filters[f]["filter"]);
-    prms.push(`first: ${this.state.pageSize}`);
+    if (!this.state.beforeCursor && !this.state.afterCursor) {
+      prms.push(`first: ${this.state.pageSize}`);
+    }
     if (!!this.state.afterCursor) {
       prms.push(`after: "${this.state.afterCursor}"`);
+      prms.push(`first: ${this.state.pageSize}`);
     }
     if (!!this.state.beforeCursor) {
       prms.push(`before: "${this.state.beforeCursor}"`);
+      prms.push(`last: ${this.state.pageSize}`);
     }
     if (!!this.state.orderBy) {
       prms.push(`orderBy: ["${this.state.orderBy}"]`);
@@ -244,9 +265,9 @@ class Searcher extends Component {
   applyFilters = () => {
     this.setState(
       (state, props) => ({
-        page: 0,
-        afterCursor: null,
-        beforeCursor: null,
+        page: props.paginationPage || 0,
+        afterCursor: props.afterCursor || null,
+        beforeCursor: props.beforeCursor || null,
         clearAll: state.clearAll + 1,
       }),
       this._cacheAndApply
@@ -383,6 +404,10 @@ class Searcher extends Component {
       withSelection = null,
       actionsContributionKey = null,
       withPagination = true,
+      exportable = false,
+      exportFetch = null,
+      exportFields = ['id'],
+      exportFieldsColumns,
       intl,
     } = this.props;
     return (
@@ -424,7 +449,7 @@ class Searcher extends Component {
                   </Grid>
                 </Grid>
                 <Grid container alignItems="center" item xs={4} className={classes.paperHeader}>
-                  {fetchedItems && (
+                  {fetchedItems && (  
                     <Grid container direction="row" justify="flex-end" className={classes.paperHeaderAction}>
                       <StyledSelectionMenu
                         canSelectAll={canSelectAll}
@@ -436,6 +461,11 @@ class Searcher extends Component {
                         actions={actions}
                         processing={processing}
                         actionsContributionKey={actionsContributionKey}
+                        filters={this.state.filters}
+                        exportable={exportable}
+                        exportFetch={exportFetch}
+                        exportFields={exportFields}
+                        exportFieldsColumns={exportFieldsColumns}
                       />
                     </Grid>
                   )}
@@ -485,10 +515,13 @@ class Searcher extends Component {
 
 const mapStateToProps = (state) => ({
   filtersCache: !!state.core && state.core.filtersCache,
+  paginationPage: state.core?.savedPagination?.paginationPage,
+  afterCursor: state.core?.savedPagination?.afterCursor,
+  beforeCursor: state.core?.savedPagination?.beforeCursor,
 });
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ cacheFilters }, dispatch);
+  return bindActionCreators({ cacheFilters, saveCurrentPaginationPage }, dispatch);
 };
 
 export default withModulesManager(

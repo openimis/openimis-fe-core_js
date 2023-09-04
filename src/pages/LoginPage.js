@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useHistory } from "../helpers/history";
 import { makeStyles } from "@material-ui/styles";
 import { Button, Box, Grid, Paper, LinearProgress } from "@material-ui/core";
@@ -7,6 +7,7 @@ import { useTranslations } from "../helpers/i18n";
 import { useModulesManager } from "../helpers/modules";
 import Helmet from "../helpers/Helmet";
 import { useAuthentication } from "../helpers/hooks";
+import Contributions from "./../components/generics/Contributions";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -23,9 +24,11 @@ const useStyles = makeStyles((theme) => ({
   paper: theme.paper.paper,
   logo: {
     maxHeight: 100,
-    width: 100
+    width: 100,
   },
 }));
+
+const LOGIN_PAGE_CONTRIBUTION_KEY = "core.LoginPage";
 
 const LoginPage = ({ logo }) => {
   const classes = useStyles();
@@ -76,7 +79,7 @@ const LoginPage = ({ logo }) => {
                 <Grid item container direction="row" alignItems="center">
                   <img className={classes.logo} src={logo} />
                   <Box pl={2} fontWeight="fontWeightMedium" fontSize="h4.fontSize">
-                    openIMIS
+                    {formatMessage("appName")}
                   </Box>
                 </Grid>
                 <Grid item>
@@ -117,6 +120,7 @@ const LoginPage = ({ logo }) => {
                 </Grid>
                 <Grid item>
                   <Button onClick={redirectToForgotPassword}>{formatMessage("forgotPassword")}</Button>
+                  <Contributions contributionKey={LOGIN_PAGE_CONTRIBUTION_KEY} />
                 </Grid>
               </Grid>
             </Box>

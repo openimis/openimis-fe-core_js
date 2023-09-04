@@ -19,6 +19,7 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 - `JournalDrawer`: side bar in which mutation journal is displayed
 - `AlertDialog`: pop up (modal) dialog to display an alert message (one 'ok' button)
 - `ConfirmDialog`: pop up (modal) dialog to display a confirmation message (with 'cancel' / 'confirm' buttons)
+- `SelectDialog`: pop up (modal) dialog to display a message and take an action between two options (yes/no, do/do not, continue/go back) - with editable (through the props) button labels, message content and dialog title, without using Redux store and actions
 - `FataError`: page for non-recoverable backend access errors
 - `Help`: main menu entry for Help (link to manual)
 - `Logout`: main menu entry to logout
@@ -36,6 +37,7 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 - `Contributions`: generic component to open business components for contributions
 - `ControlledField`: field that is skipped based on module configuration
 - `TextInput`,`NumberInput`, `AmountInput` & `SelectInput`: generic input components for the various data types
+- `ValidatedTextInput`: generic input component which checks the uniqueness of entered data and gives the appropriate information about it
 - `FieldLabel`: formatting a label in a form
 - `FormattedMessage`: translated text (module/key)
 - `ProgressOrError`: display progress during component's asynchronous calls... and hide or diaply error message when asynchronous call returns
@@ -94,6 +96,8 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 - `core.AppBar`: ability to add entries in the AppBar (known usage: insuree Enquiry component)
 - `core.MainMenu`: ability to add main menu entries from modules (known usage: claim, insuree,...)
 - `core.Router`: ability to register routes in client-side routing (known usage: claim, insuree,...)
+- `core.UnauthenticatedRouter`: ability to register routes in client-side routing for pages that don't require user authentication
+- `core.LoginPage`: ability to add components to the menu login page
 
 ## Contributions
 

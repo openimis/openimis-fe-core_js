@@ -4,7 +4,6 @@ import { bindActionCreators } from "redux";
 import { injectIntl } from "react-intl";
 import { formatMessage, SelectInput, withModulesManager } from "@openimis/fe-core";
 import { fetchLanguages } from "../actions";
-import _debounce from "lodash/debounce";
 
 class LanguagePicker extends Component {
   componentDidMount() {

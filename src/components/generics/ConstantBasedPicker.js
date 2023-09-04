@@ -46,7 +46,7 @@ class ConstantBasedPicker extends Component {
       required = false,
     } = this.props;
     const { value } = this.state;
-    if (!withNull && value === null) return null;
+    if (!withNull && value === null && !!!constants) return null;
     const options = withNull
       ? [
           {

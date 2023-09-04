@@ -1,16 +1,31 @@
 import React, { Fragment } from "react";
-import { formatMessage, FormPanel, FormattedMessage, TextInput } from "@openimis/fe-core";
-import { Grid, Divider, FormControlLabel, Checkbox } from "@material-ui/core";
-import { injectIntl } from "react-intl";
-import { withTheme, withStyles } from "@material-ui/core/styles";
+import { connect } from "react-redux";
+
+import { Checkbox, Divider, FormControlLabel, Grid } from "@material-ui/core";
+import { withStyles, withTheme } from "@material-ui/core/styles";
+
+import {
+  formatMessage,
+  FormattedMessage,
+  FormPanel,
+  TextInput,
+  ValidatedTextInput,
+  withModulesManager,
+} from "@openimis/fe-core";
+import { roleNameValidationCheck, roleNameValidationClear, roleNameSetValid } from "../actions";
 
 const styles = (theme) => ({
   item: theme.paper.item,
 });
 
 class RoleHeadPanel extends FormPanel {
+  shouldValidate = (inputValue) => {
+    const { savedRoleName } = this.props;
+    return inputValue !== savedRoleName;
+  };
   render() {
-    const { intl, classes, edited, isRequiredFieldsEmpty, isReadOnly } = this.props;
+    const { intl, classes, edited, isRequiredFieldsEmpty, isReadOnly, isRoleNameValid, roleNameValidationError } =
+      this.props;
     return (
       <Fragment>
         <Divider />
@@ -24,7 +39,15 @@ class RoleHeadPanel extends FormPanel {
         )}
         <Grid container>
           <Grid item className={classes.item}>
-            <TextInput
+            <ValidatedTextInput
+              itemQueryIdentifier="roleName"
+              codeTakenLabel={"core.roleManagement.duplicateButton.tooltip"}
+              shouldValidate={this.shouldValidate}
+              isValid={isRoleNameValid}
+              validationError={roleNameValidationError}
+              action={roleNameValidationCheck}
+              clearAction={roleNameValidationClear}
+              setValidAction={roleNameSetValid}
               module="core"
               label="roleManagement.roleName"
               value={!!edited && !!edited.name ? edited.name : ""}
@@ -72,4 +95,11 @@ class RoleHeadPanel extends FormPanel {
   }
 }
 
-export default injectIntl(withTheme(withStyles(styles)(RoleHeadPanel)));
+const mapStateToProps = (state) => ({
+  isRoleNameValid: state.core.validationFields?.roleName?.isValid,
+  isRoleNameValidating: state.core.validationFields?.roleName?.isValidating,
+  roleNameValidationError: state.core.validationFields?.roleName?.validationError,
+  savedRoleName: state.core?.role?.name,
+});
+
+export default withModulesManager(connect(mapStateToProps)(withTheme(withStyles(styles)(RoleHeadPanel))));

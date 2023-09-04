@@ -72,7 +72,7 @@ const Autocomplete = (props) => {
   useEffect(() => {
     if (shouldBeSelected) onChange(options[0]);
   }, [options?.length])
-  
+
   return (
     <MuiAutocomplete
       key={resetKey}
@@ -86,7 +86,7 @@ const Autocomplete = (props) => {
       openOnFocus
       blurOnSelect={!multiple}
       multiple={multiple}
-      disabled={readOnly || shouldBeSelected}
+      disabled={readOnly}
       options={options}
       loading={isLoading}
       autoHighlight={autoHighlight}

@@ -44,6 +44,7 @@ const Autocomplete = (props) => {
   const { formatMessage } = useTranslations("core.Autocomplete", modulesManager);
   const [open, setOpen] = useState(false);
   const [resetKey, setResetKey] = useState(Date.now());
+  const shouldBeSelected = required && options.length === 1;
 
   const handleInputChange = useDebounceCb((searchString) => {
     setCurrentString && setCurrentString(searchString);
@@ -68,6 +69,10 @@ const Autocomplete = (props) => {
     setResetKey(Date.now());
   }, [value]);
 
+  useEffect(() => {
+    if (shouldBeSelected) onChange(options[0]);
+  }, [options?.length])
+  
   return (
     <MuiAutocomplete
       key={resetKey}
@@ -81,7 +86,7 @@ const Autocomplete = (props) => {
       openOnFocus
       blurOnSelect={!multiple}
       multiple={multiple}
-      disabled={readOnly}
+      disabled={readOnly || shouldBeSelected}
       options={options}
       loading={isLoading}
       autoHighlight={autoHighlight}

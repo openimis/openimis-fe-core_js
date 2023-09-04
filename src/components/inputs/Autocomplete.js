@@ -44,6 +44,7 @@ const Autocomplete = (props) => {
   const { formatMessage } = useTranslations("core.Autocomplete", modulesManager);
   const [open, setOpen] = useState(false);
   const [resetKey, setResetKey] = useState(Date.now());
+  const shouldBeSelected = required && options.length === 1;
 
   const handleInputChange = useDebounceCb((searchString) => {
     setCurrentString && setCurrentString(searchString);
@@ -67,6 +68,10 @@ const Autocomplete = (props) => {
   useEffect(() => {
     setResetKey(Date.now());
   }, [value]);
+
+  useEffect(() => {
+    if (shouldBeSelected) onChange(options[0]);
+  }, [options?.length])
 
   return (
     <MuiAutocomplete

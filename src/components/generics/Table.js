@@ -65,6 +65,8 @@ const styles = (theme) => ({
 class Table extends Component {
   state = {
     selection: {},
+    ordinalNumberFrom: null,
+    ordinalNumberTo: null,
   };
 
   _atom = (a) =>
@@ -137,6 +139,13 @@ class Table extends Component {
     </Box>
   );
 
+  calculateOrdinalNumber = (iidx) => {
+    const {ordinalNumberFrom, ordinalNumberTo} = this.state
+    if (isNaN(ordinalNumberFrom) || isNaN(ordinalNumberTo)) return 0;
+    const ordinalArray = Array.from({ length: ordinalNumberTo - ordinalNumberFrom + 1 }, (_, i) => ordinalNumberFrom + i);
+    return ordinalArray[iidx]
+  }
+
   render() {
     const {
       intl,
@@ -171,6 +180,7 @@ class Table extends Component {
       error = null,
       showOrdinalNumber = false,
     } = this.props;
+    const {ordinalNumberFrom, ordinalNumberTo} = this.state
     let localHeaders = [...(headers || [])];
     let localPreHeaders = !!preHeaders ? [...preHeaders] : null;
     let localItemFormatters = [...itemFormatters];
@@ -286,7 +296,7 @@ class Table extends Component {
                     !!onDoubleClick && classes.clickable,
                   )}
                 >
-                {showOrdinalNumber &&
+                {showOrdinalNumber && ordinalNumberFrom && ordinalNumberTo &&
                   <TableCell
                     className={clsx(
                       !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
@@ -296,9 +306,9 @@ class Table extends Component {
                       !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
                       aligns.length > 0 && classes[aligns[0]]
                     )}
-                    key={`v-${iidx}-0`}
+                    key={`v-${this.calculateOrdinalNumber(iidx)}-0`}
                   >
-                    <span>{iidx + 1}</span>
+                    <span>{this.calculateOrdinalNumber(iidx)}</span>
                   </TableCell>
                 }
                   {localItemFormatters &&
@@ -331,8 +341,11 @@ class Table extends Component {
                   className={classes.pager}
                   colSpan={localItemFormatters.length}
                   labelRowsPerPage={formatMessage(intl, "core", "rowsPerPage")}
-                  labelDisplayedRows={({ from, to, count }) =>
-                    `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`
+                  labelDisplayedRows={({ from, to, count }) => {
+                    if (this.state.ordinalNumberTo !== to) this.setState({ordinalNumberTo: to})
+                    if (this.state.ordinalNumberFrom !== from) this.setState({ordinalNumberFrom: from})
+                    return `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`;
+                    }
                   }
                   count={count}
                   page={page}

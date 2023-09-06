@@ -27,9 +27,11 @@ export function formatAmount(intl, amount) {
 }
 
 export function formatDateFromISO(mm, intl, date) {
-  let isSecondaryCalendar = JSON.parse(localStorage.getItem('isSecondaryCalendarEnabled'));
+  const isSecondaryCalendar = JSON.parse(localStorage.getItem("isSecondaryCalendarEnabled"));
   if (isSecondaryCalendar) {
-    return neFormateDateFromISO(date);
+    const secondCalendarFormatting = mm.getConf("fe-core", "secondCalendarFormatting", "DD-MM-YYYY");
+    const secondCalendarFormattingLang = mm.getConf("fe-core", "secondCalendarFormattingLang", "en");
+    return neFormateDateFromISO(date, [secondCalendarFormatting, secondCalendarFormattingLang]);
   }
   return adFormateDateFromISO(mm, intl, date);
 }
@@ -39,8 +41,14 @@ export function toISODate(d) {
   return moment(d).format().slice(0, 10);
 }
 
-export function withTooltip(c, t, placement='bottom') {
-  return !!t ? <Tooltip title={t} placement={placement}>{c}</Tooltip> : c;
+export function withTooltip(c, t, placement = "bottom") {
+  return !!t ? (
+    <Tooltip title={t} placement={placement}>
+      {c}
+    </Tooltip>
+  ) : (
+    c
+  );
 }
 
 export function useTranslations(moduleName, modulesManager) {

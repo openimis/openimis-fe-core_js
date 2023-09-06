@@ -153,3 +153,5 @@ None
 - `AmountInput.currencyPosition`: position of the currency for the AmountInput. Choices are `start` and `end` (default: `start`)
 - `menuLeft`: position menu in the Drawer component on the left site of the application
 - `calendarSwitch`: enable calendar switcher toggle on the navbar of the webpage. Currently supports nepali calendar. Default false.
+- `secondCalendarFormatting`: formatting options for second calendar, default: "DD-MM-YYYY"
+- `secondCalendarFormatting`: formatting languagge for second calendar, default: "en"

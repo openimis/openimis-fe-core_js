@@ -4,6 +4,7 @@ import { useIntl } from "react-intl";
 import moment from "moment";
 import { formatDateFromISO as adFormateDateFromISO } from "../pickers/AdDateFormatter";
 import { formatDateFromISO as neFormateDateFromISO } from "../pickers/NeDateFormatter";
+import { STORAGE_KEY_SECONDARY_CALENDAR } from "../constants";
 
 //formatting with values is expansive.. so let's have separated methods
 export function formatMessage(intl, module, id) {
@@ -27,7 +28,7 @@ export function formatAmount(intl, amount) {
 }
 
 export function formatDateFromISO(mm, intl, date) {
-  const isSecondaryCalendar = JSON.parse(localStorage.getItem("isSecondaryCalendarEnabled"));
+  const isSecondaryCalendar = JSON.parse(localStorage.getItem(STORAGE_KEY_SECONDARY_CALENDAR));
   if (isSecondaryCalendar) {
     const secondCalendarFormatting = mm.getConf("fe-core", "secondCalendarFormatting", "DD-MM-YYYY");
     const secondCalendarFormattingLang = mm.getConf("fe-core", "secondCalendarFormattingLang", "en");

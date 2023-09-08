@@ -63,6 +63,12 @@ const styles = (theme) => ({
   },
   jrnlItem: theme.jrnlDrawer.item,
   jrnlItemDetail: theme.jrnlDrawer.itemDetail,
+  jrnlItemDetailsError: {
+    ...theme.jrnlDrawer.itemDetail,
+    color: theme.palette.error.main,
+    whiteSpace: 'normal',
+    overflowWrap: 'break-word',
+  },
   jrnlItemDetailText: theme.jrnlDrawer.itemDetailText,
   jrnlIconClickable: {
     cursor: "pointer",
@@ -385,14 +391,27 @@ class JournalDrawer extends Component {
                       unmountOnExit
                     >
                       <List component="div" disablePadding>
-                        {JSON.parse(m.clientMutationDetails).map((d, di) => (
-                          <ListItemText
-                            className={classes.jrnlItemDetail}
-                            key={`mdet-${di}`}
-                            primary={d}
-                            primaryTypographyProps={{ class: classes.jrnlItemDetailText }}
-                          />
-                        ))}
+                        {(() => {
+                          try {
+                            const details = JSON.parse(m.clientMutationDetails);
+                            return details.map((detail, detailIndex) => (
+                              <ListItemText
+                                className={classes.jrnlItemDetail}
+                                key={`mdet-${detailIndex}`}
+                                primary={detail}
+                                primaryTypographyProps={{ class: classes.jrnlItemDetailText }}
+                              />
+                            ));
+                          } catch (error) {
+                            return (
+                              <ListItemText
+                                className={classes.jrnlItemDetailsError}
+                                primaryTypographyProps={{ class: classes.jrnlItemDetailText }}
+                                primary={`Mutation details not available. ${error}`}
+                              />
+                            );
+                          }
+                        })()}
                       </List>
                     </Collapse>
                   )}

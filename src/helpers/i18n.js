@@ -4,7 +4,7 @@ import { useIntl } from "react-intl";
 import moment from "moment";
 import { formatDateFromISO as adFormateDateFromISO } from "../pickers/AdDateFormatter";
 import { formatDateFromISO as neFormateDateFromISO } from "../pickers/NeDateFormatter";
-import { STORAGE_KEY_SECONDARY_CALENDAR, DEFAULT_SECOND_CALENDAR_FORMAT, DEFAULT_SECOND_CALENDAR_LANG } from "../constants";
+import { STORAGE_KEY_SECONDARY_CALENDAR, DEFAULT_SETTINGS} from "../constants";
 
 //formatting with values is expansive.. so let's have separated methods
 export function formatMessage(intl, module, id) {
@@ -30,8 +30,8 @@ export function formatAmount(intl, amount) {
 export function formatDateFromISO(mm, intl, date) {
   const isSecondaryCalendar = JSON.parse(localStorage.getItem(STORAGE_KEY_SECONDARY_CALENDAR));
   if (isSecondaryCalendar) {
-    const secondCalendarFormatting = mm.getConf("fe-core", "secondCalendarFormatting", DEFAULT_SECOND_CALENDAR_FORMAT);
-    const secondCalendarFormattingLang = mm.getConf("fe-core", "secondCalendarFormattingLang", DEFAULT_SECOND_CALENDAR_LANG);
+    const secondCalendarFormatting = mm.getConf("fe-core", "secondCalendarFormatting", DEFAULT_SETTINGS.SECOND_CALENDAR_FORMAT);
+    const secondCalendarFormattingLang = mm.getConf("fe-core", "secondCalendarFormattingLang", DEFAULT_SETTINGS.SECOND_CALENDAR_LANG);
     return neFormateDateFromISO(date, [secondCalendarFormatting, secondCalendarFormattingLang]);
   }
   return adFormateDateFromISO(mm, intl, date);

@@ -266,7 +266,7 @@ export function login(credentials) {
       await dispatch(refreshAuthToken());
     }
     const action = await dispatch(loadUser());
-    return action.type !== "CORE_AUTH_ERR";
+    return {loginStatus: action.type, message: action?.payload?.response?.detail ?? ""}
   };
 }
 

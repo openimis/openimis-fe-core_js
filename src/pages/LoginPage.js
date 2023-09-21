@@ -37,6 +37,7 @@ const LoginPage = ({ logo }) => {
   const { formatMessage } = useTranslations("core.LoginPage", modulesManager);
   const [credentials, setCredentials] = useState({});
   const [hasError, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState({loginStatus: "", message: ""});
   const auth = useAuthentication();
   const [isAuthenticating, setAuthenticating] = useState(false);
 
@@ -50,10 +51,13 @@ const LoginPage = ({ logo }) => {
     e.preventDefault();
     setError(false);
     setAuthenticating(true);
-    if (await auth.login(credentials)) {
+    let response = await auth.login(credentials);
+    if (response?.loginStatus !== "CORE_AUTH_ERR") {
       history.push("/");
     } else {
       setError(true);
+      const { loginStatus, message} = response;
+      setErrorMessage({ loginStatus, message: message ?? ""});
       setAuthenticating(false);
     }
   };
@@ -62,6 +66,13 @@ const LoginPage = ({ logo }) => {
     e.preventDefault();
     history.push("/forgot_password");
   };
+
+  const errorMessages = {
+    GENERAL: formatMessage("core.LoginPage.authError"),
+    HF_CONTRACT_INVALID: formatMessage("core.LoginPage.authErrorHealthFacilityContractInvalid")
+  }
+
+  const getErrorMessage = (key) => errorMessages[key] || errorMessages.GENERAL;
 
   return (
     <>
@@ -104,7 +115,7 @@ const LoginPage = ({ logo }) => {
                 </Grid>
                 {hasError && (
                   <Grid item>
-                    <Box color="error.main">{formatMessage("authError")}</Box>
+                    <Box color="error.main">{getErrorMessage(errorMessage.message)}</Box>
                   </Grid>
                 )}
                 <Grid item>

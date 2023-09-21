@@ -40,6 +40,7 @@
   "core.LoginPage.password.label": "Password",
   "core.LoginPage.loginBtn": "Log In",
   "core.LoginPage.authError": "The password or the username you've entered is incorrect.",
+  "core.LoginPage.authErrorHealthFacilityContractInvalid": "Your contract has expired.",
   "core.LoginPage.pageTitle": "Log In",
   "core.LoginPage.forgotPassword": "Forgot Password ?",
   "core.ForgotPasswordPage.pageTitle": "Forgot Password ?",

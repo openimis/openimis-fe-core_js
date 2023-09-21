@@ -27,24 +27,16 @@ const LANGUAGE_FULL_PROJECTION = () => ["name", "code", "sortOrder"];
 
 const MODULEPERMISSION_FULL_PROJECTION = () => ["modulePermsList{moduleName, permissions{permsName, permsValue}}"];
 
-const CUSTOM_FILTER_FULL_PROJECTION = () => [
-  'type',
-  'code',
-  'possibleFilters {field, filter, type}',
-];
+const CUSTOM_FILTER_FULL_PROJECTION = () => ["type", "code", "possibleFilters {field, filter, type}"];
 
 export function fetchCustomFilter(params) {
-  const payload = formatQuery(
-    "customFilters",
-    params,
-    CUSTOM_FILTER_FULL_PROJECTION()
-  );
+  const payload = formatQuery("customFilters", params, CUSTOM_FILTER_FULL_PROJECTION());
   return graphql(payload, "FETCH_CUSTOM_FILTER");
 }
 
 function getApiUrl() {
-  let _baseApiUrl = process.env.REACT_APP_API_URL ?? '/api';
-  if (_baseApiUrl.indexOf('/') !== 0) {
+  let _baseApiUrl = process.env.REACT_APP_API_URL ?? "/api";
+  if (_baseApiUrl.indexOf("/") !== 0) {
     _baseApiUrl = `/${_baseApiUrl}`;
   }
   return _baseApiUrl;
@@ -266,7 +258,7 @@ export function login(credentials) {
       await dispatch(refreshAuthToken());
     }
     const action = await dispatch(loadUser());
-    return {loginStatus: action.type, message: action?.payload?.response?.detail ?? ""}
+    return { loginStatus: action.type, message: action?.payload?.response?.detail ?? "" };
   };
 }
 
@@ -318,7 +310,16 @@ export function fetchMutation(clientMutationId) {
   const payload = formatPageQuery(
     "mutationLogs",
     [`clientMutationId: "${clientMutationId}"`],
-    ["id", "status", "error", "clientMutationId", "clientMutationLabel", "clientMutationDetails", "requestDateTime", "jsonExt"],
+    [
+      "id",
+      "status",
+      "error",
+      "clientMutationId",
+      "clientMutationLabel",
+      "clientMutationDetails",
+      "requestDateTime",
+      "jsonExt",
+    ],
   );
   return graphql(payload, "CORE_MUTATION");
 }
@@ -471,18 +472,18 @@ export function roleNameSetValid() {
 
 export function saveCurrentPaginationPage(page, afterCursor, beforeCursor, module) {
   return (dispatch) => {
-    dispatch({ type: "CORE_PAGINATION_PAGE", payload: { page, afterCursor, beforeCursor, module} });
+    dispatch({ type: "CORE_PAGINATION_PAGE", payload: { page, afterCursor, beforeCursor, module } });
   };
 }
 
 export function clearCurrentPaginationPage() {
   return (dispatch) => {
-    dispatch({ type: "CORE_PAGINATION_PAGE_CLEAR" })
-  }
+    dispatch({ type: "CORE_PAGINATION_PAGE_CLEAR" });
+  };
 }
 
 export function toggleCurrentCalendarType(isSecondaryCalendarEnabled) {
   return (dispatch) => {
-    dispatch({ type: "CORE_CALENDAR_TYPE_TOGGLE", payload: { isSecondaryCalendarEnabled } })
-  }
+    dispatch({ type: "CORE_CALENDAR_TYPE_TOGGLE", payload: { isSecondaryCalendarEnabled } });
+  };
 }

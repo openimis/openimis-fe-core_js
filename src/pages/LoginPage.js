@@ -36,8 +36,7 @@ const LoginPage = ({ logo }) => {
   const modulesManager = useModulesManager();
   const { formatMessage } = useTranslations("core.LoginPage", modulesManager);
   const [credentials, setCredentials] = useState({});
-  const [hasError, setError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState({loginStatus: "", message: ""});
+  const [serverResponse, setServerResponse] = useState({ loginStatus: "", message: null });
   const auth = useAuthentication();
   const [isAuthenticating, setAuthenticating] = useState(false);
 
@@ -49,15 +48,13 @@ const LoginPage = ({ logo }) => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    setError(false);
     setAuthenticating(true);
     let response = await auth.login(credentials);
+    const { loginStatus, message } = response;
+    setServerResponse({ loginStatus, message});
     if (response?.loginStatus !== "CORE_AUTH_ERR") {
       history.push("/");
     } else {
-      setError(true);
-      const { loginStatus, message} = response;
-      setErrorMessage({ loginStatus, message: message ?? ""});
       setAuthenticating(false);
     }
   };
@@ -69,8 +66,8 @@ const LoginPage = ({ logo }) => {
 
   const errorMessages = {
     GENERAL: formatMessage("core.LoginPage.authError"),
-    HF_CONTRACT_INVALID: formatMessage("core.LoginPage.authErrorHealthFacilityContractInvalid")
-  }
+    HF_CONTRACT_INVALID: formatMessage("core.LoginPage.authErrorHealthFacilityContractInvalid"),
+  };
 
   const getErrorMessage = (key) => errorMessages[key] || errorMessages.GENERAL;
 
@@ -113,9 +110,9 @@ const LoginPage = ({ logo }) => {
                     onChange={(password) => setCredentials({ ...credentials, password })}
                   />
                 </Grid>
-                {hasError && (
+                {serverResponse?.message && (
                   <Grid item>
-                    <Box color="error.main">{getErrorMessage(errorMessage.message)}</Box>
+                    <Box color="error.main">{getErrorMessage(serverResponse.message)}</Box>
                   </Grid>
                 )}
                 <Grid item>

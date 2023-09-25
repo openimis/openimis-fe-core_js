@@ -147,7 +147,7 @@ export function prepareMutation(operation, input, params = {}) {
   return { operation, variables, clientMutationId: params.clientMutationId };
 }
 
-export function waitForMutation(clientMutationId) {
+export function waitForMutation(clientMutationId, additionalRequest = "") {
   return async (dispatch) => {
     let attempts = 0;
     let res;
@@ -166,6 +166,7 @@ export function waitForMutation(clientMutationId) {
                 clientMutationId
                 jsonContent
                 error
+                ${additionalRequest}
               }
             }
           }
@@ -186,7 +187,7 @@ export function waitForMutation(clientMutationId) {
   };
 }
 
-export function graphqlMutation(mutation, variables, type = "CORE_TRIGGER_MUTATION", params = {}, wait = true) {
+export function graphqlMutation(mutation, variables, type = "CORE_TRIGGER_MUTATION", params = {}, wait = true, additionalRequest = "") {
   let clientMutationId;
   if (variables?.input) {
     clientMutationId = uuid.uuid();
@@ -197,10 +198,25 @@ export function graphqlMutation(mutation, variables, type = "CORE_TRIGGER_MUTATI
     if (clientMutationId) {
       dispatch(fetchMutation(clientMutationId));
       if (wait) {
-        return dispatch(waitForMutation(clientMutationId));
+        return dispatch(waitForMutation(clientMutationId, additionalRequest));
       } else {
         return response?.payload?.data;
       }
+    }
+  };
+}
+
+export function graphqlMutationLegacy(payload, type = "CORE_TRIGGER_MUTATION", params = {}, wait = true, additionalRequest = "") {
+  if (wait && !params.clientMutationId) {
+    console.error("graphqlMutationLegacy cannot wait with a specified clientMutationId");
+  }
+  return async (dispatch) => {
+    const response = await dispatch(graphql(payload, type, params));
+    dispatch(fetchMutation(params.clientMutationId));
+    if (wait) {
+      return dispatch(waitForMutation(params.clientMutationId, additionalRequest));
+    } else {
+      return response?.payload?.data;
     }
     return response;
   };

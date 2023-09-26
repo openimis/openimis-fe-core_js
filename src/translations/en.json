@@ -110,5 +110,8 @@
   "core.RegistersStatusReport.region": "Region",
   "core.RegistersStatusReport.district": "District",
   "core.Table.ordinalNumberHeader": "Number",
-  "core.calendarSwitcher": "BS/AD"
+  "core.calendarSwitcher": "BS/AD",
+  "core.selectEconomicUnit.title": "Please select an economic unit.",
+  "core.selectEconomicUnit.message": "Economic unit will be selected for the time being of the session. Login again to change it.",
+  "core.selectEconomicUnit.confirm": "Confirm"
 }

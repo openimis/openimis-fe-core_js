@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { IntlProvider } from "react-intl";
 import { Redirect, Route, BrowserRouter, Switch } from "react-router-dom";
@@ -18,6 +18,7 @@ import { useAuthentication } from "../helpers/hooks";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import SetPasswordPage from "../pages/SetPasswordPage";
 import { ErrorBoundary } from "@openimis/fe-core";
+import EconomicUnitDialog from "./dialogs/EconomicUnitDialog";
 
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";
 export const UNAUTHENTICATED_ROUTER_CONTRIBUTION_KEY = "core.UnauthenticatedRouter";
@@ -47,6 +48,8 @@ const App = (props) => {
     basename = process.env.PUBLIC_URL,
     ...others
   } = props;
+
+  const economicUnitConfig = modulesManager.getConf("fe-core", "economicUnitConfig", true);
 
   const auth = useAuthentication();
   const routes = useMemo(() => {
@@ -101,6 +104,7 @@ const App = (props) => {
         <IntlProvider locale={locale} messages={allMessages}>
           <AlertDialog />
           <ConfirmDialog confirm={confirm} onConfirm={clearConfirm} />
+          <EconomicUnitDialog confirmState={auth.isAuthenticated && economicUnitConfig}/>
           <div className="App">
             {auth.isAuthenticated && <Contributions contributionKey={APP_BOOT_CONTRIBUTION_KEY} />}
             <BrowserRouter basename={basename}>

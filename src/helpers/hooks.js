@@ -1,7 +1,15 @@
 import { useModulesManager } from "@openimis/fe-core";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { refreshAuthToken, login, logout, initialize, graphqlWithVariables, graphqlMutation } from "../actions";
+import {
+  refreshAuthToken,
+  login,
+  logout,
+  initialize,
+  graphqlWithVariables,
+  graphqlMutation,
+  getAuthnRequest
+} from "../actions";
 
 export const useDebounceCb = (cb, duration = 0) => {
   const [payload, setPayload] = useState();
@@ -160,6 +168,7 @@ export const useAuthentication = () => {
     isInitialized,
     initialize: () => dispatch(initialize()),
     login: (credentials) => dispatch(login(credentials)),
+    getAuthnRequest: () => getAuthnRequest(),
     refresh,
     logout: () => dispatch(logout()),
   };

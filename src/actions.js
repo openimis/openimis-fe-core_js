@@ -249,6 +249,14 @@ export function loadUser() {
   });
 }
 
+export function getAuthnRequest() {
+  return fetch({
+    endpoint: `${baseApiUrl}/msystems/saml/acs/`,
+    method: "GET",
+    types: ["GET_AUTH_N_REQUEST_REQ", "GET_AUTH_N_REQUEST_RESP", "GET_AUTH_N_REQUEST_ERR"],
+  });
+}
+
 export function login(credentials) {
   return async (dispatch) => {
     if (credentials) {

@@ -8,6 +8,8 @@ import { useModulesManager } from "../helpers/modules";
 import Helmet from "../helpers/Helmet";
 import { useAuthentication } from "../helpers/hooks";
 import Contributions from "./../components/generics/Contributions";
+import MPassLogo from "./../mPassLogoColor.svg";
+import {getAuthnRequest} from "../actions";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -37,8 +39,10 @@ const LoginPage = ({ logo }) => {
   const { formatMessage } = useTranslations("core.LoginPage", modulesManager);
   const [credentials, setCredentials] = useState({});
   const [hasError, setError] = useState(false);
+  const [hasMPassError, setMPassError] = useState(false);
   const auth = useAuthentication();
   const [isAuthenticating, setAuthenticating] = useState(false);
+  const useMPassConf = modulesManager.getConf("fe-core", "useMPass", false);
 
   useEffect(() => {
     if (auth.isAuthenticated) {
@@ -61,6 +65,19 @@ const LoginPage = ({ logo }) => {
   const redirectToForgotPassword = (e) => {
     e.preventDefault();
     history.push("/forgot_password");
+  };
+
+  const handleMPassLogin = async (e) => {
+    e.preventDefault();
+    setMPassError(false);
+    setAuthenticating(true);
+    const response = await auth.getAuthnRequest()
+    if (response.ok) {
+      history.push(`${response.mPassUrl}`)
+    } else {
+      setMPassError(true);
+      setAuthenticating(false);
+    }
   };
 
   return (
@@ -122,6 +139,18 @@ const LoginPage = ({ logo }) => {
                   <Button onClick={redirectToForgotPassword}>{formatMessage("forgotPassword")}</Button>
                   <Contributions contributionKey={LOGIN_PAGE_CONTRIBUTION_KEY} />
                 </Grid>
+                {useMPassConf && (
+                  < Grid item>
+                    <Button fullWidth type="submit" onClick={handleMPassLogin}>
+                      <MPassLogo/>
+                    </Button>
+                  </Grid>
+                )}
+                {useMPassConf && hasMPassError && (
+                  <Grid item>
+                    <Box color="error.main">{formatMessage("authMPassError")}</Box>
+                  </Grid>
+                )}
               </Grid>
             </Box>
           </form>

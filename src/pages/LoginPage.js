@@ -49,7 +49,7 @@ const LoginPage = ({ logo }) => {
   const onSubmit = async (e) => {
     e.preventDefault();
     setAuthenticating(true);
-    let response = await auth.login(credentials);
+    const response = await auth.login(credentials);
     const { loginStatus, message } = response;
     setServerResponse({ loginStatus, message});
     if (response?.loginStatus !== "CORE_AUTH_ERR") {

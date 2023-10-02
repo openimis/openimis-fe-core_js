@@ -14,7 +14,7 @@ const styles = (theme) => ({
 
 const Help = ({ classes }) => {
   const modulesManager = useModulesManager();
-  const isCoreMISHelp = modulesManager.getConf("fe-core", "help.isCoreMIS", false);
+  const isCoreMISHelp = modulesManager.getConf("fe-core", "redirectToCoreMISConfluenceUrl", false);
   const url = isCoreMISHelp ? CORE_MIS_CONFLUENCE_URL : DEFAULT_URL;
   const onClick = () => {
     window.open(url);

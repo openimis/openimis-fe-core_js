@@ -3,16 +3,14 @@ import { connect } from "react-redux";
 import moment from "moment";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { injectIntl } from "react-intl";
-import { FormControl} from "@material-ui/core";
+import { FormControl } from "@material-ui/core";
 import { DatePicker as MUIDatePicker } from "@material-ui/pickers";
 import { formatMessage, toISODate } from "../helpers/i18n";
-import Calendar from '@sbmdkl/nepali-datepicker-reactjs';
-import '@sbmdkl/nepali-datepicker-reactjs/dist/index.css';
-import NepaliDate from "nepali-date-converter"
-import {
-  withModulesManager,
-  withHistory,
-} from "@openimis/fe-core";
+import { withModulesManager, withHistory } from "@openimis/fe-core";
+
+import nepali from "./NepalCalendar";
+import nepali_en from "./NepaliLocale";
+import DatePicker from "react-multi-date-picker";
 
 const styles = (theme) => ({
   label: {
@@ -25,11 +23,10 @@ function fromISODate(s) {
   return moment(s).toDate();
 }
 
-class DatePicker extends Component {
+class openIMISDatePicker extends Component {
   state = {
-    value: null
-    };
-
+    value: null,
+  };
 
   componentDidMount() {
     this.setState((state, props) => ({ value: props.value || null }));
@@ -42,11 +39,7 @@ class DatePicker extends Component {
   }
 
   dateChange = (d) => {
-    this.setState({ value: toISODate(d) }, (i) => !!this.props.onChange ? this.props.onChange(toISODate(d)) : null);
-  };
-
-  onChangeNepal = ({ bsDate, adDate }) => {
-    this.setState({ value: toISODate(adDate)}, (i) => !!this.props.onChange ? this.props.onChange(toISODate(adDate)) : null);
+    this.setState({ value: toISODate(d) }, (i) => (!!this.props.onChange ? this.props.onChange(toISODate(d)) : null));
   };
 
   render() {
@@ -62,56 +55,62 @@ class DatePicker extends Component {
       format = "DD-MM-YYYY",
       reset,
       isSecondaryCalendarEnabled,
+      modulesManager,
       ...otherProps
     } = this.props;
 
-  if (isSecondaryCalendarEnabled){
-    const nepaliDate = (!!this.state.value ? new NepaliDate(new Date(this.state.value)).format('YYYY-MM-DD'): new NepaliDate().format('YYYY-MM-DD'))
-    return (
-      <FormControl fullWidth={fullWidth}>
-        <label>{!!label ? formatMessage(intl, module, label) : null}</label>
-        <Calendar
-          onChange={this.onChangeNepal}
-          hideDefaultValue={!this.state?.value}
-          defaultDate={nepaliDate}
-          language="en"
-          style={{width:"100%", display: "flex", position:"static"}}
-          dateFormat="DD/MM/YYYY"
-          placeholder="Select date"
-        />
-      </FormControl>
-    );
-  }
-  else{
-    return (
-      <FormControl fullWidth={fullWidth}>
-        <MUIDatePicker
-          {...otherProps}
-          format={format}
-          disabled={readOnly}
-          required={required}
-          clearable
-          value={this.state.value}
-          InputLabelProps={{
-            className: classes.label,
-          }}
-          label={!!label ? formatMessage(intl, module, label) : null}
-          onChange={this.dateChange}
-          reset={reset}
-          disablePast={disablePast}
-        />
-      </FormControl>
-    );
-  }
+    if (isSecondaryCalendarEnabled) {
+      const secondCalendarFormatting = modulesManager.getConf("fe-core", "secondCalendarFormatting", format);
+      const secondCalendarFormattingLang = modulesManager.getConf("fe-core", "secondCalendarFormattingLang", "en");
+      const secondCalendarType = modulesManager.getConf("fe-core", "secondCalendarType", nepali);
+      const secondCalendarLocale = modulesManager.getConf("fe-core", "secondCalendarType", nepali_en);
+
+      return (
+        <FormControl fullWidth={fullWidth}>
+          <label>{!!label ? formatMessage(intl, module, label).concat(required ? "*" : "") : null}</label>
+          <DatePicker
+            format={secondCalendarFormatting}
+            disabled={readOnly}
+            // clearable
+            value={this.state.value}
+            // InputLabelProps={{
+            //   className: classes.label,
+            // }}
+            // reset={reset}
+            // minDate={disablePast ? new Date() : null}
+            onChange={this.dateChange}
+            calendar={secondCalendarType}
+            locale={secondCalendarLocale}
+          />
+        </FormControl>
+      );
+    } else {
+      return (
+        <FormControl fullWidth={fullWidth}>
+          <MUIDatePicker
+            {...otherProps}
+            format={format}
+            disabled={readOnly}
+            required={required}
+            clearable
+            value={this.state.value}
+            InputLabelProps={{
+              className: classes.label,
+            }}
+            label={!!label ? formatMessage(intl, module, label) : null}
+            onChange={this.dateChange}
+            disablePast={disablePast}
+          />
+        </FormControl>
+      );
+    }
   }
 }
 
 const mapStateToProps = (state) => ({
-    isSecondaryCalendarEnabled: state.core.isSecondaryCalendarEnabled ?? false,
-  });
+  isSecondaryCalendarEnabled: state.core.isSecondaryCalendarEnabled ?? false,
+});
 
 export default injectIntl(
-    withModulesManager(
-      withHistory(connect(mapStateToProps, null)(withTheme(withStyles(styles)(DatePicker)))),
-    ),
-  );
+  withModulesManager(withHistory(connect(mapStateToProps, null)(withTheme(withStyles(styles)(openIMISDatePicker))))),
+);

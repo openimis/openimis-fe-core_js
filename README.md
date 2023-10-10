@@ -153,6 +153,12 @@ None
 - `AmountInput.currencyPosition`: position of the currency for the AmountInput. Choices are `start` and `end` (default: `start`)
 - `menuLeft`: position menu in the Drawer component on the left site of the application
 - `calendarSwitch`: enable calendar switcher toggle on the navbar of the webpage. Currently supports nepali calendar. Default false.
-- `secondCalendarFormatting`: formatting options for second calendar, default: "DD-MM-YYYY"
-- `secondCalendarFormattingLang`: formatting language for second calendar, default: "en"
-- `redirectToCoreMISConfluenceUrl` clicking on questionmark icon will take you to coreMIS confluence page, default openIMIS manual
+- `secondCalendarFormatting`: formatting options for second calendar (both picker and display), default: "DD-MM-YYYY"
+- `secondCalendarFormattingLang`: formatting language for second calendar (when displayed as saved data, not in pickers), default: "en"
+- `redirectToCoreMISConfluenceUrl`: clicking on questionmark icon will take you to coreMIS confluence page, default openIMIS manual
+- `secondCalendarType`: type of secondary calendar picker (if enabled), default "nepal"
+- `secondCalendarLocale`: locale for secondary calendar picker (if enabled), default "nepal_en"
+
+
+      const secondCalendarType = modulesManager.getConf("fe-core", "secondCalendarType", "nepali");
+      const secondCalendarLocale = modulesManager.getConf("fe-core", "secondCalendarLocale", "nepali_en");

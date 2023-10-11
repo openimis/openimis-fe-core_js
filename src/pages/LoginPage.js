@@ -51,7 +51,7 @@ const LoginPage = ({ logo }) => {
     setAuthenticating(true);
     const response = await auth.login(credentials);
     const { loginStatus, message } = response;
-    setServerResponse({ loginStatus, message});
+    setServerResponse({ loginStatus, message });
     if (response?.loginStatus !== "CORE_AUTH_ERR") {
       history.push("/");
     } else {
@@ -65,8 +65,9 @@ const LoginPage = ({ logo }) => {
   };
 
   const errorMessages = {
-    GENERAL: formatMessage("core.LoginPage.authError"),
+    INCORRECT_CREDENTIALS: formatMessage("core.LoginPage.authError"),
     HF_CONTRACT_INVALID: formatMessage("core.LoginPage.authErrorHealthFacilityContractInvalid"),
+    GENERAL: formatMessage("core.LoginPage.authErrorGeneral"),
   };
 
   const getErrorMessage = (key) => errorMessages[key] || errorMessages.GENERAL;

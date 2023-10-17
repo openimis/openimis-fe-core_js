@@ -674,13 +674,6 @@ function loadUser() {
     types: ["CORE_USERS_CURRENT_USER_REQ", "CORE_USERS_CURRENT_USER_RESP", "CORE_USERS_CURRENT_USER_ERR"]
   });
 }
-function getAuthnRequest() {
-  return fetch$1({
-    endpoint: "".concat(baseApiUrl, "/msystems/saml/acs/"),
-    method: "GET",
-    types: ["GET_AUTH_N_REQUEST_REQ", "GET_AUTH_N_REQUEST_RESP", "GET_AUTH_N_REQUEST_ERR"]
-  });
-}
 function login(credentials) {
   return /*#__PURE__*/function () {
     var _ref6 = _asyncToGenerator__default["default"]( /*#__PURE__*/_regeneratorRuntime__default["default"].mark(function _callee6(dispatch) {
@@ -1837,9 +1830,6 @@ var useAuthentication = function useAuthentication() {
     login: function login$1(credentials) {
       return dispatch(login(credentials));
     },
-    getAuthnRequest: function getAuthnRequest$1() {
-      return getAuthnRequest();
-    },
     refresh: refresh,
     logout: function logout$1() {
       return dispatch(logout());
@@ -2670,14 +2660,14 @@ var LoginPage = function LoginPage(_ref) {
     setError = _useState4[1];
   var _useState5 = React.useState(false),
     _useState6 = _slicedToArray__default["default"](_useState5, 2),
-    hasMPassError = _useState6[0],
-    setMPassError = _useState6[1];
+    hasMPassError = _useState6[0];
+    _useState6[1];
   var auth = useAuthentication();
   var _useState7 = React.useState(false),
     _useState8 = _slicedToArray__default["default"](_useState7, 2),
     isAuthenticating = _useState8[0],
     setAuthenticating = _useState8[1];
-  var useMPassConf = modulesManager.getConf("fe-core", "useMPass", false);
+  var showMPassProvider = modulesManager.getConf("fe-core", "LoginPage.showMPassProvider", false);
   React.useEffect(function () {
     if (auth.isAuthenticated) {
       history.push("/");
@@ -2718,35 +2708,11 @@ var LoginPage = function LoginPage(_ref) {
     e.preventDefault();
     history.push("/forgot_password");
   };
-  var handleMPassLogin = /*#__PURE__*/function () {
-    var _ref3 = _asyncToGenerator__default["default"]( /*#__PURE__*/_regeneratorRuntime__default["default"].mark(function _callee2(e) {
-      var response;
-      return _regeneratorRuntime__default["default"].wrap(function _callee2$(_context2) {
-        while (1) switch (_context2.prev = _context2.next) {
-          case 0:
-            e.preventDefault();
-            setMPassError(false);
-            setAuthenticating(true);
-            _context2.next = 5;
-            return auth.getAuthnRequest();
-          case 5:
-            response = _context2.sent;
-            if (response.ok) {
-              history.push("".concat(response.mPassUrl));
-            } else {
-              setMPassError(true);
-              setAuthenticating(false);
-            }
-          case 7:
-          case "end":
-            return _context2.stop();
-        }
-      }, _callee2);
-    }));
-    return function handleMPassLogin(_x2) {
-      return _ref3.apply(this, arguments);
-    };
-  }();
+  var redirectToMPassLogin = function redirectToMPassLogin(e) {
+    e.preventDefault();
+    var redirectToURL = new URL("".concat(window.location.origin).concat(baseApiUrl, "/msystems/saml/login/"));
+    window.location.href = redirectToURL.href;
+  };
   return /*#__PURE__*/React__default["default"].createElement(React__default["default"].Fragment, null, isAuthenticating && /*#__PURE__*/React__default["default"].createElement(core.Box, {
     position: "absolute",
     top: 0,
@@ -2783,7 +2749,19 @@ var LoginPage = function LoginPage(_ref) {
     pl: 2,
     fontWeight: "fontWeightMedium",
     fontSize: "h4.fontSize"
-  }, formatMessage("appName"))), /*#__PURE__*/React__default["default"].createElement(core.Grid, {
+  }, formatMessage("appName"))), showMPassProvider ? /*#__PURE__*/React__default["default"].createElement(React__default["default"].Fragment, null, /*#__PURE__*/React__default["default"].createElement(core.Grid, {
+    item: true
+  }, /*#__PURE__*/React__default["default"].createElement(core.Tooltip, {
+    title: formatMessage("loginWithMPass")
+  }, /*#__PURE__*/React__default["default"].createElement(core.Button, {
+    fullWidth: true,
+    type: "submit",
+    onClick: redirectToMPassLogin
+  }, /*#__PURE__*/React__default["default"].createElement(SvgMPassLogoColor, null)))), hasMPassError && /*#__PURE__*/React__default["default"].createElement(core.Grid, {
+    item: true
+  }, /*#__PURE__*/React__default["default"].createElement(core.Box, {
+    color: "error.main"
+  }, formatMessage("authMPassError")))) : /*#__PURE__*/React__default["default"].createElement(React__default["default"].Fragment, null, /*#__PURE__*/React__default["default"].createElement(core.Grid, {
     item: true
   }, /*#__PURE__*/React__default["default"].createElement(TextInput$1, {
     required: true,
@@ -2827,17 +2805,7 @@ var LoginPage = function LoginPage(_ref) {
     onClick: redirectToForgotPassword
   }, formatMessage("forgotPassword")), /*#__PURE__*/React__default["default"].createElement(Contributions, {
     contributionKey: LOGIN_PAGE_CONTRIBUTION_KEY
-  })), useMPassConf && /*#__PURE__*/React__default["default"].createElement(core.Grid, {
-    item: true
-  }, /*#__PURE__*/React__default["default"].createElement(core.Button, {
-    fullWidth: true,
-    type: "submit",
-    onClick: handleMPassLogin
-  }, /*#__PURE__*/React__default["default"].createElement(SvgMPassLogoColor, null))), useMPassConf && hasMPassError && /*#__PURE__*/React__default["default"].createElement(core.Grid, {
-    item: true
-  }, /*#__PURE__*/React__default["default"].createElement(core.Box, {
-    color: "error.main"
-  }, formatMessage("authMPassError")))))))));
+  })))))))));
 };
 
 var useStyles$2 = styles$t.makeStyles(function (theme) {
@@ -3287,6 +3255,7 @@ var messages_en = {
 	"core.LoginPage.loginBtn": "Log In",
 	"core.LoginPage.authError": "The password or the username you've entered is incorrect.",
 	"core.LoginPage.authMPassError": "Login error. Try again.",
+	"core.LoginPage.loginWithMPass": "Login with MPass",
 	"core.LoginPage.pageTitle": "Log In",
 	"core.LoginPage.forgotPassword": "Forgot Password ?",
 	"core.ForgotPasswordPage.pageTitle": "Forgot Password ?",

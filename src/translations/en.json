@@ -41,6 +41,7 @@
   "core.LoginPage.loginBtn": "Log In",
   "core.LoginPage.authError": "The password or the username you've entered is incorrect.",
   "core.LoginPage.authMPassError": "Login error. Try again.",
+  "core.LoginPage.loginWithMPass": "Login with MPass",
   "core.LoginPage.pageTitle": "Log In",
   "core.LoginPage.forgotPassword": "Forgot Password ?",
   "core.ForgotPasswordPage.pageTitle": "Forgot Password ?",

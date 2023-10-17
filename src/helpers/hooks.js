@@ -8,7 +8,8 @@ import {
   initialize,
   graphqlWithVariables,
   graphqlMutation,
-  getAuthnRequest
+  getAuthnRequest,
+  loginWithMPass
 } from "../actions";
 
 export const useDebounceCb = (cb, duration = 0) => {
@@ -168,7 +169,6 @@ export const useAuthentication = () => {
     isInitialized,
     initialize: () => dispatch(initialize()),
     login: (credentials) => dispatch(login(credentials)),
-    getAuthnRequest: () => getAuthnRequest(),
     refresh,
     logout: () => dispatch(logout()),
   };

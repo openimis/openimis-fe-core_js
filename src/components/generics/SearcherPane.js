@@ -34,6 +34,7 @@ class SearcherPane extends Component {
       SearchIcon = null,
       isCustomFiltering = false,
       objectForCustomFiltering = null,
+      additionalCustomFilterParams = null,
       moduleName = null,
       objectType = null,
       setAppliedCustomFilters = null,
@@ -55,6 +56,7 @@ class SearcherPane extends Component {
                 {isCustomFiltering === true ? (
                   <AdvancedFiltersDialog
                     object={objectForCustomFiltering}
+                    additionalParams={additionalCustomFilterParams}
                     moduleName={moduleName}
                     objectType={objectType}
                     setAppliedCustomFilters={setAppliedCustomFilters}

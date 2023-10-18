@@ -29,6 +29,7 @@ const AdvancedFiltersDialog = ({
   intl,
   classes,
   object,
+  additionalParams,
   fetchCustomFilter,
   customFilters,
   moduleName,
@@ -68,13 +69,20 @@ const AdvancedFiltersDialog = ({
     });
   }
 
-  const createParams = (moduleName, objectTypeName, uuidOfObject=null) => {
-    return [
+  const createParams = (moduleName, objectTypeName, uuidOfObject = null, additionalParams = null) => {
+    let params = [
       `moduleName: "${moduleName}"`,
       `objectTypeName: "${objectTypeName}"`,
-      uuidOfObject !== null ? `uuidOfObject: "${uuidOfObject}"`: ``,
     ];
+    if (uuidOfObject) {
+      params.push(`uuidOfObject: "${uuidOfObject}"`);
+    }
+    if (additionalParams) {
+      params.push(`additionalParams: ${JSON.stringify(JSON.stringify(additionalParams))}`);
+    }
+    return params;
   };
+
 
   const fetchFilters = (params) => fetchCustomFilter(params);
 
@@ -146,24 +154,18 @@ const AdvancedFiltersDialog = ({
   }
 
   useEffect(() => {
-    if (object) {
+    if (objectType) {
       // Update the state with new parameters
       let paramsToFetchFilters = []
-      if (objectType === BENEFIT_PLAN) {
         paramsToFetchFilters = createParams(
           moduleName,
           objectType,
-          object.id
+          object ? object?.id : null,
+          additionalParams
         );
-      } else {
-        paramsToFetchFilters = createParams(
-          moduleName,
-          objectType,
-        );
-      }
       fetchFilters(paramsToFetchFilters);
     }
-  }, [object]);
+  }, [objectType]);
 
   // refresh component when list of filters is changed
   useEffect(() => {}, [filters]);

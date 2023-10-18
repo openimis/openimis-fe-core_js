@@ -430,6 +430,7 @@ class Searcher extends Component {
       intl,
       isCustomFiltering = false,
       objectForCustomFiltering = null,
+      additionalCustomFilterParams = null,
       moduleName = null,
       objectType = null,
       appliedCustomFilters = null,
@@ -459,6 +460,7 @@ class Searcher extends Component {
             }
             isCustomFiltering={isCustomFiltering}
             objectForCustomFiltering={objectForCustomFiltering}
+            additionalCustomFilterParams={additionalCustomFilterParams}
             moduleName={moduleName}
             objectType={objectType}
             setAppliedCustomFilters={setAppliedCustomFilters}

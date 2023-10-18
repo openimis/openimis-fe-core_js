@@ -17,6 +17,7 @@ const LogoutButton = () => {
   const history = useHistory();
   const dispatch = useDispatch();
   const onClick = async () => {
+    localStorage.clear();
     await dispatch(logout());
     history.push("/");
   };

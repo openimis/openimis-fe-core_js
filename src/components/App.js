@@ -53,6 +53,10 @@ const App = (props) => {
 
   const economicUnitConfig = modulesManager.getConf("fe-core", "App.economicUnitConfig", false);
 
+  const [economicUnitDialogOpen, setEconomicUnitDialogOpen] = useState(
+    economicUnitConfig && !localStorage.getItem(ECONOMIC_UNIT_STORAGE_KEY),
+  );
+
   const auth = useAuthentication();
   const routes = useMemo(() => {
     return modulesManager.getContribs(ROUTER_CONTRIBUTION_KEY);
@@ -81,10 +85,6 @@ const App = (props) => {
       .reduce((allmsgs, msgs) => Object.assign(allmsgs, msgs.messages), {});
     return { ...messages, ...msgs };
   }, [user?.language, messages]);
-
-  const [economicUnitDialogOpen, setEconomicUnitDialogOpen] = useState(
-    economicUnitConfig && !localStorage.getItem(ECONOMIC_UNIT_STORAGE_KEY),
-  );
 
   useEffect(() => {
     auth.initialize();

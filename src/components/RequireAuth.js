@@ -33,6 +33,7 @@ import { useTranslations } from "../helpers/i18n";
 export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
 export const MAIN_MENU_CONTRIBUTION_KEY = "core.MainMenu";
 export const MAIN_SEARCHER_CONTRIBUTION_KEY = "core.MainSearcher";
+export const ECONOMIC_UNIT_BUTTON_CONTRIBUTION_KEY = "policyholder.EconomicUnitChangeButton";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -201,7 +202,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const RequireAuth = (props) => {
-  const { children, logo, redirectTo, ...others } = props;
+  const { children, logo, redirectTo, onEconomicDialogOpen, ...others } = props;
   const [isOpen, setOpen] = useBoolean();
   const [isDrawerOpen, setDrawerOpen] = useBoolean();
   const theme = useTheme();
@@ -333,6 +334,10 @@ const RequireAuth = (props) => {
             labelPlacement="start"
           />
           }
+          <Contributions
+            contributionKey={ECONOMIC_UNIT_BUTTON_CONTRIBUTION_KEY}
+            onEconomicDialogOpen={onEconomicDialogOpen}
+          />
           <LogoutButton />
           <Help />
         </Toolbar>

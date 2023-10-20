@@ -1,3 +1,5 @@
+import { logout } from "../actions";
+
 export const ensureArray = (maybeArray) => {
   if (Array.isArray(maybeArray)) {
     return maybeArray;
@@ -36,3 +38,8 @@ export function getTimeDifferenceInDaysFromToday(dateToCheck) {
   const currentDate = new Date();
   return getTimeDifferenceInDays(dateToCheck, currentDate);
 }
+
+export const onLogout = async (dispatch) => {
+  localStorage.clear();
+  await dispatch(logout());
+};

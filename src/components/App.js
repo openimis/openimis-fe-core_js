@@ -18,6 +18,7 @@ import { useAuthentication } from "../helpers/hooks";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import SetPasswordPage from "../pages/SetPasswordPage";
 import { ErrorBoundary } from "@openimis/fe-core";
+import { onLogout } from "../helpers/utils";
 
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";
 export const UNAUTHENTICATED_ROUTER_CONTRIBUTION_KEY = "core.UnauthenticatedRouter";
@@ -99,6 +100,10 @@ const App = (props) => {
     if (economicUnitConfig && auth.isAuthenticated && !localStorage.getItem(ECONOMIC_UNIT_STORAGE_KEY)) {
       setEconomicUnitDialogOpen(true);
     }
+
+    if (!economicUnitConfig || (economicUnitConfig && !auth.isAuthenticated)) {
+      setEconomicUnitDialogOpen(false);
+    }
   }, [auth, economicUnitDialogOpen]);
 
   if (error) {
@@ -118,8 +123,8 @@ const App = (props) => {
             <Contributions
               contributionKey={ECONOMIC_UNIT_DIALOG_CONTRIBUTION_KEY}
               open={economicUnitDialogOpen}
-              onClose={() => setEconomicUnitDialogOpen(false)}
               setEconomicUnitDialogOpen={setEconomicUnitDialogOpen}
+              onLogout={onLogout}
             />
           ) : null}
           <div className="App">

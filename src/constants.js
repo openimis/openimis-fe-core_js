@@ -118,3 +118,6 @@ export const CLAIM_STATS_ORDER = [
 
 export const CORE_MIS_CONFLUENCE_URL = "https://openimis.atlassian.net/wiki/spaces/OP/pages/3531407380/Project+2022.T3+CORE-MIS+Merger";
 export const DEFAULT_URL = "/Manual/IMIS_manual.pdf";
+
+export const  M_PASS_LOGIN_PATH = "/msystems/saml/login/";
+export const  M_PASS_LOGOUT_PATH = "/msystems/saml/logout/";

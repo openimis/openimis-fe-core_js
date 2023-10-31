@@ -7,6 +7,7 @@ import { baseApiUrl, logout } from "../actions";
 import { useHistory } from "../helpers/history";
 import { useModulesManager } from "../helpers/modules";
 import { M_PASS_LOGOUT_PATH } from "../constants";
+import {onLogout} from "../helpers/utils";
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -29,7 +30,7 @@ const LogoutButton = () => {
   };
 
   const redirectToImisLogout = async () => {
-    await dispatch(logout());
+    await onLogout();
     history.push("/");
   }
 

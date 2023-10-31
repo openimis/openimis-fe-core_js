@@ -156,3 +156,4 @@ None
 - `secondCalendarFormatting`: formatting options for second calendar, default: "DD-MM-YYYY"
 - `secondCalendarFormattingLang`: formatting language for second calendar, default: "en"
 - `redirectToCoreMISConfluenceUrl` clicking on questionmark icon will take you to coreMIS confluence page, default openIMIS manual
+- `App.economicUnitConfig`: In the Moldovan implementation, if set to __true__, users must be assigned to an Economic Unit (EU). If a user isn't linked to an EU, a modal will prompt them to do so. Until an EU is assigned, the only permitted action for the user is to log out. Default setting: __false__.

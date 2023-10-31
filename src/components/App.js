@@ -18,12 +18,15 @@ import { useAuthentication } from "../helpers/hooks";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import SetPasswordPage from "../pages/SetPasswordPage";
 import { ErrorBoundary } from "@openimis/fe-core";
-import EconomicUnitDialog from "./dialogs/EconomicUnitDialog";
+import { onLogout } from "../helpers/utils";
 
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";
 export const UNAUTHENTICATED_ROUTER_CONTRIBUTION_KEY = "core.UnauthenticatedRouter";
 export const APP_BOOT_CONTRIBUTION_KEY = "core.Boot";
 export const TRANSLATION_CONTRIBUTION_KEY = "translations";
+export const ECONOMIC_UNIT_DIALOG_CONTRIBUTION_KEY = "policyholder.EconomicUnitDialog";
+
+const ECONOMIC_UNIT_STORAGE_KEY = "userEconomicUnit";
 
 const styles = () => ({
   fetching: {
@@ -49,7 +52,9 @@ const App = (props) => {
     ...others
   } = props;
 
-  const economicUnitConfig = modulesManager.getConf("fe-core", "economicUnitConfig", true);
+  const economicUnitConfig = modulesManager.getConf("fe-core", "App.economicUnitConfig", false);
+
+  const [economicUnitDialogOpen, setEconomicUnitDialogOpen] = useState(false);
 
   const auth = useAuthentication();
   const routes = useMemo(() => {
@@ -91,6 +96,16 @@ const App = (props) => {
     }
   }, []);
 
+  useEffect(() => {
+    if (economicUnitConfig && auth.isAuthenticated && !localStorage.getItem(ECONOMIC_UNIT_STORAGE_KEY)) {
+      setEconomicUnitDialogOpen(true);
+    }
+
+    if (!economicUnitConfig || (economicUnitConfig && !auth.isAuthenticated)) {
+      setEconomicUnitDialogOpen(false);
+    }
+  }, [auth, economicUnitDialogOpen]);
+
   if (error) {
     return <FatalError error={error} />;
   }
@@ -104,7 +119,14 @@ const App = (props) => {
         <IntlProvider locale={locale} messages={allMessages}>
           <AlertDialog />
           <ConfirmDialog confirm={confirm} onConfirm={clearConfirm} />
-          <EconomicUnitDialog confirmState={auth.isAuthenticated && economicUnitConfig}/>
+          {economicUnitConfig ? (
+            <Contributions
+              contributionKey={ECONOMIC_UNIT_DIALOG_CONTRIBUTION_KEY}
+              open={economicUnitDialogOpen}
+              setEconomicUnitDialogOpen={setEconomicUnitDialogOpen}
+              onLogout={onLogout}
+            />
+          ) : null}
           <div className="App">
             {auth.isAuthenticated && <Contributions contributionKey={APP_BOOT_CONTRIBUTION_KEY} />}
             <BrowserRouter basename={basename}>
@@ -120,7 +142,7 @@ const App = (props) => {
                     path={"/" + route.path}
                     render={(props) => (
                       <ErrorBoundary>
-                          <route.component modulesManager={modulesManager} {...props} {...others} />
+                        <route.component modulesManager={modulesManager} {...props} {...others} />
                       </ErrorBoundary>
                     )}
                   />
@@ -132,7 +154,12 @@ const App = (props) => {
                     path={"/" + route.path}
                     render={(props) => (
                       <ErrorBoundary>
-                        <RequireAuth {...props} {...others} redirectTo={"/login"}>
+                        <RequireAuth
+                          {...props}
+                          {...others}
+                          redirectTo={"/login"}
+                          onEconomicDialogOpen={() => setEconomicUnitDialogOpen(true)}
+                        >
                           <route.component modulesManager={modulesManager} {...props} {...others} />
                         </RequireAuth>
                       </ErrorBoundary>

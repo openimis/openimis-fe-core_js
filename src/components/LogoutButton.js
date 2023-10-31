@@ -3,10 +3,10 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
 import { IconButton } from "@material-ui/core";
 import { ExitToApp } from "@material-ui/icons";
-import {baseApiUrl, logout} from "../actions";
+import { baseApiUrl, logout } from "../actions";
 import { useHistory } from "../helpers/history";
-import {useModulesManager} from "../helpers/modules";
-import {M_PASS_LOGOUT_PATH} from "../constants";
+import { useModulesManager } from "../helpers/modules";
+import { M_PASS_LOGOUT_PATH } from "../constants";
 
 const useStyles = makeStyles((theme) => ({
   button: {

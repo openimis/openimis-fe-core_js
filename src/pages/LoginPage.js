@@ -10,7 +10,7 @@ import { useAuthentication } from "../helpers/hooks";
 import Contributions from "./../components/generics/Contributions";
 import MPassLogo from "./../mPassLogoColor.svg";
 import { baseApiUrl } from "../actions";
-import {M_PASS_LOGIN_PATH} from "../constants";
+import { M_PASS_LOGIN_PATH } from "../constants";
 
 const useStyles = makeStyles((theme) => ({
   container: {

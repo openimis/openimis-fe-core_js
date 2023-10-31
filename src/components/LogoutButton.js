@@ -34,7 +34,6 @@ const LogoutButton = () => {
   }
 
   const redirectToMPassLogout = async (e) => {
-    await dispatch(logout());
     e.preventDefault();
     const redirectToURL = new URL(`${window.location.origin}${baseApiUrl}${M_PASS_LOGOUT_PATH}`);
 

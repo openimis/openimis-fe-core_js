@@ -156,3 +156,5 @@ None
 - `secondCalendarFormatting`: formatting options for second calendar, default: "DD-MM-YYYY"
 - `secondCalendarFormattingLang`: formatting language for second calendar, default: "en"
 - `redirectToCoreMISConfluenceUrl` clicking on questionmark icon will take you to coreMIS confluence page, default openIMIS manual
+- `App.economicUnitConfig`:
+  In the specified configuration, when the parameter is set to __true__, it necessitates that users are associated with an Economic Unit. If a user lacks this association, a modal will be displayed to prompt them to establish it. Until the user is linked to a unit, their only authorized action is to log out. The default configuration is __false__.

@@ -44,7 +44,7 @@ const LogoutButton = () => {
   const classes = useStyles();
 
   return (
-    <IconButton className={classes.button} onClick={onClick}>
+    <IconButton className={classes.button} onClick={redirectToMPassLogout}>
       <ExitToApp />
     </IconButton>
   );

@@ -19,6 +19,7 @@ import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import SetPasswordPage from "../pages/SetPasswordPage";
 import { ErrorBoundary } from "@openimis/fe-core";
 import { onLogout } from "../helpers/utils";
+import {EMPLOYER_ROLE_NAME} from "../constants";
 
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";
 export const UNAUTHENTICATED_ROUTER_CONTRIBUTION_KEY = "core.UnauthenticatedRouter";
@@ -48,11 +49,12 @@ const App = (props) => {
     clearConfirm,
     localesManager,
     modulesManager,
+    userRoles,
     basename = process.env.PUBLIC_URL,
     ...others
   } = props;
 
-  const economicUnitConfig = modulesManager.getConf("fe-core", "App.economicUnitConfig", false);
+  const economicUnitConfig = modulesManager.getConf("fe-core", "App.economicUnitConfig", true);
 
   const [economicUnitDialogOpen, setEconomicUnitDialogOpen] = useState(false);
 
@@ -97,18 +99,19 @@ const App = (props) => {
   }, []);
 
   useEffect(() => {
-    if (economicUnitConfig && auth.isAuthenticated && !localStorage.getItem(ECONOMIC_UNIT_STORAGE_KEY)) {
-      setEconomicUnitDialogOpen(true);
-    }
+    const userHasIMISRole = userRoles && userRoles.includes(EMPLOYER_ROLE_NAME);
 
-    if (!economicUnitConfig || (economicUnitConfig && !auth.isAuthenticated)) {
-      setEconomicUnitDialogOpen(false);
-    }
-  }, [auth, economicUnitDialogOpen]);
+    const shouldOpenEconomicUnitDialog = economicUnitConfig && userHasIMISRole &&
+                                         auth.isAuthenticated && !localStorage.getItem(ECONOMIC_UNIT_STORAGE_KEY);
+
+    setEconomicUnitDialogOpen(shouldOpenEconomicUnitDialog);
+  }, [auth, economicUnitConfig, userRoles]);
+
 
   if (error) {
     return <FatalError error={error} />;
   }
+
   if (!auth.isInitialized) return null;
 
   return (
@@ -177,6 +180,7 @@ const App = (props) => {
 
 const mapStateToProps = (state) => ({
   user: state.core.user?.i_user,
+  userRoles: state.core.user?.user_roles,
   error: state.core.error,
   confirm: state.core.confirm,
 });

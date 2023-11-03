@@ -121,3 +121,5 @@ export const DEFAULT_URL = "/Manual/IMIS_manual.pdf";
 
 export const  M_PASS_LOGIN_PATH = "/msystems/saml/login/";
 export const  M_PASS_LOGOUT_PATH = "/msystems/saml/logout/";
+
+export const EMPLOYER_ROLE_NAME = "Employer";

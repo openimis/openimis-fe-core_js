@@ -54,7 +54,7 @@ const App = (props) => {
     ...others
   } = props;
 
-  const economicUnitConfig = modulesManager.getConf("fe-core", "App.economicUnitConfig", true);
+  const economicUnitConfig = modulesManager.getConf("fe-core", "App.economicUnitConfig", false);
 
   const [economicUnitDialogOpen, setEconomicUnitDialogOpen] = useState(false);
 

@@ -45,7 +45,7 @@ export const onLogout = async (dispatch) => {
   await dispatch(logout());
 };
 
-export const redirectToMPassLogout = async (e) => {
+export const redirectToSamlLogout = async (e) => {
   e.preventDefault();
   const redirectToURL = new URL(`${window.location.origin}${baseApiUrl}${SAML_LOGOUT_PATH}`);
 

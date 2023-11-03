@@ -4,7 +4,7 @@ import { IconButton } from "@material-ui/core";
 import { ExitToApp } from "@material-ui/icons";
 import { useHistory } from "../helpers/history";
 import { useModulesManager } from "../helpers/modules";
-import { onLogout, redirectToMPassLogout } from "../helpers/utils";
+import { onLogout, redirectToSamlLogout } from "../helpers/utils";
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -19,7 +19,7 @@ const LogoutButton = () => {
   const mPassLogout = modulesManager.getConf("fe-core", "LogoutButton.showMPassProvider", false);
   const onClick = async (e) => {
     if (mPassLogout) {
-      await redirectToMPassLogout(e);
+      await redirectToSamlLogout(e);
     } else {
       await redirectToImisLogout();
     }

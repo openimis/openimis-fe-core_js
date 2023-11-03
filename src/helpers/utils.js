@@ -1,4 +1,5 @@
-import { logout } from "../actions";
+import {baseApiUrl, logout} from "../actions";
+import {M_PASS_LOGOUT_PATH} from "../constants";
 
 export const ensureArray = (maybeArray) => {
   if (Array.isArray(maybeArray)) {
@@ -42,4 +43,11 @@ export function getTimeDifferenceInDaysFromToday(dateToCheck) {
 export const onLogout = async (dispatch) => {
   localStorage.clear();
   await dispatch(logout());
+};
+
+export const redirectToMPassLogout = async (e) => {
+  e.preventDefault();
+  const redirectToURL = new URL(`${window.location.origin}${baseApiUrl}${M_PASS_LOGOUT_PATH}`);
+
+  window.location.href = redirectToURL.href;
 };

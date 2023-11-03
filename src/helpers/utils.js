@@ -1,5 +1,5 @@
 import { baseApiUrl, logout } from "../actions";
-import { M_PASS_LOGOUT_PATH } from "../constants";
+import { SAML_LOGOUT_PATH } from "../constants";
 
 export const ensureArray = (maybeArray) => {
   if (Array.isArray(maybeArray)) {
@@ -47,7 +47,7 @@ export const onLogout = async (dispatch) => {
 
 export const redirectToMPassLogout = async (e) => {
   e.preventDefault();
-  const redirectToURL = new URL(`${window.location.origin}${baseApiUrl}${M_PASS_LOGOUT_PATH}`);
+  const redirectToURL = new URL(`${window.location.origin}${baseApiUrl}${SAML_LOGOUT_PATH}`);
 
   window.location.href = redirectToURL.href;
 };

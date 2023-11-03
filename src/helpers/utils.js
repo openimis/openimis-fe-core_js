@@ -1,5 +1,5 @@
-import {baseApiUrl, logout} from "../actions";
-import {M_PASS_LOGOUT_PATH} from "../constants";
+import { baseApiUrl, logout } from "../actions";
+import { M_PASS_LOGOUT_PATH } from "../constants";
 
 export const ensureArray = (maybeArray) => {
   if (Array.isArray(maybeArray)) {

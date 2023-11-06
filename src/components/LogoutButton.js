@@ -26,7 +26,7 @@ const LogoutButton = () => {
   };
 
   const redirectToImisLogout = async () => {
-    await onLogout();
+    await onLogout(dispatch);
     history.push("/");
   }
 

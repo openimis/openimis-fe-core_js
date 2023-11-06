@@ -121,3 +121,5 @@ export const DEFAULT_URL = "/Manual/IMIS_manual.pdf";
 
 export const  SAML_LOGIN_PATH = "/msystems/saml/login/";
 export const  SAML_LOGOUT_PATH = "/msystems/saml/logout/";
+
+export const RIGHT_VIEW_EU_MODAL = 203000;

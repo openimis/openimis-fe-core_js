@@ -19,6 +19,7 @@ import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import SetPasswordPage from "../pages/SetPasswordPage";
 import { ErrorBoundary } from "@openimis/fe-core";
 import { onLogout } from "../helpers/utils";
+import { RIGHT_VIEW_EU_MODAL } from "../constants";
 
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";
 export const UNAUTHENTICATED_ROUTER_CONTRIBUTION_KEY = "core.UnauthenticatedRouter";
@@ -97,18 +98,19 @@ const App = (props) => {
   }, []);
 
   useEffect(() => {
-    if (economicUnitConfig && auth.isAuthenticated && !localStorage.getItem(ECONOMIC_UNIT_STORAGE_KEY)) {
-      setEconomicUnitDialogOpen(true);
-    }
+    const userHasModalRight = user?.rights ? user.rights.includes(RIGHT_VIEW_EU_MODAL) : false;
 
-    if (!economicUnitConfig || (economicUnitConfig && !auth.isAuthenticated)) {
-      setEconomicUnitDialogOpen(false);
-    }
-  }, [auth, economicUnitDialogOpen]);
+    const shouldOpenEconomicUnitDialog = economicUnitConfig && userHasModalRight &&
+                                         auth.isAuthenticated && !localStorage.getItem(ECONOMIC_UNIT_STORAGE_KEY);
+
+    setEconomicUnitDialogOpen(shouldOpenEconomicUnitDialog);
+  }, [auth, economicUnitConfig, user]);
+
 
   if (error) {
     return <FatalError error={error} />;
   }
+
   if (!auth.isInitialized) return null;
 
   return (

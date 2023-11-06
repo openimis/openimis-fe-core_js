@@ -19,7 +19,7 @@ import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import SetPasswordPage from "../pages/SetPasswordPage";
 import { ErrorBoundary } from "@openimis/fe-core";
 import { onLogout } from "../helpers/utils";
-import {EMPLOYER_ROLE_NAME} from "../constants";
+import { RIGHT_VIEW_EU_MODAL } from "../constants";
 
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";
 export const UNAUTHENTICATED_ROUTER_CONTRIBUTION_KEY = "core.UnauthenticatedRouter";
@@ -49,7 +49,6 @@ const App = (props) => {
     clearConfirm,
     localesManager,
     modulesManager,
-    userRoles,
     basename = process.env.PUBLIC_URL,
     ...others
   } = props;
@@ -99,13 +98,13 @@ const App = (props) => {
   }, []);
 
   useEffect(() => {
-    const userHasIMISRole = userRoles && userRoles.includes(EMPLOYER_ROLE_NAME);
+    const userHasModalRight = user?.rights ? user.rights.includes(RIGHT_VIEW_EU_MODAL) : false;
 
-    const shouldOpenEconomicUnitDialog = economicUnitConfig && userHasIMISRole &&
+    const shouldOpenEconomicUnitDialog = economicUnitConfig && userHasModalRight &&
                                          auth.isAuthenticated && !localStorage.getItem(ECONOMIC_UNIT_STORAGE_KEY);
 
     setEconomicUnitDialogOpen(shouldOpenEconomicUnitDialog);
-  }, [auth, economicUnitConfig, userRoles]);
+  }, [auth, economicUnitConfig, user]);
 
 
   if (error) {
@@ -180,7 +179,6 @@ const App = (props) => {
 
 const mapStateToProps = (state) => ({
   user: state.core.user?.i_user,
-  userRoles: state.core.user?.user_roles,
   error: state.core.error,
   confirm: state.core.confirm,
 });

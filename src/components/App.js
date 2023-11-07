@@ -99,12 +99,14 @@ const App = (props) => {
 
   useEffect(() => {
     const userHasModalRight = user?.rights ? user.rights.includes(RIGHT_VIEW_EU_MODAL) : false;
+    if (economicUnitConfig && userHasModalRight && auth.isAuthenticated && !localStorage.getItem(ECONOMIC_UNIT_STORAGE_KEY)) {
+      setEconomicUnitDialogOpen(true);
+    }
 
-    const shouldOpenEconomicUnitDialog = economicUnitConfig && userHasModalRight &&
-                                         auth.isAuthenticated && !localStorage.getItem(ECONOMIC_UNIT_STORAGE_KEY);
-
-    setEconomicUnitDialogOpen(shouldOpenEconomicUnitDialog);
-  }, [auth, economicUnitConfig, user]);
+    if (!economicUnitConfig || (economicUnitConfig && !auth.isAuthenticated)) {
+      setEconomicUnitDialogOpen(false);
+    }
+  }, [auth, economicUnitDialogOpen, user]);
 
 
   if (error) {

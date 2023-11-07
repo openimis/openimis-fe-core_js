@@ -21,7 +21,7 @@ const LogoutButton = () => {
   const mPassLogout = modulesManager.getConf("fe-core", "LogoutButton.showMPassProvider", false);
   const onClick = async (e) => {
     if (mPassLogout) {
-      await redirectToSamlLogout(e);
+      redirectToSamlLogout(e);
     } else {
       await redirectToImisLogout();
     }

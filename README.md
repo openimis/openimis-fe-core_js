@@ -160,9 +160,5 @@ None
   In the specified configuration, when the parameter is set to __true__, it necessitates that users are associated with an Economic Unit. If a user lacks this association, a modal will be displayed to prompt them to establish it. Until the user is linked to a unit, their only authorized action is to log out. The default configuration is __false__.
 - `LogoutButton.showMPassProvider`:  when activated, routes the user to the saml logout page for secure session termination
 - `LoginPage.showMPassProvider`: redirects users to the saml login page, facilitating access to mPass-protected resources
-- `secondCalendarType`: type of secondary calendar picker (if enabled), default "nepal"
-- `secondCalendarLocale`: locale for secondary calendar picker (if enabled), default "nepal_en"
-
-
-      const secondCalendarType = modulesManager.getConf("fe-core", "secondCalendarType", "nepali");
-      const secondCalendarLocale = modulesManager.getConf("fe-core", "secondCalendarLocale", "nepali_en");
+- `secondCalendarType`: type of secondary calendar picker (if enabled), default "nepali"
+- `secondCalendarLocale`: locale for secondary calendar picker (if enabled), default "nepali_en"

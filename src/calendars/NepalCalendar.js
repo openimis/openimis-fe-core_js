@@ -2,7 +2,7 @@ const nepali = {
     name: "nepali",
     startYear: 1,
     yearLength: 365,
-    epoch: 1700709,
+    epoch: 1701212,
     century: 20,
     weekStartDayIndex: 1,
     getMonthLengths(year) {
@@ -14,8 +14,8 @@ const nepali = {
         return nepaliMonthsDictionary[parseInt(year)];
     },
     isLeap(year) {
-      // those methods have to be defined even if they are not used in a given calendar
-      return false
+      // workaround needed because of things hardcoded in library
+      return year
     },
     getLeaps(currentYear) {
       return []

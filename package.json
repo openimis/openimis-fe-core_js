@@ -51,7 +51,6 @@
     "src"
   ],
   "dependencies": {
-    "@sbmdkl/nepali-datepicker-reactjs": "^1.2.1",
     "history": "^5.2.0",
     "nepali-date-converter": "^3.3.1",
     "react-multi-date-picker": "^4.3.3",

@@ -82,6 +82,15 @@ class openIMISDatePicker extends Component {
     return _key in _dictionary ? _dictionary[_key] : _dictionary["default"];
   };
 
+  // for some reason multi-date-picker picks incorrect date
+  // we need to add one day for it to works correctly
+  // it is possible, that future release of library will fix it
+  // making this method redundant
+  moveByOneDay = (date) => {
+    date.setDate(date.getDate() + 1);
+    return date;
+  }
+
   render() {
     const {
       intl,
@@ -112,7 +121,7 @@ class openIMISDatePicker extends Component {
           <DatePicker
             format={secondCalendarFormatting}
             disabled={readOnly}
-            value={this.state.value ? new Date(this.state.value) : null}
+            value={this.state.value ? this.moveByOneDay(new Date(this.state.value)) : null}
             {...((!!this.props.minDate || !!disablePast) && {
               minDate: this.getMinDate(this.props.minDate, disablePast),
             })}

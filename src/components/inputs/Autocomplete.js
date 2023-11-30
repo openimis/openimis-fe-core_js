@@ -38,6 +38,7 @@ const Autocomplete = (props) => {
     setCurrentString,
     multiple = false,
     renderInput,
+    noOptionsText,
   } = props;
   const modulesManager = useModulesManager();
   const minCharLookup = modulesManager.getConf("fe-admin", "usersMinCharLookup", 2);
@@ -72,6 +73,7 @@ const Autocomplete = (props) => {
     <MuiAutocomplete
       key={resetKey}
       fullWidth={fullWidth}
+      noOptionsText={noOptionsText}
       className={className}
       style={{ minWidth }}
       loadingText={formatMessage("loadingText")}

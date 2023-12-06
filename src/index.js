@@ -31,7 +31,7 @@ import Table from "./components/generics/Table";
 import SearcherExport from "./components/generics/SearcherExport";
 import Searcher from "./components/generics/Searcher";
 import SearcherPane from "./components/generics/SearcherPane";
-import DatePicker from "./pickers/DatePicker";
+import openIMISDatePicker from "./pickers/DatePicker";
 import Picker from "./components/generics/Picker";
 import ConstantBasedPicker from "./components/generics/ConstantBasedPicker";
 import CustomFilterFieldStatusPicker from "./pickers/CustomFilterFieldStatusPicker";
@@ -192,7 +192,7 @@ const DEFAULT_CONFIG = {
 
 export const CoreModule = (cfg) => {
   let def = { ...DEFAULT_CONFIG };
-  def.refs.push({ key: "core.DatePicker", ref: DatePicker });
+  def.refs.push({ key: "core.DatePicker", ref: openIMISDatePicker });
   return { ...def, ...cfg };
 };
 

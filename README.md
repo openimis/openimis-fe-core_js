@@ -153,10 +153,12 @@ None
 - `AmountInput.currencyPosition`: position of the currency for the AmountInput. Choices are `start` and `end` (default: `start`)
 - `menuLeft`: position menu in the Drawer component on the left site of the application
 - `calendarSwitch`: enable calendar switcher toggle on the navbar of the webpage. Currently supports nepali calendar. Default false.
-- `secondCalendarFormatting`: formatting options for second calendar, default: "DD-MM-YYYY"
-- `secondCalendarFormattingLang`: formatting language for second calendar, default: "en"
-- `redirectToCoreMISConfluenceUrl` clicking on questionmark icon will take you to coreMIS confluence page, default openIMIS manual
+- `secondCalendarFormatting`: formatting options for second calendar (both picker and display), default: "DD-MM-YYYY"
+- `secondCalendarFormattingLang`: formatting language for second calendar (when displayed as saved data, not in pickers), default: "en"
+- `redirectToCoreMISConfluenceUrl`: clicking on questionmark icon will take you to coreMIS confluence page, default openIMIS manual
 - `App.economicUnitConfig`:
   In the specified configuration, when the parameter is set to __true__, it necessitates that users are associated with an Economic Unit. If a user lacks this association, a modal will be displayed to prompt them to establish it. Until the user is linked to a unit, their only authorized action is to log out. The default configuration is __false__.
 - `LogoutButton.showMPassProvider`:  when activated, routes the user to the saml logout page for secure session termination
 - `LoginPage.showMPassProvider`: redirects users to the saml login page, facilitating access to mPass-protected resources
+- `secondCalendarType`: type of secondary calendar picker (if enabled), default "nepali"
+- `secondCalendarLocale`: locale for secondary calendar picker (if enabled), default "nepali_en"

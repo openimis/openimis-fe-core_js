@@ -112,5 +112,8 @@
   "core.RegistersStatusReport.region": "Region",
   "core.RegistersStatusReport.district": "District",
   "core.Table.ordinalNumberHeader": "Number",
-  "core.calendarSwitcher": "BS/AD"
+  "core.calendarSwitcher": "BS/AD",
+  "core.calendar.clearButton": "Clear date",
+  "core.calendar.okButton": "Accept",
+  "core.calendar.cancelButton": "Cancel"
 }

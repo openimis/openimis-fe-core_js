@@ -102,7 +102,7 @@ class Form extends Component {
         tooltip: saveTooltip || formatMessage(this.props.intl, module, "saveTooltip"),
       },
       {
-        condition: !this.state.dirty && !!fab,
+        condition: (!!this.state.dirty || !!openDirty) && !!fab,
         content: (
           <span>
             <Fab color="primary" onClick={(e) => fabAction(this.props.edited)}>

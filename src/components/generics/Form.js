@@ -152,7 +152,13 @@ class Form extends Component {
                           return (
                             <Grid item key={`form-action-${idx}`} className={classes.paperHeaderAction}>
                               {withTooltip(
-                                !!a.button ? a.button : <IconButton onClick={a.doIt}>{a.icon}</IconButton>,
+                                !!a.button ? (
+                                  a.button
+                                ) : (
+                                  <IconButton onClick={a.doIt} disabled={a?.disabled}>
+                                    {a.icon}
+                                  </IconButton>
+                                ),
                                 a.tooltip,
                               )}
                             </Grid>

@@ -18,7 +18,7 @@ import {
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import MoreHoriz from "@material-ui/icons/MoreHoriz";
 
-import {cacheFilters, resetCacheFilters, saveCurrentPaginationPage} from "../../actions";
+import { cacheFilters, closeExportColumnsDialog, resetCacheFilters, saveCurrentPaginationPage } from "../../actions";
 import { formatMessage } from "../../helpers/i18n";
 import { sort, formatSorter } from "../../helpers/api";
 import withModulesManager from "../../helpers/modules";
@@ -29,6 +29,7 @@ import FormattedMessage from "./FormattedMessage";
 import ProgressOrError from "./ProgressOrError";
 import Table from "./Table";
 import { CLEARED_STATE_FILTER } from "../../constants";
+import ExportColumnsDialog from "../dialogs/ExportColumnsDialog";
 
 const styles = (theme) => ({
   root: {
@@ -93,6 +94,7 @@ class SelectionMenu extends Component {
           exportFetch={this.props.exportFetch}
           exportFields={this.props.exportFields}
           exportFieldsColumns={this.props.exportFieldsColumns}
+          chooseExportableColumns={this.props.chooseExportableColumns}
           label={this.props.exportFieldLabel}
         />)}
         {!!contributionKey && (
@@ -439,7 +441,8 @@ class Searcher extends Component {
       setAppliedFiltersRowStructure = null,
       applyNumberCircle = null,
       exportFieldLabel = null,
-      showOrdinalNumber = false
+      showOrdinalNumber = false,
+      chooseExportableColumns = false,
     } = this.props;
     return (
       <Fragment>
@@ -509,6 +512,7 @@ class Searcher extends Component {
                         exportFields={exportFields}
                         exportFieldsColumns={exportFieldsColumns}
                         exportFieldLabel={exportFieldLabel}
+                        chooseExportableColumns={chooseExportableColumns}
                       />
                     </Grid>
                   )}

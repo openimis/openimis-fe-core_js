@@ -23,6 +23,10 @@ const styles = (theme) => ({
   },
 });
 
+function EmptyComponent() {
+  return <div />;
+}
+
 class SelectInput extends Component {
   _onChange = (e) => {
     if (this.props.value !== e.target.value) {
@@ -32,6 +36,23 @@ class SelectInput extends Component {
 
   handleClear = () => {
     this.props.onChange("");
+  };
+
+  // When there is a value, we pass a dummy div to effectively hide the default dropdown icon.
+  // This allows us to make room for the clear icon without having two icons visible at the same time.
+  renderIconComponent = () => {
+    const { value } = this.props;
+    return value ? EmptyComponent : undefined;
+  };
+
+  // If there's a value, we render the clear icon. Clicking it calls handleClear, which resets the Select's value.
+  renderEndAdornment = () => {
+    const { value, classes } = this.props;
+    return value ? (
+      <IconButton onClick={this.handleClear} className={classes.iconButton}>
+        <ClearIcon />
+      </IconButton>
+    ) : undefined;
   };
 
   render() {
@@ -68,18 +89,9 @@ class SelectInput extends Component {
               }}
               value={!!value ? JSON.stringify(value) : null}
               onChange={this._onChange}
-              // When there is a value, we pass a dummy div to effectively hide the default dropdown icon.
-              // This allows us to make room for the clear icon without having two icons visible at the same time.
-              IconComponent={value ? () => <div /> : undefined}
+              IconComponent={this.renderIconComponent()}
               disabled={disabled}
-              endAdornment={
-                // If there's a value, we render the clear icon. Clicking it calls handleClear, which resets the Select's value.
-                !!value ? (
-                  <IconButton onClick={this.handleClear} className={classes.iconButton}>
-                    <ClearIcon />
-                  </IconButton>
-                ) : undefined
-              }
+              endAdornment={this.renderEndAdornment()}
               displayEmpty
             >
               {placeholder && (

@@ -1,22 +1,58 @@
 import React, { Component, Fragment } from "react";
-import { withTheme, withStyles } from "@material-ui/core/styles";
 import { injectIntl } from "react-intl";
-import { FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
+import _ from "lodash-uuid";
+
+import { FormControl, InputLabel, Select, MenuItem, IconButton } from "@material-ui/core";
+import { withTheme, withStyles } from "@material-ui/core/styles";
+
+import ClearIcon from "@material-ui/icons/Clear";
 import FormattedMessage from "../generics/FormattedMessage";
 import TextInput from "./TextInput";
-import _ from "lodash-uuid";
 
 const styles = (theme) => ({
   label: {
     color: theme.palette.primary.main,
   },
+  formControl: {
+    position: "relative",
+  },
+  iconButton: {
+    position: "absolute",
+    right: 0,
+    padding: "8px",
+  },
 });
+
+function EmptyComponent() {
+  return <div />;
+}
 
 class SelectInput extends Component {
   _onChange = (e) => {
     if (this.props.value !== e.target.value) {
       this.props.onChange(JSON.parse(e.target.value));
     }
+  };
+
+  handleClear = () => {
+    this.props.onChange("");
+  };
+
+  // When there is a value, we pass a dummy div to effectively hide the default dropdown icon.
+  // This allows us to make room for the clear icon without having two icons visible at the same time.
+  renderIconComponent = () => {
+    const { value } = this.props;
+    return value ? EmptyComponent : undefined;
+  };
+
+  // If there's a value, we render the clear icon. Clicking it calls handleClear, which resets the Select's value.
+  renderEndAdornment = () => {
+    const { value, classes } = this.props;
+    return value ? (
+      <IconButton onClick={this.handleClear} className={classes.iconButton}>
+        <ClearIcon />
+      </IconButton>
+    ) : undefined;
   };
 
   render() {
@@ -41,7 +77,7 @@ class SelectInput extends Component {
     return (
       <Fragment>
         {!readOnly && (
-          <FormControl required={required} fullWidth>
+          <FormControl required={required} fullWidth className={classes.formControl}>
             <InputLabel shrink={true} className={classes.label}>
               {strLabel ?? <FormattedMessage module={module} id={label} />}
             </InputLabel>
@@ -53,7 +89,9 @@ class SelectInput extends Component {
               }}
               value={!!value ? JSON.stringify(value) : null}
               onChange={this._onChange}
+              IconComponent={this.renderIconComponent()}
               disabled={disabled}
+              endAdornment={this.renderEndAdornment()}
               displayEmpty
             >
               {placeholder && (

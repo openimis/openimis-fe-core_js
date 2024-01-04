@@ -115,5 +115,9 @@
   "core.calendarSwitcher": "BS/AD",
   "core.calendar.clearButton": "Clear date",
   "core.calendar.okButton": "Accept",
-  "core.calendar.cancelButton": "Cancel"
+  "core.calendar.cancelButton": "Cancel",
+  "core.exportColumnsDialog.confirmButton": "Ok",
+  "core.exportColumnsDialog.cancelButton": "Cancel",
+  "core.exportColumnsDialog.clearAllButton": "Clear All",
+  "core.exportColumnsDialog.title": "Select columns."
 }

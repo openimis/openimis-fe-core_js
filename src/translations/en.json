@@ -42,6 +42,8 @@
   "core.LoginPage.authError": "The password or the username you've entered is incorrect.",
   "core.LoginPage.authErrorHealthFacilityContractInvalid": "Your contract has expired.",
   "core.LoginPage.authErrorGeneral": "Unknown error.",
+  "core.LoginPage.authMPassError": "Login error. Try again.",
+  "core.LoginPage.loginWithMPass": "Login with MPass",
   "core.LoginPage.pageTitle": "Log In",
   "core.LoginPage.forgotPassword": "Forgot Password ?",
   "core.ForgotPasswordPage.pageTitle": "Forgot Password ?",
@@ -112,5 +114,12 @@
   "core.RegistersStatusReport.region": "Region",
   "core.RegistersStatusReport.district": "District",
   "core.Table.ordinalNumberHeader": "Number",
-  "core.calendarSwitcher": "BS/AD"
+  "core.calendarSwitcher": "BS/AD",
+  "core.calendar.clearButton": "Clear date",
+  "core.calendar.okButton": "Accept",
+  "core.calendar.cancelButton": "Cancel",
+  "core.exportColumnsDialog.confirmButton": "Ok",
+  "core.exportColumnsDialog.cancelButton": "Cancel",
+  "core.exportColumnsDialog.clearAllButton": "Clear All",
+  "core.exportColumnsDialog.title": "Select columns."
 }

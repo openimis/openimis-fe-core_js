@@ -379,6 +379,18 @@ export function clearConfirm(confirmed) {
   };
 }
 
+export function openExportColumnsDialog() {
+  return (dispatch) => {
+    dispatch({ type: "CORE_OPEN_EXPORT_COLUMNS_DIALOG"})
+  }
+}
+
+export function closeExportColumnsDialog() {
+  return (dispatch) => {
+    dispatch({type: "CORE_CLOSE_EXPORT_COLUMNS_DIALOG"})
+  }
+}
+
 export function fetchRoles(params) {
   const payload = formatPageQueryWithCount("role", params, ROLE_FULL_PROJECTION());
   return graphql(payload, "CORE_ROLES");

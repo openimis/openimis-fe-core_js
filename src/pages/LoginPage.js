@@ -102,31 +102,6 @@ const LoginPage = ({ logo }) => {
                     {formatMessage("appName")}
                   </Box>
                 </Grid>
-                <Grid item>
-                  <TextInput
-                    required
-                    readOnly={isAuthenticating}
-                    label={formatMessage("username.label")}
-                    fullWidth
-                    defaultValue={credentials.username}
-                    onChange={(username) => setCredentials({ ...credentials, username })}
-                  />
-                </Grid>
-                <Grid item>
-                  <TextInput
-                    required
-                    readOnly={isAuthenticating}
-                    type="password"
-                    label={formatMessage("password.label")}
-                    fullWidth
-                    onChange={(password) => setCredentials({ ...credentials, password })}
-                  />
-                </Grid>
-                {serverResponse?.message && (
-                  <Grid item>
-                    <Box color="error.main">{getErrorMessage(serverResponse.message)}</Box>
-                  </Grid>
-                )}
                 {showMPassProvider ? (
                   <>
                     <Grid item>
@@ -164,10 +139,10 @@ const LoginPage = ({ logo }) => {
                         onChange={(password) => setCredentials({ ...credentials, password })}
                       />
                     </Grid>
-                    {hasError && (
-                      <Grid item>
-                        <Box color="error.main">{formatMessage("authError")}</Box>
-                      </Grid>
+                    {serverResponse?.message && (
+                    <Grid item>
+                      <Box color="error.main">{getErrorMessage(serverResponse.message)}</Box>
+                    </Grid>
                     )}
                     <Grid item>
                       <Button

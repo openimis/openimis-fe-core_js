@@ -23,51 +23,46 @@ const ExportColumnsDialog = ({
   const { formatMessage } = useTranslations(module, modulesManager);
   const [columnBoolValues, setColumnBoolValues] = useState({});
 
-  const isObjectEmpty = (object) => {
-    return Object.keys(columnBoolValues).length === 0
-  }
-
   useEffect(() => {
-    if (isObjectEmpty(columnBoolValues)) {
-      const newColumnBoolValues = {};
-      for (const key of Object.keys(columns)) {
-        newColumnBoolValues[key] = true;
-      }
+    if (Object.keys(columnBoolValues).length === 0) {
+      const newColumnBoolValues = Object.fromEntries(
+        Object.keys(columns).map(key => [key, true])
+      );
       setColumnBoolValues(newColumnBoolValues);
     }
-  }, [])
+  }, [columnBoolValues, columns]);
+
+  const handleCheckboxChange = (key, checked) => {
+    setColumnBoolValues({ ...columnBoolValues, [key]: checked });
+  };
 
   const fillCheckboxesWithValue = (value) => {
     const newColumnBoolValues = Object.fromEntries(
       Object.keys(columnBoolValues).map(key => [key, value])
     );
     setColumnBoolValues(newColumnBoolValues);
-  }
+  };
 
   const getFilteredColumns = () => {
-    const result = {};
-
-    Object.keys(columnBoolValues).forEach(key => {
-      if (columnBoolValues[key] === true) {
-        result[key] = columns[key];
-      }
-    });
-
-    return result;
+    return Object.fromEntries(
+      Object.entries(columnBoolValues)
+        .filter(([key, checked]) => checked)
+        .map(([key]) => [key, columns[key]])
+    );
   };
 
   const handleConfirm = () => {
     const filteredColumns = getFilteredColumns();
-    const filteredFields = [...Object.keys(filteredColumns), "json_ext"];
+    const filteredFields = Object.keys(filteredColumns);
     getFilteredFieldsAndColumn(filteredFields, filteredColumns);
     onConfirm();
     fillCheckboxesWithValue(true);
-  }
+  };
 
   const handleCancel = () => {
     onClose();
     fillCheckboxesWithValue(true);
-  }
+  };
 
   return (
     <Dialog open={confirmState} onClose={onClose}>
@@ -80,7 +75,7 @@ const ExportColumnsDialog = ({
               <Checkbox
                 color="primary"
                 checked={columnBoolValues[key]}
-                onChange={(event) => setColumnBoolValues({...columnBoolValues, [key]: event.target.checked})}
+                onChange={(event) => handleCheckboxChange(key, event.target.checked)}
               />
             }
             label={value}

@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import withStyles from "@material-ui/core/styles/withStyles";
-import { Tooltip, MenuItem } from "@material-ui/core";
+import { MenuItem, Tooltip } from "@material-ui/core";
 import { formatMessage } from "../../helpers/i18n";
 import { injectIntl } from "react-intl";
-import {closeExportColumnsDialog, openExportColumnsDialog} from "../../actions";
+import {
+  closeExportColumnsDialog,
+  openExportColumnsDialog,
+} from "../../actions";
 import ExportColumnsDialog from "../dialogs/ExportColumnsDialog";
 
 const styles = (theme) => ({
@@ -20,74 +23,95 @@ const styles = (theme) => ({
 });
 
 function SearcherExport(props) {
-  const { intl, rights, selection, filters, exportFetch, exportFields, exportFieldsColumns, chooseExportableColumns, label=null } = props;
+  const {
+    intl,
+    rights,
+    selection,
+    filters,
+    exportFetch,
+    exportFields,
+    exportFieldsColumns,
+    chooseExportableColumns,
+    label = null,
+  } = props;
+
   const [exportStatus, setExport] = useState(0);
-  const [filteredExportFields, setFilteredExportFields] = useState(exportFields);
-  const [filteredExportFieldColumns, setFilteredExportFieldColumns] = useState(exportFieldsColumns);
   const dispatch = useDispatch();
-  const isExportColumnsDialogOpen = useSelector((state) => state.core?.isExportColumnsDialogOpen);
-  const enabled = (selection) => {return exportStatus == 0};
+  const isExportColumnsDialogOpen = useSelector(
+    (state) => state.core?.isExportColumnsDialogOpen
+  );
 
-  const exportData = (fields=exportFields, columns=exportFieldsColumns) => {
-    let prms = Object.keys(filters)
+  const enabled = selection => exportStatus === 0;
+
+  const exportData = (fields = exportFields, columns = exportFieldsColumns) => {
+    const prms = Object.keys(filters)
       .filter((f) => !!filters[f]["filter"])
-      .map((f) => filters[f]["filter"])
+      .map((f) => filters[f]["filter"]);
 
-    prms.push(`fields: ${JSON.stringify(fields)}`)
-    prms.push(`fieldsColumns: "${JSON.stringify(columns).replace(/\"/g, '\\"')}"`)
+    prms.push(`fields: ${JSON.stringify(fields)}`);
+    prms.push(`fieldsColumns: "${JSON.stringify(columns).replace(/\"/g, '\\"')}"`);
     exportFetch(prms);
   };
 
   const handleExportData = () => {
     if (chooseExportableColumns) {
-      dispatch(openExportColumnsDialog())
+      dispatch(openExportColumnsDialog());
     } else {
-      exportData()
+      exportData();
     }
-  }
+  };
 
   const handleColumnFiltering = (fields, columns) => {
-    exportData(fields, columns)
-  }
+    exportData(fields, columns);
+  };
 
+  const parseToDialogColumns = (columns, fields) => {
+    return fields.reduce((dialogColumns, field) => {
+      if (!(field in dialogColumns)) {
+        dialogColumns[field] = field.startsWith("json_ext__")
+          ? field.replace(/^json_ext__/, "")
+          : field;
+      }
+      return dialogColumns;
+    }, { ...columns });
+  };
 
-  let entries = [{
-    text: label || formatMessage(intl, "core", "exportSearchResult"),
-    action: handleExportData
-  }];
-
-  entries = entries.map((i, idx) => (
-      <Tooltip
-      title={formatMessage(intl, "core", "exportSearchResult.tooltip")}>
-          <div>
-            <MenuItem
-              key={`selectionsMenu-export-${idx}`}
-              onClick={e => i.action()}
-              disabled={!enabled(selection)}
-            >
-              {i.text}
-            </MenuItem>
-          </div>
-      </Tooltip>
-  ))
-
+  const entries = [
+    {
+      text: label || formatMessage(intl, "core", "exportSearchResult"),
+      action: handleExportData,
+    },
+  ];
 
   return (
     <>
-      <ExportColumnsDialog
-        confirmState={isExportColumnsDialogOpen}
-        onConfirm={() => dispatch(closeExportColumnsDialog())}
-        onClose={() => dispatch(closeExportColumnsDialog())}
-        module="core"
-        getFilteredFieldsAndColumn={handleColumnFiltering}
-        columns={exportFieldsColumns}
-      />
-      <div style={{ display: enabled(selection) ? "block" : "none" }}>
-        {entries}
-      </div>
-  </>
-  )
+      {chooseExportableColumns && (
+        <ExportColumnsDialog
+          confirmState={isExportColumnsDialogOpen}
+          onConfirm={() => dispatch(closeExportColumnsDialog())}
+          onClose={() => dispatch(closeExportColumnsDialog())}
+          module="core"
+          getFilteredFieldsAndColumn={handleColumnFiltering}
+          columns={parseToDialogColumns(exportFieldsColumns, exportFields)}
+        />
+      )}
 
+      <div style={{ display: enabled(selection) ? "block" : "none" }}>
+        {entries.map((item, idx) => (
+          <Tooltip title={formatMessage(intl, "core", "exportSearchResult.tooltip")}>
+            <div key={`selectionsMenu-export-${idx}`}>
+              <MenuItem
+                onClick={(e) => item.action()}
+                disabled={!enabled(selection)}
+              >
+                {item.text}
+              </MenuItem>
+            </div>
+          </Tooltip>
+        ))}
+      </div>
+    </>
+  );
 }
 
 export default injectIntl(withStyles(styles)(SearcherExport));

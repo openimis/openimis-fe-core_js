@@ -128,6 +128,7 @@ class SelectionMenu extends Component {
             <SearcherExport
               selection={this.props.selection} filters={this.props.filters} exportFetch={this.props.exportFetch}
               exportFields={this.props.exportFields} exportFieldsColumns={this.props.exportFieldsColumns}
+              chooseExportableColumns={this.props.chooseExportableColumns}
             />)}
           {!!contributionKey && (
             <Contributions

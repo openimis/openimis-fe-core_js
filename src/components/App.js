@@ -8,13 +8,13 @@ import withModulesManager, { ModulesManagerProvider } from "../helpers/modules";
 import Helmet from "../helpers/Helmet";
 import RequireAuth from "./RequireAuth";
 import FatalError from "./generics/FatalError";
-import { clearConfirm } from "../actions";
+import { clearConfirm, toggleCurrentCalendarType } from "../actions";
 import AlertDialog from "./dialogs/AlertDialog";
 import ConfirmDialog from "./dialogs/ConfirmDialog";
 import { bindActionCreators } from "redux";
 import Contributions from "./generics/Contributions";
 import LoginPage from "../pages/LoginPage";
-import { useAuthentication } from "../helpers/hooks";
+import { useAuthentication, useBoolean } from "../helpers/hooks";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import SetPasswordPage from "../pages/SetPasswordPage";
 import { ErrorBoundary } from "@openimis/fe-core";
@@ -50,12 +50,14 @@ const App = (props) => {
     localesManager,
     modulesManager,
     basename = process.env.PUBLIC_URL,
+    toggleCurrentCalendarType,
     ...others
   } = props;
 
   const economicUnitConfig = modulesManager.getConf("fe-core", "App.economicUnitConfig", false);
 
   const [economicUnitDialogOpen, setEconomicUnitDialogOpen] = useState(false);
+  const [isSecondaryCalendar, setSecondaryCalendar] = useBoolean(true);
 
   const auth = useAuthentication();
   const routes = useMemo(() => {
@@ -108,6 +110,10 @@ const App = (props) => {
     }
   }, [auth, economicUnitDialogOpen, user]);
 
+  useEffect(() => {
+    localStorage.setItem("isSecondaryCalendarEnabled", JSON.stringify(!isSecondaryCalendar));
+    toggleCurrentCalendarType(!isSecondaryCalendar);
+  }, [isSecondaryCalendar]);
 
   if (error) {
     return <FatalError error={error} />;
@@ -163,6 +169,8 @@ const App = (props) => {
                           {...others}
                           redirectTo={"/login"}
                           onEconomicDialogOpen={() => setEconomicUnitDialogOpen(true)}
+                          isSecondaryCalendar={isSecondaryCalendar}
+                          setSecondaryCalendar={setSecondaryCalendar}
                         >
                           <route.component modulesManager={modulesManager} {...props} {...others} />
                         </RequireAuth>
@@ -185,6 +193,6 @@ const mapStateToProps = (state) => ({
   confirm: state.core.confirm,
 });
 
-const mapDispatchToProps = (dispatch) => bindActionCreators({ clearConfirm }, dispatch);
+const mapDispatchToProps = (dispatch) => bindActionCreators({ clearConfirm, toggleCurrentCalendarType }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(withTheme(withStyles(styles)(withModulesManager(App))));

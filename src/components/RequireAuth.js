@@ -1,6 +1,6 @@
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo } from "react";
 import withWidth from "@material-ui/core/withWidth";
-import { Redirect } from "../helpers/history";
+import { Redirect, useHistory } from "../helpers/history";
 import { alpha, useTheme, makeStyles } from "@material-ui/core/styles";
 import { useModulesManager } from "../helpers/modules";
 import LogoutButton from "./LogoutButton";
@@ -26,8 +26,6 @@ import { useBoolean, useAuthentication } from "../helpers/hooks";
 
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { Switch } from "@material-ui/core";
-import { toggleCurrentCalendarType } from "../actions"
-import { useDispatch } from 'react-redux';
 import { useTranslations } from "../helpers/i18n";
 
 export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
@@ -202,11 +200,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const RequireAuth = (props) => {
-  const { children, logo, redirectTo, onEconomicDialogOpen, ...others } = props;
+  const { children, logo, redirectTo, isSecondaryCalendar, setSecondaryCalendar, onEconomicDialogOpen, ...others } = props;
   const [isOpen, setOpen] = useBoolean();
   const [isDrawerOpen, setDrawerOpen] = useBoolean();
   const theme = useTheme();
   const classes = useStyles();
+  const history = useHistory();
   const modulesManager = useModulesManager();
   const auth = useAuthentication();
   const cfg = children.props.modulesManager.cfg;
@@ -217,14 +216,6 @@ const RequireAuth = (props) => {
   );
 
   const isAppBarMenu = useMemo(() => theme.menu.variant.toUpperCase() === "APPBAR", [theme.menu.variant]);
-  const [isSecondaryCalendar, setSecondaryCalendar] = useBoolean(true);
-  const dispatch = useDispatch();
-
-  useEffect(() =>{
-      localStorage.setItem("isSecondaryCalendarEnabled",  JSON.stringify(!isSecondaryCalendar));
-      dispatch(toggleCurrentCalendarType(!isSecondaryCalendar)), [isSecondaryCalendar]
-    }
-     )
 
   if (!auth.isAuthenticated) {
     return <Redirect to={redirectTo} />;
@@ -297,7 +288,7 @@ const RequireAuth = (props) => {
           >
             <MenuIcon />
           </IconButton>
-          <Button className={classes.appName} onClick={(e) => (window.location.href = "/front")}>
+          <Button className={classes.appName} onClick={(e) => history.push("/")}>
             {isAppBarMenu && (
               <Hidden smDown implementation="css">
                 <img className={classes.logo} src={logo} />

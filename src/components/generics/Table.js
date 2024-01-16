@@ -221,12 +221,20 @@ class Table extends Component {
       <Box position="relative" overflow="auto">
         {header && (
           <Grid container alignItems="center" justify="space-between" className={classes.tableTitle}>
-            <Grid item xs={6}>
-              <Typography variant="h6">{header}</Typography>
-            </Grid>
-            <Grid item container direction="row" alignItems="center" justify="space-between" xs={6}>
-              {extendHeader && extendHeader()}
-            </Grid>
+            {extendHeader ? (
+              <>
+                <Grid item xs={6}>
+                  <Typography variant="h6">{header}</Typography>
+                </Grid>
+                <Grid item container direction="row" alignItems="center" justify="space-between" xs={6}>
+                  {extendHeader && extendHeader()}
+                </Grid>
+              </>
+            ) : (
+              <Grid item xs={6}>
+                <Typography variant="h6">{header}</Typography>
+              </Grid>
+            )}
           </Grid>
         )}
         <Divider />

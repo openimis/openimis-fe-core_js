@@ -5,6 +5,7 @@ import { Grid, Paper, Divider, IconButton } from "@material-ui/core";
 import { YoutubeSearchedFor as ResetFilterIcon, Search as DefaultSearchIcon } from "@material-ui/icons";
 import FormattedMessage from "./FormattedMessage";
 import { withTooltip, formatMessage } from "../../helpers/i18n";
+import AdvancedFiltersDialog from "../dialogs/AdvancedFiltersDialog";
 
 const styles = (theme) => ({
   paper: theme.paper.body,
@@ -19,9 +20,11 @@ class SearcherPane extends Component {
     const {
       classes,
       module,
+      del,
       title = "search.title",
       split = 8,
       filterPane,
+      filters,
       resultsPane = null,
       reset,
       resetTooltip,
@@ -29,6 +32,17 @@ class SearcherPane extends Component {
       refreshTooltip,
       actions,
       SearchIcon = null,
+      isCustomFiltering = false,
+      objectForCustomFiltering = null,
+      additionalCustomFilterParams = null,
+      moduleName = null,
+      objectType = null,
+      setAppliedCustomFilters = null,
+      appliedCustomFilters = null,
+      onChangeFilters,
+      appliedFiltersRowStructure = null,
+      setAppliedFiltersRowStructure = null,
+      applyNumberCircle = null,
     } = this.props;
     return (
       <Paper className={classes.paper}>
@@ -39,6 +53,24 @@ class SearcherPane extends Component {
           <Grid item xs={12 - split} className={classes.paperHeader}>
             {(!!actions || !!refresh) && (
               <Grid container justify="flex-end">
+                {isCustomFiltering === true ? (
+                  <AdvancedFiltersDialog
+                    object={objectForCustomFiltering}
+                    additionalParams={additionalCustomFilterParams}
+                    moduleName={moduleName}
+                    objectType={objectType}
+                    setAppliedCustomFilters={setAppliedCustomFilters}
+                    appliedCustomFilters={appliedCustomFilters}
+                    onChangeFilters={onChangeFilters}
+                    appliedFiltersRowStructure={appliedFiltersRowStructure}
+                    setAppliedFiltersRowStructure={setAppliedFiltersRowStructure}
+                    applyNumberCircle={applyNumberCircle}
+                    searchCriteria={filters}
+                    deleteFilter={del}
+                  />
+                ) : (
+                  <></>
+                )}
                 {!!actions &&
                   actions.map((a, idx) => (
                     <Grid item key={`action-${idx}`} className={classes.paperHeaderAction}>

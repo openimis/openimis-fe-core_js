@@ -2,6 +2,8 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { IconButton } from "@material-ui/core";
 import { HelpOutline } from "@material-ui/icons";
+import { useModulesManager } from "@openimis/fe-core";
+import {CORE_MIS_CONFLUENCE_URL, DEFAULT_URL} from "../constants";
 
 const styles = (theme) => ({
   button: {
@@ -11,8 +13,11 @@ const styles = (theme) => ({
 });
 
 const Help = ({ classes }) => {
+  const modulesManager = useModulesManager();
+  const isCoreMISHelp = modulesManager.getConf("fe-core", "redirectToCoreMISConfluenceUrl", false);
+  const url = isCoreMISHelp ? CORE_MIS_CONFLUENCE_URL : DEFAULT_URL;
   const onClick = () => {
-    window.open("/Manual/IMIS_manual.pdf");
+    window.open(url);
   };
 
   return (

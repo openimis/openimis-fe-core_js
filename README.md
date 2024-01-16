@@ -43,7 +43,7 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 - `ProgressOrError`: display progress during component's asynchronous calls... and hide or diaply error message when asynchronous call returns
 - `Searcher`: generic searcher page (with criteria form and result table)
 - `Form`: generic form. Manage dirty state, displays add/save button,...
-- `Table`: generic table. Headers (with -sort-actions), rows,...
+- `Table`: generic table. Headers (with -sort-actions), rows, optional setting - showOrdinalNumber that will show column with ordinal number as first column, ...
 
 ## Helpers
 
@@ -80,6 +80,11 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 - `toISODate`: format local date to ISO format
 
   Note: depends on the selected calendar (Gregorian vs. Nepali)
+
+### JSON handler
+
+- `createFieldsBasedOnJSON`: Creates additional fields from a JSON string and returns an array of field objects.
+- `renderInputComponent`: Renders the appropriate input component based on the field type and value.
 
 ### navigation
 
@@ -131,6 +136,7 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 - `CORE_UPDATE_ROLE_RESP`: receive a result of update Role mutation
 - `CORE_DUPLICATE_ROLE_RESP`: receive a result of duplicate Role mutation
 - `CORE_DELETE_ROLE_RESP`: receive a result of delete Role mutation
+- `CORE_CALENDAR_TYPE_TOGGLE`: set calendar switch status between gregorian and other calendar
 
 ## Other Modules Listened Redux Actions
 
@@ -145,3 +151,14 @@ None
 - `journalDrawer.pageSize`: page size when loading (historical) mutations (Default: `5`)
 - `AutoSuggestion.limitDisplay`: threshold to limit the number of items in the auto suggestions (adding 'more options...' message), default: 10
 - `AmountInput.currencyPosition`: position of the currency for the AmountInput. Choices are `start` and `end` (default: `start`)
+- `menuLeft`: position menu in the Drawer component on the left site of the application
+- `calendarSwitch`: enable calendar switcher toggle on the navbar of the webpage. Currently supports nepali calendar. Default false.
+- `secondCalendarFormatting`: formatting options for second calendar (both picker and display), default: "DD-MM-YYYY"
+- `secondCalendarFormattingLang`: formatting language for second calendar (when displayed as saved data, not in pickers), default: "en"
+- `redirectToCoreMISConfluenceUrl`: clicking on questionmark icon will take you to coreMIS confluence page, default openIMIS manual
+- `App.economicUnitConfig`:
+  In the specified configuration, when the parameter is set to __true__, it necessitates that users are associated with an Economic Unit. If a user lacks this association, a modal will be displayed to prompt them to establish it. Until the user is linked to a unit, their only authorized action is to log out. The default configuration is __false__.
+- `LogoutButton.showMPassProvider`:  when activated, routes the user to the saml logout page for secure session termination
+- `LoginPage.showMPassProvider`: redirects users to the saml login page, facilitating access to mPass-protected resources
+- `secondCalendarType`: type of secondary calendar picker (if enabled), default "nepali"
+- `secondCalendarLocale`: locale for secondary calendar picker (if enabled), default "nepali_en"

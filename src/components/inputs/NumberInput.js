@@ -30,7 +30,7 @@ class NumberInput extends Component {
   };
   render() {
     const { intl, module = "core", min = null, max = null, value, error, displayZero = false, displayNa = false, decimal = false, ...others } = this.props;
-    let inputProps = { ...this.props.inputProps, type: "tel" }; // We use "tel" instead of "number" to hide up/down arrows
+    let inputProps = { ...this.props.inputProps, type: "number" };
     let err = error;
 
     if (min !== null) {

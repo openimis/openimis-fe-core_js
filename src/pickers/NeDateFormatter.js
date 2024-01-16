@@ -1,8 +1,13 @@
-import moment from "moment";
+import NepaliDate from "nepali-date-converter";
 
-export function formatDateFromISO(date) {
+export function formatDateFromISO(date, formattingOptions) {
   if (!date) return "";
-  let dte = moment(date);
-  let bsDate = calendarFunctions.getBsDateByAdDate(dte.year(), dte.month() + 1, dte.date());
-  return calendarFunctions.bsDateFormat("%y-%m-%d", bsDate.bsYear, bsDate.bsMonth, bsDate.bsDate);
+  // this nepali-date-converter only supports dates up to this date, it will crash whole site if this date is exceeded
+  // added as a safeguard, other solution is probably needed
+  // TODO remove after nepal component change
+  if (date > new Date("2090/12/30")) {
+    date = new Date("2090/12/30");
+  }
+  const bsDate = new NepaliDate(new Date(date)).format(...formattingOptions);
+  return bsDate;
 }

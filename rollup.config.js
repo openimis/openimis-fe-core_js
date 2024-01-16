@@ -1,6 +1,7 @@
 import babel from "@rollup/plugin-babel";
 import json from "@rollup/plugin-json";
 import pkg from "./package.json";
+import svgr from '@svgr/rollup'
 
 export default {
   input: "src/index.js",
@@ -14,6 +15,10 @@ export default {
       file: "dist/index.js",
       format: "cjs",
       sourcemap: true,
+    },
+    {
+      file: 'bundle.js',
+      format: 'cjs',
     },
   ],
   external: [
@@ -36,5 +41,6 @@ export default {
       exclude: "node_modules/**",
       babelHelpers: "runtime",
     }),
+    svgr(),
   ],
 };

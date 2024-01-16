@@ -27,6 +27,21 @@ const LANGUAGE_FULL_PROJECTION = () => ["name", "code", "sortOrder"];
 
 const MODULEPERMISSION_FULL_PROJECTION = () => ["modulePermsList{moduleName, permissions{permsName, permsValue}}"];
 
+const CUSTOM_FILTER_FULL_PROJECTION = () => [
+  'type',
+  'code',
+  'possibleFilters {field, filter, type}',
+];
+
+export function fetchCustomFilter(params) {
+  const payload = formatQuery(
+    "customFilters",
+    params,
+    CUSTOM_FILTER_FULL_PROJECTION()
+  );
+  return graphql(payload, "FETCH_CUSTOM_FILTER");
+}
+
 function getApiUrl() {
   let _baseApiUrl = process.env.REACT_APP_API_URL ?? '/api';
   if (_baseApiUrl.indexOf('/') !== 0) {
@@ -47,6 +62,12 @@ export function apiHeaders() {
 export function cacheFilters(key, filters) {
   return (dispatch) => {
     dispatch({ type: "CORE_CACHE_FILTER", payload: { [key]: filters } });
+  };
+}
+
+export function resetCacheFilters(key) {
+  return (dispatch) => {
+    dispatch({ type: "CORE_CACHE_FILTER_RESET", payload: key });
   };
 }
 
@@ -297,7 +318,7 @@ export function fetchMutation(clientMutationId) {
   const payload = formatPageQuery(
     "mutationLogs",
     [`clientMutationId: "${clientMutationId}"`],
-    ["id", "status", "error", "clientMutationId", "clientMutationLabel", "clientMutationDetails", "requestDateTime"],
+    ["id", "status", "error", "clientMutationId", "clientMutationLabel", "clientMutationDetails", "requestDateTime", "jsonExt"],
   );
   return graphql(payload, "CORE_MUTATION");
 }
@@ -316,6 +337,7 @@ export function fetchHistoricalMutations(pageSize, afterCursor) {
     "clientMutationLabel",
     "clientMutationDetails",
     "requestDateTime",
+    "jsonExt",
   ]);
   return graphql(payload, "CORE_HISTORICAL_MUTATIONS");
 }
@@ -456,5 +478,11 @@ export function saveCurrentPaginationPage(page, afterCursor, beforeCursor, modul
 export function clearCurrentPaginationPage() {
   return (dispatch) => {
     dispatch({ type: "CORE_PAGINATION_PAGE_CLEAR" })
+  }
+}
+
+export function toggleCurrentCalendarType(isSecondaryCalendarEnabled) {
+  return (dispatch) => {
+    dispatch({ type: "CORE_CALENDAR_TYPE_TOGGLE", payload: { isSecondaryCalendarEnabled } })
   }
 }

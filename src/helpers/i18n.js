@@ -4,6 +4,7 @@ import { useIntl } from "react-intl";
 import moment from "moment";
 import { formatDateFromISO as adFormateDateFromISO } from "../pickers/AdDateFormatter";
 import { formatDateFromISO as neFormateDateFromISO } from "../pickers/NeDateFormatter";
+import { STORAGE_KEY_SECONDARY_CALENDAR, DEFAULT_SETTINGS} from "../constants";
 
 //formatting with values is expansive.. so let's have separated methods
 export function formatMessage(intl, module, id) {
@@ -27,8 +28,11 @@ export function formatAmount(intl, amount) {
 }
 
 export function formatDateFromISO(mm, intl, date) {
-  if (mm.getConf("fe-core", "datePicker") === "ne") {
-    return neFormateDateFromISO(date);
+  const isSecondaryCalendar = JSON.parse(localStorage.getItem(STORAGE_KEY_SECONDARY_CALENDAR));
+  if (isSecondaryCalendar) {
+    const secondCalendarFormatting = mm.getConf("fe-core", "secondCalendarFormatting", DEFAULT_SETTINGS.SECOND_CALENDAR_FORMAT);
+    const secondCalendarFormattingLang = mm.getConf("fe-core", "secondCalendarFormattingLang", DEFAULT_SETTINGS.SECOND_CALENDAR_LANG);
+    return neFormateDateFromISO(date, [secondCalendarFormatting, secondCalendarFormattingLang]);
   }
   return adFormateDateFromISO(mm, intl, date);
 }
@@ -38,8 +42,14 @@ export function toISODate(d) {
   return moment(d).format().slice(0, 10);
 }
 
-export function withTooltip(c, t) {
-  return !!t ? <Tooltip title={t}>{c}</Tooltip> : c;
+export function withTooltip(c, t, placement = "bottom") {
+  return !!t ? (
+    <Tooltip title={t} placement={placement}>
+      {c}
+    </Tooltip>
+  ) : (
+    c
+  );
 }
 
 export function useTranslations(moduleName, modulesManager) {

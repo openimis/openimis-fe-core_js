@@ -39,8 +39,8 @@ const LoginPage = ({ logo }) => {
   const modulesManager = useModulesManager();
   const { formatMessage } = useTranslations("core.LoginPage", modulesManager);
   const [credentials, setCredentials] = useState({});
-  const [hasError, setError] = useState(false);
-  const [hasMPassError, setMPassError] = useState(false);
+  const [serverResponse, setServerResponse] = useState({ loginStatus: "", message: null });
+  const [hasMPassError, setMPassError] = useState(false);  
   const auth = useAuthentication();
   const [isAuthenticating, setAuthenticating] = useState(false);
   const showMPassProvider = modulesManager.getConf("fe-core", "LoginPage.showMPassProvider", false);
@@ -53,12 +53,13 @@ const LoginPage = ({ logo }) => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    setError(false);
     setAuthenticating(true);
-    if (await auth.login(credentials)) {
+    const response = await auth.login(credentials);
+    const { loginStatus, message } = response;
+    setServerResponse({ loginStatus, message });
+    if (response?.loginStatus !== "CORE_AUTH_ERR") {
       history.push("/");
     } else {
-      setError(true);
       setAuthenticating(false);
     }
   };
@@ -68,6 +69,13 @@ const LoginPage = ({ logo }) => {
     history.push("/forgot_password");
   };
 
+  const errorMessages = {
+    INCORRECT_CREDENTIALS: formatMessage("core.LoginPage.authError"),
+    HF_CONTRACT_INVALID: formatMessage("core.LoginPage.authErrorHealthFacilityContractInvalid"),
+    GENERAL: formatMessage("core.LoginPage.authErrorGeneral"),
+  };
+
+  const getErrorMessage = (key) => errorMessages[key] || errorMessages.GENERAL;
   const redirectToMPassLogin = (e) => {
     e.preventDefault();
     const redirectToURL = new URL(`${window.location.origin}${baseApiUrl}${SAML_LOGIN_PATH}`);
@@ -131,10 +139,10 @@ const LoginPage = ({ logo }) => {
                         onChange={(password) => setCredentials({ ...credentials, password })}
                       />
                     </Grid>
-                    {hasError && (
-                      <Grid item>
-                        <Box color="error.main">{formatMessage("authError")}</Box>
-                      </Grid>
+                    {serverResponse?.message && (
+                    <Grid item>
+                      <Box color="error.main">{getErrorMessage(serverResponse.message)}</Box>
+                    </Grid>
                     )}
                     <Grid item>
                       <Button
@@ -152,7 +160,7 @@ const LoginPage = ({ logo }) => {
                       <Contributions contributionKey={LOGIN_PAGE_CONTRIBUTION_KEY} />
                     </Grid>
                   </>
-                )}
+                  )}
               </Grid>
             </Box>
           </form>

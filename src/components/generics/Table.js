@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react";
+import React, { Component } from "react";
 import clsx from "clsx";
 import { injectIntl } from "react-intl";
 import _ from "lodash";

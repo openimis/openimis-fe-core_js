@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react";
+import React, { Component } from "react";
 import clsx from "clsx";
 import { injectIntl } from "react-intl";
 import _ from "lodash";
@@ -185,6 +185,7 @@ class Table extends Component {
       fetching = null,
       error = null,
       showOrdinalNumber = false,
+      extendHeader,
     } = this.props;
     const { ordinalNumberFrom } = this.state;
     let localHeaders = [...(headers || [])];
@@ -219,11 +220,24 @@ class Table extends Component {
     return (
       <Box position="relative" overflow="auto">
         {header && (
-          <Fragment>
-            <Typography className={classes.tableTitle}>{header}</Typography>
-            <Divider />
-          </Fragment>
+          <Grid container alignItems="center" justify="space-between" className={classes.tableTitle}>
+            {extendHeader ? (
+              <>
+                <Grid item xs={6}>
+                  <Typography variant="h6">{header}</Typography>
+                </Grid>
+                <Grid item container direction="row" alignItems="center" justify="space-between" xs={6}>
+                  {extendHeader && extendHeader()}
+                </Grid>
+              </>
+            ) : (
+              <Grid item xs={12}>
+                <Typography variant="h6">{header}</Typography>
+              </Grid>
+            )}
+          </Grid>
         )}
+        <Divider />
         <MUITable className={classes.table} size={size}>
           {!!localPreHeaders && localPreHeaders.length > 0 && (
             <TableHead>

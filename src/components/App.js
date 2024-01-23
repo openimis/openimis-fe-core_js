@@ -20,6 +20,8 @@ import SetPasswordPage from "../pages/SetPasswordPage";
 import { ErrorBoundary } from "@openimis/fe-core";
 import { onLogout } from "../helpers/utils";
 import { RIGHT_VIEW_EU_MODAL } from "../constants";
+import NotFoundPage from "./NotFoundPage";
+import PermissionCheck from "./PermissionCheck";
 
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";
 export const UNAUTHENTICATED_ROUTER_CONTRIBUTION_KEY = "core.UnauthenticatedRouter";
@@ -51,6 +53,7 @@ const App = (props) => {
     modulesManager,
     basename = process.env.PUBLIC_URL,
     toggleCurrentCalendarType,
+    rights,
     ...others
   } = props;
 
@@ -101,7 +104,12 @@ const App = (props) => {
 
   useEffect(() => {
     const userHasModalRight = user?.rights ? user.rights.includes(RIGHT_VIEW_EU_MODAL) : false;
-    if (economicUnitConfig && userHasModalRight && auth.isAuthenticated && !localStorage.getItem(ECONOMIC_UNIT_STORAGE_KEY)) {
+    if (
+      economicUnitConfig &&
+      userHasModalRight &&
+      auth.isAuthenticated &&
+      !localStorage.getItem(ECONOMIC_UNIT_STORAGE_KEY)
+    ) {
       setEconomicUnitDialogOpen(true);
     }
 
@@ -172,12 +180,20 @@ const App = (props) => {
                           isSecondaryCalendar={isSecondaryCalendar}
                           setSecondaryCalendar={setSecondaryCalendar}
                         >
-                          <route.component modulesManager={modulesManager} {...props} {...others} />
+                          <PermissionCheck
+                            modulesManager={modulesManager}
+                            userRights={rights}
+                            requiredRights={route.requiredRights}
+                            {...others}
+                          >
+                            <route.component modulesManager={modulesManager} {...props} {...others} />
+                          </PermissionCheck>
                         </RequireAuth>
                       </ErrorBoundary>
                     )}
                   />
                 ))}
+                <Route render={() => <NotFoundPage {...others} />} />
               </Switch>
             </BrowserRouter>
           </div>
@@ -188,6 +204,7 @@ const App = (props) => {
 };
 
 const mapStateToProps = (state) => ({
+  rights: state.core.user?.i_user?.rights ?? [],
   user: state.core.user?.i_user,
   error: state.core.error,
   confirm: state.core.confirm,

@@ -121,5 +121,12 @@
   "core.exportColumnsDialog.confirmButton": "Ok",
   "core.exportColumnsDialog.cancelButton": "Cancel",
   "core.exportColumnsDialog.clearAllButton": "Clear All",
-  "core.exportColumnsDialog.title": "Select columns."
+  "core.exportColumnsDialog.title": "Select columns.",
+  "core.NotFoundPage.title": "Page not found",
+  "core.NotFoundPage.description": "The requested URL was not found on this server.",
+  "core.ErrorPage.back": "Move back to the home page",
+  "core.ForbiddenPage.title": "Access Denied",
+  "core.ForbiddenPage.description": "Sorry, you are not authorized to access this page.",
+  "core.InternalServerErrorPage.title": "Internal Server Error",
+  "core.InternalServerErrorPage.description": "The server encountered an internal error or misconfiguration and was unable to complete your request."
 }

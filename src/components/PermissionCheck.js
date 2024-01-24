@@ -18,7 +18,7 @@ const PermissionCheck = ({ userRights, requiredRights, children, ...props }) => 
       return false;
     }
 
-    return requiredRights.every((right) => userRights?.includes(right));
+    return requiredRights.some((right) => userRights?.includes(right));
   };
 
   return hasAccess() ? children : <ForbiddenPage {...props} />;

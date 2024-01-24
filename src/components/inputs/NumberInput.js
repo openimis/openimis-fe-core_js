@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import TextInput from "./TextInput";
 import { injectIntl } from "react-intl";
-import {formatMessage, formatMessageWithValues} from "../../helpers/i18n";
+import { formatMessage, formatMessageWithValues } from "../../helpers/i18n";
 
 class NumberInput extends Component {
   constructor(props) {
@@ -10,27 +10,58 @@ class NumberInput extends Component {
       isEdited: false,
     };
   }
-  formatInput = (v, displayZero, displayNa, decimal) => {
-    if (!v && displayNa && !this.state.isEdited) return formatMessage(this.props.intl, this.props.module, "core.NumberInput.notApplicable");
-    if (v === 0 && displayZero) return '0';
-    if (v == 0 && !displayZero) return '';
-    if (decimal && !isNaN(Number(v))) {
-      if (typeof v === 'string' && v.includes('.') && v.split('.')[1].length > 2) return parseFloat(v).toFixed(2);
-      else return v;
+
+  handleKeyPress = (event) => {
+    const { allowDecimals = true } = this.props;
+
+    if (event.key === "." && !allowDecimals) {
+      event.preventDefault();
     }
-    if (!v || isNaN(v)) return "";
-    return parseFloat(v);
+  };
+
+  formatInput = (value, displayZero, displayNa, decimal) => {
+    if (!value) {
+      if (displayNa && !this.state.isEdited) {
+        return formatMessage(this.props.intl, this.props.module, "core.NumberInput.notApplicable");
+      }
+      return displayZero ? "0" : "";
+    }
+
+    const numericValue = Number(value);
+
+    if (isNaN(numericValue)) return "";
+
+    if (decimal) {
+      if (typeof value === "string" && value.includes(".") && value.split(".")[1].length > 2) {
+        return parseFloat(value).toFixed(2);
+      }
+      return value;
+    }
+
+    return parseFloat(value);
   };
 
   handleNaBlur = () => {
-    if ((isNaN(this.props.value) || this.props.value === '') && this.state.isEdited) {
+    if ((isNaN(this.props.value) || this.props.value === "") && this.state.isEdited) {
       this.props.onChange(undefined);
     }
     this.setState({ isEdited: false });
   };
+
   render() {
-    const { intl, module = "core", min = null, max = null, value, error, displayZero = false, displayNa = false, decimal = false, ...others } = this.props;
-    let inputProps = { ...this.props.inputProps, type: "number" };
+    const {
+      intl,
+      module = "core",
+      min = null,
+      max = null,
+      value,
+      error,
+      displayZero = false,
+      displayNa = false,
+      allowDecimals = true,
+      ...others
+    } = this.props;
+    let inputProps = { ...this.props.inputProps, type: "number", onKeyPress: this.handleKeyPress };
     let err = error;
 
     if (min !== null) {
@@ -57,8 +88,8 @@ class NumberInput extends Component {
         value={value}
         error={err}
         inputProps={inputProps}
-        formatInput={(v) =>this.formatInput(v, displayZero, displayNa, decimal)}
-        onFocus={() => this.setState({isEdited: true})}
+        formatInput={(v) => this.formatInput(v, displayZero, displayNa, allowDecimals)}
+        onFocus={() => this.setState({ isEdited: true })}
         onBlur={() => this.handleNaBlur()}
       />
     );

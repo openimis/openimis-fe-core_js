@@ -27,6 +27,7 @@ import { useBoolean, useAuthentication } from "../helpers/hooks";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { Switch } from "@material-ui/core";
 import { useTranslations } from "../helpers/i18n";
+import { DEFAULT } from "../constants";
 
 export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
 export const MAIN_MENU_CONTRIBUTION_KEY = "core.MainMenu";
@@ -200,8 +201,16 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const RequireAuth = (props) => {
-  const { children, logo, redirectTo, isSecondaryCalendar, setSecondaryCalendar, onEconomicDialogOpen, ...others } = props;
-  const [isOpen, setOpen] = useBoolean();
+  const {
+    children,
+    logo,
+    whiteLogo,
+    redirectTo,
+    isSecondaryCalendar,
+    setSecondaryCalendar,
+    onEconomicDialogOpen,
+    ...others
+  } = props;  const [isOpen, setOpen] = useBoolean();
   const [isDrawerOpen, setDrawerOpen] = useBoolean();
   const theme = useTheme();
   const classes = useStyles();
@@ -214,6 +223,7 @@ const RequireAuth = (props) => {
     "allowSecondCalendar",
     false,
   );
+  const isWorker = modulesManager.getConf("fe-insuree", "isWorker", DEFAULT.IS_WORKER);
 
   const isAppBarMenu = useMemo(() => theme.menu.variant.toUpperCase() === "APPBAR", [theme.menu.variant]);
 
@@ -243,7 +253,7 @@ const RequireAuth = (props) => {
           <Button className={classes.appName} onClick={(e) => (window.location.href = "/front")}>
             {isAppBarMenu && (
               <Hidden smDown implementation="css">
-                <img className={classes.logo} src={logo} />
+                <img className={classes.logo} src={isWorker && !!whiteLogo ? whiteLogo : logo} alt="Logo of openIMIS" />
               </Hidden>
             )}
             <FormattedMessage module="core" id="appName" defaultMessage={<FormattedMessage id="root.appName" />} />
@@ -291,10 +301,12 @@ const RequireAuth = (props) => {
           <Button className={classes.appName} onClick={(e) => history.push("/")}>
             {isAppBarMenu && (
               <Hidden smDown implementation="css">
-                <img className={classes.logo} src={logo} />
+                <img className={classes.logo} src={isWorker && !!whiteLogo ? whiteLogo : logo} alt="Logo of openIMIS" />
               </Hidden>
             )}
-            <FormattedMessage module="core" id="appName" defaultMessage={<FormattedMessage id="root.appName" />} />
+            {!isWorker && (
+              <FormattedMessage module="core" id="appName" defaultMessage={<FormattedMessage id="root.appName" />} />
+            )}
           </Button>
           <Hidden smDown implementation="css">
             <Tooltip title={modulesManager.getModulesVersions().join(", ")}>
@@ -313,18 +325,15 @@ const RequireAuth = (props) => {
           <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
             <div className={classes.grow} />
           </Contributions>
-          {!!calendarSwitch &&
-          <FormControlLabel
-            control={
-            <Switch
-              color="secondary"
-              checked={isSecondaryCalendar}
-              onChange={setSecondaryCalendar.toggle}
-            />}
-            label={formatMessage("core.calendarSwitcher")}
-            labelPlacement="start"
-          />
-          }
+          {!!calendarSwitch && (
+            <FormControlLabel
+              control={
+                <Switch color="secondary" checked={isSecondaryCalendar} onChange={setSecondaryCalendar.toggle} />
+              }
+              label={formatMessage("core.calendarSwitcher")}
+              labelPlacement="start"
+            />
+          )}
           <Contributions
             contributionKey={ECONOMIC_UNIT_BUTTON_CONTRIBUTION_KEY}
             onEconomicDialogOpen={onEconomicDialogOpen}

@@ -10,7 +10,7 @@ import { useAuthentication } from "../helpers/hooks";
 import Contributions from "./../components/generics/Contributions";
 import MPassLogo from "./../mPassLogoColor.svg";
 import { baseApiUrl } from "../actions";
-import { SAML_LOGIN_PATH } from "../constants";
+import { DEFAULT, SAML_LOGIN_PATH } from "../constants";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -44,6 +44,7 @@ const LoginPage = ({ logo }) => {
   const auth = useAuthentication();
   const [isAuthenticating, setAuthenticating] = useState(false);
   const showMPassProvider = modulesManager.getConf("fe-core", "LoginPage.showMPassProvider", false);
+  const isWorker = modulesManager.getConf("fe-insuree", "isWorker", DEFAULT.IS_WORKER);
 
   useEffect(() => {
     if (auth.isAuthenticated) {
@@ -98,9 +99,11 @@ const LoginPage = ({ logo }) => {
               <Grid container spacing={2} direction="column" alignItems="stretch">
                 <Grid item container direction="row" alignItems="center">
                   <img className={classes.logo} src={logo} />
-                  <Box pl={2} fontWeight="fontWeightMedium" fontSize="h4.fontSize">
-                    {formatMessage("appName")}
-                  </Box>
+                  {!isWorker && (
+                    <Box pl={2} fontWeight="fontWeightMedium" fontSize="h4.fontSize">
+                      {formatMessage("appName")}
+                    </Box>
+                  )}
                 </Grid>
                 {showMPassProvider ? (
                   <>

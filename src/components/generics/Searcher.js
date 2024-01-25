@@ -42,7 +42,6 @@ const styles = (theme) => ({
   paperHeaderAction: {
     paddingInline: 5,
   },
-  paperDivider: theme.paper.divider,
   tableHeaderAction: theme.table.headerAction,
   processing: {
     margin: theme.spacing(1),
@@ -518,9 +517,7 @@ class Searcher extends Component {
                     </Grid>
                   )}
                 </Grid>
-                <Grid item xs={12} className={classes.paperDivider}>
-                  <Divider />
-                </Grid>
+                <Divider />
                 <Grid item xs={12}>
                   <Table
                     size="small"

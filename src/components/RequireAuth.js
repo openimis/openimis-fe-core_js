@@ -253,7 +253,7 @@ const RequireAuth = (props) => {
           <Button className={classes.appName} onClick={(e) => (window.location.href = "/front")}>
             {isAppBarMenu && (
               <Hidden smDown implementation="css">
-                <img className={classes.logo} src={isWorker && !!whiteLogo ? whiteLogo : logo} />
+                <img className={classes.logo} src={isWorker && !!whiteLogo ? whiteLogo : logo} alt="Logo of openIMIS" />
               </Hidden>
             )}
             <FormattedMessage module="core" id="appName" defaultMessage={<FormattedMessage id="root.appName" />} />
@@ -301,7 +301,7 @@ const RequireAuth = (props) => {
           <Button className={classes.appName} onClick={(e) => history.push("/")}>
             {isAppBarMenu && (
               <Hidden smDown implementation="css">
-                <img className={classes.logo} src={isWorker && !!whiteLogo ? whiteLogo : logo} />
+                <img className={classes.logo} src={isWorker && !!whiteLogo ? whiteLogo : logo} alt="Logo of openIMIS" />
               </Hidden>
             )}
             {!isWorker && (

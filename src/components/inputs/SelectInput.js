@@ -61,6 +61,7 @@ class SelectInput extends Component {
       module,
       label,
       strLabel = null,
+      withLabel = true,
       name,
       options,
       value,
@@ -93,6 +94,8 @@ class SelectInput extends Component {
               disabled={disabled}
               endAdornment={this.renderEndAdornment()}
               displayEmpty
+              //NOTE: We want to get rid of default styling (marginTop) if label is not rendered
+              {...(withLabel ? null : { style: { marginTop: "0px" } })}
             >
               {placeholder && (
                 <MenuItem disabled value="">
@@ -107,7 +110,16 @@ class SelectInput extends Component {
             </Select>
           </FormControl>
         )}
-        {!!readOnly && <TextInput fullWidth={true} module={module} label={label} value={valueStr} readOnly={true} />}
+        {!!readOnly && (
+          <TextInput
+            //NOTE: We want to get rid of default styling (marginTop) if label is not rendered
+            {...(withLabel ? { label } : null)}
+            fullWidth={true}
+            module={module}
+            value={valueStr}
+            readOnly={true}
+          />
+        )}
       </Fragment>
     );
   }

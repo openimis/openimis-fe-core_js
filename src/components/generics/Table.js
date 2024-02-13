@@ -334,6 +334,9 @@ class Table extends Component {
                   {localItemFormatters &&
                     localItemFormatters.map((f, fidx) => {
                       if (colSpans.length > fidx && !colSpans[fidx]) return null;
+                      // NOTE: The 'f' function can explicitly be set to null, enabling the option to omit 
+                      // a column  and suppress its display under specific conditions.
+                      if (f === null) return null;
                       return (
                         <TableCell
                           colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}

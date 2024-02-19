@@ -57,14 +57,10 @@ class openIMISDatePicker extends Component {
     this.setState({ value: null });
   };
 
-  getMinDate = (_minDate, _disablePast) => {
-    let result = _minDate;
+  getMinDate = () => {
+    const { disablePast, minDate } = this.props;
 
-    if (_disablePast && new Date() > _minDate) {
-      result = new Date();
-    }
-
-    return result;
+    return { minDate: this.moveByOneDay(disablePast ? new Date() : new Date(minDate)) };
   };
 
   secondaryCalendarsOptions = {
@@ -89,7 +85,7 @@ class openIMISDatePicker extends Component {
   moveByOneDay = (date) => {
     date.setDate(date.getDate() + 1);
     return date;
-  }
+  };
 
   render() {
     const {
@@ -122,10 +118,8 @@ class openIMISDatePicker extends Component {
             format={secondCalendarFormatting}
             disabled={readOnly}
             value={this.state.value ? this.moveByOneDay(new Date(this.state.value)) : null}
-            {...((!!this.props.minDate || !!disablePast) && {
-              minDate: this.getMinDate(this.props.minDate, disablePast),
-            })}
-            {...(!!this.props.maxDate && { maxDate: this.props.maxDate })}
+            {...(!!this.props.minDate && this.getMinDate())}
+            {...(!!this.props.maxDate && { maxDate: this.moveByOneDay(new Date(this.props.maxDate)) })}
             onChange={this.secondaryCalendarDateChange}
             highlightToday={false}
             calendar={this.getDictionaryValueOrDefault(this.secondaryCalendarsOptions, secondCalendarType)}

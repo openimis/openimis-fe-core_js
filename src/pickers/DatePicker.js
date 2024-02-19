@@ -101,6 +101,8 @@ class openIMISDatePicker extends Component {
       reset,
       isSecondaryCalendarEnabled,
       modulesManager,
+      minDate,
+      maxDate,
       ...otherProps
     } = this.props;
 
@@ -118,8 +120,8 @@ class openIMISDatePicker extends Component {
             format={secondCalendarFormatting}
             disabled={readOnly}
             value={this.state.value ? this.moveByOneDay(new Date(this.state.value)) : null}
-            {...(!!this.props.minDate && this.getMinDate())}
-            {...(!!this.props.maxDate && { maxDate: this.moveByOneDay(new Date(this.props.maxDate)) })}
+            {...((!!minDate || disablePast) && this.getMinDate())}
+            {...(!!maxDate && { maxDate: this.moveByOneDay(new Date(maxDate)) })}
             onChange={this.secondaryCalendarDateChange}
             highlightToday={false}
             calendar={this.getDictionaryValueOrDefault(this.secondaryCalendarsOptions, secondCalendarType)}

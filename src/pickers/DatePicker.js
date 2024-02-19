@@ -57,7 +57,7 @@ class openIMISDatePicker extends Component {
     this.setState({ value: null });
   };
 
-  getMinDate = () => {
+  setMinDate = () => {
     const { disablePast, minDate } = this.props;
 
     return { minDate: this.moveByOneDay(disablePast ? new Date() : new Date(minDate)) };
@@ -120,7 +120,7 @@ class openIMISDatePicker extends Component {
             format={secondCalendarFormatting}
             disabled={readOnly}
             value={this.state.value ? this.moveByOneDay(new Date(this.state.value)) : null}
-            {...((!!minDate || disablePast) && this.getMinDate())}
+            {...((!!minDate || disablePast) && this.setMinDate())}
             {...(!!maxDate && { maxDate: this.moveByOneDay(new Date(maxDate)) })}
             onChange={this.secondaryCalendarDateChange}
             highlightToday={false}

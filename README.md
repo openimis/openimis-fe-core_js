@@ -123,6 +123,7 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 - `core.YearPicker`, pick a year within a range
 - `core.MonthPicker`, contant-based month picker. Translation keys `month.null`, `month.1`,...
 - `core.LanguagePicker`, pick from available languages
+- `core.WarningBox`, simple alert component to show warnings or messages, with options to customize its look and size.
 
 ## Dispatched Redux Actions
 

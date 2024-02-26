@@ -186,6 +186,7 @@ class Table extends Component {
       error = null,
       showOrdinalNumber = false,
       extendHeader,
+      disableDeleteOnEmptyRow = false,
     } = this.props;
     const { ordinalNumberFrom } = this.state;
     let localHeaders = [...(headers || [])];
@@ -206,11 +207,14 @@ class Table extends Component {
     if (!!onDelete) {
       if (localPreHeaders) localPreHeaders.push("");
       localHeaders.push("");
-      localItemFormatters.push((i, idx) => (
-        <IconButton onClick={(e) => onDelete(idx)}>
-          <DeleteIcon />
-        </IconButton>
-      ));
+      localItemFormatters.push((i, idx) => {
+        const isEmpty = disableDeleteOnEmptyRow ? _.isEmpty(i) : false;
+        return (
+          <IconButton disabled={isEmpty} onClick={(e) => onDelete(idx)}>
+            <DeleteIcon />
+          </IconButton>
+        );
+      });
     }
 
     const rowsPerPage = pageSize || rowsPerPageOptions[0];

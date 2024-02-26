@@ -48,6 +48,7 @@ import ErrorBoundary from "./helpers/ErrorBoundary";
 import ConfirmDialog from "./components/dialogs/ConfirmDialog";
 import SelectDialog from "./components/dialogs/SelectDialog";
 import AdvancedFiltersDialog from "./components/dialogs/AdvancedFiltersDialog";
+import WarningBox from "./components/generics/WarningBox";
 import {
   baseApiUrl,
   apiHeaders,
@@ -267,6 +268,7 @@ export {
   Error,
   FatalError,
   AlertForwarder,
+  WarningBox,
   SelectInput,
   TextInput,
   ValidatedTextInput,

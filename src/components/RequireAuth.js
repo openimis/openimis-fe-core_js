@@ -223,7 +223,7 @@ const RequireAuth = (props) => {
     "allowSecondCalendar",
     false,
   );
-  const isWorker = modulesManager.getConf("fe-insuree", "isWorker", DEFAULT.IS_WORKER);
+  const isWorker = modulesManager.getConf("fe-core", "isWorker", DEFAULT.IS_WORKER);
 
   const isAppBarMenu = useMemo(() => theme.menu.variant.toUpperCase() === "APPBAR", [theme.menu.variant]);
 
@@ -322,9 +322,13 @@ const RequireAuth = (props) => {
               </Contributions>
             </Hidden>
           )}
-          <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
+          {isWorker ? (
             <div className={classes.grow} />
-          </Contributions>
+          ) : (
+            <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
+              <div className={classes.grow} />
+            </Contributions>
+          )}
           {!!calendarSwitch && (
             <FormControlLabel
               control={

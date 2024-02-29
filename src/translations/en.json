@@ -128,5 +128,7 @@
   "core.ForbiddenPage.title": "Access Denied",
   "core.ForbiddenPage.description": "Sorry, you are not authorized to access this page.",
   "core.InternalServerErrorPage.title": "Internal Server Error",
-  "core.InternalServerErrorPage.description": "The server encountered an internal error or misconfiguration and was unable to complete your request."
+  "core.InternalServerErrorPage.description": "The server encountered an internal error or misconfiguration and was unable to complete your request.",
+  "core.tooltip.logout": "Log out",
+  "core.tooltip.help": "Documentation"
 }

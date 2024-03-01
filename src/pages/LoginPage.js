@@ -44,7 +44,7 @@ const LoginPage = ({ logo }) => {
   const auth = useAuthentication();
   const [isAuthenticating, setAuthenticating] = useState(false);
   const showMPassProvider = modulesManager.getConf("fe-core", "LoginPage.showMPassProvider", false);
-  const isWorker = modulesManager.getConf("fe-insuree", "isWorker", DEFAULT.IS_WORKER);
+  const isWorker = modulesManager.getConf("fe-core", "isWorker", DEFAULT.IS_WORKER);
 
   useEffect(() => {
     if (auth.isAuthenticated) {

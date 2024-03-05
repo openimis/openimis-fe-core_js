@@ -130,5 +130,6 @@
   "core.InternalServerErrorPage.title": "Internal Server Error",
   "core.InternalServerErrorPage.description": "The server encountered an internal error or misconfiguration and was unable to complete your request.",
   "core.tooltip.logout": "Log out",
-  "core.tooltip.help": "Documentation"
+  "core.tooltip.help": "Documentation",
+  "core.NeDateFormatter.dateOutOfRange": "DATE_OUT_OF_RANGE"
 }

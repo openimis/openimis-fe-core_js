@@ -32,7 +32,7 @@ export function formatDateFromISO(mm, intl, date) {
   if (isSecondaryCalendar) {
     const secondCalendarFormatting = mm.getConf("fe-core", "secondCalendarFormatting", DEFAULT_SETTINGS.SECOND_CALENDAR_FORMAT);
     const secondCalendarFormattingLang = mm.getConf("fe-core", "secondCalendarFormattingLang", DEFAULT_SETTINGS.SECOND_CALENDAR_LANG);
-    return neFormateDateFromISO(date, [secondCalendarFormatting, secondCalendarFormattingLang]);
+    return neFormateDateFromISO(date, intl, [secondCalendarFormatting, secondCalendarFormattingLang]);
   }
   return adFormateDateFromISO(mm, intl, date);
 }

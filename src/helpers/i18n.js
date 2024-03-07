@@ -3,6 +3,7 @@ import { Tooltip } from "@material-ui/core";
 import { useIntl } from "react-intl";
 import moment from "moment";
 import { formatDateFromISO as adFormateDateFromISO } from "../pickers/AdDateFormatter";
+import { formatDateTimeFromISO as adFormateDateTimeFromISO } from "../pickers/AdDateTimeFormatter";
 import { formatDateFromISO as neFormateDateFromISO } from "../pickers/NeDateFormatter";
 import { STORAGE_KEY_SECONDARY_CALENDAR, DEFAULT_SETTINGS} from "../constants";
 
@@ -37,6 +38,10 @@ export function formatDateFromISO(mm, intl, date) {
   return adFormateDateFromISO(mm, intl, date);
 }
 
+export function formatDateTimeFromISO(mm, intl, date) {
+  return adFormateDateTimeFromISO(mm, intl, date);
+}
+
 export function toISODate(d) {
   if (!d) return null;
   return moment(d).format().slice(0, 10);
@@ -58,6 +63,7 @@ export function useTranslations(moduleName, modulesManager) {
 
   return {
     formatDateFromISO: formatDateFromISO.bind(null, modulesManager, intl),
+    formatDateTimeFromISO: formatDateTimeFromISO.bind(null, modulesManager, intl),
     formatAmount: formatAmount.bind(null, intl),
     formatMessage: moduleName ? formatMessage.bind(null, intl, moduleName) : formatMessage.bind(null, intl),
     formatMessageWithValues: moduleName

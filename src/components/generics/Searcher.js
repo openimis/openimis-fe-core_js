@@ -268,7 +268,7 @@ class Searcher extends Component {
         filters[filter.id] = { value: filter.value, filter: filter.filter };
       }
     });
-    this.setState({ filters }, (e) => this.applyFilters());
+    this.setState({ filters });
   };
 
   _cacheAndApply = () => {

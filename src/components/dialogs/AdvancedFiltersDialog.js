@@ -117,9 +117,15 @@ const AdvancedFiltersDialog = ({
   const applyFilter = () => {
     setAppliedFiltersRowStructure(filters);
     const outputFilters = JSON.stringify(
-      filters.map(({ filter, value, field, type }) =>
-        `${field}__${filter}__${type}=${JSON.stringify(value)}`)
+      filters.map(({ filter, value, field, type }) => {
+        if (type === 'integer') {
+          return `${field}__${filter}__${type}=${value}`;
+        } else {
+          return `${field}__${filter}__${type}=${JSON.stringify(value)}`;
+        }
+      })
     );
+
     if(checkArrayFilterStructure() === false){
       onChangeFilters([
         {

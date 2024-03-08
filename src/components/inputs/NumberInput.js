@@ -24,7 +24,7 @@ class NumberInput extends Component {
       if (displayNa && !this.state.isEdited) {
         return formatMessage(this.props.intl, this.props.module, "core.NumberInput.notApplicable");
       }
-      return displayZero ? "0" : "";
+      return displayZero && value === 0 ? "0" : "";
     }
 
     const numericValue = Number(value);

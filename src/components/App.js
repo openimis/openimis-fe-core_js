@@ -24,6 +24,7 @@ import NotFoundPage from "./NotFoundPage";
 import PermissionCheck from "./PermissionCheck";
 
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";
+export const UNAUTHENTICATED_ROUTER_CONTRIBUTION_KEY = "core.UnauthenticatedRouter";
 export const APP_BOOT_CONTRIBUTION_KEY = "core.Boot";
 export const TRANSLATION_CONTRIBUTION_KEY = "translations";
 export const ECONOMIC_UNIT_DIALOG_CONTRIBUTION_KEY = "policyholder.EconomicUnitDialog";
@@ -64,6 +65,10 @@ const App = (props) => {
   const auth = useAuthentication();
   const routes = useMemo(() => {
     return modulesManager.getContribs(ROUTER_CONTRIBUTION_KEY);
+  }, []);
+
+  const unauthenticatedRoutes = useMemo(() => {
+    return modulesManager.getContribs(UNAUTHENTICATED_ROUTER_CONTRIBUTION_KEY);
   }, []);
 
   const locale = useMemo(() => {

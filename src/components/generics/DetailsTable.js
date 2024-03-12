@@ -1,20 +1,21 @@
-import React from 'react'
+import React from "react";
 
-function DetailsTable({code,type,validFrom}){
-    let list = [
-        {code: code, type:type, validFrom:validFrom},
-    ]
-    return <p><table style={{marginLeft: 20, marginTop: 10}}>
-        {list.map((val, key) => {
-            return (
-                <tr key={key}>
-                    <td width={150}>{val.code}</td>
-                    <td width={150}>{val.type}</td>
-                    <td width={150}>{val.validFrom}</td>
-                </tr>
-            )
-        })}
-  </table></p>
+function DetailsTable({ code, type, validFrom }) {
+  const details = [{ code, type, validFrom }];
+
+  return (
+    <table style={{ marginLeft: 20, marginTop: 10 }}>
+      {details.map(({ code, type, validFrom }) => {
+        return (
+          <tr key={code}>
+            <td width={150}>{code}</td>
+            <td width={150}>{type}</td>
+            <td width={150}>{validFrom}</td>
+          </tr>
+        );
+      })}
+    </table>
+  );
 }
 
-export default DetailsTable
+export default DetailsTable;

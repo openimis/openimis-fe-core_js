@@ -1,7 +1,12 @@
 import React from "react";
+
+import { IconButton, Tooltip } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
-import { IconButton } from "@material-ui/core";
 import { HelpOutline } from "@material-ui/icons";
+
+import { useModulesManager } from "@openimis/fe-core";
+import { CORE_MIS_CONFLUENCE_URL, DEFAULT_URL, MODULE_NAME } from "../constants";
+import { useTranslations } from "../helpers/i18n";
 
 const styles = (theme) => ({
   button: {
@@ -11,14 +16,20 @@ const styles = (theme) => ({
 });
 
 const Help = ({ classes }) => {
+  const modulesManager = useModulesManager();
+  const { formatMessage } = useTranslations(MODULE_NAME, modulesManager);
+  const isCoreMISHelp = modulesManager.getConf("fe-core", "redirectToCoreMISConfluenceUrl", false);
+  const url = isCoreMISHelp ? CORE_MIS_CONFLUENCE_URL : DEFAULT_URL;
   const onClick = () => {
-    window.open("/Manual/IMIS_manual.pdf");
+    window.open(url);
   };
 
   return (
-    <IconButton className={classes.button} onClick={onClick}>
-      <HelpOutline />
-    </IconButton>
+    <Tooltip title={formatMessage("core.tooltip.help")}>
+      <IconButton className={classes.button} onClick={onClick}>
+        <HelpOutline />
+      </IconButton>
+    </Tooltip>
   );
 };
 

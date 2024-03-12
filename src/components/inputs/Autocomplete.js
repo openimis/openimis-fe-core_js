@@ -12,7 +12,7 @@ const styles = (theme) => ({
   },
 });
 
-const defaultGetOptionSelected = (option, v) => option.id === v.id;
+const defaultGetOptionSelected = (option, v) => option.id === v?.id;
 
 const Autocomplete = (props) => {
   const {
@@ -38,6 +38,7 @@ const Autocomplete = (props) => {
     setCurrentString,
     multiple = false,
     renderInput,
+    noOptionsText,
   } = props;
   const modulesManager = useModulesManager();
   const minCharLookup = modulesManager.getConf("fe-admin", "usersMinCharLookup", 2);
@@ -72,6 +73,7 @@ const Autocomplete = (props) => {
     <MuiAutocomplete
       key={resetKey}
       fullWidth={fullWidth}
+      noOptionsText={noOptionsText}
       className={className}
       style={{ minWidth }}
       loadingText={formatMessage("loadingText")}

@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react";
+import React, { Component } from "react";
 import clsx from "clsx";
 import { injectIntl } from "react-intl";
 import _ from "lodash";
@@ -34,6 +34,8 @@ const styles = (theme) => ({
   tableHighlightedRow: theme.table.highlightedRow,
   tableHighlightedCell: theme.table.highlightedCell,
   tableHighlightedAltRow: theme.table.highlightedAltRow,
+  tableSecondaryHighlightedRow: theme.table.secondaryHighlightedRow,
+  tableSecondaryHighlightedCell: theme.table.secondaryHighlightedCell,
   tableHighlightedAltCell: theme.table.highlightedAltCell,
   tableDisabledRow: theme.table.disabledRow,
   tableDisabledCell: theme.table.disabledCell,
@@ -64,6 +66,7 @@ const styles = (theme) => ({
 class Table extends Component {
   state = {
     selection: {},
+    ordinalNumberFrom: null,
   };
 
   _atom = (a) =>
@@ -108,9 +111,9 @@ class Table extends Component {
 
   isSelected = (i) => !!this.props.withSelection && !!this.state.selection[this.itemIdentifier(i)];
 
-  select = (i,e) => {
+  select = (i, e) => {
     // block normal href only for left click
-    if (e.type === 'click') {   
+    if (e.type === "click") {
       if (!this.props.withSelection) return;
       let s = this.state.selection;
       let id = this.itemIdentifier(i);
@@ -136,6 +139,20 @@ class Table extends Component {
     </Box>
   );
 
+  calculateOrdinalNumber = (iidx, isPaginationEnabled, arrayLength) => {
+    const { ordinalNumberFrom } = this.state;
+    let currentIndex = 0;
+    if (isPaginationEnabled) {
+      if (isNaN(ordinalNumberFrom)) {
+        currentIndex = 0;
+      }
+      currentIndex = iidx + ordinalNumberFrom;
+    } else {
+      currentIndex = iidx + 1;
+    }
+    return currentIndex;
+  };
+
   render() {
     const {
       intl,
@@ -153,6 +170,7 @@ class Table extends Component {
       itemFormatters,
       rowHighlighted = null,
       rowHighlightedAlt = null,
+      rowSecondaryHighlighted = null,
       rowDisabled = null,
       rowLocked = null,
       withPagination = false,
@@ -167,7 +185,11 @@ class Table extends Component {
       onDelete = null,
       fetching = null,
       error = null,
+      showOrdinalNumber = false,
+      extendHeader,
+      disableDeleteOnEmptyRow = false,
     } = this.props;
+    const { ordinalNumberFrom } = this.state;
     let localHeaders = [...(headers || [])];
     let localPreHeaders = !!preHeaders ? [...preHeaders] : null;
     let localItemFormatters = [...itemFormatters];
@@ -186,22 +208,41 @@ class Table extends Component {
     if (!!onDelete) {
       if (localPreHeaders) localPreHeaders.push("");
       localHeaders.push("");
-      localItemFormatters.push((i, idx) => (
-        <IconButton onClick={(e) => onDelete(idx)}>
-          <DeleteIcon />
-        </IconButton>
-      ));
+      localItemFormatters.push((i, idx) => {
+        const isEmpty = disableDeleteOnEmptyRow ? _.isEmpty(i) : false;
+        return (
+          <IconButton disabled={isEmpty} onClick={(e) => onDelete(idx)}>
+            <DeleteIcon />
+          </IconButton>
+        );
+      });
     }
 
     const rowsPerPage = pageSize || rowsPerPageOptions[0];
+    if (showOrdinalNumber) {
+      localHeaders.unshift("core.Table.ordinalNumberHeader");
+    }
     return (
       <Box position="relative" overflow="auto">
         {header && (
-          <Fragment>
-            <Typography className={classes.tableTitle}>{header}</Typography>
-            <Divider />
-          </Fragment>
+          <Grid container alignItems="center" justify="space-between" className={classes.tableTitle}>
+            {extendHeader ? (
+              <>
+                <Grid item xs={6}>
+                  <Typography variant="h6">{header}</Typography>
+                </Grid>
+                <Grid item container direction="row" alignItems="center" justify="space-between" xs={6}>
+                  {extendHeader && extendHeader()}
+                </Grid>
+              </>
+            ) : (
+              <Grid item xs={12}>
+                <Typography variant="h6">{header}</Typography>
+              </Grid>
+            )}
+          </Grid>
         )}
+        <Divider />
         <MUITable className={classes.table} size={size}>
           {!!localPreHeaders && localPreHeaders.length > 0 && (
             <TableHead>
@@ -241,15 +282,11 @@ class Table extends Component {
                           justifyContent={aligns.length > idx ? aligns[idx] : "left"}
                         >
                           <Box>
-                            {typeof h === 'function' ? (
-                              <Box>
-                              {() => (h(this.state, this.props))}
-                              </Box>
-                            ): ( 
-                            <FormattedMessage module={module} id={h} />
-                            ) 
-                            }
-                           
+                            {typeof h === "function" ? (
+                              <Box>{() => h(this.state, this.props)}</Box>
+                            ) : (
+                              <FormattedMessage module={module} id={h} />
+                            )}
                           </Box>
                           {headerActions.length > idx ? this.headerAction(headerActions[idx][1]) : null}
                         </Box>
@@ -267,21 +304,44 @@ class Table extends Component {
                 <TableRow
                   key={iidx}
                   selected={this.isSelected(i)}
-                  onClick={(e) => this.select(i,e)}
-                  onContextMenu={onDoubleClick ? () => onDoubleClick(i,true) : undefined}
+                  onClick={(e) => this.select(i, e)}
+                  onContextMenu={onDoubleClick ? () => onDoubleClick(i, true) : undefined}
                   onDoubleClick={onDoubleClick ? () => onDoubleClick(i) : undefined}
                   className={clsx(
                     classes.tableRow,
                     !!rowLocked && rowLocked(i) ? classes.tableLockedRow : null,
                     !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedRow : null,
                     !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltRow : null,
+                    !!rowSecondaryHighlighted && rowSecondaryHighlighted(i)
+                      ? classes.tableSecondaryHighlightedRow
+                      : null,
                     !!rowDisabled && rowDisabled(i) ? classes.tableDisabledRow : null,
                     !!onDoubleClick && classes.clickable,
                   )}
                 >
+                  {showOrdinalNumber && (
+                    <TableCell
+                      className={clsx(
+                        !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
+                        !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
+                        !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
+                        !!rowSecondaryHighlighted && rowSecondaryHighlighted(i)
+                          ? classes.tableSecondaryHighlightedCell
+                          : null,
+                        !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
+                        aligns.length > 0 && classes[aligns[0]],
+                      )}
+                      key={`v-${this.calculateOrdinalNumber(iidx, withPagination, items.length)}-0`}
+                    >
+                      <span>{this.calculateOrdinalNumber(iidx, withPagination, items.length)}</span>
+                    </TableCell>
+                  )}
                   {localItemFormatters &&
                     localItemFormatters.map((f, fidx) => {
                       if (colSpans.length > fidx && !colSpans[fidx]) return null;
+                      // NOTE: The 'f' function can explicitly be set to null, enabling the option to omit 
+                      // a column  and suppress its display under specific conditions.
+                      if (f === null) return null;
                       return (
                         <TableCell
                           colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
@@ -289,6 +349,9 @@ class Table extends Component {
                             !!rowLocked && rowLocked(i) ? classes.tableLockedCell : null,
                             !!rowHighlighted && rowHighlighted(i) ? classes.tableHighlightedCell : null,
                             !!rowHighlightedAlt && rowHighlightedAlt(i) ? classes.tableHighlightedAltCell : null,
+                            !!rowSecondaryHighlighted && rowSecondaryHighlighted(i)
+                              ? classes.tableSecondaryHighlightedCell
+                              : null,
                             !!rowDisabled && rowDisabled(i) ? classes.tableDisabledCell : null,
                             aligns.length > fidx && classes[aligns[fidx]],
                           )}
@@ -308,9 +371,10 @@ class Table extends Component {
                   className={classes.pager}
                   colSpan={localItemFormatters.length}
                   labelRowsPerPage={formatMessage(intl, "core", "rowsPerPage")}
-                  labelDisplayedRows={({ from, to, count }) =>
-                    `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`
-                  }
+                  labelDisplayedRows={({ from, to, count }) => {
+                    if (this.state.ordinalNumberFrom !== from) this.setState({ ordinalNumberFrom: from });
+                    return `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`;
+                  }}
                   count={count}
                   page={page}
                   rowsPerPage={rowsPerPage}

@@ -33,7 +33,7 @@ import TableServiceReview from "./components/generics/TableServiceReview";
 import SearcherExport from "./components/generics/SearcherExport";
 import Searcher from "./components/generics/Searcher";
 import SearcherPane from "./components/generics/SearcherPane";
-import DatePicker from "./pickers/DatePicker";
+import openIMISDatePicker from "./pickers/DatePicker";
 import Picker from "./components/generics/Picker";
 import ConstantBasedPicker from "./components/generics/ConstantBasedPicker";
 import CustomFilterFieldStatusPicker from "./pickers/CustomFilterFieldStatusPicker";
@@ -50,6 +50,7 @@ import ErrorBoundary from "./helpers/ErrorBoundary";
 import ConfirmDialog from "./components/dialogs/ConfirmDialog";
 import SelectDialog from "./components/dialogs/SelectDialog";
 import AdvancedFiltersDialog from "./components/dialogs/AdvancedFiltersDialog";
+import WarningBox from "./components/generics/WarningBox";
 import {
   baseApiUrl,
   apiHeaders,
@@ -69,6 +70,7 @@ import {
   formatMessage,
   formatMessageWithValues,
   formatDateFromISO,
+  formatDateTimeFromISO,
   toISODate,
   formatAmount,
   withTooltip,
@@ -122,12 +124,52 @@ import { formatJsonField } from "./helpers/jsonExt";
 import { RIGHT_ROLE_SEARCH, CLEARED_STATE_FILTER } from "./constants";
 import { authMiddleware } from "./middlewares";
 import RefreshAuthToken from "./components/RefreshAuthToken";
+import UserActivityReport from "./reports/UserActivityReport";
+import RegistersStatusReport from "./reports/RegistersStatusReport";
+
 const ROUTE_ROLES = "roles";
 const ROUTE_ROLE = "roles/role";
 
 const DEFAULT_CONFIG = {
   "translations": [{ key: "en", messages: messages_en }],
   "reducers": [{ key: "core", reducer: reducer }],
+  "reports": [
+    {
+      key: "user_activity",
+      component: UserActivityReport,
+      isValid: (values) => values.dateFrom && values.dateTo,
+      getParams: (values) => {
+        const params = {}
+        if (values.user) {
+          params.requested_user_id = decodeId(values.user.iUser.id);
+        }
+        if (values.action) {
+          params.action = values.action;
+        }
+        if (values.entity) {
+          params.entity = values.entity;
+        }
+        params.date_start = values.dateFrom;
+        params.date_end = values.dateTo;
+        return params;
+      },
+    },
+    {
+      key: "registers_status",
+      component: RegistersStatusReport,
+      isValid: (values) => true,
+      getParams: (values) => {
+        const params = {}
+        if (values.region) {
+          params.requested_region_id = decodeId(values.region.id);
+        }
+        if (values.district) {
+          params.requested_district_id = decodeId(values.district.id);
+        }
+        return params;
+      },
+    },
+  ],
   "middlewares": [authMiddleware],
   "refs": [
     { key: "core.JournalDrawer.pollInterval", ref: 2000 },
@@ -154,7 +196,7 @@ const DEFAULT_CONFIG = {
 
 export const CoreModule = (cfg) => {
   let def = { ...DEFAULT_CONFIG };
-  def.refs.push({ key: "core.DatePicker", ref: DatePicker });
+  def.refs.push({ key: "core.DatePicker", ref: openIMISDatePicker });
   return { ...def, ...cfg };
 };
 
@@ -214,6 +256,7 @@ export {
   formatMessage,
   formatMessageWithValues,
   formatDateFromISO,
+  formatDateTimeFromISO,
   toISODate,
   formatAmount,
   formatGQLString,
@@ -229,6 +272,7 @@ export {
   Error,
   FatalError,
   AlertForwarder,
+  WarningBox,
   SelectInput,
   TextInput,
   ValidatedTextInput,

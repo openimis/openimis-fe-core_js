@@ -1,4 +1,5 @@
 import React from "react";
+import InternalServerErrorPage from "../components/InternalServerErrorPage";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -15,10 +16,12 @@ class ErrorBoundary extends React.Component {
     // Just log for now, could be reported elsewhere
     console.error(error, errorInfo);
   }
+  
   render() {
     if (this.state.hasError) {
-      return <h1>An error was not properly caught. Refer to console log.</h1>;
+      return <InternalServerErrorPage logo={this.props.children.props.logo} />;
     }
+
     return this.props.children;
   }
 }

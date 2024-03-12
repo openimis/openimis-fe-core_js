@@ -18,7 +18,7 @@ import {
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import MoreHoriz from "@material-ui/icons/MoreHoriz";
 
-import {cacheFilters, resetCacheFilters, saveCurrentPaginationPage} from "../../actions";
+import { cacheFilters, closeExportColumnsDialog, resetCacheFilters, saveCurrentPaginationPage } from "../../actions";
 import { formatMessage } from "../../helpers/i18n";
 import { sort, formatSorter } from "../../helpers/api";
 import withModulesManager from "../../helpers/modules";
@@ -29,6 +29,7 @@ import FormattedMessage from "./FormattedMessage";
 import ProgressOrError from "./ProgressOrError";
 import Table from "./Table";
 import { CLEARED_STATE_FILTER } from "../../constants";
+import ExportColumnsDialog from "../dialogs/ExportColumnsDialog";
 
 const styles = (theme) => ({
   root: {
@@ -41,7 +42,6 @@ const styles = (theme) => ({
   paperHeaderAction: {
     paddingInline: 5,
   },
-  paperDivider: theme.paper.divider,
   tableHeaderAction: theme.table.headerAction,
   processing: {
     margin: theme.spacing(1),
@@ -93,6 +93,7 @@ class SelectionMenu extends Component {
           exportFetch={this.props.exportFetch}
           exportFields={this.props.exportFields}
           exportFieldsColumns={this.props.exportFieldsColumns}
+          chooseExportableColumns={this.props.chooseExportableColumns}
           label={this.props.exportFieldLabel}
         />)}
         {!!contributionKey && (
@@ -126,6 +127,7 @@ class SelectionMenu extends Component {
             <SearcherExport
               selection={this.props.selection} filters={this.props.filters} exportFetch={this.props.exportFetch}
               exportFields={this.props.exportFields} exportFieldsColumns={this.props.exportFieldsColumns}
+              chooseExportableColumns={this.props.chooseExportableColumns}
             />)}
           {!!contributionKey && (
             <Contributions
@@ -405,6 +407,7 @@ class Searcher extends Component {
       rowLocked = () => false,
       rowHighlighted = () => false,
       rowHighlightedAlt = () => false,
+      rowSecondaryHighlighted = () => false,
       rowDisabled = () => false,
       selectionMessage = null,
       preHeaders = null,
@@ -429,6 +432,7 @@ class Searcher extends Component {
       intl,
       isCustomFiltering = false,
       objectForCustomFiltering = null,
+      additionalCustomFilterParams = null,
       moduleName = null,
       objectType = null,
       appliedCustomFilters = null,
@@ -436,7 +440,9 @@ class Searcher extends Component {
       appliedFiltersRowStructure = null,
       setAppliedFiltersRowStructure = null,
       applyNumberCircle = null,
-      exportFieldLabel = null
+      exportFieldLabel = null,
+      showOrdinalNumber = false,
+      chooseExportableColumns = false,
     } = this.props;
     return (
       <Fragment>
@@ -457,6 +463,7 @@ class Searcher extends Component {
             }
             isCustomFiltering={isCustomFiltering}
             objectForCustomFiltering={objectForCustomFiltering}
+            additionalCustomFilterParams={additionalCustomFilterParams}
             moduleName={moduleName}
             objectType={objectType}
             setAppliedCustomFilters={setAppliedCustomFilters}
@@ -505,13 +512,12 @@ class Searcher extends Component {
                         exportFields={exportFields}
                         exportFieldsColumns={exportFieldsColumns}
                         exportFieldLabel={exportFieldLabel}
+                        chooseExportableColumns={chooseExportableColumns}
                       />
                     </Grid>
                   )}
                 </Grid>
-                <Grid item xs={12} className={classes.paperDivider}>
-                  <Divider />
-                </Grid>
+                <Divider />
                 <Grid item xs={12}>
                   <Table
                     size="small"
@@ -525,6 +531,7 @@ class Searcher extends Component {
                     rowLocked={(i) => rowLocked(this.state.selection, i)}
                     rowHighlighted={(i) => rowHighlighted(this.state.selection, i)}
                     rowHighlightedAlt={(i) => rowHighlightedAlt(this.state.selection, i)}
+                    rowSecondaryHighlighted={(i) => rowSecondaryHighlighted(i)}
                     rowDisabled={(i) => rowDisabled(this.state.selection, i)}
                     items={items}
                     withPagination={withPagination}
@@ -541,6 +548,7 @@ class Searcher extends Component {
                     onChangePage={this.onChangePage}
                     rowsPerPageOptions={rowsPerPageOptions}
                     onChangeRowsPerPage={this.onChangeRowsPerPage}
+                    showOrdinalNumber = {showOrdinalNumber}
                   />
                 </Grid>
               </Fragment>
@@ -557,6 +565,8 @@ const mapStateToProps = (state) => ({
   paginationPage: state.core?.savedPagination?.paginationPage,
   afterCursor: state.core?.savedPagination?.afterCursor,
   beforeCursor: state.core?.savedPagination?.beforeCursor,
+  // This is not used directly, but is needed for Searcher component to be rerendered on change of calendar type
+  isSecondaryCalendarEnabled: state.core.isSecondaryCalendarEnabled ?? false
 });
 
 const mapDispatchToProps = (dispatch) => {

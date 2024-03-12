@@ -32,7 +32,6 @@ const styles = (theme) => ({
   drawerHeading: {
     fontSize: theme.menu.drawer.fontSize,
     color: theme.menu.drawer.textColor,
-    paddingTop: theme.menu.drawer.fontSize / 2,
   },
   drawerDivider: {
     // width: 100
@@ -68,22 +67,27 @@ const Accordion = withStyles({
   expanded: {},
 })(MuiAccordion);
 
-const AccordionSummary = withStyles({
+const AccordionSummary = withStyles((theme) => ({
   root: {
-    backgroundColor: "#006273",
-
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.secondary.main,
     minHeight: 56,
     "&$expanded": {
       minHeight: 56,
     },
   },
   content: {
+    margin: "0",
+    padding: "0",
+    alignItems: 'center',
+    justifyContent: 'start',
     "&$expanded": {
-      margin: "12px 0",
+      margin: "0",
     },
+    color: theme.palette.secondary.main
   },
   expanded: {},
-})(MuiAccordionSummary);
+}))(MuiAccordionSummary);
 
 const AccordionDetails = withStyles((theme) => ({
   root: {

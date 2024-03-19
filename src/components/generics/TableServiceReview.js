@@ -175,7 +175,7 @@ class Table extends Component {
     let localPreHeaders = !!preHeaders ? [...preHeaders] : null;
     let localItemFormatters = [...itemFormatters];
     let localsubServicesItemsFormattersReview = [...subServicesItemsFormattersReview];
-    const i = !!headers && headers.length;
+    let i = !!headers && headers.length;
 
     while (localHeaders && i--) {
       if (modulesManager?.hideField(module, localHeaders[i])) {

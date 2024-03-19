@@ -177,7 +177,7 @@ class Table extends Component {
     let localItemFormatters = [...itemFormatters];
     let localSubServicesItemsFormatters = [...subServicesItemsFormatters];
     let localsubServicesItemsFormattersReview = [...subServicesItemsFormattersReview];
-    const i = !!headers && headers.length;
+    let i = !!headers && headers.length;
 
     while (localHeaders && i--) {
       if (modulesManager?.hideField(module, localHeaders[i])) {
@@ -333,7 +333,9 @@ class Table extends Component {
                           })}
                       </tr>
                     </table>
-                    {localItemFormatters[0](i, iidx).props.children.props?.value?.packagetype !== "S" && (
+                    {localItemFormatters[0](i, iidx).props.children.props.value != undefined &&
+                      localItemFormatters[0](i, iidx).props.children.props.value.packagetype != undefined &&
+                      localItemFormatters[0](i, iidx).props.children.props.value.packagetype !== "S" && (
                       <table style={{ marginTop: 10, width: "90%" }}>
                         <tr>
                           <TableCell>

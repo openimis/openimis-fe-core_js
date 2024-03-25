@@ -87,7 +87,7 @@ class SearcherPane extends Component {
                 )}
                 {!!refresh && (
                   <Grid item key={`action-refresh`} className={classes.paperHeaderAction}>
-                    <Button variant="outlined" style={{ border: 0 }} onClick={reset} startIcon={<DefaultSearchIcon />}>
+                    <Button variant="outlined" style={{ border: 0 }} onClick={refresh} startIcon={<DefaultSearchIcon />}>
                       <Typography variant="subtitle1">
                         {formatMessage(this.props.intl, module, "refreshFilterTooltip")}
                       </Typography>

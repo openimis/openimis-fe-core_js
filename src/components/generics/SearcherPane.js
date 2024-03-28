@@ -1,17 +1,19 @@
 import React, { Component, Fragment } from "react";
 import { injectIntl } from "react-intl";
+
+import { Grid, Paper, Divider, IconButton, Typography, Button } from "@material-ui/core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { Grid, Paper, Divider, IconButton } from "@material-ui/core";
 import { YoutubeSearchedFor as ResetFilterIcon, Search as DefaultSearchIcon } from "@material-ui/icons";
-import FormattedMessage from "./FormattedMessage";
-import { withTooltip, formatMessage } from "../../helpers/i18n";
+
+import { formatMessage } from "../../helpers/i18n";
 import AdvancedFiltersDialog from "../dialogs/AdvancedFiltersDialog";
+import FormattedMessage from "./FormattedMessage";
 
 const styles = (theme) => ({
   paper: theme.paper.body,
-  paperHeader: theme.paper.header,
+  paperHeader: { ...theme.paper.header, display: "flex", justifyContent: "flex-end", itemAlign: "center" },
   paperHeaderTitle: theme.paper.title,
-  paperHeaderAction: theme.paper.action,
+  paperHeaderAction: { ...theme.paper.action, display: "flex", justifyContent: "center", itemAlign: "center" },
   paperDivider: theme.paper.divider,
 });
 
@@ -27,11 +29,8 @@ class SearcherPane extends Component {
       filters,
       resultsPane = null,
       reset,
-      resetTooltip,
       refresh,
-      refreshTooltip,
       actions,
-      SearchIcon = null,
       isCustomFiltering = false,
       objectForCustomFiltering = null,
       additionalCustomFilterParams = null,
@@ -52,7 +51,7 @@ class SearcherPane extends Component {
           </Grid>
           <Grid item xs={12 - split} className={classes.paperHeader}>
             {(!!actions || !!refresh) && (
-              <Grid container justify="flex-end">
+              <>
                 {isCustomFiltering === true ? (
                   <AdvancedFiltersDialog
                     object={objectForCustomFiltering}
@@ -77,23 +76,25 @@ class SearcherPane extends Component {
                       <IconButton onClick={a.action}>{a.icon}</IconButton>
                     </Grid>
                   ))}
-                {!!reset &&
-                  withTooltip(
-                    <Grid item key={`action-reset`} className={classes.paperHeaderAction}>
-                      <IconButton onClick={reset}>
-                        <ResetFilterIcon />
-                      </IconButton>
-                    </Grid>,
-                    resetTooltip || formatMessage(this.props.intl, module, "resetFilterTooltip")
-                  )}
-                {!!refresh &&
-                  withTooltip(
-                    <Grid item key={`action-refresh`} className={classes.paperHeaderAction}>
-                      <IconButton onClick={refresh}>{!!SearchIcon ? <SearchIcon /> : <DefaultSearchIcon />}</IconButton>
-                    </Grid>,
-                    refreshTooltip || formatMessage(this.props.intl, module, "refreshFilterTooltip")
-                  )}
-              </Grid>
+                {!!reset && (
+                  <Grid item key={`action-reset`} className={classes.paperHeaderAction}>
+                    <Button variant="outlined" style={{ border: 0 }} onClick={reset} startIcon={<ResetFilterIcon />}>
+                      <Typography variant="subtitle1">
+                        {formatMessage(this.props.intl, module, "resetFilterTooltip")}
+                      </Typography>
+                    </Button>
+                  </Grid>
+                )}
+                {!!refresh && (
+                  <Grid item key={`action-refresh`} className={classes.paperHeaderAction}>
+                    <Button variant="outlined" style={{ border: 0 }} onClick={refresh} startIcon={<DefaultSearchIcon />}>
+                      <Typography variant="subtitle1">
+                        {formatMessage(this.props.intl, module, "refreshFilterTooltip")}
+                      </Typography>
+                    </Button>
+                  </Grid>
+                )}
+              </>
             )}
           </Grid>
           {!!filterPane && (

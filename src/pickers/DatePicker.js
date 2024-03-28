@@ -138,6 +138,8 @@ class openIMISDatePicker extends Component {
         <FormControl fullWidth={fullWidth}>
           <MUIDatePicker
             {...otherProps}
+            maxDate={maxDate}
+            minDate={minDate}
             format={format}
             disabled={readOnly}
             required={required}

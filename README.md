@@ -47,6 +47,7 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 - `FormattedMessage`: translated text (module/key)
 - `ProgressOrError`: display progress during component's asynchronous calls... and hide or diaply error message when asynchronous call returns
 - `Searcher`: generic searcher page (with criteria form and result table)
+- `SearcherActionButton`: represents an action button used within a search interface.
 - `Form`: generic form. Manage dirty state, displays add/save button,...
 - `Table`: generic table. Headers (with -sort-actions), rows, optional setting - showOrdinalNumber that will show column with ordinal number as first column, ...
 

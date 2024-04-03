@@ -124,6 +124,7 @@ import { authMiddleware } from "./middlewares";
 import RefreshAuthToken from "./components/RefreshAuthToken";
 import UserActivityReport from "./reports/UserActivityReport";
 import RegistersStatusReport from "./reports/RegistersStatusReport";
+import SearcherActionButton from "./components/generics/SearcherActionButton";
 
 const ROUTE_ROLES = "roles";
 const ROUTE_ROLE = "roles/role";
@@ -312,4 +313,5 @@ export {
   CLEARED_STATE_FILTER,
   createFieldsBasedOnJSON,
   renderInputComponent,
+  SearcherActionButton,
 };

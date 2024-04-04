@@ -145,11 +145,11 @@ class RoleRightsPanel extends FormPanel {
     if (filterValue) {
       const filteredPerms = this.filterPermissions(false);
 
-      const removedPerms = roleRights.filter(
+      const restPerms = roleRights.filter(
         (right) => !filteredPerms.some((filteredRight) => filteredRight === right),
       );
 
-      onEditedChanged({ roleRights: removedPerms, ...restState });
+      onEditedChanged({ roleRights: restPerms, ...restState });
       return;
     }
 

@@ -18,6 +18,8 @@
   "core.roleManagement.saveButton.tooltip.enabled": "Save changes",
   "core.roleManagement.saveButton.tooltip.disabled": "Please fill required fields first",
   "core.roleManagement.role.availableRights": "Available permissions",
+  "core.roleManagement.role.addAllFilteredPerms": "Add all filtered permissions",
+  "core.roleManagement.role.removeAllPerms": "Remove all filtered permissions",
   "core.roleManagement.role.chosenRights": "Chosen permissions",
   "core.roleManagement.role.rightsFilter": "Filter",
   "core.roleManagement.CreateRole.mutationLabel": "Create Role {label}",

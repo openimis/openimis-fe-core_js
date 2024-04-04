@@ -10,6 +10,7 @@ import {
   Typography,
   IconButton,
   TextField,
+  Tooltip,
   InputAdornment,
 } from "@material-ui/core";
 import { injectIntl } from "react-intl";
@@ -20,6 +21,7 @@ import { fetchModulesPermissions } from "../actions";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
 import SearchIcon from "@material-ui/icons/Search";
+import DoubleArrowIcon from "@material-ui/icons/DoubleArrow";
 
 const styles = (theme) => ({
   item: theme.paper.item,
@@ -36,6 +38,16 @@ const styles = (theme) => ({
   },
   listItemText: {
     textTransform: "capitalize",
+  },
+  reversedArrow: {
+    transform: "rotate(180deg)",
+  },
+  listTitle: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: "5px",
   },
 });
 
@@ -91,6 +103,59 @@ class RoleRightsPanel extends FormPanel {
     return translatedMessage;
   };
 
+  filterPermissions = (checkAvailableRights = true) => {
+    const { modulePermissions, edited } = this.props;
+    const { roleRights } = edited;
+
+    const sortedModulePermissions = modulePermissions
+      ? modulePermissions.sort((module, otherModule) => module.moduleName > otherModule.moduleName)
+      : [];
+
+    const allFilteredPerms = sortedModulePermissions
+      .map(({ permissions, moduleName }) =>
+        permissions
+          .filter(({ permsValue, permsName }) => {
+            if (checkAvailableRights) {
+              return !roleRights.includes(permsValue) && this.isFilterMatched(moduleName, permsName);
+            }
+
+            return this.isFilterMatched(moduleName, permsName);
+          })
+          .map(({ permsValue }) => permsValue),
+      )
+      .flat();
+
+    return allFilteredPerms;
+  };
+
+  selectAllFilteredPerms = () => {
+    const { edited, onEditedChanged } = this.props;
+    const { roleRights, ...restState } = edited;
+
+    const filteredPerms = this.filterPermissions();
+
+    onEditedChanged({ roleRights: [...roleRights, ...filteredPerms], ...restState });
+  };
+
+  removeAllChosenPerms = () => {
+    const { edited, onEditedChanged } = this.props;
+    const { filterValue } = this.state;
+    const { roleRights, ...restState } = edited;
+
+    if (filterValue) {
+      const filteredPerms = this.filterPermissions(false);
+
+      const restPerms = roleRights.filter(
+        (right) => !filteredPerms.some((filteredRight) => filteredRight === right),
+      );
+
+      onEditedChanged({ roleRights: restPerms, ...restState });
+      return;
+    }
+
+    onEditedChanged({ roleRights: [], ...restState });
+  };
+
   render() {
     const {
       intl,
@@ -136,9 +201,16 @@ class RoleRightsPanel extends FormPanel {
           <Grid container justify="space-between" alignItems="center">
             <Grid item xs={6} className={classes.item}>
               <Grid item className={classes.item}>
-                <Typography variant="h6">
-                  <FormattedMessage module="core" id="roleManagement.role.availableRights" />
-                </Typography>
+                <Grid className={classes.listTitle}>
+                  <Typography variant="h6">
+                    <FormattedMessage module="core" id="roleManagement.role.availableRights" />
+                  </Typography>
+                  <Tooltip title={<FormattedMessage module="core" id="roleManagement.role.addAllFilteredPerms" />}>
+                    <IconButton color="primary" disabled={isReadOnly} onClick={this.selectAllFilteredPerms}>
+                      <DoubleArrowIcon />
+                    </IconButton>
+                  </Tooltip>
+                </Grid>
               </Grid>
               <Paper>
                 <List className={classes.list} subheader={<li />}>
@@ -154,7 +226,7 @@ class RoleRightsPanel extends FormPanel {
                         .filter(
                           (permission) =>
                             !edited.roleRights.includes(permission.permsValue) &&
-                            this.isFilterMatched(modulePermission.moduleName, permission.permsName)
+                            this.isFilterMatched(modulePermission.moduleName, permission.permsName),
                         )
                         .map((permission) => (
                           <ListItem button divider>
@@ -171,16 +243,23 @@ class RoleRightsPanel extends FormPanel {
                               </IconButton>
                             </ListItemSecondaryAction>
                           </ListItem>
-                        ))
+                        )),
                     )}
                 </List>
               </Paper>
             </Grid>
             <Grid item xs={6} className={classes.item}>
               <Grid item className={classes.item}>
-                <Typography variant="h6">
-                  <FormattedMessage module="core" id="roleManagement.role.chosenRights" />
-                </Typography>
+                <Grid className={classes.listTitle}>
+                  <Tooltip title={<FormattedMessage module="core" id="roleManagement.role.removeAllPerms" />}>
+                    <IconButton color="primary" disabled={isReadOnly} onClick={this.removeAllChosenPerms}>
+                      <DoubleArrowIcon className={classes.reversedArrow} />
+                    </IconButton>
+                  </Tooltip>
+                  <Typography variant="h6">
+                    <FormattedMessage module="core" id="roleManagement.role.chosenRights" />
+                  </Typography>
+                </Grid>
               </Grid>
               <Paper>
                 <List className={classes.list} subheader={<li />}>
@@ -196,7 +275,7 @@ class RoleRightsPanel extends FormPanel {
                         .filter(
                           (permission) =>
                             edited.roleRights.includes(permission.permsValue) &&
-                            this.isFilterMatched(modulePermission.moduleName, permission.permsName)
+                            this.isFilterMatched(modulePermission.moduleName, permission.permsName),
                         )
                         .map((permission) => (
                           <ListItem button divider>
@@ -213,7 +292,7 @@ class RoleRightsPanel extends FormPanel {
                               </IconButton>
                             </ListItemSecondaryAction>
                           </ListItem>
-                        ))
+                        )),
                     )}
                 </List>
               </Paper>

@@ -103,9 +103,9 @@ class RoleRightsPanel extends FormPanel {
     return translatedMessage;
   };
 
-  selectAllFilteredPerms = () => {
-    const { modulePermissions, edited, onEditedChanged } = this.props;
-    const { roleRights, ...restState } = edited;
+  filterPermissions = (checkAvailableRights = true) => {
+    const { modulePermissions, edited } = this.props;
+    const { roleRights } = edited;
 
     const sortedModulePermissions = modulePermissions
       ? modulePermissions.sort((module, otherModule) => module.moduleName > otherModule.moduleName)
@@ -114,20 +114,44 @@ class RoleRightsPanel extends FormPanel {
     const allFilteredPerms = sortedModulePermissions
       .map(({ permissions, moduleName }) =>
         permissions
-          .filter(
-            ({ permsValue, permsName }) =>
-              !roleRights.includes(permsValue) && this.isFilterMatched(moduleName, permsName),
-          )
+          .filter(({ permsValue, permsName }) => {
+            if (checkAvailableRights) {
+              return !roleRights.includes(permsValue) && this.isFilterMatched(moduleName, permsName);
+            }
+
+            return this.isFilterMatched(moduleName, permsName);
+          })
           .map(({ permsValue }) => permsValue),
       )
       .flat();
 
-    onEditedChanged({ roleRights: [...roleRights, ...allFilteredPerms], ...restState });
+    return allFilteredPerms;
+  };
+
+  selectAllFilteredPerms = () => {
+    const { edited, onEditedChanged } = this.props;
+    const { roleRights, ...restState } = edited;
+
+    const filteredPerms = this.filterPermissions();
+
+    onEditedChanged({ roleRights: [...roleRights, ...filteredPerms], ...restState });
   };
 
   removeAllChosenPerms = () => {
     const { edited, onEditedChanged } = this.props;
+    const { filterValue } = this.state;
     const { roleRights, ...restState } = edited;
+
+    if (filterValue) {
+      const filteredPerms = this.filterPermissions(false);
+
+      const removedPerms = roleRights.filter(
+        (right) => !filteredPerms.some((filteredRight) => filteredRight === right),
+      );
+
+      onEditedChanged({ roleRights: removedPerms, ...restState });
+      return;
+    }
 
     onEditedChanged({ roleRights: [], ...restState });
   };

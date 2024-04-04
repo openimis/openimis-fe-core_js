@@ -107,7 +107,7 @@ class RoleRightsPanel extends FormPanel {
     const { modulePermissions, edited, onEditedChanged } = this.props;
     const { roleRights, ...restState } = edited;
 
-    const sortedModulePermissions = !!modulePermissions
+    const sortedModulePermissions = modulePermissions
       ? modulePermissions.sort((module, otherModule) => module.moduleName > otherModule.moduleName)
       : [];
 

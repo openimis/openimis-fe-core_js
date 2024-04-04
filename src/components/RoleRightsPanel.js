@@ -49,9 +49,6 @@ const styles = (theme) => ({
     alignItems: "center",
     gap: "5px",
   },
-  button: {
-    textAlign: "center",
-  },
 });
 
 const RIGHT_NAME_WORDS_SEPARATOR = "_";
@@ -131,6 +128,7 @@ class RoleRightsPanel extends FormPanel {
   removeAllChosenPerms = () => {
     const { edited, onEditedChanged } = this.props;
     const { roleRights, ...restState } = edited;
+
     onEditedChanged({ roleRights: [], ...restState });
   };
 

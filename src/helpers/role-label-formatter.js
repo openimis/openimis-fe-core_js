@@ -3,9 +3,10 @@ const RIGHT_NAME_OMITTED_WORDS = ["gql", "mutation", "perms"];
 const QUERY_STRING = "query";
 const SEARCH_STRING = "search";
 const WHITESPACE = " ";
+const WORD_REGEX = /^\w|\s\w/g;
 
 const capitalizeFirstLetter = (string) => {
-  return string.toLowerCase().replace(/^\w|\s\w/g, (letter) => letter.toUpperCase());
+  return string.toLowerCase().replace(WORD_REGEX, (letter) => letter.toUpperCase());
 };
 
 export const formatRoleLabel = (moduleName = "", permName = "") => {

@@ -4,6 +4,9 @@ import { useModulesManager, useTranslations, Autocomplete, useGraphqlQuery } fro
 import { MODULE_NAME } from "../constants";
 import { formatRoleLabel } from "../helpers/role-label-formatter";
 
+const WHITESPACE_REGEX = /\s/g;
+const UNDERSCORE_REGEX = /_/g;
+
 const AuthorityPicker = ({
   onChange,
   readOnly,
@@ -39,12 +42,12 @@ const AuthorityPicker = ({
   const filteredPerms = useMemo(() => {
     if (!data) return [];
 
-    const concatenatedSearchString = searchString.replace(/\s/g, "").toLowerCase();
+    const concatenatedSearchString = searchString.replace(WHITESPACE_REGEX, "").toLowerCase();
 
     return data.modulesPermissions.modulePermsList.flatMap((module) =>
       module.permissions
         .filter((perm) => {
-          const concatenatedPermName = (module.moduleName + perm.permsName).replace(/_/g, "").toLowerCase();
+          const concatenatedPermName = (module.moduleName + perm.permsName).replace(UNDERSCORE_REGEX, "").toLowerCase();
           return concatenatedPermName.includes(concatenatedSearchString);
         })
         .map((perm) => ({

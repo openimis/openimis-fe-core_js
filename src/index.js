@@ -39,6 +39,7 @@ import CustomFilterTypeStatusPicker from "./pickers/CustomFilterTypeStatusPicker
 import YearPicker from "./pickers/YearPicker";
 import MonthPicker from "./pickers/MonthPicker";
 import LanguagePicker from "./pickers/LanguagePicker";
+import AuthorityPicker from "./pickers/AuthorityPicker";
 import Helmet from "./helpers/Helmet";
 import AccountBox from "@material-ui/icons/AccountBox";
 import Roles from "./pages/Roles";
@@ -176,6 +177,7 @@ const DEFAULT_CONFIG = {
     { key: "core.YearPicker", ref: YearPicker },
     { key: "core.MonthPicker", ref: MonthPicker },
     { key: "core.LanguagePicker", ref: LanguagePicker },
+    { key: "core.AuthorityPicker", ref: AuthorityPicker },
     { key: "core.route.role", ref: ROUTE_ROLE },
   ],
   "core.Boot": [KeepLegacyAlive, RefreshAuthToken],

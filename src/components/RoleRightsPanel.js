@@ -22,6 +22,7 @@ import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
 import SearchIcon from "@material-ui/icons/Search";
 import DoubleArrowIcon from "@material-ui/icons/DoubleArrow";
+import { formatRoleLabel } from "../helpers/role-label-formatter";
 
 const styles = (theme) => ({
   item: theme.paper.item,
@@ -50,12 +51,6 @@ const styles = (theme) => ({
     gap: "5px",
   },
 });
-
-const RIGHT_NAME_WORDS_SEPARATOR = "_";
-const RIGHT_NAME_OMITTED_WORDS = ["gql", "mutation", "perms"];
-const QUERY_STRING = "query";
-const SEARCH_STRING = "search";
-const WHITESPACE = " ";
 
 class RoleRightsPanel extends FormPanel {
   constructor(props) {
@@ -93,12 +88,7 @@ class RoleRightsPanel extends FormPanel {
     const translatedMessage = formatMessage(this.props.intl, null, translationId);
     const translationFound = translatedMessage !== translationId;
     if (!translationFound) {
-      const rightNameWords = permsName
-        .split(RIGHT_NAME_WORDS_SEPARATOR)
-        .filter((word) => !RIGHT_NAME_OMITTED_WORDS.includes(word));
-      const rightNameLabel = rightNameWords.join(WHITESPACE).replace(QUERY_STRING, SEARCH_STRING);
-      const moduleNameLabel = moduleName.split(RIGHT_NAME_WORDS_SEPARATOR).join(WHITESPACE);
-      return `${moduleNameLabel} | ${rightNameLabel}`;
+      return formatRoleLabel(moduleName, permsName);
     }
     return translatedMessage;
   };
@@ -145,9 +135,7 @@ class RoleRightsPanel extends FormPanel {
     if (filterValue) {
       const filteredPerms = this.filterPermissions(false);
 
-      const restPerms = roleRights.filter(
-        (right) => !filteredPerms.some((filteredRight) => filteredRight === right),
-      );
+      const restPerms = roleRights.filter((right) => !filteredPerms.some((filteredRight) => filteredRight === right));
 
       onEditedChanged({ roleRights: restPerms, ...restState });
       return;

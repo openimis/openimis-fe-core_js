@@ -22,6 +22,7 @@ import {
   historyPush,
   coreConfirm,
   journalize,
+  PublishedComponent,
   SelectInput,
   clearCurrentPaginationPage,
 } from "@openimis/fe-core";
@@ -84,6 +85,16 @@ class RawRoleFilter extends Component {
     ]);
   };
 
+  onChangeRoleRight = (key, value) => {
+    this.props.onChangeFilters([
+      {
+        id: key,
+        value,
+        filter: `${key}: ${value?.permsValue}`,
+      },
+    ]);
+  };
+
   booleanOptions = () => {
     const options = [null, "true", "false"];
     return [
@@ -122,6 +133,13 @@ class RawRoleFilter extends Component {
             options={this.booleanOptions()}
             value={this._filterValue("isBlocked")}
             onChange={(v) => this._onChangeFilter("isBlocked", v)}
+          />
+        </Grid>
+        <Grid item xs={3} className={classes.item}>
+          <PublishedComponent
+            pubRef="core.AuthorityPicker"
+            value={this._filterValue("roleRight")}
+            onChange={(roleRight) => this.onChangeRoleRight("roleRight", roleRight)}
           />
         </Grid>
         <Grid item xs={3} className={classes.item}>

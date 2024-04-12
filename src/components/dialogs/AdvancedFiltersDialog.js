@@ -5,15 +5,16 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { formatMessage } from "@openimis/fe-core";
+import Grid from "@material-ui/core/Grid";
+import { formatMessage, SearcherActionButton } from "@openimis/fe-core";
 import { withStyles, withTheme } from "@material-ui/core/styles";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import AdvancedFilterRowValue from "./AdvancedFilterRowValue";
 import { fetchCustomFilter } from "../../actions";
 import AddCircle from "@material-ui/icons/Add";
+import FilterListIcon from '@material-ui/icons/FilterList';
 import {
-  BENEFIT_PLAN,
   CLEARED_STATE_FILTER,
   CUSTOM_FILTERS,
   DOUBLE_UNDERSCORE,
@@ -23,6 +24,7 @@ import {
 
 const styles = (theme) => ({
   item: theme.paper.item,
+  paperHeaderAction: { ...theme.paper.action, display: "flex", justifyContent: "center", itemAlign: "center" },
 });
 
 const AdvancedFiltersDialog = ({
@@ -184,17 +186,13 @@ const AdvancedFiltersDialog = ({
 
   return (
     <>
-      <Button
-        onClick={handleOpen}
-        variant="outlined"
-        color="#DFEDEF"
-        className={classes.button}
-        style={{
-          border: "0px",
-        }}
-      >
-        {formatMessage(intl, "core", "advancedFilters")}
-      </Button>
+      <Grid item className={classes.paperHeaderAction}>
+        <SearcherActionButton
+          startIcon={<FilterListIcon />}
+          label={formatMessage(intl, "core", "advancedFilters")}
+          onClick={handleOpen}
+        />
+      </Grid>
       { appliedFiltersRowStructure.length > 0 && hasCustomFilters()
           ? (applyNumberCircle(searchCriteriaToArray().length)) : ( <></>)
       }

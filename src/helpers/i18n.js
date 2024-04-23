@@ -47,6 +47,11 @@ export function toISODate(d) {
   return moment(d).format().slice(0, 10);
 }
 
+export function toISODateTime(d) {
+  if (!d) return null;
+  return moment(d).toISOString().slice(0, 19);
+}
+
 export function withTooltip(c, t, placement = "bottom") {
   return !!t ? (
     <Tooltip title={t} placement={placement}>

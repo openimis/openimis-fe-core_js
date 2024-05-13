@@ -72,7 +72,6 @@ const LoginPage = ({ logo }) => {
         history.push("/");
       }
     } catch (error) {
-      console.error("Error during login:", error);
       setAuthenticating(false);
     }
   };
@@ -95,7 +94,6 @@ const LoginPage = ({ logo }) => {
 
   const getErrorMessage = (messageKey) => {
     // Check if the message is one of the predefined keys, otherwise return the messageKey directly
-    console.log("getErrorMessage", errorMessages);
     return errorMessages[messageKey] || messageKey;
   };
 

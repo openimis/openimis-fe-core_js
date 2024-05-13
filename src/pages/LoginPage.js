@@ -55,14 +55,31 @@ const LoginPage = ({ logo }) => {
   const onSubmit = async (e) => {
     e.preventDefault();
     setAuthenticating(true);
-    const response = await auth.login(credentials);
-    const { loginStatus, message } = response;
-    setServerResponse({ loginStatus, message });
-    if (response?.loginStatus !== "CORE_AUTH_ERR") {
-      history.push("/");
-    } else {
+  
+    try {
+      const response = await auth.login(credentials);
+      if (response.payload?.errors?.length) {
+        handleLoginError(response.payload.errors[0].message);
+        return;
+      }
+  
+      const { loginStatus, message } = response;
+      setServerResponse({ loginStatus, message });
+  
+      if (loginStatus === "CORE_AUTH_ERR") {
+        setAuthenticating(false);
+      } else {
+        history.push("/");
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
       setAuthenticating(false);
     }
+  };
+  
+  const handleLoginError = (errorMessage) => {
+    setServerResponse({ loginStatus: "CORE_AUTH_ERR", message: errorMessage });
+    setAuthenticating(false);
   };
 
   const redirectToForgotPassword = (e) => {
@@ -76,7 +93,12 @@ const LoginPage = ({ logo }) => {
     GENERAL: formatMessage("core.LoginPage.authErrorGeneral"),
   };
 
-  const getErrorMessage = (key) => errorMessages[key] || errorMessages.GENERAL;
+  const getErrorMessage = (messageKey) => {
+    // Check if the message is one of the predefined keys, otherwise return the messageKey directly
+    console.log("getErrorMessage", errorMessages);
+    return errorMessages[messageKey] || messageKey;
+  };
+
   const redirectToMPassLogin = (e) => {
     e.preventDefault();
     const redirectToURL = new URL(`${window.location.origin}${baseApiUrl}${SAML_LOGIN_PATH}`);

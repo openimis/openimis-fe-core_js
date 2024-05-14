@@ -52,6 +52,11 @@ const LoginPage = ({ logo }) => {
     }
   }, []);
 
+  const handleLoginError = (errorMessage) => {
+    setServerResponse({ loginStatus: "CORE_AUTH_ERR", message: errorMessage });
+    setAuthenticating(false);
+  };
+
   const onSubmit = async (e) => {
     e.preventDefault();
     setAuthenticating(true);
@@ -76,10 +81,6 @@ const LoginPage = ({ logo }) => {
     }
   };
   
-  const handleLoginError = (errorMessage) => {
-    setServerResponse({ loginStatus: "CORE_AUTH_ERR", message: errorMessage });
-    setAuthenticating(false);
-  };
 
   const redirectToForgotPassword = (e) => {
     e.preventDefault();
@@ -93,7 +94,6 @@ const LoginPage = ({ logo }) => {
   };
 
   const getErrorMessage = (messageKey) => {
-    // Check if the message is one of the predefined keys, otherwise return the messageKey directly
     return errorMessages[messageKey] || messageKey;
   };
 

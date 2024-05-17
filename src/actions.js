@@ -244,21 +244,31 @@ export function loadUser() {
 export function login(credentials) {
   return async (dispatch) => {
     if (credentials) {
-      // We log in the user using the credentials
       const mutation = `mutation authenticate($username: String!, $password: String!) {
             tokenAuth(username: $username, password: $password) {
               refreshExpiresIn
             }
           }`;
-      await dispatch(
-        graphqlMutation(mutation, credentials, ["CORE_AUTH_LOGIN_REQ", "CORE_AUTH_LOGIN_RESP", "CORE_AUTH_ERR"]),
-      );
+      try {
+        const response = await dispatch(
+          graphqlMutation(mutation, credentials, ["CORE_AUTH_LOGIN_REQ", "CORE_AUTH_LOGIN_RESP", "CORE_AUTH_ERR"]),
+        );
+        if (response.payload?.errors?.length > 0) {
+          const errorMessage = response.payload.errors[0].message;
+          dispatch(authError({ message: errorMessage }));
+          return { loginStatus: "CORE_AUTH_ERR", message: errorMessage };
+        }
+        const action = await dispatch(loadUser());
+        return { loginStatus: action.type, message: action?.payload?.response?.detail ?? "" };
+      } catch (error) {
+        dispatch(authError({ message: error.message }));
+        return { loginStatus: "CORE_AUTH_ERR", message: error.message };
+      }
     } else {
-      // Try to refresh the token using the cookie (if present)
       await dispatch(refreshAuthToken());
+      const action = await dispatch(loadUser());
+      return { loginStatus: action.type, message: action?.payload?.response?.detail ?? "Error occurred while loading user." };
     }
-    const action = await dispatch(loadUser());
-    return { loginStatus: action.type, message: action?.payload?.response?.detail ?? "" };
   };
 }
 

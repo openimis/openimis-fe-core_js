@@ -34,7 +34,7 @@ export const validatePassword = (password, passwordPolicy, formatMessage, format
   addSuggestion(suggestions, password.length < min_length, formatMessageWithValues("admin.password.minLength", { count: min_length }));
   addSuggestion(suggestions, require_lower_case && !/[a-z]/.test(password), formatMessageWithValues("admin.password.lowerCase", { count: require_lower_case }));
   addSuggestion(suggestions, require_upper_case && !/[A-Z]/.test(password), formatMessageWithValues("admin.password.upperCase", { count: require_upper_case }));
-  addSuggestion(suggestions, require_numbers && !/[0-9]/.test(password), formatMessageWithValues("admin.password.numbers", { count: require_numbers }));
+  addSuggestion(suggestions, require_numbers && !/\d/.test(password), formatMessageWithValues("admin.password.numbers", { count: require_numbers }));
   addSuggestion(suggestions, require_special_characters && !/[^a-zA-Z0-9]/.test(password), formatMessageWithValues("admin.password.specialCharacters", { count: require_special_characters }));
 
   const feedbackResult = generateFeedback(suggestions, formatMessageWithValues);

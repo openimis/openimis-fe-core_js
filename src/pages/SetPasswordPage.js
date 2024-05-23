@@ -1,13 +1,16 @@
 import React, { useState, useMemo, useEffect } from "react";
-
 import { makeStyles } from "@material-ui/styles";
-import { Button, Box, Grid, Paper } from "@material-ui/core";
+import { Button,Typography, Box, Grid, Paper } from "@material-ui/core";
 import TextInput from "../components/inputs/TextInput";
 import { useTranslations } from "../helpers/i18n";
 import { useModulesManager } from "../helpers/modules";
 import { useHistory } from "../helpers/history";
 import Helmet from "../helpers/Helmet";
 import { useGraphqlMutation } from "../helpers/hooks";
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
+import { fetchPasswordPolicy } from "../actions"
+import { validatePassword } from '../helpers/passwordValidator';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -23,18 +26,22 @@ const useStyles = makeStyles((theme) => ({
   logo: {
     maxHeight: 100,
   },
+  passwordFeedback: {
+    marginTop: theme.spacing(1),
+  },
 }));
 
-const SetPasswordPage = () => {
+
+const SetPasswordPage = ({ fetchPasswordPolicy, passwordPolicy }) => {
   const classes = useStyles();
   const history = useHistory();
   const modulesManager = useModulesManager();
-  const { formatMessage } = useTranslations("core.SetPasswordPage", modulesManager);
+  const { formatMessage, formatMessageWithValues } = useTranslations("core.SetPasswordPage", modulesManager);
   const [credentials, setCredentials] = useState({});
   const [error, setError] = useState();
   const { mutate } = useGraphqlMutation(
     `
-      mutation setPassword ($input: SetPasswordMutationInput!) {
+      mutation setPassword($input: SetPasswordMutationInput!) {
         setPassword(input: $input) {
           clientMutationId
           success
@@ -45,10 +52,26 @@ const SetPasswordPage = () => {
     { wait: false },
   );
 
+  const [passwordFeedback, setPasswordFeedback] = useState("");
+  const [passwordScore, setPasswordScore] = useState(0);
+  const IS_PASSWORD_SECURED = passwordScore >= 2;
+
   useEffect(() => {
     const search = new URLSearchParams(location.search);
     setCredentials({ token: search.get("token") });
-  }, []);
+    fetchPasswordPolicy();
+  }, [fetchPasswordPolicy]);
+
+  const handlePasswordChange = (password) => {
+    const { feedback, score } = validatePassword(password, passwordPolicy, formatMessage, formatMessageWithValues);
+    setPasswordFeedback(feedback);
+    setPasswordScore(score);
+    setCredentials({ ...credentials, password });
+  };
+
+  const handleSetPasswordError = (errorMessage) => {
+    setError(errorMessage);
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -61,7 +84,7 @@ const SetPasswordPage = () => {
       if (result?.setPassword.success) {
         history.push("/");
       } else {
-        setError(result?.setPassword.error || formatMessage("error"));
+        handleSetPasswordError(result?.setPassword.error || formatMessage("error"));
       }
     }
   };
@@ -99,7 +122,7 @@ const SetPasswordPage = () => {
                     type="password"
                     label={formatMessage("password.label")}
                     fullWidth
-                    onChange={(password) => setCredentials({ ...credentials, password })}
+                    onChange={(password) => handlePasswordChange(password)}
                   />
                 </Grid>
                 <Grid item>
@@ -111,12 +134,18 @@ const SetPasswordPage = () => {
                     onChange={(confirmPassword) => setCredentials({ ...credentials, confirmPassword })}
                   />
                 </Grid>
+                {passwordFeedback && (
+                  <Grid item>
+                    <Typography color={IS_PASSWORD_SECURED ? "primary" : "error"} className={classes.passwordFeedback}>
+                      {passwordFeedback}
+                    </Typography>
+                  </Grid>
+                )}
                 {error && (
                   <Grid item>
                     <Box color="error.main">{error}</Box>
                   </Grid>
                 )}
-
                 <Grid item>
                   <Button fullWidth type="submit" disabled={!isValid} color="primary" variant="contained">
                     {formatMessage("submitBtn")}
@@ -131,4 +160,16 @@ const SetPasswordPage = () => {
   );
 };
 
-export default SetPasswordPage;
+const mapStateToProps = (state) => ({
+  passwordPolicy: state.core.passwordPolicy, // Adjust based on your state structure
+});
+
+const mapDispatchToProps = (dispatch) =>
+  bindActionCreators(
+    {
+      fetchPasswordPolicy,
+    },
+    dispatch,
+  );
+
+export default connect(mapStateToProps, mapDispatchToProps)(SetPasswordPage);

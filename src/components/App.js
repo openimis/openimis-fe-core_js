@@ -128,7 +128,6 @@ const App = (props) => {
   }
 
   if (!auth.isInitialized) return null;
-
   return (
     <>
       <Helmet titleTemplate="%s - openIMIS" defaultTitle="openIMIS" />

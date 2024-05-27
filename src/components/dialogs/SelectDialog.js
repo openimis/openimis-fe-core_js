@@ -18,6 +18,7 @@ const SelectDialog = ({
   confirmMessage,
   confirmState,
   confirmTitle,
+  confirmMessageComponent,
   onClose,
   onConfirm,
 }) => {
@@ -27,7 +28,8 @@ const SelectDialog = ({
     <Dialog open={confirmState} onClose={onClose}>
       <DialogTitle>{formatMessage(confirmTitle)}</DialogTitle>
       <DialogContent>
-        <DialogContentText>{formatMessage(confirmMessage)}</DialogContentText>
+        {confirmMessage && <DialogContentText>{formatMessage(confirmMessage)}</DialogContentText>}
+        <DialogContentText>{confirmMessageComponent}</DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button onClick={onConfirm} autoFocus className={classes.primaryButton}>

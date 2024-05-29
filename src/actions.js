@@ -44,6 +44,17 @@ function getApiUrl() {
 
 export const baseApiUrl = getApiUrl();
 
+function getCsrfToken() {
+  const CSRF_TOKEN_NAME = 'csrftoken';
+  const CSRF_NOT_FOUND = null;
+
+  const cookies = document.cookie;
+  const cookieArray = cookies.split('; ');
+  
+  const csrfCookie = cookieArray.find(cookie => cookie.startsWith(CSRF_TOKEN_NAME));
+  return csrfCookie?.split('=')[1] ?? CSRF_NOT_FOUND;
+}
+
 export function apiHeaders() {
   let headers = {
     "Content-Type": "application/json",
@@ -110,7 +121,7 @@ export function graphql(payload, type = "GRAPHQL_QUERY", params = {}) {
   };
 }
 
-export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY", params = {}) {
+export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY", params = {}, customHeaders = {}) {
   let req, resp, err;
   if (Array.isArray(type)) {
     [req, resp, err] = type;
@@ -125,6 +136,9 @@ export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY
         endpoint: `${baseApiUrl}/graphql`,
         method: "POST",
         body: JSON.stringify({ query: operation, variables }),
+        headers: {
+          ...customHeaders
+        },
         types: [
           {
             type: req,
@@ -199,14 +213,14 @@ export function waitForMutation(clientMutationId) {
   };
 }
 
-export function graphqlMutation(mutation, variables, type = "CORE_TRIGGER_MUTATION", params = {}, wait = true) {
+export function graphqlMutation(mutation, variables, type = "CORE_TRIGGER_MUTATION", params = {}, wait = true, customHeaders = {}) {
   let clientMutationId;
   if (variables?.input) {
     clientMutationId = uuid.uuid();
     variables.input.clientMutationId = clientMutationId;
   }
   return async (dispatch) => {
-    const response = await dispatch(graphqlWithVariables(mutation, variables, type, params));
+    const response = await dispatch(graphqlWithVariables(mutation, variables, type, params, customHeaders));
     if (clientMutationId) {
       dispatch(fetchMutation(clientMutationId));
       if (wait) {
@@ -249,9 +263,14 @@ export function login(credentials) {
               refreshExpiresIn
             }
           }`;
+
+      const csrfToken = getCsrfToken();
+
       try {
         const response = await dispatch(
-          graphqlMutation(mutation, credentials, ["CORE_AUTH_LOGIN_REQ", "CORE_AUTH_LOGIN_RESP", "CORE_AUTH_ERR"]),
+          graphqlMutation(mutation, credentials, ["CORE_AUTH_LOGIN_REQ", "CORE_AUTH_LOGIN_RESP", "CORE_AUTH_ERR"], {}, false, {
+            "X-CSRFToken": csrfToken
+          }),
         );
         if (response.payload?.errors?.length > 0) {
           const errorMessage = response.payload.errors[0].message;

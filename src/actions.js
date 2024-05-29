@@ -44,13 +44,14 @@ function getApiUrl() {
 
 export const baseApiUrl = getApiUrl();
 function getCsrfToken() {
-  return document.cookie.split('; ').find(row => row.startsWith('csrftoken')).split('=')[1];
+  const csrfToken = document.cookie.split('; ').find(row => row.startsWith('csrftoken'));
+  return csrfToken ? csrfToken.split('=')[1] : null;
 }
 
 export function apiHeaders() {
   let headers = {
     "Content-Type": "application/json",
-    "X-CSRFToken": getCsrfToken(),
+    // "X-CSRFToken": getCsrfToken(),
   };
   return headers;
 }
@@ -114,7 +115,7 @@ export function graphql(payload, type = "GRAPHQL_QUERY", params = {}) {
   };
 }
 
-export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY", params = {}) {
+export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY", params = {}, customHeaders = {}) {
   let req, resp, err;
   if (Array.isArray(type)) {
     [req, resp, err] = type;
@@ -129,6 +130,10 @@ export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY
         endpoint: `${baseApiUrl}/graphql`,
         method: "POST",
         body: JSON.stringify({ query: operation, variables }),
+        headers: {
+          ...apiHeaders(),
+          ...customHeaders
+        },
         types: [
           {
             type: req,
@@ -148,6 +153,7 @@ export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY
     return response;
   };
 }
+
 
 export function prepareMutation(operation, input, params = {}) {
   if (!params.clientMutationId) {
@@ -203,14 +209,14 @@ export function waitForMutation(clientMutationId) {
   };
 }
 
-export function graphqlMutation(mutation, variables, type = "CORE_TRIGGER_MUTATION", params = {}, wait = true) {
+export function graphqlMutation(mutation, variables, type = "CORE_TRIGGER_MUTATION", params = {}, wait = true, customHeaders = {}) {
   let clientMutationId;
   if (variables?.input) {
     clientMutationId = uuid.uuid();
     variables.input.clientMutationId = clientMutationId;
   }
   return async (dispatch) => {
-    const response = await dispatch(graphqlWithVariables(mutation, variables, type, params));
+    const response = await dispatch(graphqlWithVariables(mutation, variables, type, params, customHeaders));
     if (clientMutationId) {
       dispatch(fetchMutation(clientMutationId));
       if (wait) {
@@ -221,7 +227,7 @@ export function graphqlMutation(mutation, variables, type = "CORE_TRIGGER_MUTATI
     }
     return response;
   };
-}
+} 
 
 export function fetch(config) {
   return async (dispatch) => {
@@ -246,18 +252,22 @@ export function loadUser() {
   });
 }
 
-
 export function login(credentials) {
   return async (dispatch) => {
     if (credentials) {
       const mutation = `mutation authenticate($username: String!, $password: String!) {
-            tokenAuth(username: $username, password: $password) {
-              refreshExpiresIn
-            }
-          }`;
+        tokenAuth(username: $username, password: $password) {
+          refreshExpiresIn
+        }
+      }`;
+
+      const csrfToken = getCsrfToken();
+
       try {
         const response = await dispatch(
-          graphqlMutation(mutation, credentials, ["CORE_AUTH_LOGIN_REQ", "CORE_AUTH_LOGIN_RESP", "CORE_AUTH_ERR"]),
+          graphqlMutation(mutation, credentials, ["CORE_AUTH_LOGIN_REQ", "CORE_AUTH_LOGIN_RESP", "CORE_AUTH_ERR"], {}, false, {
+            "X-CSRFToken": csrfToken
+          }),
         );
         if (response.payload?.errors?.length > 0) {
           const errorMessage = response.payload.errors[0].message;
@@ -320,6 +330,13 @@ export function logout() {
     await dispatch(graphqlMutation(mutation, {}));
     return dispatch({ type: "CORE_AUTH_LOGOUT" });
   };
+}
+
+export function fetchPasswordPolicy() {
+  const payload = `query {
+    passwordPolicy
+  }`;
+  return graphql(payload, "PASSWORD_POLICY_FIELDS");
 }
 
 export function fetchMutation(clientMutationId) {

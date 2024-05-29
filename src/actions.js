@@ -43,10 +43,14 @@ function getApiUrl() {
 }
 
 export const baseApiUrl = getApiUrl();
+function getCsrfToken() {
+  return document.cookie.split('; ').find(row => row.startsWith('csrftoken')).split('=')[1];
+}
 
 export function apiHeaders() {
   let headers = {
     "Content-Type": "application/json",
+    "X-CSRFToken": getCsrfToken(),
   };
   return headers;
 }
@@ -225,6 +229,7 @@ export function fetch(config) {
       [RSAA]: {
         ...config,
         headers: {
+          ...apiHeaders(),
           "Content-Type": "application/json",
           ...config.headers,
         },
@@ -240,6 +245,7 @@ export function loadUser() {
     types: ["CORE_USERS_CURRENT_USER_REQ", "CORE_USERS_CURRENT_USER_RESP", "CORE_USERS_CURRENT_USER_ERR"],
   });
 }
+
 
 export function login(credentials) {
   return async (dispatch) => {

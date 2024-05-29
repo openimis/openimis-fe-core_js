@@ -51,7 +51,6 @@ function getCsrfToken() {
 export function apiHeaders() {
   let headers = {
     "Content-Type": "application/json",
-    // "X-CSRFToken": getCsrfToken(),
   };
   return headers;
 }
@@ -154,7 +153,6 @@ export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY
   };
 }
 
-
 export function prepareMutation(operation, input, params = {}) {
   if (!params.clientMutationId) {
     params.clientMutationId = uuid.uuid();
@@ -227,7 +225,7 @@ export function graphqlMutation(mutation, variables, type = "CORE_TRIGGER_MUTATI
     }
     return response;
   };
-} 
+}
 
 export function fetch(config) {
   return async (dispatch) => {
@@ -235,7 +233,6 @@ export function fetch(config) {
       [RSAA]: {
         ...config,
         headers: {
-          ...apiHeaders(),
           "Content-Type": "application/json",
           ...config.headers,
         },
@@ -256,10 +253,10 @@ export function login(credentials) {
   return async (dispatch) => {
     if (credentials) {
       const mutation = `mutation authenticate($username: String!, $password: String!) {
-        tokenAuth(username: $username, password: $password) {
-          refreshExpiresIn
-        }
-      }`;
+            tokenAuth(username: $username, password: $password) {
+              refreshExpiresIn
+            }
+          }`;
 
       const csrfToken = getCsrfToken();
 
@@ -330,13 +327,6 @@ export function logout() {
     await dispatch(graphqlMutation(mutation, {}));
     return dispatch({ type: "CORE_AUTH_LOGOUT" });
   };
-}
-
-export function fetchPasswordPolicy() {
-  const payload = `query {
-    passwordPolicy
-  }`;
-  return graphql(payload, "PASSWORD_POLICY_FIELDS");
 }
 
 export function fetchMutation(clientMutationId) {

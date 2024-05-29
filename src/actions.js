@@ -45,8 +45,14 @@ function getApiUrl() {
 export const baseApiUrl = getApiUrl();
 
 function getCsrfToken() {
-  const csrfToken = document.cookie.split('; ').find(row => row.startsWith('csrftoken'));
-  return csrfToken ? csrfToken.split('=')[1] : null;
+  const CSRF_TOKEN_NAME = 'csrftoken';
+  const CSRF_NOT_FOUND = null;
+
+  const cookies = document.cookie;
+  const cookieArray = cookies.split('; ');
+  
+  const csrfCookie = cookieArray.find(cookie => cookie.startsWith(CSRF_TOKEN_NAME));
+  return csrfCookie?.split('=')[1] ?? CSRF_NOT_FOUND;
 }
 
 export function apiHeaders() {

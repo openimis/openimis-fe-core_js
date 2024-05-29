@@ -43,6 +43,7 @@ function getApiUrl() {
 }
 
 export const baseApiUrl = getApiUrl();
+
 function getCsrfToken() {
   const csrfToken = document.cookie.split('; ').find(row => row.startsWith('csrftoken'));
   return csrfToken ? csrfToken.split('=')[1] : null;

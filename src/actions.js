@@ -130,7 +130,6 @@ export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY
         method: "POST",
         body: JSON.stringify({ query: operation, variables }),
         headers: {
-          ...apiHeaders(),
           ...customHeaders
         },
         types: [

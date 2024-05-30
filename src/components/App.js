@@ -8,18 +8,21 @@ import withModulesManager, { ModulesManagerProvider } from "../helpers/modules";
 import Helmet from "../helpers/Helmet";
 import RequireAuth from "./RequireAuth";
 import FatalError from "./generics/FatalError";
-import { clearConfirm } from "../actions";
+import { clearConfirm, toggleCurrentCalendarType } from "../actions";
 import AlertDialog from "./dialogs/AlertDialog";
 import ConfirmDialog from "./dialogs/ConfirmDialog";
 import { bindActionCreators } from "redux";
 import Contributions from "./generics/Contributions";
 import LoginPage from "../pages/LoginPage";
-import { useAuthentication } from "../helpers/hooks";
+import { useAuthentication, useBoolean } from "../helpers/hooks";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import SetPasswordPage from "../pages/SetPasswordPage";
 import { ErrorBoundary } from "@openimis/fe-core";
 import { onLogout } from "../helpers/utils";
 import { RIGHT_VIEW_EU_MODAL } from "../constants";
+import NotFoundPage from "./NotFoundPage";
+import PermissionCheck from "./PermissionCheck";
+import PublishedComponent from "./generics/PublishedComponent";
 
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";
 export const UNAUTHENTICATED_ROUTER_CONTRIBUTION_KEY = "core.UnauthenticatedRouter";
@@ -50,12 +53,15 @@ const App = (props) => {
     localesManager,
     modulesManager,
     basename = process.env.PUBLIC_URL,
+    toggleCurrentCalendarType,
+    rights,
     ...others
   } = props;
 
   const economicUnitConfig = modulesManager.getConf("fe-core", "App.economicUnitConfig", false);
 
   const [economicUnitDialogOpen, setEconomicUnitDialogOpen] = useState(false);
+  const [isSecondaryCalendar, setSecondaryCalendar] = useBoolean(true);
 
   const auth = useAuthentication();
   const routes = useMemo(() => {
@@ -99,7 +105,12 @@ const App = (props) => {
 
   useEffect(() => {
     const userHasModalRight = user?.rights ? user.rights.includes(RIGHT_VIEW_EU_MODAL) : false;
-    if (economicUnitConfig && userHasModalRight && auth.isAuthenticated && !localStorage.getItem(ECONOMIC_UNIT_STORAGE_KEY)) {
+    if (
+      economicUnitConfig &&
+      userHasModalRight &&
+      auth.isAuthenticated &&
+      !localStorage.getItem(ECONOMIC_UNIT_STORAGE_KEY)
+    ) {
       setEconomicUnitDialogOpen(true);
     }
 
@@ -108,13 +119,16 @@ const App = (props) => {
     }
   }, [auth, economicUnitDialogOpen, user]);
 
+  useEffect(() => {
+    localStorage.setItem("isSecondaryCalendarEnabled", JSON.stringify(!isSecondaryCalendar));
+    toggleCurrentCalendarType(!isSecondaryCalendar);
+  }, [isSecondaryCalendar]);
 
   if (error) {
     return <FatalError error={error} />;
   }
 
   if (!auth.isInitialized) return null;
-
   return (
     <>
       <Helmet titleTemplate="%s - openIMIS" defaultTitle="openIMIS" />
@@ -131,6 +145,10 @@ const App = (props) => {
               onLogout={onLogout}
             />
           ) : null}
+          <PublishedComponent
+            pubRef="grievanceSocialProtection.GrievanceConfigurationDialog"
+            rights={rights}
+          />
           <div className="App">
             {auth.isAuthenticated && <Contributions contributionKey={APP_BOOT_CONTRIBUTION_KEY} />}
             <BrowserRouter basename={basename}>
@@ -163,13 +181,23 @@ const App = (props) => {
                           {...others}
                           redirectTo={"/login"}
                           onEconomicDialogOpen={() => setEconomicUnitDialogOpen(true)}
+                          isSecondaryCalendar={isSecondaryCalendar}
+                          setSecondaryCalendar={setSecondaryCalendar}
                         >
-                          <route.component modulesManager={modulesManager} {...props} {...others} />
+                          <PermissionCheck
+                            modulesManager={modulesManager}
+                            userRights={rights}
+                            requiredRights={route.requiredRights}
+                            {...others}
+                          >
+                            <route.component modulesManager={modulesManager} {...props} {...others} />
+                          </PermissionCheck>
                         </RequireAuth>
                       </ErrorBoundary>
                     )}
                   />
                 ))}
+                <Route render={() => <NotFoundPage {...others} />} />
               </Switch>
             </BrowserRouter>
           </div>
@@ -180,11 +208,12 @@ const App = (props) => {
 };
 
 const mapStateToProps = (state) => ({
+  rights: state.core.user?.i_user?.rights ?? [],
   user: state.core.user?.i_user,
   error: state.core.error,
   confirm: state.core.confirm,
 });
 
-const mapDispatchToProps = (dispatch) => bindActionCreators({ clearConfirm }, dispatch);
+const mapDispatchToProps = (dispatch) => bindActionCreators({ clearConfirm, toggleCurrentCalendarType }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(withTheme(withStyles(styles)(withModulesManager(App))));

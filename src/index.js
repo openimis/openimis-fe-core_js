@@ -39,6 +39,7 @@ import CustomFilterTypeStatusPicker from "./pickers/CustomFilterTypeStatusPicker
 import YearPicker from "./pickers/YearPicker";
 import MonthPicker from "./pickers/MonthPicker";
 import LanguagePicker from "./pickers/LanguagePicker";
+import AuthorityPicker from "./pickers/AuthorityPicker";
 import Helmet from "./helpers/Helmet";
 import AccountBox from "@material-ui/icons/AccountBox";
 import Roles from "./pages/Roles";
@@ -48,6 +49,7 @@ import ErrorBoundary from "./helpers/ErrorBoundary";
 import ConfirmDialog from "./components/dialogs/ConfirmDialog";
 import SelectDialog from "./components/dialogs/SelectDialog";
 import AdvancedFiltersDialog from "./components/dialogs/AdvancedFiltersDialog";
+import WarningBox from "./components/generics/WarningBox";
 import {
   baseApiUrl,
   apiHeaders,
@@ -67,7 +69,9 @@ import {
   formatMessage,
   formatMessageWithValues,
   formatDateFromISO,
+  formatDateTimeFromISO,
   toISODate,
+  toISODateTime,
   formatAmount,
   withTooltip,
   useTranslations,
@@ -122,6 +126,7 @@ import { authMiddleware } from "./middlewares";
 import RefreshAuthToken from "./components/RefreshAuthToken";
 import UserActivityReport from "./reports/UserActivityReport";
 import RegistersStatusReport from "./reports/RegistersStatusReport";
+import SearcherActionButton from "./components/generics/SearcherActionButton";
 
 const ROUTE_ROLES = "roles";
 const ROUTE_ROLE = "roles/role";
@@ -173,6 +178,7 @@ const DEFAULT_CONFIG = {
     { key: "core.YearPicker", ref: YearPicker },
     { key: "core.MonthPicker", ref: MonthPicker },
     { key: "core.LanguagePicker", ref: LanguagePicker },
+    { key: "core.AuthorityPicker", ref: AuthorityPicker },
     { key: "core.route.role", ref: ROUTE_ROLE },
   ],
   "core.Boot": [KeepLegacyAlive, RefreshAuthToken],
@@ -252,7 +258,9 @@ export {
   formatMessage,
   formatMessageWithValues,
   formatDateFromISO,
+  formatDateTimeFromISO,
   toISODate,
+  toISODateTime,
   formatAmount,
   formatGQLString,
   formatJsonField,
@@ -267,6 +275,7 @@ export {
   Error,
   FatalError,
   AlertForwarder,
+  WarningBox,
   SelectInput,
   TextInput,
   ValidatedTextInput,
@@ -308,4 +317,5 @@ export {
   CLEARED_STATE_FILTER,
   createFieldsBasedOnJSON,
   renderInputComponent,
+  SearcherActionButton,
 };

@@ -1,8 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import withStyles from "@material-ui/core/styles/withStyles";
-import { Tooltip, MenuItem } from "@material-ui/core";
+import { MenuItem, Tooltip } from "@material-ui/core";
 import { formatMessage } from "../../helpers/i18n";
 import { injectIntl } from "react-intl";
+import {
+  closeExportColumnsDialog,
+  openExportColumnsDialog,
+} from "../../actions";
+import ExportColumnsDialog from "../dialogs/ExportColumnsDialog";
 
 const styles = (theme) => ({
   error: {
@@ -17,43 +23,95 @@ const styles = (theme) => ({
 });
 
 function SearcherExport(props) {
-  const { intl, rights, selection, filters, exportFetch, exportFields, exportFieldsColumns, label=null } = props;
-  const [exportStatus, setExport] = useState(0);
-  const enabled = (selection) => {return exportStatus == 0};
+  const {
+    intl,
+    rights,
+    selection,
+    filters,
+    exportFetch,
+    exportFields,
+    exportFieldsColumns,
+    chooseExportableColumns,
+    label = null,
+  } = props;
 
-  const exportData = () => {
-    let prms = Object.keys(filters)
+  const [exportStatus, setExport] = useState(0);
+  const dispatch = useDispatch();
+  const isExportColumnsDialogOpen = useSelector(
+    (state) => state.core?.isExportColumnsDialogOpen
+  );
+
+  const enabled = selection => exportStatus === 0;
+
+  const exportData = (fields = exportFields, columns = exportFieldsColumns) => {
+    const prms = Object.keys(filters)
       .filter((f) => !!filters[f]["filter"])
-      .map((f) => filters[f]["filter"])
-    
-    prms.push(`fields: ${JSON.stringify(exportFields)}`)
-    prms.push(`fieldsColumns: "${JSON.stringify(exportFieldsColumns).replace(/\"/g, '\\"')}"`)
+      .map((f) => filters[f]["filter"]);
+
+    prms.push(`fields: ${JSON.stringify(fields)}`);
+    prms.push(`fieldsColumns: "${JSON.stringify(columns).replace(/\"/g, '\\"')}"`);
     exportFetch(prms);
   };
 
-  let entries = [{ 
-    text: label || formatMessage(intl, "core", "exportSearchResult"), 
-    action: exportData 
-  }];
+  const handleExportData = () => {
+    if (chooseExportableColumns) {
+      dispatch(openExportColumnsDialog());
+    } else {
+      exportData();
+    }
+  };
 
-  entries = entries.map((i, idx) => (
-      <Tooltip 
-      title={formatMessage(intl, "core", "exportSearchResult.tooltip")}>
-          <div><MenuItem 
-          key={`selectionsMenu-export-${idx}`} 
-          onClick={e => i.action()}
-          disabled={!enabled(selection)}>
-            {i.text}
-          </MenuItem></div>
-      </Tooltip>
-))
+  const handleColumnFiltering = (fields, columns) => {
+    exportData(fields, columns);
+  };
 
+  const parseToDialogColumns = (columns, fields) => {
+    return fields.reduce((dialogColumns, field) => {
+      if (!(field in dialogColumns)) {
+        dialogColumns[field] = field.startsWith("json_ext__")
+          ? field.replace(/^json_ext__/, "")
+          : field;
+      }
+      return dialogColumns;
+    }, { ...columns });
+  };
+
+  const entries = [
+    {
+      text: label || formatMessage(intl, "core", "exportSearchResult"),
+      action: handleExportData,
+    },
+  ];
 
   return (
+    <>
+      {chooseExportableColumns && (
+        <ExportColumnsDialog
+          confirmState={isExportColumnsDialogOpen}
+          onConfirm={() => dispatch(closeExportColumnsDialog())}
+          onClose={() => dispatch(closeExportColumnsDialog())}
+          module="core"
+          getFilteredFieldsAndColumn={handleColumnFiltering}
+          columns={parseToDialogColumns(exportFieldsColumns, exportFields)}
+        />
+      )}
+
       <div style={{ display: enabled(selection) ? "block" : "none" }}>
-          {entries}
+        {entries.map((item, idx) => (
+          <Tooltip title={formatMessage(intl, "core", "exportSearchResult.tooltip")}>
+            <div key={`selectionsMenu-export-${idx}`}>
+              <MenuItem
+                onClick={(e) => item.action()}
+                disabled={!enabled(selection)}
+              >
+                {item.text}
+              </MenuItem>
+            </div>
+          </Tooltip>
+        ))}
       </div>
-  )
+    </>
+  );
 }
 
 export default injectIntl(withStyles(styles)(SearcherExport));

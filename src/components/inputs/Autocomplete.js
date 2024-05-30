@@ -12,7 +12,7 @@ const styles = (theme) => ({
   },
 });
 
-const defaultGetOptionSelected = (option, v) => option.id === v.id;
+const defaultGetOptionSelected = (option, v) => option.id === v?.id;
 
 const Autocomplete = (props) => {
   const {

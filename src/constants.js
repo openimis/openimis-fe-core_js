@@ -1,4 +1,4 @@
-export const DEFAULT_DEBOUNCE_TIME = 700;
+export const DEFAULT_DEBOUNCE_TIME = 500;
 export const DEFAULT_PAGE_SIZE = 10;
 export const ROWS_PER_PAGE_OPTIONS = [10, 20, 50, 100];
 export const CONTAINS_LOOKUP = "Icontains";
@@ -117,9 +117,15 @@ export const CLAIM_STATS_ORDER = [
 ]
 
 export const CORE_MIS_CONFLUENCE_URL = "https://openimis.atlassian.net/wiki/spaces/OP/pages/3531407380/Project+2022.T3+CORE-MIS+Merger";
-export const DEFAULT_URL = "/Manual/IMIS_manual.pdf";
+export const DEFAULT_URL = "https://docs.openimis.org/";
 
 export const  SAML_LOGIN_PATH = "/msystems/saml/login/";
 export const  SAML_LOGOUT_PATH = "/msystems/saml/logout/";
 
 export const RIGHT_VIEW_EU_MODAL = 203000;
+
+export const ENTER_KEY = "Enter";
+
+export const DEFAULT = {
+  IS_WORKER: false,
+}

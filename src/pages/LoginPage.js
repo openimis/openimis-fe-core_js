@@ -10,7 +10,7 @@ import { useAuthentication } from "../helpers/hooks";
 import Contributions from "./../components/generics/Contributions";
 import MPassLogo from "./../mPassLogoColor.svg";
 import { baseApiUrl } from "../actions";
-import { SAML_LOGIN_PATH } from "../constants";
+import { DEFAULT, SAML_LOGIN_PATH } from "../constants";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -39,11 +39,12 @@ const LoginPage = ({ logo }) => {
   const modulesManager = useModulesManager();
   const { formatMessage } = useTranslations("core.LoginPage", modulesManager);
   const [credentials, setCredentials] = useState({});
-  const [hasError, setError] = useState(false);
-  const [hasMPassError, setMPassError] = useState(false);
+  const [serverResponse, setServerResponse] = useState({ loginStatus: "", message: null });
+  const [hasMPassError, setMPassError] = useState(false);  
   const auth = useAuthentication();
   const [isAuthenticating, setAuthenticating] = useState(false);
   const showMPassProvider = modulesManager.getConf("fe-core", "LoginPage.showMPassProvider", false);
+  const isWorker = modulesManager.getConf("fe-core", "isWorker", DEFAULT.IS_WORKER);
 
   useEffect(() => {
     if (auth.isAuthenticated) {
@@ -51,21 +52,49 @@ const LoginPage = ({ logo }) => {
     }
   }, []);
 
+  const handleLoginError = (errorMessage) => {
+    setServerResponse({ loginStatus: "CORE_AUTH_ERR", message: errorMessage });
+    setAuthenticating(false);
+  };
+
   const onSubmit = async (e) => {
     e.preventDefault();
-    setError(false);
     setAuthenticating(true);
-    if (await auth.login(credentials)) {
-      history.push("/");
-    } else {
-      setError(true);
+  
+    try {
+      const response = await auth.login(credentials);
+      if (response.payload?.errors?.length) {
+        handleLoginError(response.payload.errors[0].message);
+        return;
+      }
+  
+      const { loginStatus, message } = response;
+      setServerResponse({ loginStatus, message });
+  
+      if (loginStatus === "CORE_AUTH_ERR") {
+        setAuthenticating(false);
+      } else {
+        history.push("/");
+      }
+    } catch (error) {
       setAuthenticating(false);
     }
   };
+  
 
   const redirectToForgotPassword = (e) => {
     e.preventDefault();
     history.push("/forgot_password");
+  };
+
+  const errorMessages = {
+    INCORRECT_CREDENTIALS: formatMessage("core.LoginPage.authError"),
+    HF_CONTRACT_INVALID: formatMessage("core.LoginPage.authErrorHealthFacilityContractInvalid"),
+    GENERAL: formatMessage("core.LoginPage.authErrorGeneral"),
+  };
+
+  const getErrorMessage = (messageKey) => {
+    return errorMessages[messageKey] || messageKey;
   };
 
   const redirectToMPassLogin = (e) => {
@@ -90,9 +119,11 @@ const LoginPage = ({ logo }) => {
               <Grid container spacing={2} direction="column" alignItems="stretch">
                 <Grid item container direction="row" alignItems="center">
                   <img className={classes.logo} src={logo} />
-                  <Box pl={2} fontWeight="fontWeightMedium" fontSize="h4.fontSize">
-                    {formatMessage("appName")}
-                  </Box>
+                  {!isWorker && (
+                    <Box pl={2} fontWeight="fontWeightMedium" fontSize="h4.fontSize">
+                      {formatMessage("appName")}
+                    </Box>
+                  )}
                 </Grid>
                 {showMPassProvider ? (
                   <>
@@ -131,10 +162,10 @@ const LoginPage = ({ logo }) => {
                         onChange={(password) => setCredentials({ ...credentials, password })}
                       />
                     </Grid>
-                    {hasError && (
-                      <Grid item>
-                        <Box color="error.main">{formatMessage("authError")}</Box>
-                      </Grid>
+                    {serverResponse?.message && (
+                    <Grid item>
+                      <Box color="error.main">{getErrorMessage(serverResponse.message)}</Box>
+                    </Grid>
                     )}
                     <Grid item>
                       <Button
@@ -152,7 +183,7 @@ const LoginPage = ({ logo }) => {
                       <Contributions contributionKey={LOGIN_PAGE_CONTRIBUTION_KEY} />
                     </Grid>
                   </>
-                )}
+                  )}
               </Grid>
             </Box>
           </form>

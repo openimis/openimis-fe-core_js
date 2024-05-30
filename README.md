@@ -24,6 +24,11 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 - `Help`: main menu entry for Help (link to manual)
 - `Logout`: main menu entry to logout
 - `KeepLegacyAlive`: component to be registered in core.Boot contribution to keep legacy openIMIS session alive while interacting with new openIMIS pages
+- `ErrorPage`: displays error messages with status, title, and optional logo. Includes navigation button to the homepage.
+- `PermissionCheck`: controls access to content based on user rights (403 error). Renders content if user has required rights, otherwise shows `ForbiddenPage`.
+- `ForbiddenPage`: shown when a user lacks permission to access a specific page or resource. Displays an access denied message.
+- `NotFoundPage`: appears when a user visits a non-existent route (404 error). Informs the user that the page is unavailable and suggests navigation option.
+- `InternalServerErrorPage`: displays a message for a 500 Internal Server Error, informing users of a server-side issue in the application.
 
 ## Generic Components (to be reused along business-focused components)
 
@@ -42,6 +47,7 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 - `FormattedMessage`: translated text (module/key)
 - `ProgressOrError`: display progress during component's asynchronous calls... and hide or diaply error message when asynchronous call returns
 - `Searcher`: generic searcher page (with criteria form and result table)
+- `SearcherActionButton`: represents an action button used within a search interface.
 - `Form`: generic form. Manage dirty state, displays add/save button,...
 - `Table`: generic table. Headers (with -sort-actions), rows, optional setting - showOrdinalNumber that will show column with ordinal number as first column, ...
 
@@ -118,6 +124,7 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 - `core.YearPicker`, pick a year within a range
 - `core.MonthPicker`, contant-based month picker. Translation keys `month.null`, `month.1`,...
 - `core.LanguagePicker`, pick from available languages
+- `core.WarningBox`, simple alert component to show warnings or messages, with options to customize its look and size.
 
 ## Dispatched Redux Actions
 
@@ -144,7 +151,7 @@ None
 
 ## Configurations Options
 
-- `datePicker`: the concrete date picker to publish as `core.DatePicker` component ("ad"= Gregorian DatePicker, "ne"= Neplali calendar date picker )
+- `datePicker`: the concrete date picker to publish as `core.DatePicker` component ("ad"= Gregorian DatePicker, "ne"= Nepali calendar date picker )
 - `useDynPermalinks`: use ?dyn=<Base64-URL> when opening in new tab (prevent sending client-side routes to server while) (Default: false)
 - `core.JournalDrawer.pollInterval`: poll interval (in ms) to check for mutation status once submitted (Default: 2000)
 - `core.KeepLegacyAlive.pollInterval`: poll interval (in ms) to send the ping to legacy openIMIS (to prevent session timeout). (Default: 300000 = 5')
@@ -157,8 +164,8 @@ None
 - `secondCalendarFormattingLang`: formatting language for second calendar (when displayed as saved data, not in pickers), default: "en"
 - `redirectToCoreMISConfluenceUrl`: clicking on questionmark icon will take you to coreMIS confluence page, default openIMIS manual
 - `App.economicUnitConfig`:
-  In the specified configuration, when the parameter is set to __true__, it necessitates that users are associated with an Economic Unit. If a user lacks this association, a modal will be displayed to prompt them to establish it. Until the user is linked to a unit, their only authorized action is to log out. The default configuration is __false__.
-- `LogoutButton.showMPassProvider`:  when activated, routes the user to the saml logout page for secure session termination
+  In the specified configuration, when the parameter is set to **true**, it necessitates that users are associated with an Economic Unit. If a user lacks this association, a modal will be displayed to prompt them to establish it. Until the user is linked to a unit, their only authorized action is to log out. The default configuration is **false**.
+- `LogoutButton.showMPassProvider`: when activated, routes the user to the saml logout page for secure session termination
 - `LoginPage.showMPassProvider`: redirects users to the saml login page, facilitating access to mPass-protected resources
 - `secondCalendarType`: type of secondary calendar picker (if enabled), default "nepali"
 - `secondCalendarLocale`: locale for secondary calendar picker (if enabled), default "nepali_en"

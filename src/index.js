@@ -63,7 +63,8 @@ import {
   fetchMutation,
   prepareMutation,
   clearCurrentPaginationPage,
-  fetchCustomFilter
+  fetchCustomFilter,
+  fetchPasswordPolicy
 } from "./actions";
 import {
   formatMessage,
@@ -118,6 +119,7 @@ import withHistory, {
   Redirect,
   NavLink,
 } from "./helpers/history";
+import { validatePassword } from "./helpers/passwordValidator";
 import { createFieldsBasedOnJSON, renderInputComponent } from "./helpers/json-handler-utils";
 import withModulesManager, { useModulesManager } from "./helpers/modules";
 import { formatJsonField } from "./helpers/jsonExt";
@@ -221,6 +223,7 @@ export {
   graphqlMutation,
   journalize,
   fetchMutation,
+  fetchPasswordPolicy,
   prepareMutation,
   downloadExport,
   coreAlert,
@@ -238,6 +241,7 @@ export {
   Link,
   Redirect,
   NavLink,
+  validatePassword,
   historyPush,
   decodeId,
   encodeId,

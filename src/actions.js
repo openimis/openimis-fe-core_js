@@ -335,6 +335,13 @@ export function logout() {
   };
 }
 
+export function fetchPasswordPolicy() {
+  const payload = `query {
+    passwordPolicy
+  }`;
+  return graphql(payload, "PASSWORD_POLICY_FIELDS");
+}
+
 export function fetchMutation(clientMutationId) {
   const payload = formatPageQuery(
     "mutationLogs",

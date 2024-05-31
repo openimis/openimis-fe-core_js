@@ -7,7 +7,7 @@ import { withTheme, withStyles } from "@material-ui/core/styles";
 import withModulesManager, { ModulesManagerProvider } from "../helpers/modules";
 import Helmet from "../helpers/Helmet";
 import RequireAuth from "./RequireAuth";
-import FatalError from "./generics/FatalError";
+import FatalErrorPage from "./generics/FatalError";
 import { clearConfirm, toggleCurrentCalendarType } from "../actions";
 import AlertDialog from "./dialogs/AlertDialog";
 import ConfirmDialog from "./dialogs/ConfirmDialog";
@@ -29,7 +29,6 @@ export const UNAUTHENTICATED_ROUTER_CONTRIBUTION_KEY = "core.UnauthenticatedRout
 export const APP_BOOT_CONTRIBUTION_KEY = "core.Boot";
 export const TRANSLATION_CONTRIBUTION_KEY = "translations";
 export const ECONOMIC_UNIT_DIALOG_CONTRIBUTION_KEY = "policyholder.EconomicUnitDialog";
-
 const ECONOMIC_UNIT_STORAGE_KEY = "userEconomicUnit";
 
 const styles = () => ({
@@ -125,7 +124,11 @@ const App = (props) => {
   }, [isSecondaryCalendar]);
 
   if (error) {
-    return <FatalError error={error} />;
+    return (
+      <IntlProvider locale={locale} messages={allMessages}>
+        <FatalErrorPage error={error} />
+      </IntlProvider>
+    );
   }
 
   if (!auth.isInitialized) return null;

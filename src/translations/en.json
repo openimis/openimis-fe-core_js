@@ -135,5 +135,9 @@
   "core.tooltip.help": "Documentation",
   "core.NeDateFormatter.dateOutOfRange": "DATE_OUT_OF_RANGE",
   "core.AuthorityPicker.label": "Authority",
-  "core.AuthorityPicker.placeholder": "Search..."
+  "core.AuthorityPicker.placeholder": "Search...",
+  "core.FatalError.RateLimitExceeded.description": "You have exceeded the number of allowed requests. Please try again later.",
+  "core.FatalError.RateLimitExceeded.title": "Rate Limit Exceeded",
+  "core.FatalError.GenericError.description": "Error",
+  "core.FatalError.GenericError.title": "An unexpected error occurred"
 }

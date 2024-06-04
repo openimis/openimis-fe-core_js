@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { makeStyles } from "@material-ui/styles";
-import { Button,Typography, Box, Grid, Paper } from "@material-ui/core";
+import { Button, Typography, Box, Grid, Paper, IconButton, InputAdornment } from "@material-ui/core";
 import TextInput from "../components/inputs/TextInput";
 import { useTranslations } from "../helpers/i18n";
 import { useModulesManager } from "../helpers/modules";
@@ -9,8 +9,12 @@ import Helmet from "../helpers/Helmet";
 import { useGraphqlMutation } from "../helpers/hooks";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
-import { fetchPasswordPolicy } from "../actions"
+import { fetchPasswordPolicy } from "../actions";
 import { validatePassword } from '../helpers/passwordValidator';
+import { passwordGenerator } from "../helpers/passwordGenerator";
+import VisibilityIcon from "@material-ui/icons/Visibility";
+import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
+import ClearIcon from "@material-ui/icons/Clear";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -29,6 +33,10 @@ const useStyles = makeStyles((theme) => ({
   passwordFeedback: {
     marginTop: theme.spacing(1),
   },
+  buttonGroup: {
+    display: "flex",
+    justifyContent: "space-between",
+  },
 }));
 
 
@@ -39,6 +47,7 @@ const SetPasswordPage = ({ fetchPasswordPolicy, passwordPolicy }) => {
   const { formatMessage, formatMessageWithValues } = useTranslations("core.SetPasswordPage", modulesManager);
   const [credentials, setCredentials] = useState({});
   const [error, setError] = useState();
+  const [showPassword, setShowPassword] = useState(false);
   const { mutate } = useGraphqlMutation(
     `
       mutation setPassword($input: SetPasswordMutationInput!) {
@@ -71,6 +80,27 @@ const SetPasswordPage = ({ fetchPasswordPolicy, passwordPolicy }) => {
 
   const handleSetPasswordError = (errorMessage) => {
     setError(errorMessage);
+  };
+
+  const generatePassword = () => {
+    const newPassword = passwordGenerator({
+      length: 12,
+      isNumberRequired: true,
+      isLowerCaseRequired: true,
+      isUpperCaseRequired: true,
+      isSpecialSymbolRequired: true,
+    });
+    handlePasswordChange(newPassword);
+    setCredentials({ ...credentials, password: newPassword, confirmPassword: newPassword });
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const clearPassword = () => {
+    handlePasswordChange("");
+    setCredentials({ ...credentials, password: "", confirmPassword: "" });
   };
 
   const onSubmit = async (e) => {
@@ -119,20 +149,37 @@ const SetPasswordPage = ({ fetchPasswordPolicy, passwordPolicy }) => {
                 <Grid item>
                   <TextInput
                     required
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     label={formatMessage("password.label")}
                     fullWidth
                     onChange={(password) => handlePasswordChange(password)}
+                    value={credentials.password || ""}
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton onClick={togglePasswordVisibility} edge="end">
+                          {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                        </IconButton>
+                        <IconButton onClick={clearPassword} edge="end">
+                          <ClearIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    }
                   />
                 </Grid>
                 <Grid item>
                   <TextInput
                     required
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     label={formatMessage("confirmPassword.label")}
                     fullWidth
                     onChange={(confirmPassword) => setCredentials({ ...credentials, confirmPassword })}
+                    value={credentials.confirmPassword || ""}
                   />
+                </Grid>
+                <Grid item className={classes.buttonGroup}>
+                  <Button onClick={generatePassword} variant="contained">
+                    {formatMessage("core.SetPasswordPage.generatePassword")}
+                  </Button>
                 </Grid>
                 {passwordFeedback && (
                   <Grid item>

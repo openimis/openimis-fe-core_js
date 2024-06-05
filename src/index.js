@@ -120,6 +120,7 @@ import withHistory, {
   NavLink,
 } from "./helpers/history";
 import { validatePassword } from "./helpers/passwordValidator";
+import { passwordGenerator } from "./helpers/passwordGenerator"
 import { createFieldsBasedOnJSON, renderInputComponent } from "./helpers/json-handler-utils";
 import withModulesManager, { useModulesManager } from "./helpers/modules";
 import { formatJsonField } from "./helpers/jsonExt";
@@ -322,4 +323,5 @@ export {
   createFieldsBasedOnJSON,
   renderInputComponent,
   SearcherActionButton,
+  passwordGenerator,
 };

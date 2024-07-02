@@ -196,7 +196,10 @@ class Searcher extends Component {
     clearAll: 0,
     menuAnchor: null,
   };
-
+  constructor(props) {
+    super(props);
+    this.fetchEnabled = props.modulesManager.getConf("fe-core", "shouldFetchInitially", true);
+  }
   componentDidMount() {
     const cacheKey = this._getCacheKey();
     var filters = this.props.filtersCache[cacheKey] || this.props.defaultFilters || {};
@@ -206,7 +209,11 @@ class Searcher extends Component {
         pageSize: props.defaultPageSize || 10,
         orderBy: props.defaultOrderBy,
       }),
-      (e) => this.applyFilters()
+      (e) => {
+        if (this.fetchEnabled) {
+          this.applyFilters();
+        }
+      }
     );
   }
 

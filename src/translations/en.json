@@ -143,5 +143,9 @@
   "core.FatalError.RateLimitExceeded.description": "You have exceeded the number of allowed requests. Please try again later.",
   "core.FatalError.RateLimitExceeded.title": "Rate Limit Exceeded",
   "core.FatalError.GenericError.description": "Error",
-  "core.FatalError.GenericError.title": "An unexpected error occurred"
+  "core.FatalError.GenericError.title": "An unexpected error occurred",
+  "core.LanguageQuickPicker.dialog.title": "Confirm Language",
+  "core.LanguageQuickPicker.dialog.message": "You are about to change the language to {language}. Do you want to proceed?",
+  "core.LanguageQuickPicker.dialog.confirm": "Confirm",
+  "core.LanguageQuickPicker.dialog.cancel": "Cancel"
 }

@@ -23,7 +23,7 @@ const ROLE_FULL_PROJECTION = () => [
 
 const ROLERIGHT_FULL_PROJECTION = () => ["rightId"];
 
-const LANGUAGE_FULL_PROJECTION = () => ["name", "code", "sortOrder"];
+const LANGUAGE_FULL_PROJECTION = () => ["name", "code"];
 
 const MODULEPERMISSION_FULL_PROJECTION = () => ["modulePermsList{moduleName, permissions{permsName, permsValue}}"];
 
@@ -535,4 +535,16 @@ export function toggleCurrentCalendarType(isSecondaryCalendarEnabled) {
   return (dispatch) => {
     dispatch({ type: "CORE_CALENDAR_TYPE_TOGGLE", payload: { isSecondaryCalendarEnabled } });
   };
+}
+
+export function changeUserLanguage(language, clientMutationLabel) {
+  const mutation = formatMutation("changeUserLanguage", `languageId: "${language}"`, clientMutationLabel);
+  const requestedDateTime = new Date();
+
+  return graphql(mutation.payload, ["CORE_MUTATION_REQ", "CHANGE_USER_LANGUAGE_RESP", "CORE_MUTATION_ERR"], {
+    actionType: "CHANGE_USER_LANGUAGE_RESP",
+    clientMutationId: mutation.clientMutationId,
+    clientMutationLabel,
+    requestedDateTime,
+  });
 }

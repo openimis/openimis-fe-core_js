@@ -48,6 +48,10 @@ function reducer(
     fetchedCustomFilters: false,
     customFilters: [],
     isExportColumnsDialogOpen: false,
+    fetchingLanguages: false,
+    fetchedLanguages: false,
+    languages: [],
+    errorLanguages: null,
   },
   action,
 ) {

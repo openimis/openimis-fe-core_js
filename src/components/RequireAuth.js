@@ -23,7 +23,7 @@ import Contributions from "./generics/Contributions";
 import FormattedMessage from "./generics/FormattedMessage";
 import JournalDrawer from "./JournalDrawer";
 import { useBoolean, useAuthentication } from "../helpers/hooks";
-
+import LanguageQuickPicker from "../pickers/LanguageQuickPicker";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { Switch } from "@material-ui/core";
 import { useTranslations } from "../helpers/i18n";
@@ -338,6 +338,7 @@ const RequireAuth = (props) => {
               labelPlacement="start"
             />
           )}
+          <LanguageQuickPicker />
           <Contributions
             contributionKey={ECONOMIC_UNIT_BUTTON_CONTRIBUTION_KEY}
             onEconomicDialogOpen={onEconomicDialogOpen}

@@ -1,6 +1,7 @@
 import React from "react";
 import { TextInput, NumberInput } from "@openimis/fe-core";
 import { FIELD_TYPES } from "../constants";
+import { isEmptyObject } from "./utils";
 
 // Creates additional fields from a JSON string and returns an array of field objects.
 // @param { string } json - The JSON string containing additional fields.
@@ -11,7 +12,7 @@ export const createFieldsBasedOnJSON = (json, stream = "") => {
 
   const additionalFields = JSON.parse(json);
 
-  const fields = stream ? additionalFields[stream] : additionalFields;
+  const fields = stream && !isEmptyObject(additionalFields) ? additionalFields[stream] : additionalFields;
 
   return Object.entries(fields).map(([property, value]) => {
     const field = { [property]: value };

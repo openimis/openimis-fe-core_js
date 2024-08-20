@@ -32,6 +32,7 @@ function SearcherExport(props) {
     exportFields,
     exportFieldsColumns,
     chooseExportableColumns,
+    additionalExportFields,
     label = null,
   } = props;
 
@@ -43,14 +44,23 @@ function SearcherExport(props) {
 
   const enabled = selection => exportStatus === 0;
 
-  const exportData = (fields = exportFields, columns = exportFieldsColumns) => {
-    const prms = Object.keys(filters)
+  const exportData = (
+    fields = exportFields,
+    columns = exportFieldsColumns,
+    additionalFields = additionalExportFields,
+  ) => {
+    const defaultFilters = Object
+      .keys(filters)
       .filter((f) => !!filters[f]["filter"])
       .map((f) => filters[f]["filter"]);
 
-    prms.push(`fields: ${JSON.stringify(fields)}`);
-    prms.push(`fieldsColumns: "${JSON.stringify(columns).replace(/\"/g, '\\"')}"`);
-    exportFetch(prms);
+    const additionalFilters = Object.entries(additionalFields || {}).map(([key, value]) => `${key}: "${value}"`);
+
+    const parameters = [...defaultFilters, ...additionalFilters];
+
+    parameters.push(`fields: ${JSON.stringify(fields)}`);
+    parameters.push(`fieldsColumns: "${JSON.stringify(columns).replace(/\"/g, '\\"')}"`);
+    exportFetch(parameters);
   };
 
   const handleExportData = () => {

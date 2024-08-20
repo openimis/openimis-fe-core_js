@@ -78,7 +78,6 @@ class SelectionMenu extends Component {
   action = (a) => {
     this.setState({ anchorEl: null }, (e) => this.props.triggerAction(a));
   };
-
   renderButtons = (entries, contributionKey) => (
     <Grid item className={this.props.classes.paperHeader}>
       <Grid container alignItems="center" className={this.props.classes.paperHeaderAction}>
@@ -91,6 +90,7 @@ class SelectionMenu extends Component {
           selection={this.props.selection}
           filters={this.props.filters}
           exportFetch={this.props.exportFetch}
+          additionalExportFields={this.props.additionalExportFields}
           exportFields={this.props.exportFields}
           exportFieldsColumns={this.props.exportFieldsColumns}
           chooseExportableColumns={this.props.chooseExportableColumns}
@@ -450,6 +450,7 @@ class Searcher extends Component {
       exportFieldLabel = null,
       showOrdinalNumber = false,
       chooseExportableColumns = false,
+      additionalExportFields,
     } = this.props;
     return (
       <Fragment>
@@ -520,6 +521,7 @@ class Searcher extends Component {
                         exportFieldsColumns={exportFieldsColumns}
                         exportFieldLabel={exportFieldLabel}
                         chooseExportableColumns={chooseExportableColumns}
+                        additionalExportFields={additionalExportFields}
                       />
                     </Grid>
                   )}

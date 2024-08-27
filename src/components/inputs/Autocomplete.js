@@ -39,6 +39,7 @@ const Autocomplete = (props) => {
     multiple = false,
     renderInput,
     noOptionsText,
+    limitTags,
   } = props;
   const modulesManager = useModulesManager();
   const minCharLookup = modulesManager.getConf("fe-admin", "usersMinCharLookup", 2);
@@ -90,6 +91,7 @@ const Autocomplete = (props) => {
       open={open}
       onOpen={() => setOpen(true)}
       onClose={() => setOpen(false)}
+      limitTags={limitTags ? limitTags : Infinity}
       autoComplete
       value={value}
       getOptionLabel={getOptionLabel ?? ((option) => option.label)}

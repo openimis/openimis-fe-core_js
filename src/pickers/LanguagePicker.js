@@ -7,7 +7,7 @@ import { fetchLanguages } from "../actions";
 
 class LanguagePicker extends Component {
   componentDidMount() {
-    if (!this.props.languages) {
+    if (!this.props.languages?.length) {
       // prevent loading multiple times the cache when component is several times on a page
       setTimeout(() => {
         !this.props.fetching && !this.props.fetched && this.props.fetchLanguages();

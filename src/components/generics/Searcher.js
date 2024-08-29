@@ -1,35 +1,32 @@
 import React, { Component, Fragment } from "react";
-import _ from "lodash";
-import { bindActionCreators } from "redux";
-import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
 
 import {
-  Grid,
-  Paper,
-  Divider,
-  Typography,
-  IconButton,
   Button,
+  CircularProgress,
+  Divider,
+  Grid,
+  IconButton,
   Menu,
   MenuItem,
-  CircularProgress,
+  Paper,
+  Typography,
 } from "@material-ui/core";
-import { withTheme, withStyles } from "@material-ui/core/styles";
+import { withStyles, withTheme } from "@material-ui/core/styles";
 import MoreHoriz from "@material-ui/icons/MoreHoriz";
 
-import { cacheFilters, closeExportColumnsDialog, resetCacheFilters, saveCurrentPaginationPage } from "../../actions";
+import { cacheFilters, resetCacheFilters, saveCurrentPaginationPage } from "../../actions";
+import { formatSorter, sort } from "../../helpers/api";
 import { formatMessage } from "../../helpers/i18n";
-import { sort, formatSorter } from "../../helpers/api";
 import withModulesManager from "../../helpers/modules";
-import SearcherExport from "./SearcherExport";
-import SearcherPane from "./SearcherPane";
 import Contributions from "./Contributions";
 import FormattedMessage from "./FormattedMessage";
 import ProgressOrError from "./ProgressOrError";
+import SearcherExport from "./SearcherExport";
+import SearcherPane from "./SearcherPane";
 import Table from "./Table";
-import { CLEARED_STATE_FILTER } from "../../constants";
-import ExportColumnsDialog from "../dialogs/ExportColumnsDialog";
 
 const styles = (theme) => ({
   root: {
@@ -86,16 +83,22 @@ class SelectionMenu extends Component {
             <Button onClick={(e) => this.action(i.action)}>{i.text}</Button>
           </Grid>
         ))}
-        {this.props.exportable && (<SearcherExport
-          selection={this.props.selection}
-          filters={this.props.filters}
-          exportFetch={this.props.exportFetch}
-          additionalExportFields={this.props.additionalExportFields}
-          exportFields={this.props.exportFields}
-          exportFieldsColumns={this.props.exportFieldsColumns}
-          chooseExportableColumns={this.props.chooseExportableColumns}
-          label={this.props.exportFieldLabel}
-        />)}
+        {this.props.exportable && (
+          <SearcherExport
+            selection={this.props.selection}
+            filters={this.props.filters}
+            exportFetch={this.props.exportFetch}
+            additionalExportFields={this.props.additionalExportFields}
+            exportFields={this.props.exportFields}
+            exportFieldsColumns={this.props.exportFieldsColumns}
+            chooseExportableColumns={this.props.chooseExportableColumns}
+            label={this.props.exportFieldLabel}
+            chooseFileFormat={this.props.chooseFileFormat}
+            exportFileFormats={this.props.exportFileFormats}
+            exportFileFormat={this.props.exportFileFormat}
+            setExportFileFormat={this.props.setExportFileFormat}
+          />
+        )}
         {!!contributionKey && (
           <Contributions
             actionHandler={this.action}
@@ -125,10 +128,17 @@ class SelectionMenu extends Component {
           ))}
           {this.props.exportable && (
             <SearcherExport
-              selection={this.props.selection} filters={this.props.filters} exportFetch={this.props.exportFetch}
-              exportFields={this.props.exportFields} exportFieldsColumns={this.props.exportFieldsColumns}
+              selection={this.props.selection}
+              filters={this.props.filters}
+              exportFetch={this.props.exportFetch}
+              exportFields={this.props.exportFields}
+              exportFieldsColumns={this.props.exportFieldsColumns}
               chooseExportableColumns={this.props.chooseExportableColumns}
-            />)}
+              additionalExportFields={this.props.additionalExportFields}
+              chooseFileFormat={this.props.chooseFileFormat}
+              exportFileFormats={this.props.exportFileFormats}
+            />
+          )}
           {!!contributionKey && (
             <Contributions
               actionHandler={this.action}
@@ -173,7 +183,7 @@ class SelectionMenu extends Component {
         entries.push({ text: formatMessage(intl, "claim", a.label), action: a.action });
       }
     });
-    if (entries.length > 2 || (this.props.exportable && entries.length>=1)) {
+    if (entries.length > 2 || (this.props.exportable && entries.length >= 1)) {
       return this.renderMenu(entries, actionsContributionKey);
     } else {
       return this.renderButtons(entries, actionsContributionKey);
@@ -451,6 +461,10 @@ class Searcher extends Component {
       showOrdinalNumber = false,
       chooseExportableColumns = false,
       additionalExportFields,
+      chooseFileFormat = false,
+      exportFileFormats = {},
+      exportFileFormat,
+      setExportFileFormat,
     } = this.props;
     return (
       <Fragment>
@@ -522,6 +536,10 @@ class Searcher extends Component {
                         exportFieldLabel={exportFieldLabel}
                         chooseExportableColumns={chooseExportableColumns}
                         additionalExportFields={additionalExportFields}
+                        chooseFileFormat={chooseFileFormat}
+                        exportFileFormats={exportFileFormats}
+                        exportFileFormat={exportFileFormat}
+                        setExportFileFormat={setExportFileFormat}
                       />
                     </Grid>
                   )}

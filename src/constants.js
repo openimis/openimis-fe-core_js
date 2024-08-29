@@ -129,3 +129,11 @@ export const ENTER_KEY = "Enter";
 export const DEFAULT = {
   IS_WORKER: false,
 }
+
+export const EXPORT_FILE_FORMATS = {
+  // By default, the export file format is CSV
+  csv: "csv",
+  // The other available export file format is XLSX.
+  // It can be configured individually for each Searcher.
+  xlsx: "xlsx",
+};

@@ -416,15 +416,15 @@ export function clearConfirm(confirmed) {
   };
 }
 
-export function openExportColumnsDialog() {
+export function openExportConfigDialog() {
   return (dispatch) => {
-    dispatch({ type: "CORE_OPEN_EXPORT_COLUMNS_DIALOG"})
+    dispatch({ type: "CORE_OPEN_EXPORT_CONFIG_DIALOG"})
   }
 }
 
-export function closeExportColumnsDialog() {
+export function closeExportConfigDialog() {
   return (dispatch) => {
-    dispatch({type: "CORE_CLOSE_EXPORT_COLUMNS_DIALOG"})
+    dispatch({type: "CORE_CLOSE_EXPORT_CONFIG_DIALOG"})
   }
 }
 

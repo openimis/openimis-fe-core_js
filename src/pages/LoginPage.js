@@ -11,6 +11,7 @@ import Contributions from "./../components/generics/Contributions";
 import MPassLogo from "./../mPassLogoColor.svg";
 import { baseApiUrl } from "../actions";
 import { DEFAULT, SAML_LOGIN_PATH } from "../constants";
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -26,8 +27,8 @@ const useStyles = makeStyles((theme) => ({
   },
   paper: theme.paper.paper,
   logo: {
-    maxHeight: 100,
-    width: 100,
+    maxHeight: 130,
+    width: 130,
   },
 }));
 
@@ -45,6 +46,7 @@ const LoginPage = ({ logo }) => {
   const [isAuthenticating, setAuthenticating] = useState(false);
   const showMPassProvider = modulesManager.getConf("fe-core", "LoginPage.showMPassProvider", false);
   const isWorker = modulesManager.getConf("fe-core", "isWorker", DEFAULT.IS_WORKER);
+  const enableLandingPage = modulesManager.getConf("fe-core", "App.enableLandingPage", DEFAULT.ENABLE_LANDING_PAGE);
 
   useEffect(() => {
     if (auth.isAuthenticated) {
@@ -117,6 +119,18 @@ const LoginPage = ({ logo }) => {
           <form onSubmit={onSubmit}>
             <Box p={6} width={380}>
               <Grid container spacing={2} direction="column" alignItems="stretch">
+                {enableLandingPage && (
+                  <Grid item container direction="row" alignItems="center">
+                    <Button
+                      onClick={() => history.push("/")}
+                      startIcon={<ArrowBackIcon />}
+                      color="primary"
+                      variant="text"
+                    >
+                      {formatMessage("backButton")}
+                    </Button>
+                  </Grid>
+                )}
                 <Grid item container direction="row" alignItems="center">
                   <img className={classes.logo} src={logo} />
                   {!isWorker && (

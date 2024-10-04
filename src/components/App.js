@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { IntlProvider } from "react-intl";
-import { Redirect, Route, BrowserRouter, Switch } from "react-router-dom";
+import { Route, BrowserRouter, Switch } from "react-router-dom";
 import { CssBaseline } from "@material-ui/core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import withModulesManager, { ModulesManagerProvider } from "../helpers/modules";

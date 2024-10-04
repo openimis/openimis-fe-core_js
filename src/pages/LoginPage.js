@@ -46,7 +46,7 @@ const LoginPage = ({ logo }) => {
   const [isAuthenticating, setAuthenticating] = useState(false);
   const showMPassProvider = modulesManager.getConf("fe-core", "LoginPage.showMPassProvider", false);
   const isWorker = modulesManager.getConf("fe-core", "isWorker", DEFAULT.IS_WORKER);
-  const enableLandingPage = modulesManager.getConf("fe-core", "App.enableLandingPage", DEFAULT.ENABLE_LANDING_PAGE);
+  const enablePublicPage = modulesManager.getConf("fe-core", "App.enablePublicPage", DEFAULT.ENABLE_PUBLIC_PAGE);
 
   useEffect(() => {
     if (auth.isAuthenticated) {
@@ -119,7 +119,7 @@ const LoginPage = ({ logo }) => {
           <form onSubmit={onSubmit}>
             <Box p={6} width={380}>
               <Grid container spacing={2} direction="column" alignItems="stretch">
-                {enableLandingPage && (
+                {enablePublicPage && (
                   <Grid item container direction="row" alignItems="center">
                     <Button
                       onClick={() => history.push("/")}

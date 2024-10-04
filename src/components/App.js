@@ -23,7 +23,7 @@ import { RIGHT_VIEW_EU_MODAL } from "../constants";
 import NotFoundPage from "./NotFoundPage";
 import PermissionCheck from "./PermissionCheck";
 import PublishedComponent from "./generics/PublishedComponent";
-import LandingPageMiddleware from "./LandingPageMiddleware";
+import PublicPageMiddleware from "./PublicPageMiddleware";
 
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";
 export const UNAUTHENTICATED_ROUTER_CONTRIBUTION_KEY = "core.UnauthenticatedRouter";
@@ -160,7 +160,7 @@ const App = (props) => {
                 <Route
                   exact
                   path="/"
-                  render={() => <LandingPageMiddleware isAuthenticated={auth.isAuthenticated} {...others} />}
+                  render={() => <PublicPageMiddleware isAuthenticated={auth.isAuthenticated} {...others} />}
                 />
                 <Route path={"/login"} render={() => <LoginPage {...others} />} />
                 <Route path={"/forgot_password"} render={() => <ForgotPasswordPage {...others} />} />

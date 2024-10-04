@@ -128,6 +128,7 @@ export const ENTER_KEY = "Enter";
 
 export const DEFAULT = {
   IS_WORKER: false,
+  ENABLE_PUBLIC_PAGE: false,
 }
 
 export const EXPORT_FILE_FORMATS = {

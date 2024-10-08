@@ -1,5 +1,6 @@
 import React from "react";
 import { Redirect } from "react-router-dom";
+
 import { DEFAULT } from "../constants";
 import { useModulesManager } from "../helpers/modules";
 import Contributions from "./generics/Contributions";
@@ -21,7 +22,7 @@ import Contributions from "./generics/Contributions";
 
 const PUBLIC_PAGE_CONTRIBUTION_KEY = "core.PublicPage";
 
-const PublicPageMiddleware = ({ isAuthenticated }) => {
+const PublicPageMiddleware = ({ isAuthenticated, logo }) => {
   const modulesManager = useModulesManager();
   const enablePublicPage = modulesManager.getConf("fe-core", "App.enablePublicPage", DEFAULT.ENABLE_PUBLIC_PAGE);
 
@@ -29,7 +30,7 @@ const PublicPageMiddleware = ({ isAuthenticated }) => {
     return <Redirect to="/home" />;
   }
 
-  return <Contributions contributionKey={PUBLIC_PAGE_CONTRIBUTION_KEY} isAuthenticated={isAuthenticated} />;
+  return <Contributions contributionKey={PUBLIC_PAGE_CONTRIBUTION_KEY} isAuthenticated={isAuthenticated} logo={logo} />;
 };
 
 export default PublicPageMiddleware;

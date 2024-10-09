@@ -37,13 +37,14 @@ function SearcherExport(props) {
     exportFileFormat = EXPORT_FILE_FORMATS.csv,
     setExportFileFormat,
     label = null,
+    selectWithCheckbox,
   } = props;
 
   const [exportStatus, setExport] = useState(0);
   const dispatch = useDispatch();
   const isExportConfigDialogOpen = useSelector((state) => state.core?.isExportConfigDialogOpen);
 
-  const enabled = (selection) => exportStatus === 0;
+  const enabled = (selection) => (selectWithCheckbox ? !selection?.length && exportStatus === 0 : exportStatus === 0);
 
   const exportData = (
     fields = exportFields,
@@ -113,7 +114,7 @@ function SearcherExport(props) {
         />
       )}
 
-      <div style={{ display: enabled(selection) ? "block" : "none" }}>
+      <div>
         {entries.map((item, idx) => (
           <Tooltip title={formatMessage(intl, "core", "exportSearchResult.tooltip")}>
             <div key={`selectionsMenu-export-${idx}`}>

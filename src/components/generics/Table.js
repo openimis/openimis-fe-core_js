@@ -293,6 +293,7 @@ class Table extends Component {
                 {selectWithCheckbox && withSelection && (
                   <TableCell padding="checkbox">
                     <Checkbox
+                      color="primary"
                       indeterminate={numSelected > 0 && numSelected < count}
                       checked={count > 0 && numSelected === count}
                       onChange={(e) => this.selectAll(e)}
@@ -355,7 +356,7 @@ class Table extends Component {
                 >
                   {selectWithCheckbox && withSelection && (
                     <TableCell padding="checkbox">
-                      <Checkbox checked={this.isSelected(i)} onChange={(e) => this.select(i, e)} />
+                      <Checkbox checked={this.isSelected(i)} onChange={(e) => this.select(i, e)} color="primary" />
                     </TableCell>
                   )}
                   {showOrdinalNumber && (

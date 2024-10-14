@@ -46,7 +46,12 @@ function reducer(
     fetchingCustomFilters: false,
     errorCustomFilters: null,
     fetchedCustomFilters: false,
-    customFilters: []
+    customFilters: [],
+    isExportConfigDialogOpen: false,
+    fetchingLanguages: false,
+    fetchedLanguages: false,
+    languages: [],
+    errorLanguages: null,
   },
   action,
 ) {
@@ -73,6 +78,16 @@ function reducer(
       };
       delete s.confirm;
       return s;
+    case "CORE_OPEN_EXPORT_CONFIG_DIALOG":
+      return {
+        ...state,
+        isExportConfigDialogOpen: true,
+      };
+    case "CORE_CLOSE_EXPORT_CONFIG_DIALOG":
+      return {
+        ...state,
+        isExportConfigDialogOpen: false,
+      };
     case "CORE_USERS_CURRENT_USER_RESP":
       return {
         ...state,
@@ -86,6 +101,28 @@ function reducer(
           message: action.payload.statusText,
           detail: !!action.payload.response ? action.payload.response.detail : null,
         },
+      };
+    case "PASSWORD_POLICY_FIELDS_REQ":
+      return {
+        ...state,
+        fetchingPasswordPolicy: true,
+        fetchedPasswordPolicy: false,
+        passwordPolicy: null,
+        errorPasswordPolicy: null,
+      };
+    case "PASSWORD_POLICY_FIELDS_RESP":
+      return {
+        ...state,
+        fetchingPasswordPolicy: false,
+        fetchedPasswordPolicy: true,
+        passwordPolicy: action.payload.data.passwordPolicy,
+        errorPasswordPolicy: formatGraphQLError(action.payload),
+      };
+    case "PASSWORD_POLICY_FIELDS_ERR":
+      return {
+        ...state,
+        fetchingPasswordPolicy: false,
+        errorPasswordPolicy: formatServerError(action.payload),
       };
     case "CORE_CACHE_FILTER":
       var filtersCache = { ...state.filtersCache, ...action.payload };

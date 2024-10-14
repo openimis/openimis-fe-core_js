@@ -32,6 +32,7 @@ import { fetchMutation, fetchHistoricalMutations } from "../actions";
 import withModulesManager from "../helpers/modules";
 import moment from "moment";
 import _ from "lodash";
+import { CLAIM_STATS_ORDER, GLOBAL_UNDERSCORE, WHITE_SPACE } from "../constants";
 
 const styles = (theme) => ({
   toolbar: {
@@ -62,6 +63,12 @@ const styles = (theme) => ({
   },
   jrnlItem: theme.jrnlDrawer.item,
   jrnlItemDetail: theme.jrnlDrawer.itemDetail,
+  jrnlItemDetailsError: {
+    ...theme.jrnlDrawer.itemDetail,
+    color: theme.palette.error.main,
+    whiteSpace: 'normal',
+    overflowWrap: 'break-word',
+  },
   jrnlItemDetailText: theme.jrnlDrawer.itemDetailText,
   jrnlIconClickable: {
     cursor: "pointer",
@@ -92,6 +99,13 @@ const styles = (theme) => ({
     width: "100%",
     margin: theme.spacing(1),
   },
+  centerText: {
+    textAlign: 'center'
+  },
+  boldCenterText: {
+    textAlign: 'center',
+    fontWeight: 'bold',
+  }
 });
 
 class Messages extends Component {
@@ -185,9 +199,10 @@ class Messages extends Component {
   render() {
     const { classes, anchorEl, onClick, messages } = this.props;
     if (!messages) return null;
-    let msgs = [messages];
+    const stats = messages?.jsonExt ? JSON.parse(messages.jsonExt) : {};
+    let msgs = [messages?.error || messages];
     try {
-      msgs = JSON.parse(messages);
+      msgs = JSON.parse(messages?.error || messages);
       if (!Array.isArray(msgs)) {
         msgs = [msgs];
       }
@@ -210,6 +225,20 @@ class Messages extends Component {
           onClick={onClick}
           PaperProps={{ className: classes.messagePopover }}
         >
+          {stats?.claim_stats && (
+            <div>
+              <Typography className={classes.boldCenterText}>
+                {stats.claim_stats["header"]}
+              </Typography>
+              {CLAIM_STATS_ORDER.map((key) => (
+                stats.claim_stats.hasOwnProperty(key) && (
+                  <Typography className={classes.centerText} key={key}>
+                    {`${key.replace(GLOBAL_UNDERSCORE, WHITE_SPACE)}: ${stats.claim_stats[key]}`}
+                  </Typography>
+                )
+              ))}
+            </div>
+          )}
           <Grid container>{msgs.map((msg, idx) => this.formatMessage(msg, idx))}</Grid>
         </Popover>
       </ClickAwayListener>
@@ -332,22 +361,12 @@ class JournalDrawer extends Component {
                         <CircularProgress size={theme.jrnlDrawer.iconSize} />
                       </ListItemIcon>
                     )}
-                    {m.status === 1 && (
-                      <ListItemIcon
-                        className={clsx(classes.jrnlErrorIcon, { [classes.jrnlIconClickable]: !open })}
-                        onClick={(e) => this.showMessages(e, m.error)}
-                      >
-                        <ErrorIcon />
-                      </ListItemIcon>
-                    )}
-                    {m.status === 2 && (
-                      <ListItemIcon
-                        className={clsx(classes.jrnlIcon, { [classes.jrnlIconClickable]: !open })}
-                        onClick={(e) => this.showMessages(e, m)}
-                      >
-                        <CheckIcon />
-                      </ListItemIcon>
-                    )}
+                    <ListItemIcon
+                      className={clsx(m.status === 1 ? classes.jrnlErrorIcon : classes.jrnlIcon, { [classes.jrnlIconClickable]: !open })}
+                      onClick={(e) => this.showMessages(e, m)}
+                    >
+                      {m.status === 1 ? <ErrorIcon /> : <CheckIcon/>}
+                    </ListItemIcon>
                     <ListItemText
                       className={m.status === 1 ? classes.jrnlErrorItem : classes.jrnlItem}
                       primary={m.clientMutationLabel}
@@ -372,14 +391,27 @@ class JournalDrawer extends Component {
                       unmountOnExit
                     >
                       <List component="div" disablePadding>
-                        {JSON.parse(m.clientMutationDetails).map((d, di) => (
-                          <ListItemText
-                            className={classes.jrnlItemDetail}
-                            key={`mdet-${di}`}
-                            primary={d}
-                            primaryTypographyProps={{ class: classes.jrnlItemDetailText }}
-                          />
-                        ))}
+                        {(() => {
+                          try {
+                            const details = JSON.parse(m.clientMutationDetails);
+                            return details.map((detail, detailIndex) => (
+                              <ListItemText
+                                className={classes.jrnlItemDetail}
+                                key={`mdet-${detailIndex}`}
+                                primary={detail}
+                                primaryTypographyProps={{ class: classes.jrnlItemDetailText }}
+                              />
+                            ));
+                          } catch (error) {
+                            return (
+                              <ListItemText
+                                className={classes.jrnlItemDetailsError}
+                                primaryTypographyProps={{ class: classes.jrnlItemDetailText }}
+                                primary={`Mutation details not available. ${error}`}
+                              />
+                            );
+                          }
+                        })()}
                       </List>
                     </Collapse>
                   )}

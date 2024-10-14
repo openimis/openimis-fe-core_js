@@ -23,34 +23,37 @@ const ROLE_FULL_PROJECTION = () => [
 
 const ROLERIGHT_FULL_PROJECTION = () => ["rightId"];
 
-const LANGUAGE_FULL_PROJECTION = () => ["name", "code", "sortOrder"];
+const LANGUAGE_FULL_PROJECTION = () => ["name", "code"];
 
 const MODULEPERMISSION_FULL_PROJECTION = () => ["modulePermsList{moduleName, permissions{permsName, permsValue}}"];
 
-const CUSTOM_FILTER_FULL_PROJECTION = () => [
-  'type',
-  'code',
-  'possibleFilters {field, filter, type}',
-];
+const CUSTOM_FILTER_FULL_PROJECTION = () => ["type", "code", "possibleFilters {field, filter, type}"];
 
 export function fetchCustomFilter(params) {
-  const payload = formatQuery(
-    "customFilters",
-    params,
-    CUSTOM_FILTER_FULL_PROJECTION()
-  );
+  const payload = formatQuery("customFilters", params, CUSTOM_FILTER_FULL_PROJECTION());
   return graphql(payload, "FETCH_CUSTOM_FILTER");
 }
 
 function getApiUrl() {
-  let _baseApiUrl = process.env.REACT_APP_API_URL ?? '/api';
-  if (_baseApiUrl.indexOf('/') !== 0) {
+  let _baseApiUrl = process.env.REACT_APP_API_URL ?? "/api";
+  if (_baseApiUrl.indexOf("/") !== 0) {
     _baseApiUrl = `/${_baseApiUrl}`;
   }
   return _baseApiUrl;
 }
 
 export const baseApiUrl = getApiUrl();
+
+function getCsrfToken() {
+  const CSRF_TOKEN_NAME = 'csrftoken';
+  const CSRF_NOT_FOUND = null;
+
+  const cookies = document.cookie;
+  const cookieArray = cookies.split('; ');
+  
+  const csrfCookie = cookieArray.find(cookie => cookie.startsWith(CSRF_TOKEN_NAME));
+  return csrfCookie?.split('=')[1] ?? CSRF_NOT_FOUND;
+}
 
 export function apiHeaders() {
   let headers = {
@@ -118,7 +121,7 @@ export function graphql(payload, type = "GRAPHQL_QUERY", params = {}) {
   };
 }
 
-export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY", params = {}) {
+export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY", params = {}, customHeaders = {}) {
   let req, resp, err;
   if (Array.isArray(type)) {
     [req, resp, err] = type;
@@ -133,6 +136,9 @@ export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY
         endpoint: `${baseApiUrl}/graphql`,
         method: "POST",
         body: JSON.stringify({ query: operation, variables }),
+        headers: {
+          ...customHeaders
+        },
         types: [
           {
             type: req,
@@ -207,14 +213,14 @@ export function waitForMutation(clientMutationId) {
   };
 }
 
-export function graphqlMutation(mutation, variables, type = "CORE_TRIGGER_MUTATION", params = {}, wait = true) {
+export function graphqlMutation(mutation, variables, type = "CORE_TRIGGER_MUTATION", params = {}, wait = true, customHeaders = {}) {
   let clientMutationId;
   if (variables?.input) {
     clientMutationId = uuid.uuid();
     variables.input.clientMutationId = clientMutationId;
   }
   return async (dispatch) => {
-    const response = await dispatch(graphqlWithVariables(mutation, variables, type, params));
+    const response = await dispatch(graphqlWithVariables(mutation, variables, type, params, customHeaders));
     if (clientMutationId) {
       dispatch(fetchMutation(clientMutationId));
       if (wait) {
@@ -252,21 +258,36 @@ export function loadUser() {
 export function login(credentials) {
   return async (dispatch) => {
     if (credentials) {
-      // We log in the user using the credentials
       const mutation = `mutation authenticate($username: String!, $password: String!) {
             tokenAuth(username: $username, password: $password) {
               refreshExpiresIn
             }
           }`;
-      await dispatch(
-        graphqlMutation(mutation, credentials, ["CORE_AUTH_LOGIN_REQ", "CORE_AUTH_LOGIN_RESP", "CORE_AUTH_ERR"]),
-      );
+
+      const csrfToken = getCsrfToken();
+
+      try {
+        const response = await dispatch(
+          graphqlMutation(mutation, credentials, ["CORE_AUTH_LOGIN_REQ", "CORE_AUTH_LOGIN_RESP", "CORE_AUTH_ERR"], {}, false, {
+            "X-CSRFToken": csrfToken
+          }),
+        );
+        if (response.payload?.errors?.length > 0) {
+          const errorMessage = response.payload.errors[0].message;
+          dispatch(authError({ message: errorMessage }));
+          return { loginStatus: "CORE_AUTH_ERR", message: errorMessage };
+        }
+        const action = await dispatch(loadUser());
+        return { loginStatus: action.type, message: action?.payload?.response?.detail ?? "" };
+      } catch (error) {
+        dispatch(authError({ message: error.message }));
+        return { loginStatus: "CORE_AUTH_ERR", message: error.message };
+      }
     } else {
-      // Try to refresh the token using the cookie (if present)
       await dispatch(refreshAuthToken());
+      const action = await dispatch(loadUser());
+      return { loginStatus: action.type, message: action?.payload?.response?.detail ?? "Error occurred while loading user." };
     }
-    const action = await dispatch(loadUser());
-    return action.type !== "CORE_AUTH_ERR";
   };
 }
 
@@ -314,11 +335,28 @@ export function logout() {
   };
 }
 
+export function fetchPasswordPolicy() {
+  const payload = `query {
+    passwordPolicy
+  }`;
+  return graphql(payload, "PASSWORD_POLICY_FIELDS");
+}
+
 export function fetchMutation(clientMutationId) {
   const payload = formatPageQuery(
     "mutationLogs",
     [`clientMutationId: "${clientMutationId}"`],
-    ["id", "status", "error", "clientMutationId", "clientMutationLabel", "clientMutationDetails", "requestDateTime"],
+    [
+      "id",
+      "status",
+      "error",
+      "clientMutationId",
+      "clientMutationLabel",
+      "clientMutationDetails",
+      "requestDateTime",
+      "jsonExt",
+      "autogeneratedCode"
+    ],
   );
   return graphql(payload, "CORE_MUTATION");
 }
@@ -337,6 +375,7 @@ export function fetchHistoricalMutations(pageSize, afterCursor) {
     "clientMutationLabel",
     "clientMutationDetails",
     "requestDateTime",
+    "jsonExt",
   ]);
   return graphql(payload, "CORE_HISTORICAL_MUTATIONS");
 }
@@ -375,6 +414,18 @@ export function clearConfirm(confirmed) {
   return (dispatch) => {
     dispatch({ type: "CORE_CONFIRM_CLEAR", payload: confirmed });
   };
+}
+
+export function openExportConfigDialog() {
+  return (dispatch) => {
+    dispatch({ type: "CORE_OPEN_EXPORT_CONFIG_DIALOG"})
+  }
+}
+
+export function closeExportConfigDialog() {
+  return (dispatch) => {
+    dispatch({type: "CORE_CLOSE_EXPORT_CONFIG_DIALOG"})
+  }
 }
 
 export function fetchRoles(params) {
@@ -470,18 +521,30 @@ export function roleNameSetValid() {
 
 export function saveCurrentPaginationPage(page, afterCursor, beforeCursor, module) {
   return (dispatch) => {
-    dispatch({ type: "CORE_PAGINATION_PAGE", payload: { page, afterCursor, beforeCursor, module} });
+    dispatch({ type: "CORE_PAGINATION_PAGE", payload: { page, afterCursor, beforeCursor, module } });
   };
 }
 
 export function clearCurrentPaginationPage() {
   return (dispatch) => {
-    dispatch({ type: "CORE_PAGINATION_PAGE_CLEAR" })
-  }
+    dispatch({ type: "CORE_PAGINATION_PAGE_CLEAR" });
+  };
 }
 
 export function toggleCurrentCalendarType(isSecondaryCalendarEnabled) {
   return (dispatch) => {
-    dispatch({ type: "CORE_CALENDAR_TYPE_TOGGLE", payload: { isSecondaryCalendarEnabled } })
-  }
+    dispatch({ type: "CORE_CALENDAR_TYPE_TOGGLE", payload: { isSecondaryCalendarEnabled } });
+  };
+}
+
+export function changeUserLanguage(language, clientMutationLabel) {
+  const mutation = formatMutation("changeUserLanguage", `languageId: "${language}"`, clientMutationLabel);
+  const requestedDateTime = new Date();
+
+  return graphql(mutation.payload, ["CORE_MUTATION_REQ", "CHANGE_USER_LANGUAGE_RESP", "CORE_MUTATION_ERR"], {
+    actionType: "CHANGE_USER_LANGUAGE_RESP",
+    clientMutationId: mutation.clientMutationId,
+    clientMutationLabel,
+    requestedDateTime,
+  });
 }

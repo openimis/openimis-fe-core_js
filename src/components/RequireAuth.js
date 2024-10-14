@@ -1,6 +1,6 @@
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo } from "react";
 import withWidth from "@material-ui/core/withWidth";
-import { Redirect } from "../helpers/history";
+import { Redirect, useHistory } from "../helpers/history";
 import { alpha, useTheme, makeStyles } from "@material-ui/core/styles";
 import { useModulesManager } from "../helpers/modules";
 import LogoutButton from "./LogoutButton";
@@ -23,15 +23,16 @@ import Contributions from "./generics/Contributions";
 import FormattedMessage from "./generics/FormattedMessage";
 import JournalDrawer from "./JournalDrawer";
 import { useBoolean, useAuthentication } from "../helpers/hooks";
-
+import LanguageQuickPicker from "../pickers/LanguageQuickPicker";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { Switch } from "@material-ui/core";
-import { toggleCurrentCalendarType } from "../actions"
-import { useDispatch } from 'react-redux';
+import { useTranslations } from "../helpers/i18n";
+import { DEFAULT } from "../constants";
 
 export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
 export const MAIN_MENU_CONTRIBUTION_KEY = "core.MainMenu";
 export const MAIN_SEARCHER_CONTRIBUTION_KEY = "core.MainSearcher";
+export const ECONOMIC_UNIT_BUTTON_CONTRIBUTION_KEY = "policyholder.EconomicUnitChangeButton";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -200,11 +201,20 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const RequireAuth = (props) => {
-  const { children, logo, redirectTo, ...others } = props;
-  const [isOpen, setOpen] = useBoolean();
+  const {
+    children,
+    logo,
+    whiteLogo,
+    redirectTo,
+    isSecondaryCalendar,
+    setSecondaryCalendar,
+    onEconomicDialogOpen,
+    ...others
+  } = props;  const [isOpen, setOpen] = useBoolean();
   const [isDrawerOpen, setDrawerOpen] = useBoolean();
   const theme = useTheme();
   const classes = useStyles();
+  const history = useHistory();
   const modulesManager = useModulesManager();
   const auth = useAuthentication();
   const cfg = children.props.modulesManager.cfg;
@@ -213,12 +223,9 @@ const RequireAuth = (props) => {
     "allowSecondCalendar",
     false,
   );
+  const isWorker = modulesManager.getConf("fe-core", "isWorker", DEFAULT.IS_WORKER);
 
   const isAppBarMenu = useMemo(() => theme.menu.variant.toUpperCase() === "APPBAR", [theme.menu.variant]);
-  const [isSecondaryCalendar, setSecondaryCalendar] = useBoolean(false);
-  const dispatch = useDispatch();
-
-  useEffect(() => dispatch(toggleCurrentCalendarType(!isSecondaryCalendar)), [isSecondaryCalendar])
 
   if (!auth.isAuthenticated) {
     return <Redirect to={redirectTo} />;
@@ -246,7 +253,7 @@ const RequireAuth = (props) => {
           <Button className={classes.appName} onClick={(e) => (window.location.href = "/front")}>
             {isAppBarMenu && (
               <Hidden smDown implementation="css">
-                <img className={classes.logo} src={logo} />
+                <img className={classes.logo} src={isWorker && !!whiteLogo ? whiteLogo : logo} alt="Logo of openIMIS" />
               </Hidden>
             )}
             <FormattedMessage module="core" id="appName" defaultMessage={<FormattedMessage id="root.appName" />} />
@@ -274,7 +281,7 @@ const RequireAuth = (props) => {
     </>
     )
   }
-  
+  const { formatMessage } = useTranslations(module, modulesManager);
   return (
     <>
       <AppBar
@@ -291,13 +298,15 @@ const RequireAuth = (props) => {
           >
             <MenuIcon />
           </IconButton>
-          <Button className={classes.appName} onClick={(e) => (window.location.href = "/front")}>
+          <Button className={classes.appName} onClick={(e) => history.push("/")}>
             {isAppBarMenu && (
               <Hidden smDown implementation="css">
-                <img className={classes.logo} src={logo} />
+                <img className={classes.logo} src={isWorker && !!whiteLogo ? whiteLogo : logo} alt="Logo of openIMIS" />
               </Hidden>
             )}
-            <FormattedMessage module="core" id="appName" defaultMessage={<FormattedMessage id="root.appName" />} />
+            {!isWorker && (
+              <FormattedMessage module="core" id="appName" defaultMessage={<FormattedMessage id="root.appName" />} />
+            )}
           </Button>
           <Hidden smDown implementation="css">
             <Tooltip title={modulesManager.getModulesVersions().join(", ")}>
@@ -313,21 +322,27 @@ const RequireAuth = (props) => {
               </Contributions>
             </Hidden>
           )}
-          <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
+          {isWorker ? (
             <div className={classes.grow} />
-          </Contributions>
-          {!!calendarSwitch &&
-          <FormControlLabel
-            control={
-            <Switch
-              color="secondary"
-              checked={isSecondaryCalendar}
-              onChange={setSecondaryCalendar.toggle}
-            />}
-            label= {"AD/BS"}
-            labelPlacement="start"
+          ) : (
+            <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
+              <div className={classes.grow} />
+            </Contributions>
+          )}
+          {!!calendarSwitch && (
+            <FormControlLabel
+              control={
+                <Switch color="secondary" checked={isSecondaryCalendar} onChange={setSecondaryCalendar.toggle} />
+              }
+              label={formatMessage("core.calendarSwitcher")}
+              labelPlacement="start"
+            />
+          )}
+          <LanguageQuickPicker />
+          <Contributions
+            contributionKey={ECONOMIC_UNIT_BUTTON_CONTRIBUTION_KEY}
+            onEconomicDialogOpen={onEconomicDialogOpen}
           />
-          }
           <LogoutButton />
           <Help />
         </Toolbar>

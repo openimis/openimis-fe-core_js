@@ -8,6 +8,20 @@ const styles = (theme) => ({
   label: {
     color: theme.palette.primary.main,
   },
+  // NOTE: This is used to hide the increment/decrement arrows from the number input
+  numberInput: {
+    '& input[type=number]': {
+        '-moz-appearance': 'textfield'
+    },
+    '& input[type=number]::-webkit-outer-spin-button': {
+        '-webkit-appearance': 'none',
+        margin: 0
+    },
+    '& input[type=number]::-webkit-inner-spin-button': {
+        '-webkit-appearance': 'none',
+        margin: 0
+    }
+  },
 });
 
 class TextInput extends Component {
@@ -61,6 +75,7 @@ class TextInput extends Component {
     return (
       <TextField
         {...others}
+        className={classes.numberInput}
         fullWidth
         disabled={readOnly}
         label={!!label && formatMessage(intl, module, label)}

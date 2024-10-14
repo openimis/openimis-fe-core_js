@@ -22,6 +22,7 @@ import {
   historyPush,
   coreConfirm,
   journalize,
+  PublishedComponent,
   SelectInput,
   clearCurrentPaginationPage,
 } from "@openimis/fe-core";
@@ -84,6 +85,16 @@ class RawRoleFilter extends Component {
     ]);
   };
 
+  onChangeRoleRight = (key, value) => {
+    this.props.onChangeFilters([
+      {
+        id: key,
+        value,
+        filter: `${key}: ${value?.permsValue}`,
+      },
+    ]);
+  };
+
   booleanOptions = () => {
     const options = [null, "true", "false"];
     return [
@@ -122,6 +133,13 @@ class RawRoleFilter extends Component {
             options={this.booleanOptions()}
             value={this._filterValue("isBlocked")}
             onChange={(v) => this._onChangeFilter("isBlocked", v)}
+          />
+        </Grid>
+        <Grid item xs={3} className={classes.item}>
+          <PublishedComponent
+            pubRef="core.AuthorityPicker"
+            value={this._filterValue("roleRight")}
+            onChange={(roleRight) => this.onChangeRoleRight("roleRight", roleRight)}
           />
         </Grid>
         <Grid item xs={3} className={classes.item}>
@@ -172,14 +190,14 @@ class Roles extends Component {
 
   fetch = (params) => this.props.fetchRoles(params);
 
-  headers = () => {
+  headers = (filters) => {
     const { rights } = this.props;
     let result = [
       "roleManagement.roleName",
       "roleManagement.isSystem",
       "roleManagement.isBlocked",
-      "roleManagement.dateValidFrom",
-      "roleManagement.dateValidTo",
+      filters?.showHistory?.value ? "roleManagement.dateValidFrom" : null,
+      filters?.showHistory?.value ? "roleManagement.dateValidTo" : null,
     ];
     [RIGHT_ROLE_UPDATE, RIGHT_ROLE_DUPLICATE, RIGHT_ROLE_DELETE].forEach((right) => {
       if (rights.includes(right)) {
@@ -189,7 +207,7 @@ class Roles extends Component {
     return result;
   };
 
-  itemFormatters = () => {
+  itemFormatters = (filters) => {
     const { intl, rights, modulesManager, language } = this.props;
     const result = [
       (role) =>
@@ -202,8 +220,14 @@ class Roles extends Component {
           : role.altLanguage,
       (role) => (role.isSystem !== null ? <Checkbox checked={!!role.isSystem} disabled /> : ""),
       (role) => (role.isBlocked !== null ? <Checkbox checked={role.isBlocked} disabled /> : ""),
-      (role) => (!!role.validityFrom ? formatDateFromISO(modulesManager, intl, role.validityFrom) : ""),
-      (role) => (!!role.validityTo ? formatDateFromISO(modulesManager, intl, role.validityTo) : ""),
+      (role) =>
+        filters?.showHistory?.value && role.validityFrom
+          ? formatDateFromISO(modulesManager, intl, role.validityFrom)
+          : null,
+      (role) =>
+        filters?.showHistory?.value && role.validityTo
+          ? formatDateFromISO(modulesManager, intl, role.validityTo)
+          : null,
     ];
     if (rights.includes(RIGHT_ROLE_SEARCH) || rights.includes(RIGHT_ROLE_UPDATE)) {
       result.push((role) =>
@@ -262,12 +286,12 @@ class Roles extends Component {
     this.setState({ confirmedAction }, confirm);
   };
 
-  sorts = () => [
+  sorts = (filters) => [
     ["name", true],
     ["isSystem", true],
     ["isBlocked", true],
-    ["validityFrom", true],
-    ["validityTo", true],
+    filters?.showHistory?.value ? ["validityFrom", true] : null,
+    filters?.showHistory?.value ? ["validityTo", true] : null,
   ];
 
   isRowDisabled = (_, role) =>

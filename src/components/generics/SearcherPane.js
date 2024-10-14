@@ -1,21 +1,47 @@
 import React, { Component, Fragment } from "react";
 import { injectIntl } from "react-intl";
+import _debounce from "lodash/debounce";
+
+import { Grid, Paper, Divider } from "@material-ui/core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { Grid, Paper, Divider, IconButton } from "@material-ui/core";
 import { YoutubeSearchedFor as ResetFilterIcon, Search as DefaultSearchIcon } from "@material-ui/icons";
-import FormattedMessage from "./FormattedMessage";
-import { withTooltip, formatMessage } from "../../helpers/i18n";
+
+import { SearcherActionButton } from "@openimis/fe-core";
+import { DEFAULT_DEBOUNCE_TIME, ENTER_KEY } from "../../constants";
+import { formatMessage } from "../../helpers/i18n";
 import AdvancedFiltersDialog from "../dialogs/AdvancedFiltersDialog";
+import FormattedMessage from "./FormattedMessage";
 
 const styles = (theme) => ({
   paper: theme.paper.body,
-  paperHeader: theme.paper.header,
+  paperHeader: { ...theme.paper.header, display: "flex", justifyContent: "flex-end", itemAlign: "center" },
   paperHeaderTitle: theme.paper.title,
-  paperHeaderAction: theme.paper.action,
+  paperHeaderAction: { ...theme.paper.action, display: "flex", justifyContent: "center", itemAlign: "center" },
   paperDivider: theme.paper.divider,
 });
 
 class SearcherPane extends Component {
+  constructor(props) {
+    super(props);
+    const { refresh = () => {}, reset = () => {} } = this.props;
+    this.debouncedRefresh = _debounce(refresh, DEFAULT_DEBOUNCE_TIME);
+    this.debouncedReset = _debounce(reset, DEFAULT_DEBOUNCE_TIME);
+  }
+
+  handleKeyDown = (event) => {
+    if (event.key === ENTER_KEY) {
+      this.debouncedRefresh();
+    }
+  };
+
+  componentDidMount() {
+    document.addEventListener("keydown", this.handleKeyDown);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("keydown", this.handleKeyDown);
+  }
+
   render() {
     const {
       classes,
@@ -27,13 +53,11 @@ class SearcherPane extends Component {
       filters,
       resultsPane = null,
       reset,
-      resetTooltip,
       refresh,
-      refreshTooltip,
       actions,
-      SearchIcon = null,
       isCustomFiltering = false,
       objectForCustomFiltering = null,
+      additionalCustomFilterParams = null,
       moduleName = null,
       objectType = null,
       setAppliedCustomFilters = null,
@@ -51,10 +75,11 @@ class SearcherPane extends Component {
           </Grid>
           <Grid item xs={12 - split} className={classes.paperHeader}>
             {(!!actions || !!refresh) && (
-              <Grid container justify="flex-end">
+              <>
                 {isCustomFiltering === true ? (
                   <AdvancedFiltersDialog
                     object={objectForCustomFiltering}
+                    additionalParams={additionalCustomFilterParams}
                     moduleName={moduleName}
                     objectType={objectType}
                     setAppliedCustomFilters={setAppliedCustomFilters}
@@ -72,26 +97,32 @@ class SearcherPane extends Component {
                 {!!actions &&
                   actions.map((a, idx) => (
                     <Grid item key={`action-${idx}`} className={classes.paperHeaderAction}>
-                      <IconButton onClick={a.action}>{a.icon}</IconButton>
+                      <SearcherActionButton
+                        onClick={a.action}
+                        startIcon={a.icon}
+                        label={a.label || ''}
+                      />
                     </Grid>
                   ))}
-                {!!reset &&
-                  withTooltip(
-                    <Grid item key={`action-reset`} className={classes.paperHeaderAction}>
-                      <IconButton onClick={reset}>
-                        <ResetFilterIcon />
-                      </IconButton>
-                    </Grid>,
-                    resetTooltip || formatMessage(this.props.intl, module, "resetFilterTooltip")
-                  )}
-                {!!refresh &&
-                  withTooltip(
-                    <Grid item key={`action-refresh`} className={classes.paperHeaderAction}>
-                      <IconButton onClick={refresh}>{!!SearchIcon ? <SearchIcon /> : <DefaultSearchIcon />}</IconButton>
-                    </Grid>,
-                    refreshTooltip || formatMessage(this.props.intl, module, "refreshFilterTooltip")
-                  )}
-              </Grid>
+                {!!reset && (
+                  <Grid item key={`action-reset`} className={classes.paperHeaderAction}>
+                    <SearcherActionButton
+                      startIcon={<ResetFilterIcon />}
+                      onClick={this.debouncedReset}
+                      label={formatMessage(this.props.intl, module, "resetFilterTooltip")}
+                    />
+                  </Grid>
+                )}
+                {!!refresh && (
+                  <Grid item key={`action-refresh`} className={classes.paperHeaderAction}>
+                    <SearcherActionButton
+                      startIcon={<DefaultSearchIcon />}
+                      onClick={this.debouncedRefresh}
+                      label={formatMessage(this.props.intl, module, "refreshFilterTooltip")}
+                    />
+                  </Grid>
+                )}
+              </>
             )}
           </Grid>
           {!!filterPane && (

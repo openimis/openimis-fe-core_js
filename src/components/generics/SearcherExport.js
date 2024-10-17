@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { injectIntl } from "react-intl";
 import { useDispatch, useSelector } from "react-redux";
 
-import { MenuItem, Tooltip } from "@material-ui/core";
+import { MenuItem, Tooltip, Button, Typography } from "@material-ui/core";
 import withStyles from "@material-ui/core/styles/withStyles";
+import GetAppIcon from "@material-ui/icons/GetApp";
 
 import { closeExportConfigDialog, openExportConfigDialog } from "../../actions";
 import { EXPORT_FILE_FORMATS } from "../../constants";
@@ -38,6 +39,7 @@ function SearcherExport(props) {
     setExportFileFormat,
     label = null,
     selectWithCheckbox,
+    downloadWithIconButton,
   } = props;
 
   const [exportStatus, setExport] = useState(0);
@@ -92,6 +94,7 @@ function SearcherExport(props) {
   const entries = [
     {
       text: label || formatMessage(intl, "core", "exportSearchResult"),
+      icon: <GetAppIcon />,
       action: handleExportData,
     },
   ];
@@ -118,9 +121,21 @@ function SearcherExport(props) {
         {entries.map((item, idx) => (
           <Tooltip title={formatMessage(intl, "core", "exportSearchResult.tooltip")}>
             <div key={`selectionsMenu-export-${idx}`}>
-              <MenuItem onClick={(e) => item.action()} disabled={!enabled(selection)}>
-                {item.text}
-              </MenuItem>
+              {downloadWithIconButton ? (
+                <Button
+                  onClick={(e) => item.action()}
+                  disabled={!enabled(selection)}
+                  variant="contained"
+                  color="primary"
+                  startIcon={item.icon}
+                >
+                  <Typography variant="body2"> {item.text} </Typography>
+                </Button>
+              ) : (
+                <MenuItem onClick={(e) => item.action()} disabled={!enabled(selection)}>
+                  {item.text}
+                </MenuItem>
+              )}
             </div>
           </Tooltip>
         ))}

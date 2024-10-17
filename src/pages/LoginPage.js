@@ -1,7 +1,7 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useHistory } from "../helpers/history";
 import { makeStyles } from "@material-ui/styles";
-import { Button, Box, Grid, Paper, LinearProgress, Tooltip } from "@material-ui/core";
+import { Button, Box, Grid, Paper, LinearProgress, Tooltip, Divider, Link, Typography } from "@material-ui/core";
 import TextInput from "../components/inputs/TextInput";
 import { useTranslations } from "../helpers/i18n";
 import { useModulesManager } from "../helpers/modules";
@@ -11,7 +11,7 @@ import Contributions from "./../components/generics/Contributions";
 import MPassLogo from "./../mPassLogoColor.svg";
 import { baseApiUrl } from "../actions";
 import { DEFAULT, SAML_LOGIN_PATH } from "../constants";
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -27,8 +27,8 @@ const useStyles = makeStyles((theme) => ({
   },
   paper: theme.paper.paper,
   logo: {
-    maxHeight: 130,
-    width: 130,
+    width: "100%",
+    padding: theme.spacing(2),
   },
 }));
 
@@ -45,6 +45,7 @@ const LoginPage = ({ logo }) => {
   const auth = useAuthentication();
   const [isAuthenticating, setAuthenticating] = useState(false);
   const showMPassProvider = modulesManager.getConf("fe-core", "LoginPage.showMPassProvider", false);
+  const linkToMPassUserGuide = modulesManager.getConf("fe-core", "LoginPage.linkToMPassUserGuide", "https://docs.openimis.org/");
   const isWorker = modulesManager.getConf("fe-core", "isWorker", DEFAULT.IS_WORKER);
   const enablePublicPage = modulesManager.getConf("fe-core", "App.enablePublicPage", DEFAULT.ENABLE_PUBLIC_PAGE);
 
@@ -142,11 +143,31 @@ const LoginPage = ({ logo }) => {
                 {showMPassProvider ? (
                   <>
                     <Grid item>
+                      <Box display="flex" alignItems="center" justifyContent="center" my={2}>
+                        <Typography style={{ textTransform: "uppercase" }} variant="body2">
+                          {formatMessage("loginCaption")}
+                        </Typography>
+                      </Box>
                       <Tooltip title={formatMessage("loginWithMPass")}>
                         <Button fullWidth type="submit" onClick={redirectToMPassLogin}>
                           <MPassLogo />
                         </Button>
                       </Tooltip>
+                      <Box display="flex" alignItems="center" mt={4} mb={2}>
+                        <Divider style={{ flex: 1 }} />
+                        <Link
+                          href={linkToMPassUserGuide}
+                          underline="hover"
+                          style={{ margin: "0 12px", cursor: "pointer" }}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Typography style={{ textTransform: "uppercase" }} variant="body1">
+                            {formatMessage("howToUse")}
+                          </Typography>
+                        </Link>
+                        <Divider style={{ flex: 1 }} />
+                      </Box>
                     </Grid>
                     {hasMPassError && (
                       <Grid item>

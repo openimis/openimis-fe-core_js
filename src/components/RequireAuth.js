@@ -286,8 +286,9 @@ const RequireAuth = (props) => {
     <>
       <AppBar
         position="fixed"
-        className={clsx(classes.appBar, {
+        className={clsx({
           [classes.appBarShift]: isOpen && theme.breakpoints.up("md"),
+          [classes.appBar]: !isWorker,
         })}
       >
         <Toolbar>
@@ -366,11 +367,12 @@ const RequireAuth = (props) => {
           </nav>
         </ClickAwayListener>
       )}
-      <JournalDrawer open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />
+      {!isWorker && <JournalDrawer open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />}
       <div className={classes.toolbar} />
       <main
-        className={clsx(classes.content, {
+        className={clsx({
           [classes.jrnlContentShift]: isDrawerOpen,
+          [classes.content]: !isWorker,
         })}
       >
         {children}

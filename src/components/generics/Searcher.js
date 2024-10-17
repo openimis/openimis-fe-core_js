@@ -32,7 +32,7 @@ const styles = (theme) => ({
   root: {
     width: "100%",
   },
-  paper: theme.paper.body,
+  paper: { ...theme.paper.body, boxShadow: "none" },
   paperHeader: theme.paper.header,
   paperHeaderTitle: theme.paper.title,
   paperHeaderMessage: theme.paper.message,
@@ -42,6 +42,17 @@ const styles = (theme) => ({
   tableHeaderAction: theme.table.headerAction,
   processing: {
     margin: theme.spacing(1),
+  },
+  searcherActions: {
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
+    gap: theme.spacing(1),
+    backgroundColor: theme.palette.background.default,
+    border: 0,
+  },
+  tableContainer: {
+    ...theme.table.container,
+    boxShadow: theme.shadows[2],
   },
 });
 
@@ -98,6 +109,7 @@ class SelectionMenu extends Component {
             exportFileFormats={this.props.exportFileFormats}
             exportFileFormat={this.props.exportFileFormat}
             setExportFileFormat={this.props.setExportFileFormat}
+            downloadWithIconButton={this.props.downloadWithIconButton}
           />
         )}
         {!!contributionKey && (
@@ -108,6 +120,7 @@ class SelectionMenu extends Component {
             withSelection={this.props.withSelection}
             selection={this.props.selection}
             contributionKey={contributionKey}
+            downloadWithIconButton={this.props.downloadWithIconButton}
           />
         )}
       </Grid>
@@ -142,6 +155,7 @@ class SelectionMenu extends Component {
               additionalExportFields={this.props.additionalExportFields}
               chooseFileFormat={this.props.chooseFileFormat}
               exportFileFormats={this.props.exportFileFormats}
+              downloadWithIconButton={this.props.downloadWithIconButton}
             />
           )}
           {!!contributionKey && (
@@ -477,6 +491,9 @@ class Searcher extends Component {
       setExportFileFormat,
       selectWithCheckbox = false,
       getAllItems,
+      enableActionButtons = false,
+      searcherActions = [],
+      downloadWithIconButton = false,
     } = this.props;
     return (
       <Fragment>
@@ -510,12 +527,31 @@ class Searcher extends Component {
         )}
         {!!contributionKey && <Contributions contributionKey={contributionKey} />}
         <Paper className={classes.paper}>
+          {enableActionButtons && !!searcherActions.length && (
+            <Grid container justifyContent="flex-end" className={classes.searcherActions}>
+              {searcherActions.map((action) => {
+                if (!action.authorized) return null;
+
+                return (
+                  <Button
+                    key={action.label}
+                    onClick={action.onClick}
+                    startIcon={action.icon}
+                    variant="contained"
+                    color="primary"
+                  >
+                    <Typography variant="body2"> {action.label} </Typography>
+                  </Button>
+                );
+              })}
+            </Grid>
+          )}
           <Grid container className={classes.tableContainer}>
             {errorItems ? (
               <ProgressOrError error={errorItems} />
             ) : (
               <Fragment>
-                <Grid container item alignItems="center" xs={8} className={classes.paperHeader}>
+                <Grid container item alignItems="center" xs={7} className={classes.paperHeader}>
                   <Grid item xs={8} className={classes.paperHeaderTitle}>
                     {!fetchingItems ? tableTitle : formatMessage(intl, "core", "table.resultsLoading")}
                   </Grid>
@@ -527,7 +563,7 @@ class Searcher extends Component {
                     />
                   </Grid>
                 </Grid>
-                <Grid container alignItems="center" item xs={4} className={classes.paperHeader}>
+                <Grid container alignItems="center" item xs={5} className={classes.paperHeader}>
                   {fetchedItems && (
                     <Grid container direction="row" justify="flex-end" className={classes.paperHeaderAction}>
                       <StyledSelectionMenu
@@ -555,6 +591,7 @@ class Searcher extends Component {
                         exportFileFormats={exportFileFormats}
                         exportFileFormat={exportFileFormat}
                         setExportFileFormat={setExportFileFormat}
+                        downloadWithIconButton={downloadWithIconButton}
                       />
                     </Grid>
                   )}

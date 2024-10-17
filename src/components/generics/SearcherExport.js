@@ -40,7 +40,6 @@ function SearcherExport(props) {
     label = null,
     selectWithCheckbox,
     downloadWithIconButton,
-    classes,
   } = props;
 
   const [exportStatus, setExport] = useState(0);

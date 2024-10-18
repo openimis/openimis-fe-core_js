@@ -18,6 +18,7 @@ import { withStyles, withTheme } from "@material-ui/core/styles";
 import MoreHoriz from "@material-ui/icons/MoreHoriz";
 
 import { cacheFilters, resetCacheFilters, saveCurrentPaginationPage } from "../../actions";
+import { DEFAULT } from "../../constants";
 import { formatSorter, sort } from "../../helpers/api";
 import { formatMessage } from "../../helpers/i18n";
 import withModulesManager from "../../helpers/modules";
@@ -233,6 +234,7 @@ class Searcher extends Component {
   constructor(props) {
     super(props);
     this.fetchEnabled = props.modulesManager.getConf("fe-core", "shouldFetchInitially", true);
+    this.isWorker = props.modulesManager.getConf("fe-core", "isWorker", DEFAULT.IS_WORKER);
   }
   componentDidMount() {
     const cacheKey = this._getCacheKey();
@@ -551,7 +553,7 @@ class Searcher extends Component {
               <ProgressOrError error={errorItems} />
             ) : (
               <Fragment>
-                <Grid container item alignItems="center" xs={7} className={classes.paperHeader}>
+                <Grid container item alignItems="center" xs={this.isWorker ? 7 : 8} className={classes.paperHeader}>
                   <Grid item xs={8} className={classes.paperHeaderTitle}>
                     {!fetchingItems ? tableTitle : formatMessage(intl, "core", "table.resultsLoading")}
                   </Grid>
@@ -563,7 +565,7 @@ class Searcher extends Component {
                     />
                   </Grid>
                 </Grid>
-                <Grid container alignItems="center" item xs={5} className={classes.paperHeader}>
+                <Grid container alignItems="center" item xs={this.isWorker ? 5 : 4} className={classes.paperHeader}>
                   {fetchedItems && (
                     <Grid container direction="row" justify="flex-end" className={classes.paperHeaderAction}>
                       <StyledSelectionMenu

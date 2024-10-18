@@ -45,7 +45,7 @@ const LoginPage = ({ logo }) => {
   const auth = useAuthentication();
   const [isAuthenticating, setAuthenticating] = useState(false);
   const showMPassProvider = modulesManager.getConf("fe-core", "LoginPage.showMPassProvider", false);
-  const linkToMPassUserGuide = modulesManager.getConf("fe-core", "LoginPage.linkToMPassUserGuide", "https://docs.openimis.org/");
+  const linkToUserGuide = modulesManager.getConf("fe-core", "LoginPage.linkToUserGuide", "https://docs.openimis.org/");
   const isWorker = modulesManager.getConf("fe-core", "isWorker", DEFAULT.IS_WORKER);
   const enablePublicPage = modulesManager.getConf("fe-core", "App.enablePublicPage", DEFAULT.ENABLE_PUBLIC_PAGE);
 
@@ -156,7 +156,7 @@ const LoginPage = ({ logo }) => {
                       <Box display="flex" alignItems="center" mt={4} mb={2}>
                         <Divider style={{ flex: 1 }} />
                         <Link
-                          href={linkToMPassUserGuide}
+                          href={linkToUserGuide}
                           underline="hover"
                           style={{ margin: "0 12px", cursor: "pointer" }}
                           target="_blank"

@@ -54,6 +54,11 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 
 ## Helpers
 
+### Contexts
+
+- `ToastContext`: This context provides toast notification functionality within the application. It enables you to easily display success, error, warning, or informational messages as toast notifications.
+__To use it__, you need to import `useToast` from `@openimis/fe-core` and use one of the provided functions (e.g., `showSuccess`, `showError`, `showWarning`, `showInfo`) to trigger different types of toast notifications.
+
 ### redux actions helpers
 
 - `journalize`: helper to trigger the `CORE_MUTATION_ADD` action (which register a mutation in the journal)
@@ -152,6 +157,7 @@ None
 
 ## Configurations Options
 - `core.PublicPage`: This contributions point serves as the Public Page for the OpenIMIS App. To enable its use, it must be exposed as a **core.PublicPage** contribution point. Additionally, the database configuration variable **App.enablePublicPage** must be set to `true`.
+- `showJournalSidebar`: This determines whether to render the Journal sidebar or not. __IMPORTANT__:  The Journal provides crucial information about the state of mutations, including whether they succeeded or failed. If you choose to hide it, you must ensure the user is informed of the mutation outcome - consider using toast notifications. **This configuration only hides the Journal. It does not automatically add toast notifications out of the box.**.
 - `datePicker`: the concrete date picker to publish as `core.DatePicker` component ("ad"= Gregorian DatePicker, "ne"= Nepali calendar date picker )
 - `useDynPermalinks`: use ?dyn=<Base64-URL> when opening in new tab (prevent sending client-side routes to server while) (Default: false)
 - `core.JournalDrawer.pollInterval`: poll interval (in ms) to check for mutation status once submitted (Default: 2000)

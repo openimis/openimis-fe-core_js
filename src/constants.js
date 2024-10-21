@@ -129,6 +129,7 @@ export const ENTER_KEY = "Enter";
 export const DEFAULT = {
   IS_WORKER: false,
   ENABLE_PUBLIC_PAGE: false,
+  SHOW_JOURNAL_SIDEBAR: true,
 }
 
 export const EXPORT_FILE_FORMATS = {

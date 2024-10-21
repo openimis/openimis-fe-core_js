@@ -224,6 +224,7 @@ const RequireAuth = (props) => {
     false,
   );
   const isWorker = modulesManager.getConf("fe-core", "isWorker", DEFAULT.IS_WORKER);
+  const showJournalSidebar = modulesManager.getConf("fe-core", "showJournalSidebar", DEFAULT.SHOW_JOURNAL_SIDEBAR);
 
   const isAppBarMenu = useMemo(() => theme.menu.variant.toUpperCase() === "APPBAR", [theme.menu.variant]);
 
@@ -288,7 +289,7 @@ const RequireAuth = (props) => {
         position="fixed"
         className={clsx({
           [classes.appBarShift]: isOpen && theme.breakpoints.up("md"),
-          [classes.appBar]: !isWorker,
+          [classes.appBar]: showJournalSidebar,
         })}
       >
         <Toolbar>
@@ -367,12 +368,12 @@ const RequireAuth = (props) => {
           </nav>
         </ClickAwayListener>
       )}
-      {!isWorker && <JournalDrawer open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />}
+      {showJournalSidebar && <JournalDrawer open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />}
       <div className={classes.toolbar} />
       <main
         className={clsx({
           [classes.jrnlContentShift]: isDrawerOpen,
-          [classes.content]: !isWorker,
+          [classes.content]: showJournalSidebar,
         })}
       >
         {children}

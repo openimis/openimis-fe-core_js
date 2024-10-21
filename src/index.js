@@ -119,6 +119,7 @@ import withHistory, {
   Redirect,
   NavLink,
 } from "./helpers/history";
+import { useToast } from "./helpers/ToastContext";
 import { validatePassword } from "./helpers/passwordValidator";
 import { passwordGenerator } from "./helpers/passwordGenerator"
 import { createFieldsBasedOnJSON, renderInputComponent } from "./helpers/json-handler-utils";
@@ -325,4 +326,5 @@ export {
   SearcherActionButton,
   passwordGenerator,
   EXPORT_FILE_FORMATS,
+  useToast,
 };

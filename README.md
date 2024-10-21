@@ -54,6 +54,11 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 
 ## Helpers
 
+### Contexts
+
+- `ToastContext`: This context provides toast notification functionality within the application. It enables you to easily display success, error, warning, or informational messages as toast notifications.
+__To use it__, you need to import `useToast` from `@openimis/fe-core` and use one of the provided functions (e.g., `showSuccess`, `showError`, `showWarning`, `showInfo`) to trigger different types of toast notifications.
+
 ### redux actions helpers
 
 - `journalize`: helper to trigger the `CORE_MUTATION_ADD` action (which register a mutation in the journal)

@@ -71,6 +71,7 @@ class Form extends Component {
       Panels,
       contributedPanelsKey = null,
       additionalTooltips = null,
+      enableActionButtons = false,
       ...others
     } = this.props;
 
@@ -193,9 +194,11 @@ class Form extends Component {
             Panels.map((P, idx) => (
               <Grid key={`form_panel_${idx}`} item xs={12}>
                 <P
+                  {...others}
                   edited={this.props.edited}
                   edited_id={this.props.edited_id}
-                  {...others}
+                  save={this.props.save}
+                  canSave={this.props.canSave}
                   onEditedChanged={this.onEditedChanged}
                 />
               </Grid>
@@ -208,12 +211,15 @@ class Form extends Component {
             />
           )}
         </form>
-        <div className={classes.tooltipContainer}>
-          {filteredTooltips.map((item, index) =>
-            <div className={classes.flexTooltip} key={index}>
-                {withTooltip(item.content, item.tooltip, index === 0 ? 'top' : 'left')}
-            </div>)}
-        </div>
+        {!enableActionButtons && (
+          <div className={classes.tooltipContainer}>
+            {filteredTooltips.map((item, index) => (
+              <div className={classes.flexTooltip} key={index}>
+                {withTooltip(item.content, item.tooltip, index === 0 ? "top" : "left")}
+              </div>
+            ))}
+          </div>
+        )}
       </Fragment>
     );
   }

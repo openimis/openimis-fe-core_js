@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { injectIntl } from "react-intl";
 import { useDispatch, useSelector } from "react-redux";
 
-import { MenuItem, Tooltip } from "@material-ui/core";
+import { MenuItem, Tooltip, Button, Typography } from "@material-ui/core";
 import withStyles from "@material-ui/core/styles/withStyles";
+import GetAppIcon from "@material-ui/icons/GetApp";
 
 import { closeExportConfigDialog, openExportConfigDialog } from "../../actions";
 import { EXPORT_FILE_FORMATS } from "../../constants";
@@ -37,13 +38,15 @@ function SearcherExport(props) {
     exportFileFormat = EXPORT_FILE_FORMATS.csv,
     setExportFileFormat,
     label = null,
+    selectWithCheckbox,
+    downloadWithIconButton,
   } = props;
 
   const [exportStatus, setExport] = useState(0);
   const dispatch = useDispatch();
   const isExportConfigDialogOpen = useSelector((state) => state.core?.isExportConfigDialogOpen);
 
-  const enabled = (selection) => exportStatus === 0;
+  const enabled = (selection) => (selectWithCheckbox ? !selection?.length && exportStatus === 0 : exportStatus === 0);
 
   const exportData = (
     fields = exportFields,
@@ -91,6 +94,7 @@ function SearcherExport(props) {
   const entries = [
     {
       text: label || formatMessage(intl, "core", "exportSearchResult"),
+      icon: <GetAppIcon />,
       action: handleExportData,
     },
   ];
@@ -113,13 +117,25 @@ function SearcherExport(props) {
         />
       )}
 
-      <div style={{ display: enabled(selection) ? "block" : "none" }}>
+      <div>
         {entries.map((item, idx) => (
           <Tooltip title={formatMessage(intl, "core", "exportSearchResult.tooltip")}>
             <div key={`selectionsMenu-export-${idx}`}>
-              <MenuItem onClick={(e) => item.action()} disabled={!enabled(selection)}>
-                {item.text}
-              </MenuItem>
+              {downloadWithIconButton ? (
+                <Button
+                  onClick={(e) => item.action()}
+                  disabled={!enabled(selection)}
+                  variant="contained"
+                  color="primary"
+                  startIcon={item.icon}
+                >
+                  <Typography variant="body2"> {item.text} </Typography>
+                </Button>
+              ) : (
+                <MenuItem onClick={(e) => item.action()} disabled={!enabled(selection)}>
+                  {item.text}
+                </MenuItem>
+              )}
             </div>
           </Tooltip>
         ))}

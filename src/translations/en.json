@@ -149,5 +149,9 @@
   "core.LanguageQuickPicker.dialog.title": "Confirm Language",
   "core.LanguageQuickPicker.dialog.message": "You are about to change the language to {language}. Do you want to proceed?",
   "core.LanguageQuickPicker.dialog.confirm": "Confirm",
-  "core.LanguageQuickPicker.dialog.cancel": "Cancel"
+  "core.LanguageQuickPicker.dialog.cancel": "Cancel",
+  "core.LoginPage.backButton": "Back",
+  "core.LoginPage.loginCaption": "Authentication by",
+  "core.LoginPage.howToUse": "User guide",
+  "core.InfoButton.tooltip": "More Information"
 }

@@ -119,6 +119,7 @@ import withHistory, {
   Redirect,
   NavLink,
 } from "./helpers/history";
+import { useToast } from "./helpers/ToastContext";
 import { validatePassword } from "./helpers/passwordValidator";
 import { passwordGenerator } from "./helpers/passwordGenerator"
 import { createFieldsBasedOnJSON, renderInputComponent } from "./helpers/json-handler-utils";
@@ -130,6 +131,7 @@ import RefreshAuthToken from "./components/RefreshAuthToken";
 import UserActivityReport from "./reports/UserActivityReport";
 import RegistersStatusReport from "./reports/RegistersStatusReport";
 import SearcherActionButton from "./components/generics/SearcherActionButton";
+import InfoButton from "./components/generics/InfoButton";
 
 const ROUTE_ROLES = "roles";
 const ROUTE_ROLE = "roles/role";
@@ -325,4 +327,6 @@ export {
   SearcherActionButton,
   passwordGenerator,
   EXPORT_FILE_FORMATS,
+  useToast,
+  InfoButton,
 };

@@ -152,5 +152,6 @@
   "core.LanguageQuickPicker.dialog.cancel": "Cancel",
   "core.LoginPage.backButton": "Back",
   "core.LoginPage.loginCaption": "Authentication by",
-  "core.LoginPage.howToUse": "User guide"
+  "core.LoginPage.howToUse": "User guide",
+  "core.InfoButton.tooltip": "More Information"
 }

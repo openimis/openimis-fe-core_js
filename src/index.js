@@ -131,6 +131,7 @@ import RefreshAuthToken from "./components/RefreshAuthToken";
 import UserActivityReport from "./reports/UserActivityReport";
 import RegistersStatusReport from "./reports/RegistersStatusReport";
 import SearcherActionButton from "./components/generics/SearcherActionButton";
+import InfoButton from "./components/generics/InfoButton";
 
 const ROUTE_ROLES = "roles";
 const ROUTE_ROLE = "roles/role";
@@ -327,4 +328,5 @@ export {
   passwordGenerator,
   EXPORT_FILE_FORMATS,
   useToast,
+  InfoButton,
 };

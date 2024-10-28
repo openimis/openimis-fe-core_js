@@ -10,10 +10,6 @@ export const PublicPageLanguageProvider = ({ children }) => {
   const modulesManager = useModulesManager();
   const enablePublicPage = modulesManager.getConf("fe-core", "App.enablePublicPage", DEFAULT.ENABLE_PUBLIC_PAGE);
 
-  if (!enablePublicPage) {
-    return <> {children} </>;
-  }
-
   const [publicPageLang, setPublicPageLang] = useState(() => getCookie(PUBLIC_PAGE_LANGUAGE_COOKIE_KEY) ?? "en");
 
   useEffect(() => {
@@ -27,6 +23,10 @@ export const PublicPageLanguageProvider = ({ children }) => {
   };
 
   const memoizedValue = React.useMemo(() => ({ publicPageLang, onPublicPageLangChange }), [publicPageLang]);
+
+  if (!enablePublicPage) {
+    return <> {children} </>;
+  }
 
   return <PublicPageLanguageContext.Provider value={memoizedValue}>{children}</PublicPageLanguageContext.Provider>;
 };

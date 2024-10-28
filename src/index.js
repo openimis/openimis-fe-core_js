@@ -120,6 +120,7 @@ import withHistory, {
   NavLink,
 } from "./helpers/history";
 import { useToast } from "./helpers/ToastContext";
+import { usePublicPageLanguage } from "./helpers/PublicPageLanguageContext";
 import { validatePassword } from "./helpers/passwordValidator";
 import { passwordGenerator } from "./helpers/passwordGenerator"
 import { createFieldsBasedOnJSON, renderInputComponent } from "./helpers/json-handler-utils";
@@ -329,4 +330,5 @@ export {
   EXPORT_FILE_FORMATS,
   useToast,
   InfoButton,
+  usePublicPageLanguage,
 };

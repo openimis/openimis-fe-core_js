@@ -126,6 +126,8 @@ export const RIGHT_VIEW_EU_MODAL = 203000;
 
 export const ENTER_KEY = "Enter";
 
+export const PUBLIC_PAGE_LANGUAGE_COOKIE_KEY = "publicPageLanguage";
+
 export const DEFAULT = {
   IS_WORKER: false,
   ENABLE_PUBLIC_PAGE: false,

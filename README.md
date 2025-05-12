@@ -28,8 +28,8 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 - `PermissionCheck`: controls access to content based on user rights (403 error). Renders content if user has required rights, otherwise shows `ForbiddenPage`.
 - `ForbiddenPage`: shown when a user lacks permission to access a specific page or resource. Displays an access denied message.
 - `NotFoundPage`: appears when a user visits a non-existent route (404 error). Informs the user that the page is unavailable and suggests navigation option.
-- `InternalServerErrorPage`: displays a message for a 500 Internal Server Error, informing users of a server-side issue in the application.
- * `LanguageQuickPicker` is a component that allows users to quickly switch between different languages. Available on user's navbar.
+- `InternalServerErrorPage`: displays a message for a 500 Internal Server Error, informing users of a server-side issue in the application.s
+- `LanguageQuickPicker` is a component that allows users to quickly switch between different languages. Available on user's navbar.
 
 ## Generic Components (to be reused along business-focused components)
 
@@ -52,12 +52,43 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 - `Form`: generic form. Manage dirty state, displays add/save button,...
 - `Table`: generic table. Headers (with -sort-actions), rows, optional setting - showOrdinalNumber that will show column with ordinal number as first column, ...
 
+## Role Right Translation Management
+
+This section outlines where translations for Role Rights (permissions) are managed within the openIMIS frontend modules. Understanding this structure is crucial for adding or modifying permission display names.
+
+**Standard Location:**
+
+- By default, translations for Role Rights belonging to a specific module reside within the `en.json` localization file of that module's corresponding frontend package.
+- The path typically follows this pattern: `openimis-fe-<module_name>/src/translations/en.json`.
+- **Example:** Translations for rights under the `insuree` module (e.g., `insuree.gql_query_insurees_perms`) are located in `openimis-fe-insuree/src/translations/en.json`.
+
+**Centralized Location for Specific Modules:**
+
+- Certain backend modules provide Role Rights but do not have their own dedicated frontend package (`openimis-fe-*`).
+- Translations for rights originating from these specific modules are centralized within the core frontend module's localization file: `openimis-fe-core/src/translations/en.json`.
+- The modules whose Role Right translations are currently managed in `openimis-fe-core` are:
+  - `api_fhir_r4`
+  - `report`
+  - `api_etl`
+- **Example:** The translation for `report.gql_reports_user_activity_perms` ("Report | User Activity") must be defined in `openimis-fe-core/src/translations/en.json`.
+
+**Translation Key and Value Format:**
+
+- **Key:** `module_key.original_permission_string` (e.g., `core.gql_query_users_perms`)
+- **Value:** `"ModuleNameInTitleCase | ReadablePermissionNameInTitleCase"` (e.g., `"Core | Query Users"`)
+
+**Fallback for Missing Translations:**
+
+- The system requires a translation entry for every Role Right presented in the UI.
+- If a translation cannot be found for a specific right (either because the module providing the translation is not deployed/included, or the specific key is missing from the relevant `en.json` file), the UI will display the right name prefixed with `[No Translation]`.
+- **Example:** If the translation for `core.gql_query_users_perms` is missing, it might be displayed as: `[No Translation] Core | Query Users`.
+
 ## Helpers
 
 ### Contexts
 
 - `ToastContext`: This context provides toast notification functionality within the application. It enables you to easily display success, error, warning, or informational messages as toast notifications.
-__To use it__, you need to import `useToast` from `@openimis/fe-core` and use one of the provided functions (e.g., `showSuccess`, `showError`, `showWarning`, `showInfo`) to trigger different types of toast notifications.
+  **To use it**, you need to import `useToast` from `@openimis/fe-core` and use one of the provided functions (e.g., `showSuccess`, `showError`, `showWarning`, `showInfo`) to trigger different types of toast notifications.
 
 ### redux actions helpers
 
@@ -156,8 +187,9 @@ __To use it__, you need to import `useToast` from `@openimis/fe-core` and use on
 None
 
 ## Configurations Options
+
 - `core.PublicPage`: This contributions point serves as the Public Page for the OpenIMIS App. To enable its use, it must be exposed as a **core.PublicPage** contribution point. Additionally, the database configuration variable **App.enablePublicPage** must be set to `true`.
-- `showJournalSidebar`: This determines whether to render the Journal sidebar or not. __IMPORTANT__:  The Journal provides crucial information about the state of mutations, including whether they succeeded or failed. If you choose to hide it, you must ensure the user is informed of the mutation outcome - consider using toast notifications. **This configuration only hides the Journal. It does not automatically add toast notifications out of the box.**.
+- `showJournalSidebar`: This determines whether to render the Journal sidebar or not. **IMPORTANT**: The Journal provides crucial information about the state of mutations, including whether they succeeded or failed. If you choose to hide it, you must ensure the user is informed of the mutation outcome - consider using toast notifications. **This configuration only hides the Journal. It does not automatically add toast notifications out of the box.**.
 - `datePicker`: the concrete date picker to publish as `core.DatePicker` component ("ad"= Gregorian DatePicker, "ne"= Nepali calendar date picker )
 - `useDynPermalinks`: use ?dyn=<Base64-URL> when opening in new tab (prevent sending client-side routes to server while) (Default: false)
 - `core.JournalDrawer.pollInterval`: poll interval (in ms) to check for mutation status once submitted (Default: 2000)
@@ -176,7 +208,7 @@ None
 - `LoginPage.showMPassProvider`: redirects users to the saml login page, facilitating access to mPass-protected resources
 - `secondCalendarType`: type of secondary calendar picker (if enabled), default "nepali"
 - `secondCalendarLocale`: locale for secondary calendar picker (if enabled), default "nepali_en",
-- `Input.disabledVisibilityBoost`: This setting enhances the visibility of disabled input fields (e.g., text/number inputs, date pickers). When set to __true__, the label color changes to `#181716`, and the input value color to `#5E5B50`. The default is __false__.
+- `Input.disabledVisibilityBoost`: This setting enhances the visibility of disabled input fields (e.g., text/number inputs, date pickers). When set to **true**, the label color changes to `#181716`, and the input value color to `#5E5B50`. The default is **false**.
 - `limitMutationLogsQuery`: This config to enalble or disable fetchMutationLogs query mutation in core,
 
 ## Main Menu and Submenu Configuration
@@ -186,6 +218,7 @@ None
 This document provides guidance on how to configure the Main Menu and its Submenus within the OpenIMIS application. It outlines the structure of menu entries, explains key concepts, and lists all possible configurations extracted from the system.
 
 ### Key Concepts
+
 1. **Main Menu and Submenu Structure:**
    - Each menu is uniquely identified by an `id`.
    - Submenus are associated with specific Main Menu entries and cannot currently be added dynamically unless linked to predefined frontend logic.
@@ -199,8 +232,7 @@ This document provides guidance on how to configure the Main Menu and its Submen
 4. **Dynamic Linking:**
    - New menus can be created dynamically, but submenus must be linked to existing application logic.
 5. **Keeping old approach:**
-   - If you want to keep old approach, just leave 'menus' as empty array or do not put this key into configuration file. In that case menu will be populated in a deault, old way based on the order of modules in openimis.json.  
-
+   - If you want to keep old approach, just leave 'menus' as empty array or do not put this key into configuration file. In that case menu will be populated in a deault, old way based on the order of modules in openimis.json.
 
 ### Additional Notes
 
@@ -211,6 +243,7 @@ This document provides guidance on how to configure the Main Menu and its Submen
 - **Configuration Management:** Use the `id` field to map menus and submenus to their frontend counterparts for consistent functionality.
 
 ### Useful links (openIMIS wiki page on Confluence)
+
 - [More detailed instruction of configuration](https://openimis.atlassian.net/wiki/spaces/OP/pages/4209606659/Solution+Building+configuration+of+Main+Menu+and+Submenus)
 - [List of possible configurations of submenus items](https://openimis.atlassian.net/wiki/spaces/OP/pages/4209737755/List+of+submenu+entries+available+in+system)
 - [Detailed description of technical approach to achieve having menu configurable](https://openimis.atlassian.net/wiki/spaces/OP/pages/4209803280/Technical+Approach+to+have+Menu+Configuration+flexible).

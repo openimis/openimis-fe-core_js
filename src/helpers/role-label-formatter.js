@@ -11,7 +11,7 @@ const capitalizeFirstLetter = (string) => {
     .join(WHITESPACE);
 };
 
-export const formatRoleLabel = (moduleName = "", permName = "") => {
+export const formatRoleLabel = (moduleName = "", permName = "", addPrefix = false) => {
   const rightNameWords = permName
     .split(RIGHT_NAME_WORDS_SEPARATOR)
     .filter((word) => !RIGHT_NAME_OMITTED_WORDS.includes(word));
@@ -22,5 +22,5 @@ export const formatRoleLabel = (moduleName = "", permName = "") => {
     .replace(QUERY_STRING, SEARCH_STRING);
   const moduleNameLabel = moduleName.split(RIGHT_NAME_WORDS_SEPARATOR).map(capitalizeFirstLetter).join(WHITESPACE);
 
-  return `${moduleNameLabel} | ${rightNameLabel}`;
+  return `${addPrefix ? "[No Translation] " : null} ${moduleNameLabel} | ${rightNameLabel}`;
 };

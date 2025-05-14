@@ -28,7 +28,7 @@ It is dedicated to be deployed as a module of [openimis-fe_js](https://github.co
 - `PermissionCheck`: controls access to content based on user rights (403 error). Renders content if user has required rights, otherwise shows `ForbiddenPage`.
 - `ForbiddenPage`: shown when a user lacks permission to access a specific page or resource. Displays an access denied message.
 - `NotFoundPage`: appears when a user visits a non-existent route (404 error). Informs the user that the page is unavailable and suggests navigation option.
-- `InternalServerErrorPage`: displays a message for a 500 Internal Server Error, informing users of a server-side issue in the application.s
+- `InternalServerErrorPage`: displays a message for a 500 Internal Server Error, informing users of a server-side issue in the application.
 - `LanguageQuickPicker` is a component that allows users to quickly switch between different languages. Available on user's navbar.
 
 ## Generic Components (to be reused along business-focused components)

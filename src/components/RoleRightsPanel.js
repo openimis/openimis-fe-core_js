@@ -80,7 +80,8 @@ class RoleRightsPanel extends FormPanel {
   rightTranslationId = (moduleName, permsName) => `${moduleName}.${permsName}`;
 
   isFilterMatched = (moduleName, permsName) =>
-    this.rightLabel(moduleName, permsName).includes(this.state.filterValue.toLowerCase());
+    this.rightLabel(moduleName, permsName).includes(this.state.filterValue.toLowerCase()) ||
+    this.rightTranslationId(moduleName, permsName).includes(this.state.filterValue.toLowerCase());
 
   rightLabel = (moduleName, permsName) => {
     const translationId = this.rightTranslationId(moduleName, permsName);

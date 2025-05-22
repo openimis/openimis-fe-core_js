@@ -83,6 +83,69 @@ This section outlines where translations for Role Rights (permissions) are manag
 - If a translation cannot be found for a specific right (either because the module providing the translation is not deployed/included, or the specific key is missing from the relevant `en.json` file), the UI will display the right name prefixed with `[No Translation]`.
 - **Example:** If the translation for `core.gql_query_users_perms` is missing, it might be displayed as: `[No Translation] Core | Query Users`.
 
+## Advanced Filters Translation Management
+
+All advanced filters translations live under the `core.advancedFilters` namespace, so the UI picks up the right labels from your locale files.
+
+**Default Translations:**
+
+In your locale file (e.g. `translations/en.json`), you’ll find entries like:
+
+```json
+{
+  "core.advancedFilters.exact": "Exact",
+  "core.advancedFilters.iexact": "Exact",
+  "core.advancedFilters.istartswith": "Starts with",
+  "core.advancedFilters.icontains": "Contains",
+  "core.advancedFilters.lt": "Less than",
+  "core.advancedFilters.lte": "Less than or equal to",
+  "core.advancedFilters.gt": "Greater than",
+  "core.advancedFilters.gte": "Greater than or equal to",
+  "core.advancedFilters.email": "Email",
+  "core.advancedFilters.able_bodied": "Able bodied",
+  "core.advancedFilters.national_id": "National ID",
+  "core.advancedFilters.educated_level": "Educated level",
+  "core.advancedFilters.chronic_illness": "Chronic illness",
+  "core.advancedFilters.national_id_type": "National ID type",
+  "core.advancedFilters.number_of_elderly": "Number of elderly",
+  "core.advancedFilters.number_of_children": "Number of children",
+  "core.advancedFilters.beneficiary_data_source": "Beneficiary data source"
+}
+```
+
+These keys power two reusable React components:
+
+- **CustomFilterFieldStatusPicker**  
+  Renders a dropdown of available filter _fields_, using  
+  `formatMessage('advancedFilters.<field>')`.
+
+- **CustomFilterTypeStatusPicker**  
+  After you pick a field, shows matching filter _types_, also via  
+  `formatMessage('advancedFilters.<type>')`.
+
+**How to Add or Update Translations:**
+
+Whenever the **individual** global schema changes (you add or remove a filter field/type), update your locale files:
+
+1. Identify the new key(s):
+
+   - Field → `core.advancedFilters.<new_field>`
+   - Type → `core.advancedFilters.<new_type>`
+
+2. Open your locale file, e.g.:
+
+   ```bash
+   translations/en.json
+   ```
+
+3. Add the translation entry:
+
+   ```json
+   {
+     "core.advancedFilters.example_field": "Example field"
+   }
+   ```
+
 ## Helpers
 
 ### Contexts

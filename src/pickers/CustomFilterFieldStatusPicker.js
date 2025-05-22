@@ -1,10 +1,10 @@
 import React from "react";
+
 import SelectInput from "../components/inputs/SelectInput";
-import { formatMessage } from "@openimis/fe-core";
-import { injectIntl } from "react-intl";
+import { MODULE_NAME } from "../constants";
+import { useTranslations } from "../helpers/i18n";
 
 const CustomFilterFieldStatusPicker = ({
-  intl,
   value,
   label,
   onChange,
@@ -15,18 +15,22 @@ const CustomFilterFieldStatusPicker = ({
   required = false,
   customFilters,
 }) => {
+  const { formatMessage } = useTranslations(MODULE_NAME);
 
-  const options = Array.isArray(customFilters) && customFilters !== undefined ?  [
-    ...customFilters.map((customFilter) => ({
-        value: { field: customFilter.field, type: customFilter.type },
-        label: customFilter.field
-    }))
-  ] : [];
+  const options =
+    Array.isArray(customFilters) && customFilters !== undefined
+      ? [
+          ...customFilters.map((customFilter) => ({
+            value: { field: customFilter.field, type: customFilter.type },
+            label: formatMessage(`advancedFilters.${customFilter.field}`),
+          })),
+        ]
+      : [];
 
   if (withNull) {
     options.unshift({
       value: null,
-      label: nullLabel || ""
+      label: nullLabel || "",
     });
   }
 
@@ -43,4 +47,4 @@ const CustomFilterFieldStatusPicker = ({
   );
 };
 
-export default injectIntl(CustomFilterFieldStatusPicker);
+export default CustomFilterFieldStatusPicker;

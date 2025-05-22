@@ -1,7 +1,9 @@
 import React from "react";
-import SelectInput from "../components/inputs/SelectInput";
-import { formatMessage } from "@openimis/fe-core";
 import { injectIntl } from "react-intl";
+
+import SelectInput from "../components/inputs/SelectInput";
+import { MODULE_NAME } from "../constants";
+import { useTranslations } from "../helpers/i18n";
 
 const CustomFilterTypeStatusPicker = ({
   intl,
@@ -16,22 +18,27 @@ const CustomFilterTypeStatusPicker = ({
   customFilters,
   customFilterField,
 }) => {
+  const { formatMessage } = useTranslations(MODULE_NAME);
 
   // Filter the available options based on the selected field
   const filterTypes = customFilters
     ? customFilters
         .filter((filter) => filter.field === customFilterField)
-        .map((filter) => { return (
-           filter.filter
-        )}).flat()
+        .map((filter) => {
+          return filter.filter;
+        })
+        .flat()
     : [];
 
-  const filteredOptions = filterTypes.map((filter) => ({ value: filter, label: filter }));
+  const filteredOptions = filterTypes.map((filter) => ({
+    value: filter,
+    label: formatMessage(`advancedFilters.${filter}`),
+  }));
 
   if (withNull) {
     filteredOptions.unshift({
       value: null,
-      label: nullLabel || ""
+      label: nullLabel || "",
     });
   }
 

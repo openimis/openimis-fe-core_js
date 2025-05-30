@@ -323,6 +323,12 @@ class Searcher extends Component {
     this.setState({ filters });
   };
 
+  _notifyFiltersApplied = () => {
+    if (this.props.onFiltersApplied) {
+      this.props.onFiltersApplied(this.state.filters);
+    }
+  };
+
   _cacheAndApply = () => {
     var filters = this.filtersToQueryParams();
     if (!!this.props.cacheFiltersKey) {
@@ -332,6 +338,8 @@ class Searcher extends Component {
     } else {
       this.props.fetch(filters);
     }
+
+    this._notifyFiltersApplied();
   };
 
   applyFilters = () => {

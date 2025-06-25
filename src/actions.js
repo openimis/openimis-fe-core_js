@@ -288,7 +288,7 @@ export function login(credentials) {
       try {
         const response = await dispatch(
           graphqlMutation(mutation, credentials, ["CORE_AUTH_LOGIN_REQ", "CORE_AUTH_LOGIN_RESP", "CORE_AUTH_ERR"], {}, false, {
-            "X-CSRFToken": csrfToken
+           
           }),
         );
         if (response.payload?.errors?.length > 0) {

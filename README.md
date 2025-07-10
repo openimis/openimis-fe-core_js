@@ -269,8 +269,10 @@ None
   In the specified configuration, when the parameter is set to **true**, it necessitates that users are associated with an Economic Unit. If a user lacks this association, a modal will be displayed to prompt them to establish it. Until the user is linked to a unit, their only authorized action is to log out. The default configuration is **false**.
 - `LogoutButton.showMPassProvider`: when activated, routes the user to the saml logout page for secure session termination
 - `LoginPage.showMPassProvider`: redirects users to the saml login page, facilitating access to mPass-protected resources
+- `secondaryCalendarEnabled`: as **isSecondaryCalendarEnabled** is state bind, sometimes it may require to change the calendar for specific component, this props override the secondary calendar enabling.
 - `secondCalendarType`: type of secondary calendar picker (if enabled), default "nepali"
 - `secondCalendarLocale`: locale for secondary calendar picker (if enabled), default "nepali_en",
+- `calendar.clearButton`: this translation key is for clear button message
 - `Input.disabledVisibilityBoost`: This setting enhances the visibility of disabled input fields (e.g., text/number inputs, date pickers). When set to **true**, the label color changes to `#181716`, and the input value color to `#5E5B50`. The default is **false**.
 - `limitMutationLogsQuery`: This config to enalble or disable fetchMutationLogs query mutation in core,
 

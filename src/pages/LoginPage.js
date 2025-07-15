@@ -32,6 +32,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const LOGIN_PAGE_CONTRIBUTION_KEY = "core.LoginPage";
+const LOGIN_PAGE_LOGO_CONTRIBUTION_KEY = "core.LoginPageLogo";
+const LOGIN_PAGE_FORM_CONTRIBUTION_KEY = "core.LoginPageForm";
 const LOGIN_PAGE_MPASS_CONTRIBUTION_KEY = "workerVoucher.MPassLoginButton";
 
 const LoginPage = ({ logo }) => {
@@ -48,6 +50,13 @@ const LoginPage = ({ logo }) => {
   const isWorker = modulesManager.getConf("fe-core", "isWorker", DEFAULT.IS_WORKER);
   const enablePublicPage = modulesManager.getConf("fe-core", "App.enablePublicPage", DEFAULT.ENABLE_PUBLIC_PAGE);
 
+  const login_page_logo_contributions = modulesManager.getContribs(LOGIN_PAGE_LOGO_CONTRIBUTION_KEY);
+  const login_page_form_contributions = modulesManager.getContribs(LOGIN_PAGE_FORM_CONTRIBUTION_KEY);
+
+  const has_login_page_logo_contribution = Array.isArray(login_page_logo_contributions) && login_page_logo_contributions.length > 0;
+  const has_login_page_form_contributions = Array.isArray(login_page_form_contributions) && login_page_form_contributions.length > 0;
+
+
   useEffect(() => {
     if (auth.isAuthenticated) {
       history.push("/");
@@ -62,17 +71,17 @@ const LoginPage = ({ logo }) => {
   const onSubmit = async (e) => {
     e.preventDefault();
     setAuthenticating(true);
-  
+
     try {
       const response = await auth.login(credentials);
       if (response.payload?.errors?.length) {
         handleLoginError(response.payload.errors[0].message);
         return;
       }
-  
+
       const { loginStatus, message } = response;
       setServerResponse({ loginStatus, message });
-  
+
       if (loginStatus === "CORE_AUTH_ERR") {
         setAuthenticating(false);
       } else {
@@ -82,7 +91,7 @@ const LoginPage = ({ logo }) => {
       setAuthenticating(false);
     }
   };
-  
+
 
   const redirectToForgotPassword = (e) => {
     e.preventDefault();
@@ -131,14 +140,20 @@ const LoginPage = ({ logo }) => {
                     </Button>
                   </Grid>
                 )}
-                <Grid item container direction="row" alignItems="center">
-                  <img className={classes.logo} src={logo} />
-                  {!isWorker && (
-                    <Box pl={2} fontWeight="fontWeightMedium" fontSize="h4.fontSize">
-                      {formatMessage("appName")}
-                    </Box>
-                  )}
-                </Grid>
+
+                <Contributions contributionKey={LOGIN_PAGE_LOGO_CONTRIBUTION_KEY} />
+                {
+                  !has_login_page_logo_contribution &&
+                  <Grid item container direction="row" alignItems="center">
+                    <img className={classes.logo} src={logo} />
+                    {!isWorker && (
+                      <Box pl={2} fontWeight="fontWeightMedium" fontSize="h4.fontSize">
+                        {formatMessage("appName")}
+                      </Box>
+                    )}
+                  </Grid>
+                }
+
                 {showMPassProvider ? (
                   <Grid item>
                     <Box display="flex" alignItems="center" justifyContent="center" my={2}>
@@ -165,48 +180,55 @@ const LoginPage = ({ logo }) => {
                   </Grid>
                 ) : (
                   <>
-                    <Grid item>
-                      <TextInput
-                        required
-                        readOnly={isAuthenticating}
-                        label={formatMessage("username.label")}
-                        fullWidth
-                        defaultValue={credentials.username}
-                        onChange={(username) => setCredentials({ ...credentials, username })}
-                      />
-                    </Grid>
-                    <Grid item>
-                      <TextInput
-                        required
-                        readOnly={isAuthenticating}
-                        type="password"
-                        label={formatMessage("password.label")}
-                        fullWidth
-                        onChange={(password) => setCredentials({ ...credentials, password })}
-                      />
-                    </Grid>
-                    {serverResponse?.message && (
-                    <Grid item>
-                      <Box color="error.main">{getErrorMessage(serverResponse.message)}</Box>
-                    </Grid>
-                    )}
-                    <Grid item>
-                      <Button
-                        fullWidth
-                        type="submit"
-                        disabled={isAuthenticating || !(credentials.username && credentials.password)}
-                        color="primary"
-                        variant="contained"
-                      >
-                        {formatMessage("loginBtn")}
-                      </Button>
-                    </Grid>
+                    <Contributions contributionKey={LOGIN_PAGE_FORM_CONTRIBUTION_KEY} />
+                    {
+                      !has_login_page_form_contributions &&
+                      <>
+                        <Grid item>
+                          <TextInput
+                            required
+                            readOnly={isAuthenticating}
+                            label={formatMessage("username.label")}
+                            fullWidth
+                            defaultValue={credentials.username}
+                            onChange={(username) => setCredentials({ ...credentials, username })}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <TextInput
+                            required
+                            readOnly={isAuthenticating}
+                            type="password"
+                            label={formatMessage("password.label")}
+                            fullWidth
+                            onChange={(password) => setCredentials({ ...credentials, password })}
+                          />
+                        </Grid>
+
+                        {serverResponse?.message && (
+                          <Grid item>
+                            <Box color="error.main">{getErrorMessage(serverResponse.message)}</Box>
+                          </Grid>
+                        )}
+                        <Grid item>
+                          <Button
+                            fullWidth
+                            type="submit"
+                            disabled={isAuthenticating || !(credentials.username && credentials.password)}
+                            color="primary"
+                            variant="contained"
+                          >
+                            {formatMessage("loginBtn")}
+                          </Button>
+                        </Grid>
+                      </>
+                    }
                     <Grid item>
                       <Button onClick={redirectToForgotPassword}>{formatMessage("forgotPassword")}</Button>
                       <Contributions contributionKey={LOGIN_PAGE_CONTRIBUTION_KEY} />
                     </Grid>
                   </>
-                  )}
+                )}
               </Grid>
             </Box>
           </form>

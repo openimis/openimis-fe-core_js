@@ -13,9 +13,9 @@ const AmountInput = ({ intl, inputMinValue = 0, ...props }) => {
   }
 
   const extraProps = {
-    [`${position}Adornment`]: (
-      <InputAdornment position={position}>{intl.formatMessage({ id: "currency" })}</InputAdornment>
-    ),
+    // [`${position}Adornment`]: (
+    //   <InputAdornment position="end">{intl.formatMessage({ id: "currency" })}</InputAdornment>
+    // ),
     min: inputMinValue,
   };
 

@@ -4,9 +4,11 @@ import { useModulesManager } from "../../helpers/modules";
 function getComponents(modulesManager, key) {
   const contributions = modulesManager.getContribs(key);
 
-  return contributions
+  let cont =  contributions
     .map((contrib) => (typeof contrib === "string" ? modulesManager.getRef(contrib) : contrib))
     .filter(Boolean);
+  
+    return cont;
 }
 
 const Contributions = ({ children = null, contributionKey, reverse = false, ...delegated }) => {

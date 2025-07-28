@@ -70,6 +70,7 @@ class Form extends Component {
       headPanelContributionsKey,
       Panels,
       contributedPanelsKey = null,
+      offlineContributionPanelsKey = null,
       additionalTooltips = null,
       enableActionButtons = false,
       ...others
@@ -211,6 +212,7 @@ class Form extends Component {
               contributionKey={contributedPanelsKey}
             />
           )}
+          
         </form>
         {!enableActionButtons && (
           <div className={classes.tooltipContainer}>

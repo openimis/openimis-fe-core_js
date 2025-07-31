@@ -340,40 +340,42 @@ export function fetchCsrfToken(jwtToken) {
 }
 
 export function fetchUserProduct(username) {
-  const payload = `{userProducts(username: ${ '"' + username + '"'}) {
-     id
-     username
-     iUser {
-       id
-       language
-       lastName
-       otherNames
-       healthFacilityId
-       products {
-         id
-         code
-         name
-         enrolmentPeriodStartDate
-         enrolmentPeriodEndDate
-         membershipTypes {
-           id
-           region
-           district
-           levelType
-           levelIndex
-           price
-         }
-       }
-       rights
-       hasPassword
-       region
-     }
-     tUser {
-       id
-       username
-     }
-}}`;
-  return graphql(payload, "USER_PRODUCT");
+ const query = `query getUserProducts($username: String!) {
+    userProducts(username: $username) {
+      id
+      username
+      iUser {
+        id
+        language
+        lastName
+        otherNames
+        healthFacilityId
+        products {
+          id
+          code
+          name
+          enrolmentPeriodStartDate
+          enrolmentPeriodEndDate
+          membershipTypes {
+            id
+            region
+            district
+            levelType
+            levelIndex
+            price
+          }
+        }
+        rights
+        hasPassword
+        region
+      }
+      tUser {
+        id
+        username
+      }
+    }
+  }`;
+  return graphqlMutation(query, { username }, ["CORE_USER_PRODUCTS_REQ", "CORE_USER_PRODUCTS_RESP", "CORE_USER_PRODUCTS_ERR"]);
 }
 
 export function refreshAuthToken() {

@@ -91,7 +91,6 @@ function reducer(
         isExportConfigDialogOpen: false,
       };
     case "USER_PRODUCT_RESP":
-      console.log("User product response:", action);
       return {
         ...state,
         userProduct: action.payload.data?.userProducts?.iUser?.products,
@@ -100,11 +99,13 @@ function reducer(
     case "USER_PRODUCT_ERR":
       return {
         ...state,
+        fetchingUserProduct: false,
+        errorPasswordPolicy: formatServerError(action.payload),
       };
     case "USER_PRODUCT_REQ":
       return {
         ...state,
-        fetchingUserProduct:true,
+        fetchingUserProduct: true,
         userProduct: null,
       };
     case "CORE_USERS_CURRENT_USER_RESP":

@@ -70,7 +70,6 @@ class Form extends Component {
       headPanelContributionsKey,
       Panels,
       contributedPanelsKey = null,
-      offlineContributionPanelsKey = null,
       additionalTooltips = null,
       enableActionButtons = false,
       ...others

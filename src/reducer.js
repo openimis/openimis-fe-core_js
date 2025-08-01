@@ -90,19 +90,19 @@ function reducer(
         ...state,
         isExportConfigDialogOpen: false,
       };
-    case "USER_PRODUCT_RESP":
+    case "CORE_USER_PRODUCTS_RESP":
       return {
         ...state,
         userProduct: action.payload.data?.userProducts?.iUser?.products,
         fetchingUserProduct: false,
       };
-    case "USER_PRODUCT_ERR":
+    case "CORE_USER_PRODUCTS_ERR":
       return {
         ...state,
         fetchingUserProduct: false,
         errorPasswordPolicy: formatServerError(action.payload),
       };
-    case "USER_PRODUCT_REQ":
+    case "CORE_USER_PRODUCTS_REQ":
       return {
         ...state,
         fetchingUserProduct: true,

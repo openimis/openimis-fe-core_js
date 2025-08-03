@@ -259,16 +259,16 @@ const RequireAuth = (props) => {
                 <img className={classes.logo} src={logo} alt="Logo of openIMIS" />
               </Hidden>
             )}
-            {!disableTextLogo && (
+            {/* {!disableTextLogo && (
               <FormattedMessage module="core" id="appName" defaultMessage={<FormattedMessage id="root.appName" />} />
-            )}
-            <Hidden smDown implementation="css">
+            )} */}
+            {/* <Hidden smDown implementation="css">
             <Tooltip title={modulesManager.getModulesVersions().join(", ")}>
               <Typography variant="caption" className={classes.appVersions}>
                 {modulesManager.getOpenIMISVersion()}
               </Typography>
             </Tooltip>
-          </Hidden>
+          </Hidden> */}
           </Button>
             <div className={classes.drawerContainer}></div>
               <MainMenuBar {...others} menuVariant="Drawer" contributionKey={MAIN_MENU_CONTRIBUTION_KEY}>
@@ -303,23 +303,23 @@ const RequireAuth = (props) => {
           >
             <MenuIcon />
           </IconButton>
-          <Button className={classes.appName} onClick={(e) => history.push("/")}>
+          <Button className={classes.appName} style={{padding: '0px 16px'}} onClick={(e) => history.push("/")}>
             {isAppBarMenu && (
               <Hidden smDown implementation="css">
-                <img className={classes.logo} src={logo} alt="Logo of openIMIS" />
+                <img className={classes.logo} src={"/front/logo.png"} alt="Logo of openIMIS" />
               </Hidden>
             )}
-            {!disableTextLogo && (
+            {/* {!disableTextLogo && (
               <FormattedMessage module="core" id="appName" defaultMessage={<FormattedMessage id="root.appName" />} />
-            )}
+            )} */}
           </Button>
-          <Hidden smDown implementation="css">
+          {/* <Hidden smDown implementation="css">
             <Tooltip title={modulesManager.getModulesVersions().join(", ")}>
               <Typography variant="caption" className={classes.appVersions}>
                 {modulesManager.getOpenIMISVersion()}
               </Typography>
             </Tooltip>
-          </Hidden>
+          </Hidden> */}
           {isAppBarMenu && (
             <Hidden smDown implementation="css">
               <MainMenuBar {...others} menuVariant="AppBar" contributionKey={MAIN_MENU_CONTRIBUTION_KEY}>

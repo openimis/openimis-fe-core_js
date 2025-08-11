@@ -32,7 +32,7 @@ const styles = (theme) => ({
     paddingTop: "10px", 
     paddingBottom: "10px",  
     fontWeight: 'bold',
-    fontSize: 'medium',
+    // fontSize: 'medium',
   },
   tableRow: theme.table.row,
   tableRow: {

@@ -40,6 +40,7 @@ const Autocomplete = (props) => {
     renderInput,
     noOptionsText,
     limitTags,
+    ...otherProps
   } = props;
   const modulesManager = useModulesManager();
   const minCharLookup = modulesManager.getConf("fe-admin", "usersMinCharLookup", 2);
@@ -100,6 +101,7 @@ const Autocomplete = (props) => {
       filterOptions={filterOptions}
       filterSelectedOptions={filterSelectedOptions}
       onInputChange={(__, query) => handleInputChange(query)}
+      {...otherProps}
       renderInput={
         !!renderInput
           ? renderInput

@@ -28,7 +28,16 @@ const styles = (theme) => ({
   table: theme.table,
   tableTitle: theme.table.title,
   tableHeader: theme.table.header,
+  tableHeader: { 
+    paddingTop: "10px", 
+    paddingBottom: "10px",  
+    fontWeight: 'bold',
+    // fontSize: 'medium',
+  },
   tableRow: theme.table.row,
+  tableRow: {
+    backgroundColor:'#edf6f6'
+  },
   tableLockedRow: theme.table.lockedRow,
   tableLockedCell: theme.table.lockedCell,
   tableHighlightedRow: theme.table.highlightedRow,
@@ -285,7 +294,7 @@ class Table extends Component {
             </TableHead>
           )}
           {!!localHeaders && localHeaders.length > 0 && (
-            <TableHead>
+            <TableHead style={{backgroundColor: '#d7eceb'}}>
               <TableRow>
                 {selectWithCheckbox && withSelection && (
                   <TableCell padding="checkbox">

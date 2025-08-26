@@ -155,7 +155,7 @@ class openIMISDatePicker extends Component {
             calendar={this.getDictionaryValueOrDefault(this.secondaryCalendarsOptions, secondCalendarType)}
             locale={this.getDictionaryValueOrDefault(this.secondaryCalendarsLocaleOptions, secondCalendarLocale)}
             inputClass="MuiInputBase-input"
-            style={{ borderBottom: "1px solid" }}
+            style={{ borderBottom: "1px solid",zIndex:3000 }}
             required={required}
           >
             <button style={{ margin: "5px" }} onClick={(e) => this.clearDate(e)}>

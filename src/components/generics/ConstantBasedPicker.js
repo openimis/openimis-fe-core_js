@@ -22,10 +22,17 @@ class ConstantBasedPicker extends Component {
     }
   }
 
-  _formatValue = (v) =>
-    v === null
-      ? formatMessage(this.props.intl, this.props.module, this.props.nullLabel ?? `${this.props.label}.null`)
-      : formatMessage(this.props.intl, this.props.module, `${this.props.label}.${v}`);
+  _formatValue = (v) => {
+    if (v === null) {
+      return formatMessage(this.props.intl, this.props.module, this.props.nullLabel ?? `${this.props.label}.null`);
+    }
+
+    if (this.props.getValueFrom) {
+      return this.props.getValueFrom(v);
+    }
+
+    return formatMessage(this.props.intl, this.props.module, `${this.props.label}.${v}`);
+  };
 
   _onChange = (v) => {
     this.setState({ value: v }, (e) => {
@@ -61,7 +68,7 @@ class ConstantBasedPicker extends Component {
         .map((v) => ({
           value: v,
           label: this._formatValue(v),
-        }))
+        })),
     );
     return (
       <SelectInput

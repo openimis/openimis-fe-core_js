@@ -27,8 +27,8 @@ class ConstantBasedPicker extends Component {
       return formatMessage(this.props.intl, this.props.module, this.props.nullLabel ?? `${this.props.label}.null`);
     }
 
-    if (this.props.noConstant) {
-      return formatMessage(this.props.intl, this.props.module, `${v}`);
+    if (this.props.getValueFrom) {
+      return this.props.getValueFrom(v);
     }
 
     return formatMessage(this.props.intl, this.props.module, `${this.props.label}.${v}`);

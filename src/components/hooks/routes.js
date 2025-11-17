@@ -133,7 +133,7 @@ const fosa = [
   },
   {
     parent: "Fosa",
-    title: "Paquet des soins : actes des soins",
+    title: "Paquet de soins : actes des soins",
     path: "/medical/pricelists/services",
   },
   {

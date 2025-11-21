@@ -138,7 +138,7 @@ const fosa = [
   },
   {
     parent: "Fosa",
-    title: "Panier des soins: produits medicaux",
+    title: "Paquet des soins: produits medicaux",
     path: "/medical/pricelists/items",
   },
   {

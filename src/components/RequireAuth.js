@@ -33,6 +33,7 @@ import { useIdleTimer } from "react-idle-timer/dist/index.legacy.cjs.js"; // oth
 import { CheckAssignedProfile, logout } from "../actions";
 import NotificationDialog from "./dialogs/NotificationDialog";
 import PageTitle from "./hooks/pageTitle";
+import GedAlertBanner from "./GedAlertBanner";
 // npm i cookie_js
 import cookie from "cookie_js";
 
@@ -280,56 +281,59 @@ const RequireAuth = (props) => {
   return (
     <>
       {!hideMenu && (
-        <AppBar
-          position="fixed"
-          className={clsx(classes.appBar, {
-            [classes.appBarShift]: isOpen && theme.breakpoints.up("md"),
-          })}
-        >
-          <Toolbar>
-            <IconButton
-              color="inherit"
-              onClick={setOpen.toggle}
-              className={clsx(classes.menuButton, isAppBarMenu && classes.autoHideMenuButton, isOpen && classes.hide)}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Button className={classes.appName} onClick={(e) => (window.location.href = "/front")}>
+        <>
+          <AppBar
+            position="fixed"
+            className={clsx(classes.appBar, {
+              [classes.appBarShift]: isOpen && theme.breakpoints.up("md"),
+            })}
+          >
+            <Toolbar>
+              <IconButton
+                color="inherit"
+                onClick={setOpen.toggle}
+                className={clsx(classes.menuButton, isAppBarMenu && classes.autoHideMenuButton, isOpen && classes.hide)}
+              >
+                <MenuIcon />
+              </IconButton>
+              <Button className={classes.appName} onClick={(e) => (window.location.href = "/front")}>
+                {isAppBarMenu && (
+                  <Hidden smDown implementation="css">
+                    <img className={classes.logo} src={logo} />
+                  </Hidden>
+                )}
+                CAMU
+              </Button>
+              <Hidden smDown implementation="css">
+                <Tooltip title={modulesManager.getModulesVersions().join(", ")}>
+                  <Typography variant="caption" className={classes.appVersions}>
+                    {/* {modulesManager.getOpenIMISVersion()} */}
+                  </Typography>
+                </Tooltip>
+              </Hidden>
               {isAppBarMenu && (
                 <Hidden smDown implementation="css">
-                  <img className={classes.logo} src={logo} />
+                  <Contributions {...others} menuVariant="AppBar" contributionKey={MAIN_MENU_CONTRIBUTION_KEY}>
+                    <div onClick={setOpen.off} />
+                  </Contributions>
                 </Hidden>
               )}
-              CAMU
-            </Button>
-            <Hidden smDown implementation="css">
-              <Tooltip title={modulesManager.getModulesVersions().join(", ")}>
-                <Typography variant="caption" className={classes.appVersions}>
-                  {/* {modulesManager.getOpenIMISVersion()} */}
-                </Typography>
-              </Tooltip>
-            </Hidden>
-            {isAppBarMenu && (
-              <Hidden smDown implementation="css">
-                <Contributions {...others} menuVariant="AppBar" contributionKey={MAIN_MENU_CONTRIBUTION_KEY}>
-                  <div onClick={setOpen.off} />
-                </Contributions>
-              </Hidden>
-            )}
-            <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
-              <div className={classes.grow} />
-              <div onClick={bellIcon} className={classes.iconContainer}>
-                <div>
-                  <div className={classes.iconBtn}>{getNotification?.notificationListTotalCount}</div>
-                  <NotificationsIcon />
+              <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
+                <div className={classes.grow} />
+                <div onClick={bellIcon} className={classes.iconContainer}>
+                  <div>
+                    <div className={classes.iconBtn}>{getNotification?.notificationListTotalCount}</div>
+                    <NotificationsIcon />
+                  </div>
                 </div>
-              </div>
-            </Contributions>
+              </Contributions>
 
-            <LogoutButton />
-            {/* <Help /> */}
-          </Toolbar>
-        </AppBar>
+              <LogoutButton />
+              {/* <Help /> */}
+            </Toolbar>
+          </AppBar>
+          <GedAlertBanner />
+        </>
       )}
       {isOpen && (
         <ClickAwayListener onClickAway={setOpen.off}>

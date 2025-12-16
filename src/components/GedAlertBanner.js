@@ -1,5 +1,5 @@
 import React from "react";
-import { useGedHealthCheck} from "../helpers/hooks";
+import { useGedHealthCheck } from "../helpers/hooks/useGedHealthCheck";
 
 export default function GedAlertBanner() {
   const { isGedDown, isChecking } = useGedHealthCheck();

@@ -15,7 +15,6 @@ export default function GedAlertBanner() {
         padding: "12px 0",
         fontWeight: "bold",
         fontSize: "14px",
-        marginTop: "80px",
         width: "100%",
         boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
       }}

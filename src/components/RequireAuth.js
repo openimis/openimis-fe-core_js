@@ -332,7 +332,6 @@ const RequireAuth = (props) => {
               {/* <Help /> */}
             </Toolbar>
           </AppBar>
-          <GedAlertBanner />
         </>
       )}
       {isOpen && (
@@ -361,6 +360,7 @@ const RequireAuth = (props) => {
           [classes.jrnlContentShift]: isDrawerOpen,
         })}
       >
+        <GedAlertBanner />
         {!hideMenu && <PageTitle />}
         {children}
       </main>

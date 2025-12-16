@@ -46,6 +46,12 @@ export const useGedHealthCheck = () => {
 
     if (!storedStatus) {
       fetchHealthStatus();
+    } else {
+      setHealthStatus((prev) => ({
+        ...prev,
+        isChecking: false,
+        isGedDown: storedStatus !== "UP",
+      }));
     }
   }, []);
 

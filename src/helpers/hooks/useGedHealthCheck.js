@@ -28,7 +28,7 @@ export const useGedHealthCheck = () => {
         setHealthStatus((prev) => ({
           ...prev,
           isChecking: false,
-          isGedDown: payload.status === 200,
+          isGedDown: payload.status !== 200,
         }));
 
         sessionStorage.setItem("gedHealthStatus", payload.status === 200 ? "UP" : "DOWN");

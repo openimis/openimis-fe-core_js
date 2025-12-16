@@ -6,6 +6,9 @@ export default function GedAlertBanner() {
 
   if (!isGedDown) return <></>;
 
+  console.log("===> isGedDown", isGedDown);
+  console.log("===> isChecking", isChecking);
+
   return (
     <>
       <div
@@ -19,11 +22,6 @@ export default function GedAlertBanner() {
           marginTop: "20px",
           width: "100%",
           boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-          //   position: "fixed",
-          //   top: "80px",
-          //   left: 0,
-          //   right: 0,
-          //   zIndex: 1200,
         }}
       >
         {`⚠️ Service GED (DMS) est actuellement indisponible. Veuillez contacter l'équipe technique.`}

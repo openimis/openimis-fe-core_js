@@ -204,8 +204,13 @@ const fosa = [
     subtitle: "core.routes.fosa.medicalItems.subtitle",
   },
   {
-    parent: "admin.fosaMenu",
-    title: "core.routes.fosa.verification.title",
+    parent: "Fosa",
+    title: "Gestion des Actes de Soins",
+    path: "/healthServiceManagement",
+  },
+  {
+    parent: "Fosa",
+    title: "Verification",
     path: "/insuree/insurees/verifyinsuree",
     subtitle: "core.routes.fosa.verification.subtitle",
   },

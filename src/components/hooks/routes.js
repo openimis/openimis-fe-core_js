@@ -153,6 +153,11 @@ const fosa = [
   },
   {
     parent: "Fosa",
+    title: "Gestion des Actes de Soins",
+    path: "/healthServiceManagement",
+  },
+  {
+    parent: "Fosa",
     title: "Verification",
     path: "/insuree/insurees/verifyinsuree",
   },

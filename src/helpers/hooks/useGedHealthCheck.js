@@ -33,7 +33,7 @@ export const useGedHealthCheck = () => {
         }));
 
         // sessionStorage.setItem("gedHealthStatus", payload.status === 200 ? "UP" : "DOWN");
-        cookie.set("gedHealthStatus", payload.status === 200 ? "UP" : "DOWN", { expires: 1 / 1440 });
+        cookie.set("gedHealthStatus", payload.status === 200 ? "UP" : "DOWN", { expires: 5 / 1440 });
       } catch (err) {
         console.error("Error fetching GED health status:", err);
         setHealthStatus((prev) => ({

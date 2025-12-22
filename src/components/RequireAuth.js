@@ -1,39 +1,36 @@
-import React, { useMemo, useState, useEffect } from "react";
-import { BrowserRouter as Router, Switch, Route, Link, useRouteMatch, useParams, useLocation } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 
-import withWidth from "@material-ui/core/withWidth";
-import { Redirect } from "../helpers/history";
-import { alpha, useTheme, makeStyles } from "@material-ui/core/styles";
-import { useModulesManager } from "../helpers/modules";
-import LogoutButton from "./LogoutButton";
-import Help from "../pages/Help";
-import clsx from "clsx";
 import {
   AppBar,
-  Toolbar,
-  IconButton,
-  Typography,
-  Drawer,
-  Divider,
-  Tooltip,
   Button,
-  Hidden,
   ClickAwayListener,
+  Divider,
+  Drawer,
+  Hidden,
+  IconButton,
+  Toolbar,
+  Tooltip,
+  Typography,
 } from "@material-ui/core";
+import { alpha, makeStyles, useTheme } from "@material-ui/core/styles";
+import withWidth from "@material-ui/core/withWidth";
 import MenuIcon from "@material-ui/icons/Menu";
-import Contributions from "./generics/Contributions";
-import FormattedMessage from "./generics/FormattedMessage";
-import JournalDrawer from "./JournalDrawer";
-import { useBoolean, useAuthentication } from "../helpers/hooks";
-import { useGraphqlQuery } from "@openimis/fe-core";
-import { formatMessageWithValues, withModulesManager, withHistory, historyPush } from "@openimis/fe-core";
 import NotificationsIcon from "@material-ui/icons/Notifications";
-import { useDispatch, useSelector } from "react-redux";
+import { useGraphqlQuery } from "@openimis/fe-core";
+import clsx from "clsx";
 import { useIdleTimer } from "react-idle-timer/dist/index.legacy.cjs.js"; // otherwise not building: https://github.com/SupremeTechnopriest/react-idle-timer/issues/350
+import { useDispatch, useSelector } from "react-redux";
 import { CheckAssignedProfile, logout } from "../actions";
+import { Redirect } from "../helpers/history";
+import { useAuthentication, useBoolean } from "../helpers/hooks";
+import { useModulesManager } from "../helpers/modules";
 import NotificationDialog from "./dialogs/NotificationDialog";
-import PageTitle from "./hooks/pageTitle";
 import GedAlertBanner from "./GedAlertBanner";
+import Contributions from "./generics/Contributions";
+import PageTitle from "./hooks/pageTitle";
+import JournalDrawer from "./JournalDrawer";
+import LogoutButton from "./LogoutButton";
 // npm i cookie_js
 import cookie from "cookie_js";
 
@@ -71,6 +68,10 @@ const useStyles = makeStyles((theme) => ({
   menuButton: {
     margin: theme.spacing(0, 1, 0, 1),
     padding: 0,
+    transition: "background-color 0.3s ease",
+    "&:hover": {
+      backgroundColor: "rgba(255, 159, 28, 0.2)",
+    },
   },
   autoHideMenuButton: {
     [theme.breakpoints.up("md")]: {
@@ -113,6 +114,10 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.secondary.main,
     textTransform: "none",
     fontSize: theme.typography.title.fontSize,
+    transition: "background-color 0.3s ease",
+    "&:hover": {
+      backgroundColor: "rgba(255, 159, 28, 0.2)",
+    },
   },
   appVersionsBox: {
     padding: 0,
@@ -167,6 +172,12 @@ const useStyles = makeStyles((theme) => ({
     position: "relative",
     cursor: "pointer",
     margin: "3px 9px 0 0",
+    padding: "8px",
+    borderRadius: "50%",
+    transition: "background-color 0.3s ease",
+    "&:hover": {
+      backgroundColor: "rgba(255, 159, 28, 0.2)",
+    },
   },
   iconBtn: {
     position: "absolute",

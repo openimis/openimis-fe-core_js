@@ -46,6 +46,11 @@ const styles = (theme) => ({
     color: theme.palette.text.second,
     paddingTop: theme.menu.appBar.fontSize / 2,
     textTransform: "none",
+    transition: "all 0.3s ease",
+    "&:hover": {
+      backgroundColor: "rgba(255, 159, 28, 0.2)",
+      color: "#ff9f1c",
+    },
   },
   appBarMenuPaper: {
     borderTopLeftRadius: 0,
@@ -79,8 +84,12 @@ const AccordionSummary = withStyles({
     borderBottom: "1px solid rgba(0, 0, 0, .125)",
     marginBottom: -1,
     minHeight: 56,
+    transition: "background-color 0.3s ease",
     "&$expanded": {
       minHeight: 56,
+    },
+    "&:hover": {
+      backgroundColor: "rgba(255, 159, 28, 0.2)",
     },
   },
   content: {
@@ -301,15 +310,37 @@ const MenuItemsList = ({ entries, header, classes, redirect, isAppBar = false })
                 selected={isActive}
                 style={{
                   backgroundColor: isActive ? "rgba(255, 159, 28, 0.1)" : "transparent",
+                  transition: "background-color 0.3s ease",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = "rgba(255, 159, 28, 0.15)";
+                    const icon = e.currentTarget.querySelector(".MuiListItemIcon-root");
+                    const text = e.currentTarget.querySelector(".MuiListItemText-primary");
+                    if (icon) icon.style.color = "#ff9f1c";
+                    if (text) text.style.color = "#ff9f1c";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                    const icon = e.currentTarget.querySelector(".MuiListItemIcon-root");
+                    const text = e.currentTarget.querySelector(".MuiListItemText-primary");
+                    if (icon) icon.style.color = "inherit";
+                    if (text) text.style.color = "inherit";
+                  }
                 }}
               >
-                <ListItemIcon style={{ color: isActive ? "#ff9f1c" : "inherit" }}>{entry.icon}</ListItemIcon>
+                <ListItemIcon style={{ color: isActive ? "#ff9f1c" : "inherit", transition: "color 0.3s ease" }}>
+                  {entry.icon}
+                </ListItemIcon>
                 <ListItemText
                   primary={entry.text}
                   primaryTypographyProps={{
                     style: {
                       color: isActive ? "#ff9f1c" : "inherit",
                       fontWeight: isActive ? 600 : 400,
+                      transition: "color 0.3s ease",
                     },
                   }}
                 />
@@ -331,15 +362,37 @@ const MenuItemsList = ({ entries, header, classes, redirect, isAppBar = false })
               style={{
                 backgroundColor: isActive ? "rgba(255, 159, 28, 0.1)" : "transparent",
                 borderLeft: isActive ? "3px solid #ff9f1c" : "3px solid transparent",
+                transition: "background-color 0.3s ease",
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.backgroundColor = "rgba(255, 159, 28, 0.15)";
+                  const icon = e.currentTarget.querySelector(".MuiListItemIcon-root");
+                  const text = e.currentTarget.querySelector(".MuiListItemText-primary");
+                  if (icon) icon.style.color = "#ff9f1c";
+                  if (text) text.style.color = "#ff9f1c";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  const icon = e.currentTarget.querySelector(".MuiListItemIcon-root");
+                  const text = e.currentTarget.querySelector(".MuiListItemText-primary");
+                  if (icon) icon.style.color = "inherit";
+                  if (text) text.style.color = "inherit";
+                }
               }}
             >
-              <ListItemIcon style={{ color: isActive ? "#ff9f1c" : "inherit" }}>{entry.icon}</ListItemIcon>
+              <ListItemIcon style={{ color: isActive ? "#ff9f1c" : "inherit", transition: "color 0.3s ease" }}>
+                {entry.icon}
+              </ListItemIcon>
               <ListItemText
                 primary={entry.text}
                 primaryTypographyProps={{
                   style: {
                     color: isActive ? "#ff9f1c" : "inherit",
                     fontWeight: isActive ? 600 : 400,
+                    transition: "color 0.3s ease",
                   },
                 }}
               />

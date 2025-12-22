@@ -78,7 +78,7 @@
   "core.emptyNotification": "No Notification",
   "core.routes.home.parent": "CAMU IMS",
   "core.routes.home.title": "Home",
-  "core.routes.home.subtitle": "Main dashboard",
+  "core.routes.home.subtitle": "",
   "core.routes.affiliation.families.subtitle": "Manage and view insured families",
   "core.routes.affiliation.insurees.subtitle": "Manage and view individual insureds",
   "core.routes.affiliation.policies.subtitle": "Manage insurance policies",

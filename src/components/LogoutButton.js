@@ -1,8 +1,8 @@
-import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { useDispatch,useSelector } from "react-redux";
 import { IconButton } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 import { ExitToApp } from "@material-ui/icons";
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { CheckAssignedProfile, logout } from "../actions";
 import { useHistory } from "../helpers/history";
 
@@ -10,6 +10,10 @@ const useStyles = makeStyles((theme) => ({
   button: {
     margin: theme.spacing(2),
     color: theme.palette.secondary.main,
+    transition: "background-color 0.3s ease",
+    "&:hover": {
+      backgroundColor: "rgba(255, 159, 28, 0.2)",
+    },
   },
 }));
 

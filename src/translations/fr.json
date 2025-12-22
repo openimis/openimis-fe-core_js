@@ -16,7 +16,7 @@
   "core.ForgotPasswordPage.explanationMessage": "Saisissez votre nom d'utilisateur pour pouvoir récupérer votre compte. Un e-mail contenant les instructions sera envoyé à votre adresse e-mail.",
   "core.routes.home.parent": "CAMU IMS",
   "core.routes.home.title": "Accueil",
-  "core.routes.home.subtitle": "Tableau de bord principal",
+  "core.routes.home.subtitle": "",
   "core.routes.affiliation.families.subtitle": "Gérer et consulter les familles d'assurés",
   "core.routes.affiliation.insurees.subtitle": "Gérer et consulter les assurés individuels",
   "core.routes.affiliation.policies.subtitle": "Gérer les polices d'assurance",

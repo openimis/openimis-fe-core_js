@@ -1,6 +1,8 @@
 import { Box, Grid, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import React from "react";
+import { useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 import UsePageTitle from "./usePageTitle";
 
 const useStyles = makeStyles((theme) => ({
@@ -30,9 +32,19 @@ const useStyles = makeStyles((theme) => ({
 function PageTitle() {
   const classes = useStyles();
   const page = UsePageTitle();
+  const location = useLocation();
+  const user = useSelector((state) => state.core.user);
 
   if (!page.parent && !page.title) {
     return <></>;
+  }
+
+  const isHomePage = location.pathname === "/home" || location.pathname === "/front/home";
+  const username = user?.i_user?.username || user?.username || "";
+
+  let displaySubtitle = page.subtitle;
+  if (isHomePage && username) {
+    displaySubtitle = `Bienvenue sur le compte ${username} !`;
   }
 
   return (
@@ -49,9 +61,9 @@ function PageTitle() {
               {page.title}
             </Typography>
           )}
-          {page.subtitle && (
+          {displaySubtitle && (
             <Typography variant="body2" className={classes.subtitle}>
-              {page.subtitle}
+              {displaySubtitle}
             </Typography>
           )}
         </Box>

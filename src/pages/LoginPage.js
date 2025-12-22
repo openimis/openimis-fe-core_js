@@ -22,6 +22,7 @@ import { useAuthentication } from "../helpers/hooks";
 import Contributions from "./../components/generics/Contributions";
 import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
+import cookie from "cookie_js";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -83,6 +84,10 @@ const LoginPage = ({ logo, backgroundImage }) => {
   };
 
   useEffect(() => {
+    cookie.remove("gedHealthStatus");
+  }, []);
+
+  useEffect(() => {
     if (auth.isAuthenticated) {
       history.push("/");
     } else {
@@ -97,7 +102,7 @@ const LoginPage = ({ logo, backgroundImage }) => {
     }
   }, []);
 
-  console.log("==> cred", credentials)
+  console.log("==> cred", credentials);
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -105,12 +110,12 @@ const LoginPage = ({ logo, backgroundImage }) => {
     setAuthenticating(true);
 
     if (!rememberMe) {
-      console.log("Don't remember")
+      console.log("Don't remember");
       // If "Remember Me" is unchecked, clear the saved credentials.
       localStorage.removeItem("rememberedUsername");
       localStorage.removeItem("rememberedPassword");
     } else {
-      console.log("Remember")
+      console.log("Remember");
       // If "Remember Me" is checked, save the username and password.
       localStorage.setItem("rememberedUsername", credentials.username);
       localStorage.setItem("rememberedPassword", credentials.password);

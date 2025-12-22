@@ -1,5 +1,6 @@
 import { baseApiUrl, apiHeaders, Contributions } from "@openimis/fe-core";
 import { useCallback, useEffect, useRef, useState } from "react";
+import cookie from "cookie_js";
 
 const API_URL = `${baseApiUrl}/insuree/ged-health-check/`;
 export const useGedHealthCheck = () => {
@@ -31,7 +32,8 @@ export const useGedHealthCheck = () => {
           isGedDown: payload.status !== 200,
         }));
 
-        sessionStorage.setItem("gedHealthStatus", payload.status === 200 ? "UP" : "DOWN");
+        // sessionStorage.setItem("gedHealthStatus", payload.status === 200 ? "UP" : "DOWN");
+        cookie.set("gedHealthStatus", payload.status === 200 ? "UP" : "DOWN", { expires: 5 / 1440 });
       } catch (err) {
         console.error("Error fetching GED health status:", err);
         setHealthStatus((prev) => ({
@@ -42,7 +44,8 @@ export const useGedHealthCheck = () => {
       }
     };
 
-    const storedStatus = sessionStorage.getItem("gedHealthStatus") || false;
+    // const storedStatus = sessionStorage.getItem("gedHealthStatus") || false;
+    const storedStatus = cookie.get("gedHealthStatus") || false;
 
     if (!storedStatus) {
       fetchHealthStatus();

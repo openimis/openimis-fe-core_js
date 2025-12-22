@@ -31,3 +31,9 @@
     transform: rotate(360deg);
   }
 }
+
+.MuiMenuItem-root,
+.MuiListItem-button,
+.MuiButton-root {
+  transition: background-color 0.3s ease !important;
+}

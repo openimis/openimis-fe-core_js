@@ -31,6 +31,7 @@ import Contributions from "./generics/Contributions";
 import PageTitle from "./hooks/pageTitle";
 import JournalDrawer from "./JournalDrawer";
 import LogoutButton from "./LogoutButton";
+import OdooAlertBanner from "./OdooAlertBanner";
 // npm i cookie_js
 import cookie from "cookie_js";
 
@@ -372,6 +373,7 @@ const RequireAuth = (props) => {
         })}
       >
         <GedAlertBanner />
+        <OdooAlertBanner />
         {!hideMenu && <PageTitle />}
         {children}
       </main>

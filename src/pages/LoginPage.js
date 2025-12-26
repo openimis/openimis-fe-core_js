@@ -1,28 +1,28 @@
-import React, { useMemo, useState, useEffect } from "react";
-import { useHistory } from "../helpers/history";
-import { makeStyles } from "@material-ui/styles";
 import {
-  Button,
   Box,
-  Grid,
-  Paper,
-  LinearProgress,
+  Button,
   Checkbox,
   FormControlLabel,
+  Grid,
   IconButton,
   InputAdornment,
+  LinearProgress,
+  Paper,
   TextField,
 } from "@material-ui/core";
-import Alert from "@material-ui/lab/Alert";
-import TextInput from "../components/inputs/TextInput";
-import { useTranslations } from "../helpers/i18n";
-import { useModulesManager } from "../helpers/modules";
-import Helmet from "../helpers/Helmet";
-import { useAuthentication } from "../helpers/hooks";
-import Contributions from "./../components/generics/Contributions";
 import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
+import Alert from "@material-ui/lab/Alert";
+import { makeStyles } from "@material-ui/styles";
 import cookie from "cookie_js";
+import React, { useEffect, useState } from "react";
+import TextInput from "../components/inputs/TextInput";
+import Helmet from "../helpers/Helmet";
+import { useHistory } from "../helpers/history";
+import { useAuthentication } from "../helpers/hooks";
+import { useTranslations } from "../helpers/i18n";
+import { useModulesManager } from "../helpers/modules";
+import Contributions from "./../components/generics/Contributions";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -85,6 +85,7 @@ const LoginPage = ({ logo, backgroundImage }) => {
 
   useEffect(() => {
     cookie.remove("gedHealthStatus");
+    cookie.remove("odooHealthStatus");
   }, []);
 
   useEffect(() => {

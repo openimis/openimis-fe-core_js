@@ -47,6 +47,7 @@ const LoginPage = ({ logo }) => {
   const showMPassProvider = modulesManager.getConf("fe-core", "LoginPage.showMPassProvider", false);
   const linkToUserGuide = modulesManager.getConf("fe-core", "LoginPage.linkToUserGuide", "https://docs.openimis.org/");
   const enablePublicPage = modulesManager.getConf("fe-core", "App.enablePublicPage", DEFAULT.ENABLE_PUBLIC_PAGE);
+  const isProgramAvailable = modulesManager.getConf("fe-core", "isProgramAvailable", false);
 
   useEffect(() => {
     if (auth.isAuthenticated && auth.isInitialized) {

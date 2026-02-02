@@ -246,6 +246,7 @@ const App = (props) => {
 const mapStateToProps = (state) => ({
   rights: state.core.user?.i_user?.rights ?? [],
   user: state.core.user?.i_user,
+  programs: state.core.user?.i_user?.programs ?? [],
   error: state.core.error,
   confirm: state.core.confirm,
   confirmed: state.core.confirmed,

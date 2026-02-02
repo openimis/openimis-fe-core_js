@@ -156,6 +156,7 @@ export const useAuthentication = () => {
 
   return {
     user,
+    programs: user?.i_user?.programs ?? [],
     error,
     isAuthenticated: Boolean(user),
     isInitialized,
@@ -185,6 +186,14 @@ export const useUserQuery = () => {
           language {
             code
             name
+          }
+          programs {
+            id
+            uuid
+            code
+            name
+            validityFrom
+            validityTo
           }
         }
         claimAdmin {

@@ -1,13 +1,27 @@
 import React from "react";
-
-import { Typography, Button } from "@mui/material";
+import { Button, IconButton } from "@mui/material";
 
 import { useModulesManager } from "../../helpers/modules";
 import { DEFAULT } from "../../constants";
 
-const SearcherActionButton = ({ onClick, startIcon, label }) => {
+const SearcherActionButton = ({ onClick, startIcon, label, isLocationPane }) => {
   const modulesManager = useModulesManager();
   const isWorker = modulesManager.getConf("fe-core", "isWorker", DEFAULT.IS_WORKER);
+
+  if (isLocationPane) {
+    return (
+      <IconButton
+        size="small"
+        onClick={onClick}
+        color="inherit"
+        sx={{
+          padding: "4px",
+        }}
+      >
+        {startIcon}
+      </IconButton>
+    );
+  }
 
   return (
     <Button 

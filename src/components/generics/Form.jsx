@@ -94,6 +94,7 @@ class Form extends Component {
               color="primary"
               disabled={!!this.state.saving || (!!canSave && !canSave())}
               onClick={(e) => this.save(this.props.edited)}
+              data-cy="save-button"
             >
               <SaveIcon />
             </Fab>

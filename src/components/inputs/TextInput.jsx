@@ -100,22 +100,24 @@ class TextInput extends Component {
       <StyledTextInput>
         <TextField
           {...others}
-          className={clsx({
-            "numberInput": true,
-            "disabledStateVisibilityBoost": this.disabledVisibilityBoost && readOnly,
-          })}
           fullWidth
           disabled={readOnly}
           label={!!label && formatMessage(intl, module, label)}
-          InputLabelProps={{
-            className: "label",
-          }}
-          InputProps={{ inputProps, startAdornment, endAdornment }}
-          onChange={this._onChange}
           value={this.state.value}
+          onChange={this._onChange}
           error={Boolean(error)}
           helperText={error ?? helperText}
           type={type}
+          slotProps={{
+            input: {
+              startAdornment,
+              endAdornment,
+              ...inputProps,
+            },
+            inputLabel: {
+              className: "label",
+            },
+          }}
         />
       </StyledTextInput>
     );

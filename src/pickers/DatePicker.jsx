@@ -129,6 +129,7 @@ class openIMISDatePicker extends Component {
       modulesManager,
       minDate,
       maxDate,
+      inputProps,
       ...otherProps
     } = this.props;
 
@@ -183,6 +184,8 @@ class openIMISDatePicker extends Component {
               label={!!label ? formatMessage(intl, module, label) : null}
               onChange={this.dateChange}
               disablePast={disablePast}
+              inputProps={inputProps}
+              InputProps={inputProps}
               />
             </LocalizationProvider>
           </FormControl>

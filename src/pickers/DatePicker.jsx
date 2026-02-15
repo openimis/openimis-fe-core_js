@@ -130,6 +130,7 @@ class openIMISDatePicker extends Component {
       minDate,
       maxDate,
       inputProps,
+      slotProps,
       ...otherProps
     } = this.props;
 
@@ -154,6 +155,7 @@ class openIMISDatePicker extends Component {
               highlightToday={false}
               calendar={this.getDictionaryValueOrDefault(this.secondaryCalendarsOptions, secondCalendarType)}
               locale={this.getDictionaryValueOrDefault(this.secondaryCalendarsLocaleOptions, secondCalendarLocale)}
+              slotProps={slotProps}
             >
               <button style={{ margin: "5px" }} onClick={(e) => this.clearDate(e)}>
                 {formatMessage(intl, "core", "calendar.clearButton")}

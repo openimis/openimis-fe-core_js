@@ -79,7 +79,8 @@ class SelectInput extends Component {
       readOnly = false,
       required = false,
       placeholder,
-      title = "",
+      title = '',
+      inputProps,
     } = this.props;
     if (!options) return null;
     let valueStr = null;
@@ -105,6 +106,7 @@ class SelectInput extends Component {
               value={selectValue}
               onChange={this._onChange}
               InputProps={{
+                ...inputProps,
                 endAdornment: this.renderEndAdornment(),
               }}
               SelectProps={{

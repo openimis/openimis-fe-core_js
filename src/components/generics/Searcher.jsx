@@ -510,6 +510,7 @@ class Searcher extends Component {
               variant="contained"
               color="primary"
               className="actionButton"
+              data-cy={dataCy}
             >
               <Typography variant="body2">{action.label}</Typography>
             </Button>

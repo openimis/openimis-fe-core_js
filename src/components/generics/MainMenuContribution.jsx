@@ -224,7 +224,7 @@ class MainMenuContribution extends Component {
   appBarMenu = (entries) => {
     return (
       <StyledMainMenu>
-        <Button ref={this.state.anchorRef} onClick={this.toggleExpanded} className="menuHeading">
+        <Button data-cy={this.props.menuId} ref={this.state.anchorRef} onClick={this.toggleExpanded} className="menuHeading">
           {this.props.header}
           <ExpandMoreIcon />
         </Button>

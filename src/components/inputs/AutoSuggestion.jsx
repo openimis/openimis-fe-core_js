@@ -257,7 +257,7 @@ class AutoSuggestion extends Component {
   };
 
   renderSelect = () => {
-    const { module, withNull, nullLabel, label, required = false, getSuggestionValue, title } = this.props;
+    const { module, withNull, nullLabel, label, required = false, getSuggestionValue, title, inputProps } = this.props;
     const { suggestions, selected } = this.state;
     var options = suggestions.map((r) => ({ value: r, label: getSuggestionValue(r) }));
     if (withNull) {
@@ -272,6 +272,7 @@ class AutoSuggestion extends Component {
         onChange={this.onOptionSelected}
         required={required}
         title={title}
+        inputProps={inputProps}
       />
     );
   };

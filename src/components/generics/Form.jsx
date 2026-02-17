@@ -71,6 +71,7 @@ class Form extends Component {
       contributedPanelsKey = null,
       additionalTooltips = null,
       enableActionButtons = false,
+      dataCy,
       ...others
     } = this.props;
 
@@ -79,7 +80,7 @@ class Form extends Component {
         condition: !this.state.dirty && !!add && !save,
         content: (
           <span>
-            <Fab color="primary" onClick={add}>
+            <Fab color="primary" data-cy="add-button" onClick={add}>
               <AddIcon />
             </Fab>
           </span>
@@ -156,7 +157,7 @@ class Form extends Component {
                                 !!a.button ? (
                                   a.button
                                 ) : (
-                                  <IconButton onClick={a.doIt} disabled={a?.disabled}>
+                                  <IconButton data-cy={dataCy} onClick={a.doIt} disabled={a?.disabled}>
                                     {a.icon}
                                   </IconButton>
                                 ),

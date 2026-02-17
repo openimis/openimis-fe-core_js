@@ -105,7 +105,6 @@ class SearcherPane extends Component {
       appliedFiltersRowStructure = null,
       setAppliedFiltersRowStructure = null,
       applyNumberCircle = null,
-      isLocationPane = false,
     } = this.props;
     return (
       <StyledSearcherPane>
@@ -140,28 +139,28 @@ class SearcherPane extends Component {
                       actions.map((a, idx) => (
                         <SearcherActionButton
                           key={`action-${idx}`}
+                          dataCy={dataCy}                          
                           onClick={a.action}
                           startIcon={a.icon}
                           label={a.label || ""}
-                          isLocationPane={isLocationPane}
                         />
                       ))}
                     {!!reset && (
                       <SearcherActionButton
                         key="action-reset"
+                        dataCy={"searcher-reset"}
                         startIcon={<ResetFilterIcon />}
                         onClick={this.debouncedReset}
                         label={formatMessage(this.props.intl, module, "resetFilterTooltip")}
-                        isLocationPane={isLocationPane}
                       />
                     )}
-                    {(!!refresh && !isLocationPane) && (
+                    {!!refresh && (
                       <SearcherActionButton
                         key="action-refresh"
+                        dataCy={"searcher-refresh"}
                         startIcon={<DefaultSearchIcon />}
                         onClick={this.debouncedRefresh}
                         label={formatMessage(this.props.intl, module, "refreshFilterTooltip")}
-                        isLocationPane={isLocationPane}
                       />
                     )}
                   </>

@@ -139,7 +139,7 @@ class SearcherPane extends Component {
                       actions.map((a, idx) => (
                         <SearcherActionButton
                           key={`action-${idx}`}
-                          dataCy={dataCy}                          
+                          dataCy={a.dataCy}                          
                           onClick={a.action}
                           startIcon={a.icon}
                           label={a.label || ""}

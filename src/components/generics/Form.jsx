@@ -80,7 +80,7 @@ class Form extends Component {
         condition: !this.state.dirty && !!add && !save,
         content: (
           <span>
-            <Fab color="primary" data-cy="add-button" onClick={add}>
+            <Fab color="primary" data-cy="add-new-button" onClick={add}>
               <AddIcon />
             </Fab>
           </span>

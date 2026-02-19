@@ -21,10 +21,10 @@ const ConfirmDialog = props => {
           </DialogContent>
         )}
         <DialogActions>
-          <Button onClick={() => onConfirm(true)} autoFocus className="primaryButton">
+          <Button onClick={() => onConfirm(true)} autoFocus data-cy="dialog-confirm-button" className="primaryButton">
             {formatMessage(intl, "core", "ok")}
           </Button>
-          <Button onClick={() => onConfirm(false)} className="secondaryButton">
+          <Button onClick={() => onConfirm(false)} data-cy="dialog-cancel-button" className="secondaryButton">
             {formatMessage(intl, "core", "cancel")}
           </Button>
         </DialogActions>

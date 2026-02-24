@@ -52,6 +52,7 @@ class ConstantBasedPicker extends Component {
       withNull = true,
       readOnly = false,
       required = false,
+      inputProps = "constant-based-picker"
     } = this.props;
     const { value } = this.state;
     if (!withNull && value === null && !!!constants) return null;
@@ -83,6 +84,7 @@ class ConstantBasedPicker extends Component {
           onChange={this._onChange}
           readOnly={readOnly}
           required={required}
+          inputProps={inputProps}
         />
       </StyledConstantBasedPicker>
     );

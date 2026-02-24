@@ -13,7 +13,7 @@ class NumberInput extends Component {
     };
     this.numberOfDecimals = props.modulesManager.getConf("fe-core", "numberOfDecimals", 2)
     this.pricesAreDecimal = props.modulesManager.getConf("fe-core", "pricesAreDecimal", true)
-    this.thousandSeparator = props.modulesManager.getConf("fe-core", "thousandSeparator", "fr")
+    this.thousandSeparator = props.modulesManager.getConf("fe-core", "thousandSeparator", "en")
   }
 
   handleKeyPress = (event) => {

@@ -84,7 +84,11 @@ class Role extends Component {
           this.props.fetchRole([`clientMutationId: "${this.props.mutation.clientMutationId}"`]),
         );
       }
-    } else if (prevProps.confirmed !== this.props.confirmed && !!this.props.confirmed && !!this.state.confirmedAction) {
+    } else if (
+      prevProps.confirmed !== this.props.confirmed &&
+      !!this.props.confirmed &&
+      typeof this.state.confirmedAction === "function"
+    ) {
       this.state.confirmedAction();
     }
   }

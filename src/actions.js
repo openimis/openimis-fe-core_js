@@ -278,8 +278,86 @@ export function fetch(config) {
           },
         },
       });
+
+      const endpoint = config.endpoint;
+      const payload = action?.payload || {};
+      const response = payload?.response;
+      const status = response?.status;
+      const statusText = response?.statusText;
+      const gqlErrors = payload?.errors || response?.errors || [];
+      const message = payload?.message || action?.error?.message;
+
+      if (action.error) {
+        let errorMessage = "";
+
+        if (!response && !message) {
+          errorMessage = "Server not responding";
+        } else if (status) {
+          errorMessage = `HTTP ${status}: ${statusText || "Unknown status"}`;
+        } else if (gqlErrors?.length > 0) {
+          errorMessage = `GraphQL Error: ${gqlErrors.map(e => e.message).join("; ")}`;
+        } else if (message) {
+          errorMessage = `Network or API Error: ${message}`;
+        } else {
+          errorMessage = "Unknown error during API call";
+        }
+
+        Sentry.captureException(new Error(errorMessage), {
+          level: "error",
+          tags: {
+            endpoint,
+            status: status || "no-status",
+            type: config.method || "unknown-method",
+          },
+          extra: {
+            endpoint,
+            status,
+            statusText,
+            body: config.body,
+            response: action.payload,
+          },
+        });
+      }
+
+      if (!action.error && gqlErrors?.length > 0) {
+        const gqlMessage = gqlErrors.map(e => e.message).join("; ");
+
+        Sentry.captureException(new Error(`GraphQL Error: ${gqlMessage}`), {
+          level: "error",
+          tags: {
+            endpoint,
+            type: config.method || "unknown-method",
+          },
+          extra: {
+            endpoint,
+            errors: gqlErrors,
+            query: config.body,
+          },
+        });
+      }
+
+      const norm = (m) => String(m || "").toLowerCase().replace(/['"]/g, "").trim();
+      const csrfError = gqlErrors.some((e) => {
+        const msg = norm(e?.message);
+        return msg === "csrftoken" 
+        || msg === "user not authorized for this operation" 
+        || msg === "unauthorized";
+      });
+
+      if (csrfError) {
+        dispatch(
+          coreConfirm(
+            "Session Expired",
+            "Your session has expired, You will be redirected to the login page.",
+            "csrf_logout"
+          )
+        );
+        return action;
+      }
+
     } catch (err) {
       const errorMessage = "Server not responding";
+
       Sentry.captureException(new Error(errorMessage), {
         level: "error",
         tags: {
@@ -292,64 +370,8 @@ export function fetch(config) {
           originalError: err,
         },
       });
-      return {
-        error: true,
-        payload: { message: errorMessage },
-      };
-    }
 
-    const endpoint = config.endpoint;
-    const response = action?.payload?.response;
-    const status = response?.status;
-    const statusText = response?.statusText;
-    const gqlErrors = response?.errors;
-    const message = action?.payload?.message || action?.error?.message;
-
-    if (action.error) {
-      let errorMessage = "";
-      if (!response && !message) {
-        errorMessage = "Server not responding";
-      }
-      if (status) {
-        errorMessage = `HTTP ${status}: ${statusText || "Unknown status"}`;
-      } else if (gqlErrors?.length > 0) {
-        errorMessage = `GraphQL Error: ${gqlErrors.map((e) => e.message).join("; ")}`;
-      } else if (message) {
-        errorMessage = `Network or API Error: ${message}`;
-      } else {
-        errorMessage = "Unknown error during API call";
-      }
-
-      Sentry.captureException(new Error(errorMessage), {
-        level: "error",
-        tags: {
-          endpoint,
-          status: status || "no-status",
-          type: config.method || "unknown-method",
-        },
-        extra: {
-          endpoint,
-          status,
-          statusText,
-          body: config.body,
-          response: action.payload,
-        },
-      });
-    }
-
-    if (!action.error && gqlErrors && gqlErrors.length > 0) {
-      Sentry.captureException(new Error(`GraphQL Error: ${gqlErrors.map((e) => e.message).join("; ")}`), {
-        level: "error",
-        tags: {
-          endpoint,
-          type: config.method || "unknown-method",
-        },
-        extra: {
-          endpoint,
-          errors: gqlErrors,
-          query: config.body,
-        },
-      });
+      throw err;
     }
 
     return action;
@@ -550,9 +572,9 @@ export function clearAlert() {
   };
 }
 
-export function coreConfirm(title, message) {
+export function coreConfirm(title, message, intent = null) {
   return (dispatch) => {
-    dispatch({ type: "CORE_CONFIRM", payload: { title, message } });
+    dispatch({ type: "CORE_CONFIRM", payload: { title, message, intent } });
   };
 }
 

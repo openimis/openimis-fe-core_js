@@ -170,7 +170,11 @@ class Roles extends Component {
     if (prevProps.submittingMutation && !this.props.submittingMutation) {
       this.props.journalize(this.props.mutation);
       this.setState((state) => ({ deleted: state.deleted.concat(state.toDelete) }));
-    } else if (prevProps.confirmed !== this.props.confirmed && !!this.props.confirmed && !!this.state.confirmedAction) {
+    } else if (
+      prevProps.confirmed !== this.props.confirmed &&
+      !!this.props.confirmed &&
+      typeof this.state.confirmedAction === "function"
+    ) {
       this.state.confirmedAction();
     }
   }

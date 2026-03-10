@@ -167,22 +167,36 @@ class openIMISDatePicker extends Component {
           <FormControl fullWidth={fullWidth}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <MUIDatePicker
-              {...otherProps}
-              maxDate={maxDate ? dayjs(maxDate) : undefined}
-              minDate={minDate ? dayjs(minDate) : undefined}
-              format={format}
-              disabled={readOnly}
-              required={required}
-              className={clsx({
-                "disabledStateVisibilityBoost": this.disabledVisibilityBoost && readOnly,
-              })}
-              value={this.state.value}
-              InputLabelProps={{
-                className: "label",
-              }}
-              label={!!label ? formatMessage(intl, module, label) : null}
-              onChange={this.dateChange}
-              disablePast={disablePast}
+                {...otherProps}
+                maxDate={maxDate ? dayjs(maxDate) : undefined}
+                minDate={minDate ? dayjs(minDate) : undefined}
+                format={format}
+                disabled={readOnly}
+                required={required}
+                className={clsx({
+                  "disabledStateVisibilityBoost": this.disabledVisibilityBoost && readOnly,
+                })}
+                value={this.state.value}
+                label={!!label ? formatMessage(intl, module, label) : null}
+                onChange={this.dateChange}
+                disablePast={disablePast}
+                slotProps={{
+                  actionBar: { actions: ["clear", "cancel"] },
+                  toolbar: { 
+                    hidden: false,
+                    sx: {
+                      backgroundColor: "primary.main",
+                      color: "primary.contrastText",
+                      "& .MuiTypography-root": {
+                        color: "white",
+                      },
+                    },
+                  },
+                  textField: {
+                    required,
+                    InputLabelProps: { className: "label" },
+                  },
+                }}
               />
             </LocalizationProvider>
           </FormControl>

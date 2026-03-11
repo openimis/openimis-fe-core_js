@@ -25,7 +25,7 @@ class FormattedNumberInput extends Component {
   }
 
   formatNumber = (value, intl) => {
-    if (value == null || isNaN(value)) return "";
+    if (!value || isNaN(value)) return "";
     return new Intl.NumberFormat(this.props.thousandSeparator, {
       minimumFractionDigits: this.props.pricesAreDecimal ? this.props.numberOfDecimals : 0,
       maximumFractionDigits: this.props.pricesAreDecimal ? this.props.numberOfDecimals : 0,

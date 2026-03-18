@@ -384,13 +384,28 @@ export function login(credentials) {
             {},
           ),
         );
+        if (response.payload?.response?.errors?.length > 0) {
+          const errorMessage = response.payload.response.errors[0].message;
+          dispatch(authError({ message: errorMessage }));
+          return { loginStatus: "CORE_AUTH_ERR", message: errorMessage };
+        }
+
         if (response.payload?.errors?.length > 0) {
           const errorMessage = response.payload.errors[0].message;
           dispatch(authError({ message: errorMessage }));
           return { loginStatus: "CORE_AUTH_ERR", message: errorMessage };
         }
 
-        const jwtToken = response.payload.data.tokenAuth.token;
+        const jwtToken = response.payload?.data?.tokenAuth?.token;
+        if (!response.payload?.data?.tokenAuth) {
+          if (response.payload?.message && response.payload.message !== "429 - Unknown Status") {
+            dispatch(authError({ message: response.payload.message }));
+            return { loginStatus: "CORE_AUTH_ERR", message: response.payload.message };
+          }
+          const message = "You have reached the maximum number of login attempts";
+          dispatch(authError({ message }));
+          return { loginStatus: "CORE_AUTH_ERR", message };
+        }
         const csrfResponse = await dispatch(fetchCsrfToken(jwtToken));
         const csrfToken = csrfResponse?.payload?.data?.getCsrfToken?.csrfToken;
         if (csrfToken) {

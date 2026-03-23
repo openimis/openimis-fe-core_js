@@ -377,7 +377,12 @@ export function login(credentials) {
           dispatch(authError({ message: errorMessage }));
           return { loginStatus: "CORE_AUTH_ERR", message: errorMessage };
         }
-        
+
+        if (!response.payload?.data?.tokenAuth) {
+          dispatch(authError({ message: "INCORRECT_CREDENTIALS" }));
+          return { loginStatus: "CORE_AUTH_ERR", message: "INCORRECT_CREDENTIALS" };
+        }
+
         const jwtToken = response.payload.data.tokenAuth.token;
         const csrfResponse = await dispatch(fetchCsrfToken(jwtToken));
         const csrfToken = csrfResponse?.payload?.data?.getCsrfToken?.csrfToken;

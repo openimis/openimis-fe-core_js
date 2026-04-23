@@ -11,7 +11,6 @@ const StyledFormattedNumberInput = styled("div")(({ theme }) => ({}));
 class FormattedNumberInput extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
       isEdited: false,
       rawValue: props.value != null ? this.formatNumber(props.value) : "",
@@ -19,7 +18,6 @@ class FormattedNumberInput extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    // Si la valeur du serveur change et que l’utilisateur n’édite pas, on reformate
     if (prevProps.value !== this.props.value && !this.state.isEdited) {
       this.setState({
         rawValue: this.props.value != null ? this.formatNumber(this.props.value) : "",
@@ -30,18 +28,23 @@ class FormattedNumberInput extends Component {
   formatNumber = (value) => {
     if (value == null || isNaN(value)) return "";
 
-    const { numberOfDecimals, thousandSeparator } = this.props;
-    const decimals = numberOfDecimals === undefined ? getDecimalPlaces(value) : numberOfDecimals;
+    let decimals = this.props.numberOfDecimals;
+    if (decimals === undefined && this.props.pricesAreDecimal !== undefined) {
+      decimals = this.props.pricesAreDecimal ? 2 : 0;
+    }
+    decimals = decimals === undefined ? getDecimalPlaces(value) : decimals;
 
-    return new Intl.NumberFormat(thousandSeparator, {
+    return new Intl.NumberFormat(this.props.thousandSeparator, {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     }).format(value);
   };
 
   handleKeyPress = (event) => {
-    if (event.key === "." && this.props.numberOfDecimals === 0) {
-      event.preventDefault();
+    if (event.key === ".") {
+      if (this.props.allowDecimals === false || this.props.numberOfDecimals === 0) {
+        event.preventDefault();
+      }
     }
   };
 
@@ -52,37 +55,7 @@ class FormattedNumberInput extends Component {
     this.setState({ rawValue: raw });
 
     const value = this.parseRawValue(raw);
-    this.props.onChange(isNaN(value) ? null : value);
-  };
-
-  formatInput = (value, displayZero, displayNa, decimal) => {
-    if (!value) {
-      if (displayNa && !this.state.isEdited) {
-        return formatMessage(this.props.intl, this.props.module, "core.NumberInput.notApplicable");
-      }
-      return displayZero && value === 0 ? "0" : "";
-    }
-
-    const numericValue = Number(value);
-
-    if (isNaN(numericValue)) return "";
-
-    if (decimal) {
-      const { numberOfDecimals = 2 } = this.props;
-      if (typeof value === "string" && value.includes(".") && value.split(".")[1].length > numberOfDecimals) {
-        return parseFloat(value).toFixed(numberOfDecimals);
-      }
-      return value;
-    }
-
-    return parseFloat(value);
-  };
-
-  handleNaBlur = () => {
-    if ((isNaN(this.props.value) || this.props.value === "") && this.state.isEdited) {
-      this.props.onChange(null);
-    }
-    this.setState({ isEdited: false });
+    this.props.onChange(isNaN(value) ? undefined : value);
   };
 
   handleBlur = () => {
@@ -124,6 +97,7 @@ class FormattedNumberInput extends Component {
       displayZero = false,
       displayNa = false,
       allowDecimals = true,
+      pricesAreDecimal,
       decimal,
       ...others
     } = this.props;

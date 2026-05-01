@@ -18,14 +18,41 @@ class FormattedNumberInput extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.value !== this.props.value && !this.state.isEdited) {
-      this.setState({
-        rawValue: this.props.value != null ? this.formatNumber(this.props.value) : "",
-      });
+    const { value, intl } = this.props;
+    const { isEdited, rawValue } = this.state;
+    const valueChanged = !Object.is(prevProps.value, value);
+    const hasValue = value !== null && value !== undefined;
+    
+    if (valueChanged && isEdited === false) {
+      const formattedValue = hasValue
+        ? this.formatNumber(value, intl)
+        : "";
+      if (formattedValue !== rawValue) {
+        this.setState({ rawValue: formattedValue });
+      }
     }
   }
 
-  formatNumber = (value) => {
+  normalizeNumberInput = (raw) => {
+    if (!raw) return "";
+    let normalized = raw.replace(/\s/g, "");
+    const hasComma = normalized.includes(",");
+    const hasDot = normalized.includes(".");
+    
+    if (hasComma && hasDot) {
+      normalized = normalized.replace(/,/g, "");
+    } else if (hasComma && !hasDot) {
+      const parts = normalized.split(",");
+      if (parts[1]?.length === 3) {
+        normalized = normalized.replace(/,/g, "");
+      } else {
+        normalized = normalized.replace(",", ".");
+      }
+    }
+    return normalized;
+  };
+
+  formatNumber = (value, intl) => {
     if (value == null || isNaN(value)) return "";
 
     let decimals = this.props.numberOfDecimals;
@@ -34,10 +61,19 @@ class FormattedNumberInput extends Component {
     }
     decimals = decimals === undefined ? getDecimalPlaces(value) : decimals;
 
+    if (this.props.allowDecimals === false) {
+      decimals = 0;
+    }
+
     return new Intl.NumberFormat(this.props.thousandSeparator, {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     }).format(value);
+  };
+
+  parseRawValue = (raw) => {
+    const normalized = this.normalizeNumberInput(raw);
+    return parseLocalizedNumber(normalized, this.props.thousandSeparator);
   };
 
   handleKeyPress = (event) => {
@@ -48,36 +84,40 @@ class FormattedNumberInput extends Component {
     }
   };
 
-  parseRawValue = (raw) => parseLocalizedNumber(raw, this.props.thousandSeparator);
-
   handleChange = (val) => {
     const raw = val;
     this.setState({ rawValue: raw });
-
-    const value = this.parseRawValue(raw);
-    this.props.onChange(isNaN(value) ? undefined : value);
+    
+    const normalized = this.normalizeNumberInput(raw);
+    const value = parseLocalizedNumber(normalized, this.props.thousandSeparator);
+    
+    if (!Object.is(value, this.props.value)) {
+      this.props.onChange(Number.isNaN(value) ? undefined : value);
+    }
   };
 
   handleBlur = () => {
     const { intl, displayNa } = this.props;
     const { rawValue } = this.state;
-
+    
     this.setState({ isEdited: false });
-
-    if ((rawValue === "" || isNaN(Number(rawValue))) && displayNa) {
+    
+    const normalized = this.normalizeNumberInput(rawValue);
+    const number = Number.parseFloat(normalized);
+    
+    if ((rawValue === "" || Number.isNaN(number)) && displayNa) {
       this.setState({
         rawValue: formatMessage(intl, this.props.module, "core.NumberInput.notApplicable"),
       });
       return;
     }
-
-    const number = this.parseRawValue(rawValue);
+    
     if (isNaN(number)) {
       this.setState({ rawValue: "" });
       return;
     }
-
-    this.setState({ rawValue: this.formatNumber(number) });
+    
+    this.setState({ rawValue: this.formatNumber(number, intl) });
   };
 
   handleFocus = () => {
@@ -110,7 +150,9 @@ class FormattedNumberInput extends Component {
 
     let err = error;
 
-    const numericValue = this.parseRawValue(this.state.rawValue);
+    const normalized = this.normalizeNumberInput(this.state.rawValue);
+    const numericValue = parseLocalizedNumber(normalized, this.props.thousandSeparator);
+
     if (min != null && numericValue < min) {
       err = formatMessageWithValues(intl, module, "validation.minValue", { value: numericValue, min });
     }

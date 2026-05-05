@@ -126,7 +126,7 @@ const LoginPage = ({ logo }) => {
         <Helmet title={formatMessage("pageTitle")} />
         <Paper className={classes.paper} elevation={2}>
           <form onSubmit={onSubmit}>
-            <Box p={6} width={380}>
+            <Box p={6} width={500}>
               <Grid container spacing={2} direction="column" alignItems="stretch">
                 {enablePublicPage && (
                   <Grid item container direction="row" alignItems="center">

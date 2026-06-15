@@ -13,6 +13,7 @@ import { DEFAULT } from "../constants";
 
 import DatePicker from "react-multi-date-picker";
 import nepali from "../calendars/NepalCalendar";
+import bengali_en from "../calendars/BengaliLocaleEn";
 import nepali_en from "../calendars/NepaliLocaleEn";
 import nepali_np from "../calendars/NepaliLocaleNp";
 
@@ -92,6 +93,7 @@ class openIMISDatePicker extends Component {
   };
 
   secondaryCalendarsLocaleOptions = {
+    "bengali_en": bengali_en,
     "nepali_en": nepali_en,
     "nepali_np": nepali_np,
     "default": gregorian_en,
@@ -126,13 +128,17 @@ class openIMISDatePicker extends Component {
       modulesManager,
       minDate,
       maxDate,
+      secondaryCalendarEnabled,
+      secondaryCalendarType,
+      editable = true,
+      secondaryCalendarLocale,
       ...otherProps
     } = this.props;
 
-    if (isSecondaryCalendarEnabled) {
+    if (this.props.secondaryCalendarEnabled || isSecondaryCalendarEnabled) {
       const secondCalendarFormatting = modulesManager.getConf("fe-core", "secondCalendarFormatting", format);
-      const secondCalendarType = modulesManager.getConf("fe-core", "secondCalendarType", "nepali");
-      const secondCalendarLocale = modulesManager.getConf("fe-core", "secondCalendarLocale", "nepali_en");
+      const secondCalendarType = this.props.secondCalendarType || modulesManager.getConf("fe-core", "secondCalendarType", "nepali");
+      const secondCalendarLocale = this.props.secondCalendarLocale || modulesManager.getConf("fe-core", "secondCalendarLocale", "nepali_en");
 
       return (
         <FormControl fullWidth={fullWidth}>
@@ -142,6 +148,7 @@ class openIMISDatePicker extends Component {
           <DatePicker
             format={secondCalendarFormatting}
             disabled={readOnly}
+            editable={editable}
             value={this.state.value ? this.moveByOneDay(new Date(this.state.value)) : null}
             {...((!!minDate || disablePast) && this.setMinDate())}
             {...(!!maxDate && { maxDate: this.moveByOneDay(new Date(maxDate)) })}
@@ -149,9 +156,12 @@ class openIMISDatePicker extends Component {
             highlightToday={false}
             calendar={this.getDictionaryValueOrDefault(this.secondaryCalendarsOptions, secondCalendarType)}
             locale={this.getDictionaryValueOrDefault(this.secondaryCalendarsLocaleOptions, secondCalendarLocale)}
+            inputClass="MuiInputBase-input"
+            style={{ borderBottom: "1px solid",zIndex:3000 }}
+            required={required}
           >
             <button style={{ margin: "5px" }} onClick={(e) => this.clearDate(e)}>
-              {formatMessage(intl, "core", "calendar.clearButton")}
+              {formatMessage(intl, module, "calendar.clearButton")}
             </button>
           </DatePicker>
         </FormControl>

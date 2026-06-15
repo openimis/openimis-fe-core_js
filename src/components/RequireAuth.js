@@ -35,6 +35,7 @@ export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
 export const MAIN_MENU_CONTRIBUTION_KEY = "core.MainMenu";
 export const MAIN_SEARCHER_CONTRIBUTION_KEY = "core.MainSearcher";
 export const ECONOMIC_UNIT_BUTTON_CONTRIBUTION_KEY = "policyholder.EconomicUnitChangeButton";
+export const USER_INFO_CONTRIBUTION_KEY = "core.userInfo";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -353,6 +354,9 @@ const RequireAuth = (props) => {
           />
           <LogoutButton />
           <Help />
+          <Contributions
+            contributionKey={USER_INFO_CONTRIBUTION_KEY}
+          />
         </Toolbar>
       </AppBar>
       {isOpen && (

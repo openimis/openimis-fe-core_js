@@ -536,6 +536,7 @@ class Searcher extends Component {
       downloadWithIconButton = false,
       displayClearAllColsButton,
       infoButtonContent = '',
+      onCheckBoxSelect,
       searcherActionsPosition = 'top-right',
     } = this.props;
     return (
@@ -659,7 +660,7 @@ class Searcher extends Component {
                     selection={this.state.selection}
                     selectAll={this.state.selectAll}
                     clearAll={this.state.clearAll}
-                    onChangeSelection={this.onChangeSelection}
+                    onChangeSelection={onCheckBoxSelect?onCheckBoxSelect: this.onChangeSelection}
                     onDoubleClick={onDoubleClick}
                     page={this.state.page}
                     pageSize={this.state.pageSize}

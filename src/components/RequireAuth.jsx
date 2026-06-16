@@ -25,7 +25,7 @@ import Contributions from "./generics/Contributions";
 import AppBarIconButton from "./AppBarIconButton";
 import FormattedMessage from "./generics/FormattedMessage";
 import MainMenuBar from "./MainMenuBar";
-import JournalDrawer from "./JournalDrawer";
+import JournalDrawer, { JournalButtonTrigger } from "./JournalDrawer";
 import { useBoolean, useAuthentication } from "../helpers/hooks";
 import LanguageQuickPicker from "../pickers/LanguageQuickPicker";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -43,40 +43,54 @@ export const MAIN_MENU_CONTRIBUTION_KEY = "core.MainMenu";
 export const MAIN_SEARCHER_CONTRIBUTION_KEY = "core.MainSearcher";
 export const ECONOMIC_UNIT_BUTTON_CONTRIBUTION_KEY = "policyholder.EconomicUnitChangeButton";
 
-const StyledRequireAuth = styled("div")(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  minHeight: "100vh",
+const FLUID_PADDING_DEFAULT = { percent: 2.5, maxPx: 24 };
+
+const fluidPaddingX = (theme) => {
+  const configured = theme.layout?.contentPaddingX;
+  if (typeof configured === "number") {
+    return theme.spacing(configured);
+  }
+  if (configured?.xs || configured?.sm || configured?.md) {
+    return `min(${configured.md?.percent ?? FLUID_PADDING_DEFAULT.percent}%, ${configured.md?.maxPx ?? FLUID_PADDING_DEFAULT.maxPx}px)`;
+  }
+  const { percent, maxPx } = { ...FLUID_PADDING_DEFAULT, ...configured };
+  return `min(${percent}%, ${maxPx}px)`;
+};
+
+const contentPaddingTop = (theme, size) => theme.spacing(theme.layout?.contentPaddingTop?.[size] ?? (size === "md" ? 4 : 2));
+
+const menuDrawerBreakpointUp = (theme) => theme.breakpoints.up(theme.layout?.menuDrawerBreakpoint ?? "lg");
+
+const fluidContentPadding = (theme) => ({
+  paddingTop: contentPaddingTop(theme, "xs"),
+  paddingLeft: fluidPaddingX(theme),
+  paddingRight: fluidPaddingX(theme),
+  [theme.breakpoints.up("md")]: {
+    paddingTop: contentPaddingTop(theme, "md"),
+  },
+});
+
+const journalGutter = (theme) =>
+  typeof theme.jrnlDrawer?.close?.width === "number"
+    ? `${theme.jrnlDrawer.close.width}px`
+    : theme.jrnlDrawer?.close?.width || "73px";
+
+/**
+ * Layout used when the journal is the classic always-there right sidebar: every horizontal
+ * edge keeps a gutter wide enough for the collapsed drawer, released while it is open.
+ */
+const classicJournalLayout = (theme) => ({
   "& .layoutWrapper": {
     display: "flex",
     flex: 1,
     position: "relative",
-  },
-  "& .grow": {
-    flexGrow: 1,
-  },
-  "& .logo": {
-    verticalAlign: "middle",
-    marginRight: theme.spacing(2),
-    maxHeight: 32,
-  },
-  "& .appBar": {
-    overflow: "visible",
-    zIndex: theme.zIndex.appBar,
-    minHeight: "auto",
-    position: "sticky",
-    top: 0,
   },
   "& .topToolbar": {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
     paddingLeft: theme.spacing(2),
-    paddingRight: `calc(${theme.spacing(2)} + ${
-      typeof theme.jrnlDrawer?.close?.width === "number"
-        ? `${theme.jrnlDrawer.close.width}px`
-        : theme.jrnlDrawer?.close?.width || "73px"
-    })`,
+    paddingRight: `calc(${theme.spacing(2)} + ${journalGutter(theme)})`,
     minHeight: "64px !important",
     flexWrap: "nowrap",
     gap: theme.spacing(1),
@@ -94,11 +108,7 @@ const StyledRequireAuth = styled("div")(({ theme }) => ({
       }),
     },
     [theme.breakpoints.down("sm")]: {
-      paddingRight: `calc(${theme.spacing(2)} + ${
-        typeof theme.jrnlDrawer?.close?.width === "number"
-          ? `${theme.jrnlDrawer.close.width}px`
-          : theme.jrnlDrawer?.close?.width || "73px"
-      })`,
+      paddingRight: `calc(${theme.spacing(2)} + ${journalGutter(theme)})`,
       "&.journalOpen": {
         paddingRight: theme.spacing(2),
       },
@@ -107,11 +117,7 @@ const StyledRequireAuth = styled("div")(({ theme }) => ({
   "& .menuToolbar": {
     minHeight: "auto !important",
     paddingLeft: theme.spacing(2),
-    paddingRight: `calc(${theme.spacing(2)} + ${
-      typeof theme.jrnlDrawer?.close?.width === "number"
-        ? `${theme.jrnlDrawer.close.width}px`
-        : theme.jrnlDrawer?.close?.width || "73px"
-    })`,
+    paddingRight: `calc(${theme.spacing(2)} + ${journalGutter(theme)})`,
     backgroundColor: theme.palette.primary.main,
     borderTop: `1px solid ${alpha(theme.palette.common.white, 0.1)}`,
     display: "flex",
@@ -137,6 +143,182 @@ const StyledRequireAuth = styled("div")(({ theme }) => ({
       display: "none",
     },
   },
+  "& .toolbarDrawer": {
+    color: theme.palette.secondary.main,
+    paddingRight: `calc(${theme.spacing(2)} + ${journalGutter(theme)})`,
+    transition: theme.transitions.create("padding-right", {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    "&.journalOpen": {
+      paddingRight: `calc(${theme.spacing(2)} + ${journalGutter(theme)})`,
+      transition: theme.transitions.create("padding-right", {
+        easing: theme.transitions.easing.easeOut,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
+    },
+  },
+  "& .content": {
+    flexGrow: 1,
+    paddingTop: theme.spacing(4),
+    paddingLeft: theme.spacing(3),
+    paddingRight: `calc(${theme.spacing(3)} + ${journalGutter(theme)})`,
+    transition: theme.transitions.create(["margin", "padding-right"], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    [theme.breakpoints.down("md")]: {
+      paddingTop: theme.spacing(2),
+    },
+  },
+  "& main": {
+    flexGrow: 1,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    "& > *": {
+      width: "100%",
+      padding: "0 !important",
+    },
+  },
+  "& .contentShiftLeftSideMenu": {
+    transition: theme.transitions.create("margin", {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    marginLeft: 0,
+    marginRight: theme.jrnlDrawer?.close?.width || 73,
+    padding: theme.spacing(3),
+  },
+  "& .jrnlContentShift": {
+    position: "relative",
+    zIndex: 1,
+    paddingTop: theme.spacing(4),
+    paddingRight: theme.spacing(3),
+    transition: theme.transitions.create("padding-right", {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    [theme.breakpoints.down("md")]: {
+      paddingTop: theme.spacing(2),
+      paddingRight: theme.spacing(2),
+    },
+  },
+});
+
+/**
+ * Layout used when the journal is a popup drawer: nothing is reserved on the right, so the
+ * content spans the full width with a fluid padding and the main menu collapses on its own
+ * breakpoint.
+ */
+const popupJournalLayout = (theme) => ({
+  "& .layoutWrapper": {
+    display: "flex",
+    flex: 1,
+    position: "relative",
+    minWidth: 0,
+    maxWidth: "100%",
+    overflow: "hidden",
+  },
+  "& .topToolbar": {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingLeft: fluidPaddingX(theme),
+    paddingRight: fluidPaddingX(theme),
+    minHeight: "64px !important",
+    flexWrap: "nowrap",
+    gap: theme.spacing(1),
+    position: "relative",
+    zIndex: 2,
+  },
+  "& .menuToolbar": {
+    minHeight: "auto !important",
+    paddingLeft: fluidPaddingX(theme),
+    paddingRight: fluidPaddingX(theme),
+    backgroundColor: theme.palette.primary.main,
+    borderTop: `1px solid ${alpha(theme.palette.common.white, 0.1)}`,
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: theme.spacing(1.5),
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
+    position: "relative",
+    zIndex: 1,
+    display: "none",
+    [menuDrawerBreakpointUp(theme)]: {
+      display: "flex",
+    },
+  },
+  "& .toolbarDrawer": {
+    color: theme.palette.secondary.main,
+    paddingLeft: fluidPaddingX(theme),
+    paddingRight: fluidPaddingX(theme),
+  },
+  "& .content": {
+    flexGrow: 1,
+    minWidth: 0,
+    maxWidth: "100%",
+    boxSizing: "border-box",
+    ...fluidContentPadding(theme),
+    transition: theme.transitions.create(["margin", "padding-right"], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+  },
+  "& main": {
+    flexGrow: 1,
+    minWidth: 0,
+    maxWidth: "100%",
+    boxSizing: "border-box",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    ...fluidContentPadding(theme),
+    transition: theme.transitions.create("padding-right", {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    "& > *": {
+      width: "100%",
+      maxWidth: "100%",
+      padding: "0 !important",
+    },
+  },
+  "& .contentShiftLeftSideMenu": {
+    transition: theme.transitions.create("margin", {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    marginLeft: 0,
+    minWidth: 0,
+    maxWidth: "100%",
+    boxSizing: "border-box",
+    ...fluidContentPadding(theme),
+  },
+});
+
+const StyledRequireAuth = styled("div", {
+  shouldForwardProp: (prop) => prop !== "journalSidebar",
+})(({ theme, journalSidebar }) => ({
+  display: "flex",
+  flexDirection: "column",
+  minHeight: "100vh",
+  "& .grow": {
+    flexGrow: 1,
+  },
+  "& .logo": {
+    verticalAlign: "middle",
+    marginRight: theme.spacing(2),
+    maxHeight: 32,
+  },
+  "& .appBar": {
+    overflow: "visible",
+    zIndex: theme.zIndex.appBar,
+    minHeight: "auto",
+    position: "sticky",
+    top: 0,
+  },
   "& .appBarDrawer": {
     margin: 0,
     backgroundColor: theme.palette.primary.main,
@@ -145,30 +327,6 @@ const StyledRequireAuth = styled("div")(({ theme }) => ({
     minHeight: "auto",
     position: "sticky",
     top: 0,
-  },
-
-  "& .toolbarDrawer": {
-    color: theme.palette.secondary.main,
-    paddingRight: `calc(${theme.spacing(2)} + ${
-      typeof theme.jrnlDrawer?.close?.width === "number"
-        ? `${theme.jrnlDrawer.close.width}px`
-        : theme.jrnlDrawer?.close?.width || "73px"
-    })`,
-    transition: theme.transitions.create("padding-right", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    "&.journalOpen": {
-      paddingRight: `calc(${theme.spacing(2)} + ${
-        typeof theme.jrnlDrawer?.close?.width === "number"
-          ? `${theme.jrnlDrawer.close.width}px`
-          : theme.jrnlDrawer?.close?.width || "73px"
-      })`,
-      transition: theme.transitions.create("padding-right", {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-    },
   },
 
   "& .toolbarDrawerLogout": {
@@ -212,39 +370,12 @@ const StyledRequireAuth = styled("div")(({ theme }) => ({
     margin: theme.spacing(1, 0, 1, 0),
     backgroundColor: theme.menu.drawer.backgroundColor,
   },
-  "& .content": {
-    flexGrow: 1,
-    paddingTop: theme.spacing(4),
-    paddingLeft: theme.spacing(3),
-    paddingRight: `calc(${theme.spacing(3)} + ${
-      typeof theme.jrnlDrawer?.close?.width === "number"
-        ? `${theme.jrnlDrawer.close.width}px`
-        : theme.jrnlDrawer?.close?.width || "73px"
-    })`,
-    transition: theme.transitions.create(["margin", "padding-right"], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    [theme.breakpoints.down("md")]: {
-      paddingTop: theme.spacing(2),
-    },
-  },
   "& .contentShift": {
     transition: theme.transitions.create("margin", {
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
     marginLeft: theme.menu.drawer.width,
-  },
-  "& main": {
-    flexGrow: 1,
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    "& > *": {
-      width: "100%",
-      padding: "0 !important",
-    },
   },
   "& .appName": {
     ...theme.mixins.toolbar,
@@ -274,29 +405,7 @@ const StyledRequireAuth = styled("div")(({ theme }) => ({
   "& .drawerContainer": {
     overflow: "auto",
   },
-  "& .contentShiftLeftSideMenu": {
-    transition: theme.transitions.create("margin", {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    marginLeft: 0,
-    marginRight: theme.jrnlDrawer?.close?.width || 73,
-    padding: theme.spacing(3),
-  },
-  "& .jrnlContentShift": {
-    position: "relative",
-    zIndex: 1,
-    paddingTop: theme.spacing(4),
-    paddingRight: theme.spacing(3),
-    transition: theme.transitions.create("padding-right", {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    [theme.breakpoints.down("md")]: {
-      paddingTop: theme.spacing(2),
-      paddingRight: theme.spacing(2),
-    },
-  },
+  ...(journalSidebar ? classicJournalLayout(theme) : popupJournalLayout(theme)),
 }));
 
 const RequireAuth = (props) => {
@@ -326,6 +435,10 @@ const RequireAuth = (props) => {
 
   const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
+  const menuDrawerBreakpoint = theme.layout?.menuDrawerBreakpoint ?? "lg";
+  const isMenuDrawerUp = useMediaQuery(theme.breakpoints.up(menuDrawerBreakpoint));
+  // the classic sidebar layout keeps the historical md breakpoint, the popup one is configurable
+  const isMenuBarUp = showJournalSidebar ? isMdUp : isMenuDrawerUp;
 
   const isAppBarMenu = useMemo(() => {
     const variant = theme.menu?.variant || "AppBar";
@@ -358,11 +471,39 @@ const RequireAuth = (props) => {
     return <Redirect to={redirectTo} />;
   }
 
+  const leftMenuDrawer = (
+    <>
+      <Button className="appName" onClick={() => (window.location.href = "/front")}>
+        {isAppBarMenu && isSmUp && <img className="logo" src={logo} alt="Logo" />}
+        {!disableTextLogo && (
+          <FormattedMessage module="core" id="appName" defaultMessage={<FormattedMessage id="root.appName" />} />
+        )}
+        {isSmUp && (
+          <Tooltip title={modulesManager.getModulesVersions().join(", ")}>
+            <Typography variant="caption" className="appVersions">
+              {modulesManager.getOpenIMISVersion()}
+            </Typography>
+          </Tooltip>
+        )}
+      </Button>
+      <div className="drawerContainer"></div>
+      <MainMenuBar {...others} menuVariant="Drawer" contributionKey={MAIN_MENU_CONTRIBUTION_KEY}>
+        <Divider />
+      </MainMenuBar>
+      <div />
+    </>
+  );
+
   if (menuLeft) {
     return (
-      <StyledRequireAuth>
+      <StyledRequireAuth journalSidebar={showJournalSidebar}>
         <AppBar className="appBarDrawer">
-          <Toolbar className="toolbarDrawer">
+          <Toolbar className={clsx("toolbarDrawer", { journalOpen: showJournalSidebar && isDrawerOpen })}>
+            {!showJournalSidebar && !isMenuBarUp && (
+              <IconButton color="inherit" onClick={setOpen.toggle} className="menuButton">
+                <MenuIcon />
+              </IconButton>
+            )}
             <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
               <div className="grow" />
             </Contributions>
@@ -382,33 +523,34 @@ const RequireAuth = (props) => {
                 multiple={false}
               />
             )}
+            {!showJournalSidebar && <JournalButtonTrigger onClick={setDrawerOpen.toggle} />}
             <LogoutButton className="toolbarDrawerLogout" />
             <Help />
           </Toolbar>
         </AppBar>
         <Box className="layoutWrapper">
-          <Drawer className="drawerRoot" variant="permanent" PaperProps={{ className: "drawerPaper" }} anchor="left">
-            <Button className="appName" onClick={() => (window.location.href = "/front")}>
-              {isAppBarMenu && isSmUp && <img className="logo" src={logo} alt="Logo" />}
-              {!disableTextLogo && (
-                <FormattedMessage module="core" id="appName" defaultMessage={<FormattedMessage id="root.appName" />} />
-              )}
-              {isSmUp && (
-                <Tooltip title={modulesManager.getModulesVersions().join(", ")}>
-                  <Typography variant="caption" className="appVersions">
-                    {modulesManager.getOpenIMISVersion()}
-                  </Typography>
-                </Tooltip>
-              )}
-            </Button>
-            <div className="drawerContainer"></div>
-            <MainMenuBar {...others} menuVariant="Drawer" contributionKey={MAIN_MENU_CONTRIBUTION_KEY}>
-              <Divider />
-            </MainMenuBar>
-            <div />
-          </Drawer>
+          {showJournalSidebar || isMenuBarUp ? (
+            <Drawer className="drawerRoot" variant="permanent" PaperProps={{ className: "drawerPaper" }} anchor="left">
+              {leftMenuDrawer}
+            </Drawer>
+          ) : (
+            <Drawer
+              className="drawerRoot"
+              variant="temporary"
+              anchor="left"
+              open={isOpen}
+              onClose={setOpen.off}
+              PaperProps={{ className: "drawerPaper" }}
+            >
+              {leftMenuDrawer}
+            </Drawer>
+          )}
           <main className="contentShiftLeftSideMenu">{children}</main>
-          {showJournalSidebar && <JournalDrawer open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />}
+          <JournalDrawer
+            journalSidebar={showJournalSidebar}
+            open={isDrawerOpen}
+            handleDrawer={setDrawerOpen.toggle}
+          />
         </Box>
       </StyledRequireAuth>
     );
@@ -416,18 +558,18 @@ const RequireAuth = (props) => {
 
   const { formatMessage } = useTranslations("core", modulesManager);
   return (
-    <StyledRequireAuth>
+    <StyledRequireAuth journalSidebar={showJournalSidebar}>
       <AppBar
         className={clsx("appBar", {
-          appBarShift: isOpen && isMdUp,
+          appBarShift: isOpen && isMenuBarUp,
         })}
       >
-        <Toolbar className={clsx("topToolbar", { journalOpen: isDrawerOpen })}>
+        <Toolbar className={clsx("topToolbar", { journalOpen: showJournalSidebar && isDrawerOpen })}>
           <Box display="flex" alignItems="center">
             <IconButton
               color="inherit"
               onClick={setOpen.toggle}
-              className={clsx("menuButton", (isOpen || (isMdUp && isAppBarMenu)) && "hide")}
+              className={clsx("menuButton", (isOpen || (isMenuBarUp && isAppBarMenu)) && "hide")}
             >
               <MenuIcon />
             </IconButton>
@@ -494,13 +636,14 @@ const RequireAuth = (props) => {
                 multiple={false}
               />
             )}
+            {!showJournalSidebar && <JournalButtonTrigger onClick={setDrawerOpen.toggle} />}
             <LogoutButton />
             <Help />
           </Box>
         </Toolbar>
 
-        {isAppBarMenu && isMdUp && (
-          <Toolbar className={clsx("menuToolbar", { journalOpen: isDrawerOpen })} variant="dense">
+        {isAppBarMenu && isMenuBarUp && (
+          <Toolbar className={clsx("menuToolbar", { journalOpen: showJournalSidebar && isDrawerOpen })} variant="dense">
             <MainMenuBar {...others} menuVariant="AppBar" contributionKey={MAIN_MENU_CONTRIBUTION_KEY}>
               <div onClick={setOpen.off} />
             </MainMenuBar>
@@ -535,15 +678,10 @@ const RequireAuth = (props) => {
             </nav>
           </ClickAwayListener>
         )}
-        <main
-          className={clsx({
-            jrnlContentShift: isDrawerOpen,
-            content: showJournalSidebar,
-          })}
-        >
+        <main className={clsx({ content: showJournalSidebar, jrnlContentShift: showJournalSidebar && isDrawerOpen })}>
           {children}
         </main>
-        {showJournalSidebar && <JournalDrawer open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />}
+        <JournalDrawer journalSidebar={showJournalSidebar} open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />
       </Box>
     </StyledRequireAuth>
   );

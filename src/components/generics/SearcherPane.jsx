@@ -7,6 +7,8 @@ import { styled } from "@mui/material/styles";
 import GetIconComponent from "../../helpers/icons";
 const ResetFilterIcon = GetIconComponent("YoutubeSearchedFor");
 const DefaultSearchIcon = GetIconComponent("Search");
+const HistoryIcon = GetIconComponent("History");
+const HistoryOffIcon = GetIconComponent("HistoryOff");
 
 import SearcherActionButton from "./SearcherActionButton";
 import { DEFAULT_DEBOUNCE_TIME, ENTER_KEY } from "../../constants";
@@ -107,6 +109,8 @@ class SearcherPane extends Component {
       appliedFiltersRowStructure = null,
       setAppliedFiltersRowStructure = null,
       applyNumberCircle = null,
+      onShowHistory,
+      showHistory,
       ActionButton = SearcherActionButton,
     } = this.props;
     return (
@@ -118,7 +122,7 @@ class SearcherPane extends Component {
                 <FormattedMessage module={module} id={title} />
               </Grid>
               <Grid className="paperHeader">
-                {(!!actions || !!refresh) && (
+                {(!!actions || !!refresh || !!onShowHistory) && (
                   <>
                     {isCustomFiltering === true ? (
                       <AdvancedFiltersDialog
@@ -147,6 +151,18 @@ class SearcherPane extends Component {
                           label={a.label || ""}
                         />
                       ))}
+                    {!!onShowHistory && (
+                      <ActionButton
+                        key="action-history"
+                        startIcon={showHistory ? <HistoryOffIcon /> : <HistoryIcon />}
+                        onClick={() => onShowHistory(!showHistory)}
+                        label={formatMessage(
+                          this.props.intl,
+                          "admin",
+                          showHistory ? "hideHistory" : "showHistory",
+                        )}
+                      />
+                    )}
                     {!!reset && (
                       <ActionButton
                         key="action-reset"

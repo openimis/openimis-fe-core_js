@@ -70,7 +70,11 @@ class openIMISDatePicker extends Component {
 
   dateChange = (d) => {
     const jsDate = d ? d.toDate() : null;
-    this.setState({ value: d }, () => (!!this.props.onChange ? this.props.onChange(toISODate(jsDate)) : null));
+    this.setState({ value: d }, () => {
+      if (this.props.onChange) {
+        this.props.onChange(toISODate(jsDate));
+      }
+    });
   };
 
   secondaryCalendarDateChange = (d) => {
@@ -177,13 +181,18 @@ class openIMISDatePicker extends Component {
                   "disabledStateVisibilityBoost": this.disabledVisibilityBoost && readOnly,
                 })}
                 value={this.state.value}
-                label={!!label ? formatMessage(intl, module, label) : null}
+                label={label ? formatMessage(intl, module, label) : null}
                 onChange={this.dateChange}
                 disablePast={disablePast}
                 slotProps={{
-                  actionBar: { actions: ["clear", "cancel"] },
-                  toolbar: { 
-                    hidden: false,
+                   ...otherProps.slotProps,
+                   actionBar: {
+                     ...(otherProps.slotProps?.actionBar || {}),
+                     actions: otherProps.slotProps?.actionBar?.actions ?? ["clear", "cancel", "accept"],
+                   },
+                   toolbar: {
+                     ...(otherProps.slotProps?.toolbar || {}),
+                     hidden: otherProps.slotProps?.toolbar?.hidden ?? false,
                     sx: {
                       backgroundColor: "primary.main",
                       color: "primary.contrastText",

@@ -25,7 +25,7 @@ class FormattedNumberInput extends Component {
   }
 
   formatNumber = (value, intl) => {
-    if (!value || isNaN(value)) return "";
+    if (!value || Number.isNaN(value)) return "";
     return new Intl.NumberFormat(this.props.thousandSeparator, {
       minimumFractionDigits: this.props.pricesAreDecimal ? this.props.numberOfDecimals : 0,
       maximumFractionDigits: this.props.pricesAreDecimal ? this.props.numberOfDecimals : 0,
@@ -44,7 +44,7 @@ class FormattedNumberInput extends Component {
     this.setState({ rawValue: raw });
 
     const normalized = raw.replace(/\s/g, "").replace(",", ".");
-    const value = parseFloat(normalized);
+    const value = Number.parseFloat(normalized);
     this.props.onChange(isNaN(value) ? undefined : value);
   };
 
@@ -61,7 +61,7 @@ class FormattedNumberInput extends Component {
       return;
     }
 
-    const number = parseFloat(rawValue.replace(/\s/g, "").replace(",", "."));
+    const number = Number.parseFloat(rawValue.replace(/\s/g, "").replace(",", "."));
     if (isNaN(number)) {
       this.setState({ rawValue: "" });
       return;
@@ -96,7 +96,7 @@ class FormattedNumberInput extends Component {
 
     let err = error;
 
-    const numericValue = parseFloat(this.state.rawValue.replace(/\s/g, "").replace(",", "."));
+    const numericValue = Number.parseFloat(this.state.rawValue.replace(/\s/g, "").replace(",", "."));
     if (min != null && numericValue < min) {
       err = formatMessageWithValues(intl, module, "validation.minValue", { value: numericValue, min });
     }

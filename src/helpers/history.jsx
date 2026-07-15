@@ -13,16 +13,18 @@ export default function withHistory(C) {
   };
 }
 
-export function _historyPush(mm, history, route, asNewTab) {
+export function _historyPush(mm, history, pathname, asNewTab, search = "") {
+  const location = { pathname, search: search || "" };
   if (asNewTab) {
     const hasDynLink = mm.getConf("fe-core", "useDynPermalinks", false);
-    const link = history.createHref({ pathname: route });
+    const link = history.createHref(location);
     window.open(hasDynLink ? `/?dyn=${btoa(link)}` : link);
   } else {
-    history.push(route);
+    history.push(location);
   }
 }
 
-export function historyPush(mm, history, route, params, newTab = false) {
-  _historyPush(mm, history, `/${mm.getRef(route)}${!!params ? "/" + params.join("/") : ""}`, newTab);
+export function historyPush(mm, history, route, params, newTab = false, search = "") {
+  const pathname = `/${mm.getRef(route)}${params?.length ? "/" + params.join("/") : ""}`;
+  _historyPush(mm, history, pathname, newTab, search);
 }

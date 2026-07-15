@@ -18,8 +18,11 @@ import {
   ClickAwayListener,
   Box,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
+import GetIconComponent from "../helpers/icons";
+const MenuIcon = GetIconComponent("Menu");
+import { prepareMenuEntries } from "../helpers/utils";
 import Contributions from "./generics/Contributions";
+import AppBarIconButton from "./AppBarIconButton";
 import FormattedMessage from "./generics/FormattedMessage";
 import MainMenuBar from "./MainMenuBar";
 import JournalDrawer from "./JournalDrawer";
@@ -28,9 +31,14 @@ import LanguageQuickPicker from "../pickers/LanguageQuickPicker";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { Switch } from "@mui/material";
 import { useTranslations } from "../helpers/i18n";
-import { DEFAULT } from "../constants";
+import { DEFAULT, RIGHT_USERS } from "../admin/constants";
+import { useDispatch, useSelector } from "react-redux";
+import UserPicker from "../admin/components/pickers/UserPicker";
+import { impersonateUser, stopImpersonation } from "../actions";
+import { injectIntl } from "react-intl";
 
 export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
+export const APP_BAR_ICONS_CONTRIBUTION_KEY = "core.AppBarIcons";
 export const MAIN_MENU_CONTRIBUTION_KEY = "core.MainMenu";
 export const MAIN_SEARCHER_CONTRIBUTION_KEY = "core.MainSearcher";
 export const ECONOMIC_UNIT_BUTTON_CONTRIBUTION_KEY = "policyholder.EconomicUnitChangeButton";
@@ -189,9 +197,11 @@ const StyledRequireAuth = styled("div")(({ theme }) => ({
     flexShrink: 0,
     backgroundColor: theme.menu.drawer.backgroundColor,
     color: theme.menu.drawer.textColor,
-    height: "100%",
-    position: "sticky",
-    top: "auto",
+    position: "fixed",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    zIndex: theme.zIndex.appBar + 1,
   },
 
   "& .drawerHeader": {
@@ -227,35 +237,20 @@ const StyledRequireAuth = styled("div")(({ theme }) => ({
     marginLeft: theme.menu.drawer.width,
   },
   "& main": {
-    paddingTop: theme.spacing(4),
-    paddingLeft: theme.spacing(3),
-    paddingRight: `calc(${theme.spacing(3)} + ${
-      typeof theme.jrnlDrawer?.close?.width === "number"
-        ? `${theme.jrnlDrawer.close.width}px`
-        : theme.jrnlDrawer?.close?.width || "73px"
-    })`,
     flexGrow: 1,
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    transition: theme.transitions.create("padding-right", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
     "& > *": {
       width: "100%",
       padding: "0 !important",
     },
-    [theme.breakpoints.down("md")]: {
-      paddingTop: theme.spacing(2),
-      paddingLeft: theme.spacing(2),
-      paddingRight: theme.spacing(2),
-    },
   },
   "& .appName": {
+    ...theme.mixins.toolbar,
     color: theme.palette.secondary.main,
     textTransform: "none",
-    fontSize: theme.typography.title?.fontSize || 20,
+    fontSize: theme.typography.h6.fontSize,
     fontWeight: "bold",
     whiteSpace: "nowrap",
     display: "flex",
@@ -268,7 +263,7 @@ const StyledRequireAuth = styled("div")(({ theme }) => ({
   },
   "& .appVersions": {
     color: theme.palette.secondary.main,
-    fontSize: (theme.typography.title?.fontSize || 20) / 2,
+    fontSize: theme.typography.h6.fontSize / 2,
     verticalAlign: "text-bottom",
     marginLeft: theme.spacing(1),
     opacity: 0.8,
@@ -285,9 +280,8 @@ const StyledRequireAuth = styled("div")(({ theme }) => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
     marginLeft: 0,
-    paddingLeft: theme.spacing(3),
-    paddingRight: theme.spacing(3),
-    paddingTop: theme.spacing(4),
+    marginRight: theme.jrnlDrawer?.close?.width || 73,
+    padding: theme.spacing(3),
   },
   "& .jrnlContentShift": {
     position: "relative",
@@ -314,9 +308,10 @@ const RequireAuth = (props) => {
     isSecondaryCalendar,
     setSecondaryCalendar,
     onEconomicDialogOpen,
+    intl,
     ...others
   } = props;
-
+  const rights = children.props.userRights;
   const [isOpen, setOpen] = useBoolean();
   const [isDrawerOpen, setDrawerOpen] = useBoolean();
   const theme = useTheme();
@@ -327,7 +322,6 @@ const RequireAuth = (props) => {
   const menuLeft =
     modulesManager.getConf("openimis-fe-core_js", "menuLeft") || modulesManager.getConf("fe-core", "menuLeft") || false;
   const calendarSwitch = modulesManager.getConf("fe-core", "allowSecondCalendar", false);
-  const isWorker = modulesManager.getConf("fe-core", "isWorker", DEFAULT.IS_WORKER);
   const showJournalSidebar = modulesManager.getConf("fe-core", "showJournalSidebar", DEFAULT.SHOW_JOURNAL_SIDEBAR);
 
   const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
@@ -337,6 +331,28 @@ const RequireAuth = (props) => {
     const variant = theme.menu?.variant || "AppBar";
     return typeof variant === "string" && variant.trim().toUpperCase() === "APPBAR";
   }, [theme.menu?.variant]);
+
+  const dispatch = useDispatch();
+  const impersonatedUser = useSelector((state) => state.core.impersonatedUser);
+  const showImpersonationPicker = auth.user?.is_superuser || Boolean(impersonatedUser);
+
+  const preparedIcons = useMemo(() => {
+    const rightsSet = new Set(rights.map((r) => String(r)));
+    const routes = modulesManager.getRoutes();
+    let iconsEntries = modulesManager.getContribs("core.AppBarIcons");
+    const backendAppBarIconsConfig = modulesManager.getConf("fe-core", "menus", []);
+    if (backendAppBarIconsConfig.length > 0) {
+      // Merge backend entries with module contribs, backend overrides by id
+      iconsEntries = (backendAppBarIconsConfig.find((config) => config.id === "core.AppBarIcons") || {})?.entries || [];
+    }
+    // Sort by position
+    return prepareMenuEntries(
+      rights,
+      intl,
+      iconsEntries.sort((a, b) => (a.position || 99) - (b.position || 99)),
+      routes,
+    );
+  });
 
   if (!auth.isAuthenticated) {
     return <Redirect to={redirectTo} />;
@@ -350,6 +366,22 @@ const RequireAuth = (props) => {
             <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
               <div className="grow" />
             </Contributions>
+            {showImpersonationPicker && (
+              <UserPicker
+                readOnly={Boolean(impersonatedUser)}
+                onChange={(user) => {
+                  if (!user) {
+                    dispatch(stopImpersonation());
+                  } else if (!impersonatedUser) {
+                    dispatch(impersonateUser(user));
+                  }
+                }}
+                value={impersonatedUser}
+                withLabel={false}
+                placeholder="Impersonate user"
+                multiple={false}
+              />
+            )}
             <LogoutButton className="toolbarDrawerLogout" />
             <Help />
           </Toolbar>
@@ -421,11 +453,14 @@ const RequireAuth = (props) => {
           </Box>
 
           <Box display="flex" alignItems="center" className="grow">
-            {!isWorker && (
+            {
               <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
                 <div className="grow" />
               </Contributions>
-            )}
+            }
+            {preparedIcons.map((iconProps, idx) => (
+              <AppBarIconButton key={`appbar_icon_${idx}`} {...iconProps} />
+            ))}
           </Box>
 
           <Box display="flex" alignItems="center" gap={1}>
@@ -443,6 +478,22 @@ const RequireAuth = (props) => {
               contributionKey={ECONOMIC_UNIT_BUTTON_CONTRIBUTION_KEY}
               onEconomicDialogOpen={onEconomicDialogOpen}
             />
+            {showImpersonationPicker && (
+              <UserPicker
+                readOnly={Boolean(impersonatedUser)}
+                onChange={(user) => {
+                  if (!user) {
+                    dispatch(stopImpersonation());
+                  } else if (!impersonatedUser) {
+                    dispatch(impersonateUser(user));
+                  }
+                }}
+                value={impersonatedUser}
+                withLabel={false}
+                placeholder="Impersonate user"
+                multiple={false}
+              />
+            )}
             <LogoutButton />
             <Help />
           </Box>
@@ -498,4 +549,4 @@ const RequireAuth = (props) => {
   );
 };
 
-export default RequireAuth;
+export default injectIntl(RequireAuth);

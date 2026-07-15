@@ -11,6 +11,7 @@ const mockMM = {
   getConf: (module, key, defaultValue = null) => defaultValue,
   getContribs: () => [],
   getMenuEntries: () => [],
+  getRoutes: () => ({}),
   getOpenIMISVersion: () => "dev",
   getModulesVersions: () => [],
   hideField: () => false,

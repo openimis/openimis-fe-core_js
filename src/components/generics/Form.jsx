@@ -2,21 +2,23 @@ import React, { Component, Fragment } from "react";
 import { styled } from "@mui/material/styles";
 import { injectIntl } from "react-intl";
 import { Fab, Grid, Paper, IconButton, Typography, Divider, Tooltip } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import SaveIcon from "@mui/icons-material/Save";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import GetIconComponent from "../../helpers/icons";
+
+const AddIcon = GetIconComponent("Add");
+const SaveIcon = GetIconComponent("Save");
+const ChevronLeftIcon = GetIconComponent("ChevronLeft");
 import FormattedMessage from "./FormattedMessage";
 import Contributions from "./Contributions";
 import withHistory from "../../helpers/history";
 import { withTooltip, formatMessage } from "../../helpers/i18n";
 import _ from "lodash";
 
-const StyledForm = styled('div')(({ theme }) => ({
-  '& .paper': theme.paper?.paper ?? {},
-  '& .paperHeader': theme.paper?.header ?? {},
-  '& .paperHeaderAction': theme.paper?.action ?? {},
-  '& .tooltipContainer': theme.tooltipContainer ?? {},
-  '& .flexTooltip': theme.flexTooltip ?? {},
+const StyledForm = styled("div")(({ theme }) => ({
+  "& .paper": theme.paper?.paper ?? {},
+  "& .paperHeader": theme.paper?.header ?? {},
+  "& .paperHeaderAction": theme.paper?.action ?? {},
+  "& .tooltipContainer": theme.tooltipContainer ?? {},
+  "& .flexTooltip": theme.flexTooltip ?? {},
 }));
 
 class Form extends Component {
@@ -51,6 +53,8 @@ class Form extends Component {
 
   render() {
     const {
+      enableSaveButton = true,
+      classes,
       module,
       back,
       add,
@@ -90,13 +94,15 @@ class Form extends Component {
         condition: (!!this.state.dirty || !!openDirty) && !!save,
         content: (
           <span>
-            <Fab
-              color="primary"
-              disabled={!!this.state.saving || (!!canSave && !canSave())}
-              onClick={(e) => this.save(this.props.edited)}
-            >
-              <SaveIcon />
-            </Fab>
+            {enableSaveButton && (
+              <Fab
+                color="primary"
+                disabled={!!this.state.saving || (!!canSave && !canSave())}
+                onClick={(e) => this.save(this.props.edited)}
+              >
+                <SaveIcon />
+              </Fab>
+            )}
           </span>
         ),
         tooltip: saveTooltip || formatMessage(this.props.intl, module, "saveTooltip"),
@@ -112,11 +118,11 @@ class Form extends Component {
         ),
         tooltip: fabTooltip,
       },
-    ]
+    ];
 
     const allTooltips = [...(additionalTooltips || []), ...defaultTooltips];
 
-    const filteredTooltips = allTooltips.filter(tooltip => tooltip.condition);
+    const filteredTooltips = allTooltips.filter((tooltip) => tooltip.condition);
 
     return (
       <StyledForm>
@@ -190,7 +196,7 @@ class Form extends Component {
             </Grid>
           </Grid>
           {!!Panels &&
-            Panels.filter(P => !!P).map((P, idx) => (
+            Panels.filter((P) => !!P).map((P, idx) => (
               <Grid key={`form_panel_${idx}`} size={12}>
                 <P
                   {...others}

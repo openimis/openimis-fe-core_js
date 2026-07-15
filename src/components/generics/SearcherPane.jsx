@@ -4,7 +4,9 @@ import _debounce from "lodash/debounce";
 
 import { Grid, Paper, Divider, Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { YoutubeSearchedFor as ResetFilterIcon, Search as DefaultSearchIcon } from "@mui/icons-material";
+import GetIconComponent from "../../helpers/icons";
+const ResetFilterIcon = GetIconComponent("YoutubeSearchedFor");
+const DefaultSearchIcon = GetIconComponent("Search");
 
 import SearcherActionButton from "./SearcherActionButton";
 import { DEFAULT_DEBOUNCE_TIME, ENTER_KEY } from "../../constants";
@@ -105,6 +107,7 @@ class SearcherPane extends Component {
       appliedFiltersRowStructure = null,
       setAppliedFiltersRowStructure = null,
       applyNumberCircle = null,
+      ActionButton = SearcherActionButton,
     } = this.props;
     return (
       <StyledSearcherPane>
@@ -137,7 +140,7 @@ class SearcherPane extends Component {
                     )}
                     {!!actions &&
                       actions.map((a, idx) => (
-                        <SearcherActionButton
+                        <ActionButton
                           key={`action-${idx}`}
                           onClick={a.action}
                           startIcon={a.icon}
@@ -145,7 +148,7 @@ class SearcherPane extends Component {
                         />
                       ))}
                     {!!reset && (
-                      <SearcherActionButton
+                      <ActionButton
                         key="action-reset"
                         startIcon={<ResetFilterIcon />}
                         onClick={this.debouncedReset}
@@ -153,7 +156,7 @@ class SearcherPane extends Component {
                       />
                     )}
                     {!!refresh && (
-                      <SearcherActionButton
+                      <ActionButton
                         key="action-refresh"
                         startIcon={<DefaultSearchIcon />}
                         onClick={this.debouncedRefresh}

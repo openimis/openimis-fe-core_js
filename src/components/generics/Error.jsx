@@ -2,12 +2,12 @@ import React, { Fragment } from "react";
 import { styled } from "@mui/material/styles";
 import { Typography, Divider } from "@mui/material";
 
-const StyledError = styled('div')(({ theme }) => ({
+const StyledError = styled("div")(({ theme }) => ({
   padding: theme.spacing(2),
-  '& .errorHeader': {
+  "& .errorHeader": {
     color: theme.palette.error.main,
   },
-  '& .errorDetail': {
+  "& .errorDetail": {
     color: theme.palette.error.main,
   },
 }));

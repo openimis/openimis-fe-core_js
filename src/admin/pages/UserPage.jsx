@@ -6,8 +6,8 @@ import UserForm from "../components/UserForm";
 import { createUser, updateUser } from "../actions";
 import { RIGHT_USER_ADD, RIGHT_USER_EDIT } from "../constants";
 
-const StyledDiv = styled('div')(({ theme }) => ({
-  ...theme.page ?? {},
+const StyledDiv = styled("div")(({ theme }) => ({
+  ...(theme.page ?? {}),
 }));
 
 const UserPage = (props) => {

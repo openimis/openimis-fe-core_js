@@ -179,9 +179,8 @@ Whenever the **individual** global schema changes (you add or remove a filter fi
 - `formatMessageWithValues`: provide the translation of a module-prefixed key, for messages with vairable parts
 - `formatAmount`: format an amount as a string
     with config
-    - `fe-core`, "thousandSeparator", "en"
+    - `fe-core`, "thousandSeparator", "fr"
     - `fe-core`, "numberOfDecimals", 2
-    - `fe-core`, "pricesAreDecimal", true
     the config thousandSeparator set the locale use by Intl.NumberFormat (e.g. "en") if you don't want formatting, set default value ""
     
 - `formatDateFromISO`: parse ISO date into (local) datetime
@@ -191,6 +190,16 @@ Whenever the **individual** global schema changes (you add or remove a filter fi
 - `toISODate`: format local date to ISO format
 
   Note: depends on the selected calendar (Gregorian vs. Nepali)
+
+### Number Formatting
+
+`NumberInput` supports flexible decimal formatting:
+
+- **Auto-detection (default)**: When neither `numberOfDecimals` nor `allowDecimals` is specified, decimals are auto-detected from the value (integers display without decimals, decimal values preserve their precision)
+- **Fixed decimals**: Use `numberOfDecimals={N}` prop to enforce N decimal places
+- **Integer mode**: Use `allowDecimals={false}` prop to force integer-only input
+
+Monetary amount decimal places can be controlled using the global `fe-core.numberOfDecimals` config (default: 2) or using the `numberOfDecimals` prop on `AmountInput` for individual input fields.
 
 ### JSON handler
 
@@ -276,6 +285,7 @@ None
 - `secondCalendarLocale`: locale for secondary calendar picker (if enabled), default "nepali_en",
 - `Input.disabledVisibilityBoost`: This setting enhances the visibility of disabled input fields (e.g., text/number inputs, date pickers). When set to **true**, the label color changes to `#181716`, and the input value color to `#5E5B50`. The default is **false**.
 - `limitMutationLogsQuery`: This config to enalble or disable fetchMutationLogs query mutation in core,
+- 'shouldFetchInitially' : (bool: true or false ) This config will enable or disable default search (onload in Searcher component) to avoid unnecessary loading until user clicks on filter. Disables if it is set to false.
 
 ## Main Menu and Submenu Configuration
 

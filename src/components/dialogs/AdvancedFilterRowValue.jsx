@@ -9,30 +9,23 @@ import { styled } from "@mui/material/styles";
 import { connect } from "react-redux";
 import CustomFilterFieldStatusPicker from "../../pickers/CustomFilterFieldStatusPicker";
 import CustomFilterTypeStatusPicker from "../../pickers/CustomFilterTypeStatusPicker";
-import { 
-  BOOL_OPTIONS, 
-  CLEARED_STATE_FILTER,
-  INTEGER,
-  DATE,
-  STRING,
-  BOOLEAN
-} from "../../constants";
+import { BOOL_OPTIONS, CLEARED_STATE_FILTER, INTEGER, DATE, STRING, BOOLEAN } from "../../constants";
 
 const StyledGrid = styled(Grid)(({ theme }) => ({
-  '& .item': theme.paper?.item ?? {},
+  "& .item": theme.paper?.item ?? {},
   backgroundColor: theme.paper?.paper?.backgroundColor ?? "#dbeef0",
-  '& .removeIcon': {
-    transform: 'translate(-50%, -50%)',
-    fontSize: '16px',
+  "& .removeIcon": {
+    transform: "translate(-50%, -50%)",
+    fontSize: "16px",
     color: theme.palette.primary.main,
-    cursor: 'pointer',
+    cursor: "pointer",
   },
-  '& .removeIconContainer': {
+  "& .removeIconContainer": {
     backgroundColor: theme.paper?.paper?.backgroundColor ?? "#dbeef0",
-    width: '25px',
-    height: '25px',
-    marginTop: '25px',
-  }
+    width: "25px",
+    height: "25px",
+    marginTop: "25px",
+  },
 }));
 
 const AdvancedFilterRowValue = ({
@@ -44,25 +37,24 @@ const AdvancedFilterRowValue = ({
   filters,
   setFilters,
 }) => {
-
   const onAttributeChange = (attribute) => (value) => {
     let updatedFilter = { ...currentFilter };
-  
-    if (attribute === 'field') {
+
+    if (attribute === "field") {
       updatedFilter = {
-        ...{ filter: '', value: '', type: value.type },
+        ...{ filter: "", value: "", type: value.type },
       };
     }
-  
-    const attributeValue = attribute === 'field' ? value.field : value;
+
+    const attributeValue = attribute === "field" ? value.field : value;
     updatedFilter = {
       ...updatedFilter,
       [attribute]: attributeValue,
-      ...(attribute === 'filter' && { value: '' }),
+      ...(attribute === "filter" && { value: "" }),
     };
-  
+
     setCurrentFilter(updatedFilter);
-  
+
     setFilters((prevFilters) => {
       const updatedRows = [...prevFilters];
       updatedRows[index] = { ...updatedFilter };
@@ -83,59 +75,33 @@ const AdvancedFilterRowValue = ({
       value: currentFilter.value,
       onChange: onAttributeChange("value"),
     };
-  
+
     switch (type) {
       case BOOLEAN:
-        return (
-          <SelectInput
-            options={BOOL_OPTIONS}
-            {...commonProps}
-          />
-        );
+        return <SelectInput options={BOOL_OPTIONS} {...commonProps} />;
       case INTEGER:
-        return (
-          <NumberInput
-            min={0}
-            displayZero
-            {...commonProps}
-          />
-        );
+        return <NumberInput min={0} displayZero {...commonProps} />;
       case STRING:
       default:
         if (currentFilter.field.toLowerCase().includes(DATE)) {
-          return (
-            <PublishedComponent
-              pubRef="core.DatePicker"
-              {...commonProps}
-            />
-          );
+          return <PublishedComponent pubRef="core.DatePicker" {...commonProps} />;
         } else {
-          return (
-            <TextInput
-              {...commonProps}
-            />
-          );
+          return <TextInput {...commonProps} />;
         }
     }
   };
 
   return (
-    <StyledGrid 
-      container 
-      direction="row" 
-      className="item"
-    >
+    <StyledGrid container direction="row" className="item">
       {filters.length > 0 ? (
         <div className="removeIconContainer">
-          <span
-            className="removeIcon"
-            onClick={removeFilter}
-          >
+          <span className="removeIcon" onClick={removeFilter}>
             &#x2716;
           </span>
-        </div> 
-      ) : (<></>)
-      }
+        </div>
+      ) : (
+        <></>
+      )}
       <Grid size={3} className="item">
         <CustomFilterFieldStatusPicker
           module="core"
@@ -145,23 +111,27 @@ const AdvancedFilterRowValue = ({
           customFilters={customFilters}
         />
       </Grid>
-        {currentFilter.field !== "" ? (
-          <Grid size={3} className="item">
-            <CustomFilterTypeStatusPicker
-              module="core"
-              label="core.advancedFilters.filter"
-              value={currentFilter.filter}
-              onChange={onAttributeChange("filter")}
-              customFilters={customFilters}
-              customFilterField={currentFilter.field}
-            />
-          </Grid>
-        ) : (<></>) }
-        {currentFilter.field !== "" && currentFilter.filter !== "" ? (
-          <Grid size={3} className="item">
-            {renderInputBasedOnType(currentFilter.type)}
-          </Grid>
-        ) : (<></>) }
+      {currentFilter.field !== "" ? (
+        <Grid size={3} className="item">
+          <CustomFilterTypeStatusPicker
+            module="core"
+            label="core.advancedFilters.filter"
+            value={currentFilter.filter}
+            onChange={onAttributeChange("filter")}
+            customFilters={customFilters}
+            customFilterField={currentFilter.field}
+          />
+        </Grid>
+      ) : (
+        <></>
+      )}
+      {currentFilter.field !== "" && currentFilter.filter !== "" ? (
+        <Grid size={3} className="item">
+          {renderInputBasedOnType(currentFilter.type)}
+        </Grid>
+      ) : (
+        <></>
+      )}
     </StyledGrid>
   );
 };

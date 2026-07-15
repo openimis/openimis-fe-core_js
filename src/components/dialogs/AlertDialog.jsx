@@ -12,8 +12,10 @@ import {
   Typography,
   Grid,
 } from "@mui/material";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import GetIconComponent from "../../helpers/icons";
+
+const ArrowDropDownIcon = GetIconComponent("ArrowDropDown");
+const ArrowRightIcon = GetIconComponent("ArrowRight");
 import { clearAlert } from "../../actions";
 import { formatMessage } from "../../helpers/i18n";
 import { ensureArray } from "../../helpers/utils";

@@ -5,7 +5,8 @@ import moment from "moment";
 import { formatDateFromISO as adFormateDateFromISO } from "../pickers/AdDateFormatter";
 import { formatDateTimeFromISO as adFormateDateTimeFromISO } from "../pickers/AdDateTimeFormatter";
 import { formatDateFromISO as neFormateDateFromISO } from "../pickers/NeDateFormatter";
-import { STORAGE_KEY_SECONDARY_CALENDAR, DEFAULT_SETTINGS} from "../constants";
+import { STORAGE_KEY_SECONDARY_CALENDAR, DEFAULT_SETTINGS } from "../constants";
+import { getLocalStorage } from "./useLocalStorage";
 
 //formatting with values is expansive.. so let's have separated methods
 export function formatMessage(intl, module, id) {
@@ -25,27 +26,34 @@ export function formatMessageWithValues(intl, module, id, values) {
 }
 
 export function formatAmount(mm, intl, amount) {
-  const thousandSeparator = mm.getConf("fe-core", "thousandSeparator", "en");
+  const thousandSeparator = mm.getConf("fe-core", "thousandSeparator", "fr");
   const number = amount || 0;
-  const pricesAreDecimal = mm.getConf("fe-core", "pricesAreDecimal", true);
   const numberOfDecimals = mm.getConf("fe-core", "numberOfDecimals", 2);
   if (!!thousandSeparator) {
     const formattedAmount = new Intl.NumberFormat(thousandSeparator, {
-      minimumFractionDigits: pricesAreDecimal ? numberOfDecimals : 0,
-      maximumFractionDigits: pricesAreDecimal ? numberOfDecimals : 0,
+      minimumFractionDigits: numberOfDecimals,
+      maximumFractionDigits: numberOfDecimals,
     }).format(number);
     return `${intl.formatMessage({ id: "currency" })} ${formattedAmount}`;
-  } 
+  }
 
-  const formattedAmount = parseFloat(amount).toFixed(pricesAreDecimal ? numberOfDecimals : 0);
+  const formattedAmount = Number(amount).toFixed(numberOfDecimals);
   return `${intl.formatMessage({ id: "currency" })} ${formattedAmount}`;
 }
 
 export function formatDateFromISO(mm, intl, date) {
-  const isSecondaryCalendar = JSON.parse(localStorage.getItem(STORAGE_KEY_SECONDARY_CALENDAR));
+  const isSecondaryCalendar = getLocalStorage(STORAGE_KEY_SECONDARY_CALENDAR, false);
   if (isSecondaryCalendar) {
-    const secondCalendarFormatting = mm.getConf("fe-core", "secondCalendarFormatting", DEFAULT_SETTINGS.SECOND_CALENDAR_FORMAT);
-    const secondCalendarFormattingLang = mm.getConf("fe-core", "secondCalendarFormattingLang", DEFAULT_SETTINGS.SECOND_CALENDAR_LANG);
+    const secondCalendarFormatting = mm.getConf(
+      "fe-core",
+      "secondCalendarFormatting",
+      DEFAULT_SETTINGS.SECOND_CALENDAR_FORMAT,
+    );
+    const secondCalendarFormattingLang = mm.getConf(
+      "fe-core",
+      "secondCalendarFormattingLang",
+      DEFAULT_SETTINGS.SECOND_CALENDAR_LANG,
+    );
     return neFormateDateFromISO(date, intl, [secondCalendarFormatting, secondCalendarFormattingLang]);
   }
   return adFormateDateFromISO(mm, intl, date);
@@ -82,7 +90,7 @@ export function useTranslations(moduleName, modulesManager) {
   return {
     formatDateFromISO: formatDateFromISO.bind(null, modulesManager, intl),
     formatDateTimeFromISO: formatDateTimeFromISO.bind(null, modulesManager, intl),
-    formatAmount: formatAmount.bind(null, intl),
+    formatAmount: formatAmount.bind(null, modulesManager, intl),
     formatMessage: moduleName ? formatMessage.bind(null, intl, moduleName) : formatMessage.bind(null, intl),
     formatMessageWithValues: moduleName
       ? formatMessageWithValues.bind(null, intl, moduleName)

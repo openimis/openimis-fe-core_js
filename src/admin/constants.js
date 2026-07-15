@@ -1,4 +1,4 @@
-export const RIGHT_PRODUCTS = 121001;
+export const RIGHT_PRODUCTS = 121000;
 export const RIGHT_HEALTHFACILITIES = 121101;
 export const RIGHT_PRICELISTMS = 121201;
 export const RIGHT_PRICELISTMI = 121301;
@@ -24,6 +24,7 @@ export const MODULE_NAME = "user";
 
 export const DEFAULT = {
   RENDER_LAST_NAME_FIRST: true,
+  SHOW_JOURNAL_SIDEBAR: true,
 };
 
 // https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address

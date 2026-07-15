@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import TextInput from "./TextInput";
 import { injectIntl } from "react-intl";
 import { formatMessage, formatMessageWithValues } from "../../helpers/i18n";
+import { getDecimalPlaces } from "../../helpers/utils";
 import { withModulesManager } from "@openimis/fe-core";
 import FormattedNumberInput from "./FormattedNumberInput";
 
@@ -11,20 +12,21 @@ class NumberInput extends Component {
     this.state = {
       isEdited: false,
     };
-    this.numberOfDecimals = props.modulesManager.getConf("fe-core", "numberOfDecimals", 2)
-    this.pricesAreDecimal = props.modulesManager.getConf("fe-core", "pricesAreDecimal", true)
-    this.thousandSeparator = props.modulesManager.getConf("fe-core", "thousandSeparator", "fr")
+    this.thousandSeparator = props.modulesManager.getConf("fe-core", "thousandSeparator", "en");
   }
 
-  handleKeyPress = (event) => {
-    const { allowDecimals = true } = this.props;
+  getEffectiveNumberOfDecimals = () => {
+    const { numberOfDecimals, allowDecimals = true } = this.props;
+    return allowDecimals ? numberOfDecimals : 0;
+  };
 
-    if (event.key === "." && !allowDecimals) {
+  handleKeyPress = (event) => {
+    if (event.key === "." && this.getEffectiveNumberOfDecimals() === 0) {
       event.preventDefault();
     }
   };
 
-  formatInput = (value, displayZero, displayNa, decimal) => {
+  formatInput = (value, displayZero, displayNa) => {
     if (!value) {
       if (displayNa && !this.state.isEdited) {
         return formatMessage(this.props.intl, this.props.module, "core.NumberInput.notApplicable");
@@ -32,13 +34,23 @@ class NumberInput extends Component {
       return displayZero && value === 0 ? "0" : "";
     }
 
+    const strValue = String(value);
+
+    // Preserve raw string while user is mid-entry (e.g., "1.")
+    if (strValue.endsWith(".")) {
+      return value;
+    }
+
     const numericValue = Number(value);
 
     if (isNaN(numericValue)) return "";
 
-    if (decimal) {
-      if (typeof value === "string" && value.includes(".") && value.split(".")[1].length > 0) {
-        return parseFloat(value).toFixed(this.numberOfDecimals);
+    const effectiveDecimals = this.getEffectiveNumberOfDecimals();
+    const decimals = effectiveDecimals !== undefined ? effectiveDecimals : getDecimalPlaces(numericValue);
+
+    if (decimals > 0) {
+      if (typeof value === "string" && strValue.includes(".") && strValue.split(".")[1].length > 0) {
+        return parseFloat(value).toFixed(decimals);
       }
       return value;
     }
@@ -48,7 +60,7 @@ class NumberInput extends Component {
 
   handleNaBlur = () => {
     if ((isNaN(this.props.value) || this.props.value === "") && this.state.isEdited) {
-      this.props.onChange(undefined);
+      this.props.onChange(null);
     }
     this.setState({ isEdited: false });
   };
@@ -63,7 +75,8 @@ class NumberInput extends Component {
       error,
       displayZero = false,
       displayNa = false,
-      allowDecimals = this.pricesAreDecimal,
+      decimal,
+      allowDecimals = true,
       ...others
     } = this.props;
     let inputProps = { ...this.props.inputProps, type: "number", onKeyPress: this.handleKeyPress };
@@ -90,10 +103,9 @@ class NumberInput extends Component {
       <>
         {!!this.thousandSeparator ? (
           <FormattedNumberInput
-            {...this.props} 
-            thousandSeparator = {this.thousandSeparator}
-            numberOfDecimals = {this.numberOfDecimals}
-            pricesAreDecimal = {this.pricesAreDecimal}
+            {...this.props}
+            thousandSeparator={this.thousandSeparator}
+            numberOfDecimals={this.getEffectiveNumberOfDecimals()}
           />
         ) : (
           <TextInput
@@ -102,14 +114,13 @@ class NumberInput extends Component {
             value={value}
             error={err}
             inputProps={inputProps}
-            formatInput={(v) => this.formatInput(v, displayZero, displayNa, allowDecimals)}
+            formatInput={(v) => this.formatInput(v, displayZero, displayNa)}
             onFocus={() => this.setState({ isEdited: true })}
             onBlur={() => this.handleNaBlur()}
           />
         )}
       </>
     );
-    
   }
 }
 

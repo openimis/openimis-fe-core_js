@@ -8,8 +8,8 @@ import { useModulesManager } from "../helpers/modules";
 import Helmet from "../helpers/Helmet";
 import { useGraphqlMutation } from "../helpers/hooks";
 
-const StyledForgotPasswordPage = styled('div')(({ theme }) => ({
-  '& .container': {
+const StyledForgotPasswordPage = styled("div")(({ theme }) => ({
+  "& .container": {
     position: "absolute",
     top: "30%",
     left: 0,
@@ -18,8 +18,8 @@ const StyledForgotPasswordPage = styled('div')(({ theme }) => ({
     display: "flex",
     justifyContent: "center",
   },
-  '& .paper': theme.paper?.paper ?? {},
-  '& .logo': {
+  "& .paper": theme.paper?.paper ?? {},
+  "& .logo": {
     maxHeight: 100,
   },
 }));

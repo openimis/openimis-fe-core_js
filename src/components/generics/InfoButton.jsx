@@ -3,30 +3,32 @@ import clsx from "clsx";
 
 import { styled } from "@mui/material/styles";
 import { IconButton, Popover, Typography, Tooltip } from "@mui/material";
-import InfoIcon from "@mui/icons-material/Info";
+import GetIconComponent from "../../helpers/icons";
+
+const InfoIcon = GetIconComponent("Info");
 import { useTranslations } from "../../helpers/i18n";
 import { MODULE_NAME } from "../../constants";
 
-const StyledInfoButton = styled('div')(({ theme }) => ({
-  '& .popoverContent': {
+const StyledInfoButton = styled("div")(({ theme }) => ({
+  "& .popoverContent": {
     padding: theme.spacing(1),
   },
-  '& .iconSmall': {
+  "& .iconSmall": {
     fontSize: 16,
   },
-  '& .iconMedium': {
+  "& .iconMedium": {
     fontSize: 24,
   },
-  '& .iconLarge': {
+  "& .iconLarge": {
     fontSize: 32,
   },
-  '& .maxWidthSmall': {
+  "& .maxWidthSmall": {
     maxWidth: 300,
   },
-  '& .maxWidthMedium': {
+  "& .maxWidthMedium": {
     maxWidth: 450,
   },
-  '& .maxWidthLarge': {
+  "& .maxWidthLarge": {
     maxWidth: 600,
   },
 }));
@@ -67,9 +69,9 @@ export default function InfoButton({
           <InfoIcon
             color={iconColor}
             className={clsx({
-              'iconSmall': iconSize === "small",
-              'iconMedium': iconSize === "medium",
-              'iconLarge': iconSize === "large",
+              "iconSmall": iconSize === "small",
+              "iconMedium": iconSize === "medium",
+              "iconLarge": iconSize === "large",
             })}
           />
         </IconButton>
@@ -85,10 +87,10 @@ export default function InfoButton({
         <Typography
           variant="body2"
           className={clsx({
-            'popoverContent': true,
-            'maxWidthSmall': maxWidth === "small",
-            'maxWidthMedium': maxWidth === "medium",
-            'maxWidthLarge': maxWidth === "large",
+            "popoverContent": true,
+            "maxWidthSmall": maxWidth === "small",
+            "maxWidthMedium": maxWidth === "medium",
+            "maxWidthLarge": maxWidth === "large",
           })}
         >
           {content}

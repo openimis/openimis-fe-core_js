@@ -16,10 +16,12 @@ import {
   Box,
 } from "@mui/material";
 import { styled, alpha } from "@mui/material/styles";
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
+import GetIconComponent from "../../helpers/icons";
+
+const MoreHoriz = GetIconComponent("MoreHoriz");
 
 import { cacheFilters, resetCacheFilters, saveCurrentPaginationPage } from "../../actions";
-import { DEFAULT } from "../../constants";
+import { DEFAULT, ENTER_KEY, ROWS_PER_PAGE_OPTIONS } from "../../constants";
 import { formatSorter, sort } from "../../helpers/api";
 import { formatMessage } from "../../helpers/i18n";
 import withModulesManager from "../../helpers/modules";
@@ -77,6 +79,7 @@ const StyledSearcher = styled("div")(({ theme }) => ({
   "& .paperHeaderMessage": {
     ...theme.paper?.message,
     backgroundColor: "transparent",
+    whiteSpace: "nowrap",
   },
   "& .paperHeaderAction": {
     ...theme.paper?.action,
@@ -104,6 +107,9 @@ const StyledSearcher = styled("div")(({ theme }) => ({
     overflow: "auto",
     display: "flex",
     flexDirection: "column",
+    "& button": {
+      whiteSpace: "nowrap",
+    },
   },
   "& .infoSection": {
     display: "flex",
@@ -147,7 +153,9 @@ class SelectionMenu extends Component {
     <Box display="flex" alignItems="center">
       {entries.map((i, idx) => (
         <Box key={`selectionsButtons-${idx}`} className="paperHeaderAction">
-          <Button color="inherit" onClick={(e) => this.action(i.action)}>{i.text}</Button>
+          <Button color="inherit" onClick={(e) => this.action(i.action)}>
+            {i.text}
+          </Button>
         </Box>
       ))}
       {this.props.exportable && (
@@ -272,11 +280,22 @@ class SelectionMenu extends Component {
 const StyledSelectionMenu = injectIntl(withModulesManager(SelectionMenu));
 
 class Searcher extends Component {
+  resolveInitialPageSize = (props = this.props) => {
+    const userDefaultRowsPerPage = props?.user?.i_user?.default_rows_per_page;
+    if (ROWS_PER_PAGE_OPTIONS.includes(userDefaultRowsPerPage)) {
+      return userDefaultRowsPerPage;
+    }
+    if (ROWS_PER_PAGE_OPTIONS.includes(props.defaultPageSize)) {
+      return props.defaultPageSize;
+    }
+    return 10;
+  };
+
   state = {
     filters: {},
     orderBy: null,
     page: 0,
-    pageSize: this.props.defaultPageSize || 10,
+    pageSize: this.resolveInitialPageSize(),
     afterCursor: null,
     beforeCursor: null,
     selection: [],
@@ -288,15 +307,16 @@ class Searcher extends Component {
     super(props);
     this.miniFilterPane = props.modulesManager.getConf("fe-core", "miniFilterPane", false);
     this.fetchEnabled = props.modulesManager.getConf("fe-core", "shouldFetchInitially", true);
-    this.isWorker = props.modulesManager.getConf("fe-core", "isWorker", DEFAULT.IS_WORKER);
+    this.searchOnResetFilters = props.modulesManager.getConf("fe-core", "shouldSearchOnResetFilters", true);
   }
   componentDidMount() {
+    document.addEventListener("keypress", this.handleEnter);
     const cacheKey = this._getCacheKey();
     var filters = this.props.filtersCache[cacheKey] || this.props.defaultFilters || {};
     this.setState(
       (state, props) => ({
         filters,
-        pageSize: props.defaultPageSize || 10,
+        pageSize: this.resolveInitialPageSize(props),
         orderBy: props.defaultOrderBy,
       }),
       (e) => {
@@ -351,7 +371,7 @@ class Searcher extends Component {
         filters: { ...this.props.defaultFilters },
         orderBy: props.defaultOrderBy,
       }),
-      (e) => this.applyFilters(),
+      (e) => !this.searchOnResetFilters ? null : this.applyFilters(),
     );
   };
 
@@ -518,6 +538,14 @@ class Searcher extends Component {
     );
   };
 
+  handleEnter = (event) => {
+    const activeName = document.activeElement.name;
+    if (event.key == ENTER_KEY && !!activeName && activeName != "enquiryField") {
+      let filters = { ...this.state.filters };
+      this.setState({ filters }, (e) => this.applyFilters());
+    }
+  };
+
   render() {
     const {
       module,
@@ -583,7 +611,6 @@ class Searcher extends Component {
     } = this.props;
     return (
       <StyledSearcher>
-
         {!!FilterPane && (
           <SearcherPane
             module={module}
@@ -722,6 +749,7 @@ class Searcher extends Component {
 
 const mapStateToProps = (state) => ({
   filtersCache: !!state.core && state.core.filtersCache,
+  user: state.core?.user,
   paginationPage: state.core?.savedPagination?.paginationPage,
   afterCursor: state.core?.savedPagination?.afterCursor,
   beforeCursor: state.core?.savedPagination?.beforeCursor,

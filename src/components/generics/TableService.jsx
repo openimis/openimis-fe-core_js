@@ -2,7 +2,9 @@ import React, { Component, Fragment } from "react";
 import clsx from "clsx";
 import { injectIntl } from "react-intl";
 import _ from "lodash";
-import DeleteIcon from "@mui/icons-material/Delete";
+import GetIconComponent from "../../helpers/icons";
+
+const DeleteIcon = GetIconComponent("Delete");
 import { styled } from "@mui/material/styles";
 import {
   Typography,
@@ -26,34 +28,34 @@ import TextInput from "../inputs/TextInput";
 import NumberInput from "../inputs/NumberInput";
 import AmountInput from "../inputs/AmountInput";
 
-const StyledTableService = styled('div')(({ theme }) => ({
-  '& .table': theme.table ?? {},
-  '& .tableTitle': theme.table?.title,
-  '& .tableHeader': theme.table?.header,
-  '& .tableRow': theme.table?.row,
-  '& .tableLockedRow': theme.table?.lockedRow,
-  '& .tableLockedCell': theme.table?.lockedCell,
-  '& .tableHighlightedRow': theme.table?.highlightedRow,
-  '& .tableHighlightedCell': theme.table?.highlightedCell,
-  '& .tableHighlightedAltRow': theme.table?.highlightedAltRow,
-  '& .tableHighlightedAltCell': theme.table?.highlightedAltCell,
-  '& .tableDisabledRow': theme.table?.disabledRow,
-  '& .tableDisabledCell': theme.table?.disabledCell,
-  '& .tableFooter': theme.table?.footer,
-  '& .pager': theme.table?.pager,
-  '& .left': {
+const StyledTableService = styled("div")(({ theme }) => ({
+  "& .table": theme.table ?? {},
+  "& .tableTitle": theme.table?.title,
+  "& .tableHeader": theme.table?.header,
+  "& .tableRow": theme.table?.row,
+  "& .tableLockedRow": theme.table?.lockedRow,
+  "& .tableLockedCell": theme.table?.lockedCell,
+  "& .tableHighlightedRow": theme.table?.highlightedRow,
+  "& .tableHighlightedCell": theme.table?.highlightedCell,
+  "& .tableHighlightedAltRow": theme.table?.highlightedAltRow,
+  "& .tableHighlightedAltCell": theme.table?.highlightedAltCell,
+  "& .tableDisabledRow": theme.table?.disabledRow,
+  "& .tableDisabledCell": theme.table?.disabledCell,
+  "& .tableFooter": theme.table?.footer,
+  "& .pager": theme.table?.pager,
+  "& .left": {
     textAlign: "left",
   },
-  '& .right': {
+  "& .right": {
     textAlign: "right",
   },
-  '& .center': {
+  "& .center": {
     textAlign: "center",
   },
-  '& .clickable': {
+  "& .clickable": {
     cursor: "pointer",
   },
-  '& .loader': {
+  "& .loader": {
     position: "absolute",
     top: 0,
     bottom: 0,
@@ -135,6 +137,56 @@ class Table extends Component {
     </Box>
   );
 
+  shouldShowSubServices = (i, iidx, formatters) => {
+    const firstFormatterResult = formatters[0]?.(i, iidx);
+    const value = firstFormatterResult?.props?.children?.props?.children?.props?.value;
+    return value != undefined && value.packagetype != undefined && value.packagetype !== "S";
+  };
+
+  renderItemCells = (
+    i,
+    iidx,
+    formatters,
+    aligns,
+    colSpans,
+    rowLocked,
+    rowHighlighted,
+    rowHighlightedAlt,
+    rowDisabled,
+  ) =>
+    formatters.map((f, fidx) => {
+      if (colSpans.length > fidx && !colSpans[fidx]) return null;
+      return (
+        <TableCell
+          colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
+          className={clsx(
+            !!rowLocked && rowLocked(i) ? "tableLockedCell" : null,
+            !!rowHighlighted && rowHighlighted(i) ? "tableHighlightedCell" : null,
+            !!rowHighlightedAlt && rowHighlightedAlt(i) ? "tableHighlightedAltCell" : null,
+            !!rowDisabled && rowDisabled(i) ? "tableDisabledCell" : null,
+            aligns.length > fidx && aligns[fidx],
+          )}
+          key={`v-${iidx}-${fidx}`}
+        >
+          {f(i, iidx)}
+        </TableCell>
+      );
+    });
+
+  renderSubServiceRows = (i, iidx, formatters) => {
+    if (!formatters?.length) return null;
+    return formatters.flatMap((formatter, sfidx) => {
+      const rows = formatter(i, iidx);
+      if (!rows) return [];
+      const rowList = Array.isArray(rows) ? rows : [rows];
+      return rowList
+        .filter((row) => row?.props?.children)
+        .map((row, rowIdx) => (
+          <TableRow key={`sub-${iidx}-${sfidx}-${rowIdx}`}>{React.Children.toArray(row.props.children)}</TableRow>
+        ));
+    });
+  };
+
   render() {
     const {
       intl,
@@ -167,17 +219,15 @@ class Table extends Component {
       error = null,
       forReview,
       subServicesItemsFormatters,
-      subServicesItemsFormattersReview,
-      subServiceHeaders
+      subServiceHeaders,
     } = this.props;
     let localHeaders = [...(headers || [])];
     let localSubServiceHeaders = [...(subServiceHeaders || [])];
     let localPreHeaders = !!preHeaders ? [...preHeaders] : null;
     let localItemFormatters = [...itemFormatters];
-    let localSubServicesItemsFormatters = [...subServicesItemsFormatters];
-    let localsubServicesItemsFormattersReview = [...subServicesItemsFormattersReview];
+    let localSubServicesItemsFormatters = [...(subServicesItemsFormatters || [])];
     var i = !!headers && headers.length;
-    var localForReview = forReview
+    var localForReview = forReview;
     while (localHeaders && i--) {
       if (modulesManager?.hideField(module, localHeaders[i])) {
         if (!!localPreHeaders) localPreHeaders.splice(i, 1);
@@ -211,8 +261,8 @@ class Table extends Component {
           )}
           <MUITable className="table" size={size}>
             {!!localPreHeaders && localPreHeaders.length > 0 && (
-              <table style={{ width: "100%" }}>
-                <tr>
+              <TableHead>
+                <TableRow>
                   {localPreHeaders.map((h, idx) => {
                     if (headerSpans.length > idx && !headerSpans[idx]) return null;
                     return (
@@ -225,174 +275,137 @@ class Table extends Component {
                       </TableCell>
                     );
                   })}
-                </tr>
-              </table>
+                </TableRow>
+              </TableHead>
             )}
 
             <TableBody>
               {items &&
                 items.length > 0 &&
                 items.map((i, iidx) => {
+                  const showSubServices = this.shouldShowSubServices(i, iidx, localItemFormatters);
+
                   if (i.claimlinkedService != undefined) {
-                    console.log(i);
                     return (
-                      <Box style={{ width: "100%" }}>
-                        <table style={{ width: "100%" }}>
-                          {(items.length - iidx) == items.length && (
-                            <tr>
-                              <TableCell><FormattedMessage module={module} id={localHeaders[0]} /></TableCell>
-                              <TableCell><FormattedMessage module={module} id={localHeaders[1]} /></TableCell>
-                              <TableCell><FormattedMessage module={module} id={localHeaders[2]} /></TableCell>
-                              <TableCell><FormattedMessage module={module} id={localHeaders[3]} /></TableCell>
-                            </tr>
+                      <Fragment key={`row-${iidx}`}>
+                        {iidx === 0 && (
+                          <TableRow>
+                            <TableCell className="tableHeader">
+                              <FormattedMessage module={module} id={localHeaders[0]} />
+                            </TableCell>
+                            <TableCell className="tableHeader">
+                              <FormattedMessage module={module} id={localHeaders[1]} />
+                            </TableCell>
+                            <TableCell className="tableHeader">
+                              <FormattedMessage module={module} id={localHeaders[2]} />
+                            </TableCell>
+                            <TableCell className="tableHeader">
+                              <FormattedMessage module={module} id={localHeaders[3]} />
+                            </TableCell>
+                          </TableRow>
+                        )}
+                        <TableRow>
+                          {this.renderItemCells(
+                            i,
+                            iidx,
+                            localItemFormatters,
+                            aligns,
+                            colSpans,
+                            rowLocked,
+                            rowHighlighted,
+                            rowHighlightedAlt,
+                            rowDisabled,
                           )}
-                          <tr>
-                            {localItemFormatters &&
-                              localItemFormatters.map((f, fidx) => {
-                                if (colSpans.length > fidx && !colSpans[fidx]) return null;
-                                return (
-                                  <TableCell
-                                    colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
-                                    className={clsx(
-                                      !!rowLocked && rowLocked(i) ? "tableLockedCell" : null,
-                                      !!rowHighlighted && rowHighlighted(i) ? "tableHighlightedCell" : null,
-                                      !!rowHighlightedAlt && rowHighlightedAlt(i) ? "tableHighlightedAltCell" : null,
-                                      !!rowDisabled && rowDisabled(i) ? "tableDisabledCell" : null,
-                                      aligns.length > fidx && aligns[fidx],
-                                    )}
-                                    key={`v-${iidx}-${fidx}`}
-                                  >
-                                    {f(i, iidx)}
-
-                                  </TableCell>
-                                );
-                              })}
-                          </tr>
-                        </table>
-                        {localItemFormatters[0](i, iidx).props.children.props.value != undefined &&
-                          (
-                            localItemFormatters[0](i, iidx).props.children.props.value.packagetype != undefined &&
-                            localItemFormatters[0](i, iidx).props.children.props.value.packagetype !== "S" && (
-
-                              <table style={{ marginTop: 10, width: "90%" }}>
-                                <tr>
-                                  <TableCell><FormattedMessage module={module} id={localSubServiceHeaders[0]} /></TableCell>
-                                  <TableCell><FormattedMessage module={module} id={localSubServiceHeaders[1]} /></TableCell>
-                                  <TableCell><FormattedMessage module={module} id={localSubServiceHeaders[2]} /></TableCell>
-                                  <TableCell><FormattedMessage module={module} id={localSubServiceHeaders[3]} /></TableCell>
-                                </tr>
-                                {localsubServicesItemsFormattersReview &&
-                                  localsubServicesItemsFormattersReview.map((s, sfidx) => {
-                                    return (
-                                      s(i, iidx)
-                                    );
-                                  })}
-                              </table>
-
-                            ))
-                        }
-
-                      </Box>
-                    )
-                  } else {
-                    const cleanedHeaders = localHeaders.filter(Boolean);
-                    return (
-                      <Box style={{ width: "100%" }}>
-                        <table style={{ width: "100%" }}>
-                          {(items.length - iidx) == items.length && (
-                            <tr>
-                            {cleanedHeaders.map((header, index) => (
-                              <TableCell key={index}>
-                                <FormattedMessage module={module} id={header} />
-                              </TableCell>
-                            ))}
-                          </tr>
-                          )}
-                          <tr>
-                            {localItemFormatters &&
-                              localItemFormatters.map((f, fidx) => {
-                                if (colSpans.length > fidx && !colSpans[fidx]) return null;
-                                return (
-                                  <TableCell
-                                    colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
-                                    className={clsx(
-                                      !!rowLocked && rowLocked(i) ? "tableLockedCell" : null,
-                                      !!rowHighlighted && rowHighlighted(i) ? "tableHighlightedCell" : null,
-                                      !!rowHighlightedAlt && rowHighlightedAlt(i) ? "tableHighlightedAltCell" : null,
-                                      !!rowDisabled && rowDisabled(i) ? "tableDisabledCell" : null,
-                                      aligns.length > fidx && aligns[fidx],
-                                    )}
-                                    key={`v-${iidx}-${fidx}`}
-                                  >
-                                    {f(i, iidx)}
-
-                                  </TableCell>
-                                );
-                              })}
-                          </tr>
-                        </table>
-                        {localItemFormatters[0](i, iidx).props.children.props.value != undefined &&
-                          (
-                            localItemFormatters[0](i, iidx).props.children.props.value.packagetype != undefined &&
-                            localItemFormatters[0](i, iidx).props.children.props.value.packagetype !== "S" && (
-
-                              <table style={{ marginTop: 10, width: "90%" }}>
-                                <tr>
-                                  <TableCell><FormattedMessage module={module} id={localSubServiceHeaders[0]} /></TableCell>
-                                  <TableCell><FormattedMessage module={module} id={localSubServiceHeaders[1]} /></TableCell>
-                                  <TableCell><FormattedMessage module={module} id={localSubServiceHeaders[2]} /></TableCell>
-                                  <TableCell><FormattedMessage module={module} id={localSubServiceHeaders[3]} /></TableCell>
-                                </tr>
-                                {localSubServicesItemsFormatters &&
-                                  localSubServicesItemsFormatters.map((s, sfidx) => {
-                                    return (
-                                      s(i, iidx)
-                                    );
-                                  })}
-                              </table>
-                            ))
-                        }
-                      </Box>
-                    )
-
+                        </TableRow>
+                        {showSubServices && (
+                          <Fragment>
+                            <TableRow>
+                              {localSubServiceHeaders.map((h, idx) => (
+                                <TableCell key={`sub-header-${iidx}-${idx}`} className="tableHeader">
+                                  <FormattedMessage module={module} id={h} />
+                                </TableCell>
+                              ))}
+                            </TableRow>
+                            {this.renderSubServiceRows(i, iidx, localSubServicesItemsFormatters)}
+                          </Fragment>
+                        )}
+                      </Fragment>
+                    );
                   }
 
-                }
-                )}
+                  const cleanedHeaders = localHeaders.filter(Boolean);
+                  return (
+                    <Fragment key={`row-${iidx}`}>
+                      {iidx === 0 && cleanedHeaders.length > 0 && (
+                        <TableRow>
+                          {cleanedHeaders.map((header, index) => (
+                            <TableCell key={`header-${index}`} className="tableHeader">
+                              <FormattedMessage module={module} id={header} />
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      )}
+                      <TableRow>
+                        {this.renderItemCells(
+                          i,
+                          iidx,
+                          localItemFormatters,
+                          aligns,
+                          colSpans,
+                          rowLocked,
+                          rowHighlighted,
+                          rowHighlightedAlt,
+                          rowDisabled,
+                        )}
+                      </TableRow>
+                      {showSubServices && (
+                        <TableRow>
+                          <TableCell colSpan={cleanedHeaders.length || 1}>
+                              <TableRow>
+                                {localSubServiceHeaders.map((h, idx) => (
+                                  <TableCell 
+                                  key={`sub-header-${iidx}-${idx}`} className="tableHeader">
+                                    <FormattedMessage module={module} id={h} />
+                                  </TableCell>
+                                ))}
+                              </TableRow>
+                            {this.renderSubServiceRows(i, iidx, localSubServicesItemsFormatters)}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </Fragment>
+                  );
+                })}
             </TableBody>
 
-            {
-              !!withPagination && !!count && (
-                <TableFooter className="tableFooter">
-                  <TableRow>
-                    <TablePagination
-                      className="pager"
-                      colSpan={localItemFormatters.length}
-                      labelRowsPerPage={formatMessage(intl, "core", "rowsPerPage")}
-                      labelDisplayedRows={({ from, to, count }) =>
-                        `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`
-                      }
-                      count={count}
-                      page={page}
-                      rowsPerPage={rowsPerPage}
-                      rowsPerPageOptions={rowsPerPageOptions}
-                      onRowsPerPageChange={(e) => onChangeRowsPerPage(e.target.value)}
-                      onPageChange={onChangePage}
-                    />
-                  </TableRow>
-                </TableFooter>
-              )
-            }
+            {!!withPagination && !!count && (
+              <TableFooter className="tableFooter">
+                <TableRow>
+                  <TablePagination
+                    className="pager"
+                    colSpan={localItemFormatters.length}
+                    labelRowsPerPage={formatMessage(intl, "core", "rowsPerPage")}
+                    labelDisplayedRows={({ from, to, count }) =>
+                      `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`
+                    }
+                    count={count}
+                    page={page}
+                    rowsPerPage={rowsPerPage}
+                    rowsPerPageOptions={rowsPerPageOptions}
+                    onRowsPerPageChange={(e) => onChangeRowsPerPage(e.target.value)}
+                    onPageChange={onChangePage}
+                  />
+                </TableRow>
+              </TableFooter>
+            )}
           </MUITable>
-          {
-            (fetching || error) && (
-              <Grid className="loader" container justifyContent="center" alignItems="center">
-                <ProgressOrError progress={items?.length && fetching} error={error} />{" "}
-                {/* We do not want to display the spinner with the empty table */}
-              </Grid>
-            )
-          }
-        </Box >
+          {(fetching || error) && (
+            <Grid className="loader" container justifyContent="center" alignItems="center">
+              <ProgressOrError progress={items?.length && fetching} error={error} />{" "}
+              {/* We do not want to display the spinner with the empty table */}
+            </Grid>
+          )}
+        </Box>
       </StyledTableService>
     );
   }

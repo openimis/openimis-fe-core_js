@@ -4,48 +4,85 @@ import TextInput from "./TextInput";
 import { injectIntl } from "react-intl";
 import { formatMessage, formatMessageWithValues } from "../../helpers/i18n";
 import withModulesManager from "../../helpers/modules";
+import { getDecimalPlaces, parseLocalizedNumber } from "../../helpers/utils";
 
 const StyledFormattedNumberInput = styled("div")(({ theme }) => ({}));
 
 class FormattedNumberInput extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
       isEdited: false,
-      rawValue: props.value != null ? this.formatNumber(props.value, props.intl) : "",
+      rawValue: props.value != null ? this.formatNumber(props.value) : "",
     };
   }
 
   componentDidUpdate(prevProps) {
+    // Si la valeur du serveur change et que l’utilisateur n’édite pas, on reformate
     if (prevProps.value !== this.props.value && !this.state.isEdited) {
       this.setState({
-        rawValue: this.props.value != null ? this.formatNumber(this.props.value, this.props.intl) : "",
+        rawValue: this.props.value != null ? this.formatNumber(this.props.value) : "",
       });
     }
   }
 
-  formatNumber = (value, intl) => {
-    if (!value || Number.isNaN(value)) return "";
-    return new Intl.NumberFormat(this.props.thousandSeparator, {
-      minimumFractionDigits: this.props.pricesAreDecimal ? this.props.numberOfDecimals : 0,
-      maximumFractionDigits: this.props.pricesAreDecimal ? this.props.numberOfDecimals : 0,
+  formatNumber = (value) => {
+    if (value == null || isNaN(value)) return "";
+
+    const { numberOfDecimals, thousandSeparator } = this.props;
+    const decimals = numberOfDecimals === undefined ? getDecimalPlaces(value) : numberOfDecimals;
+
+    return new Intl.NumberFormat(thousandSeparator, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
     }).format(value);
   };
 
   handleKeyPress = (event) => {
-    const { allowDecimals = true } = this.props;
-    if (event.key === "." && !allowDecimals) {
+    if (event.key === "." && this.props.numberOfDecimals === 0) {
       event.preventDefault();
     }
   };
+
+  parseRawValue = (raw) => parseLocalizedNumber(raw, this.props.thousandSeparator);
 
   handleChange = (val) => {
     const raw = val;
     this.setState({ rawValue: raw });
 
-    const normalized = raw.replace(/\s/g, "").replace(",", ".");
-    const value = Number.parseFloat(normalized);
-    this.props.onChange(isNaN(value) ? undefined : value);
+    const value = this.parseRawValue(raw);
+    this.props.onChange(isNaN(value) ? null : value);
+  };
+
+  formatInput = (value, displayZero, displayNa, decimal) => {
+    if (!value) {
+      if (displayNa && !this.state.isEdited) {
+        return formatMessage(this.props.intl, this.props.module, "core.NumberInput.notApplicable");
+      }
+      return displayZero && value === 0 ? "0" : "";
+    }
+
+    const numericValue = Number(value);
+
+    if (isNaN(numericValue)) return "";
+
+    if (decimal) {
+      const { numberOfDecimals = 2 } = this.props;
+      if (typeof value === "string" && value.includes(".") && value.split(".")[1].length > numberOfDecimals) {
+        return parseFloat(value).toFixed(numberOfDecimals);
+      }
+      return value;
+    }
+
+    return parseFloat(value);
+  };
+
+  handleNaBlur = () => {
+    if ((isNaN(this.props.value) || this.props.value === "") && this.state.isEdited) {
+      this.props.onChange(null);
+    }
+    this.setState({ isEdited: false });
   };
 
   handleBlur = () => {
@@ -61,13 +98,13 @@ class FormattedNumberInput extends Component {
       return;
     }
 
-    const number = Number.parseFloat(rawValue.replace(/\s/g, "").replace(",", "."));
+    const number = this.parseRawValue(rawValue);
     if (isNaN(number)) {
       this.setState({ rawValue: "" });
       return;
     }
 
-    this.setState({ rawValue: this.formatNumber(number, intl) });
+    this.setState({ rawValue: this.formatNumber(number) });
   };
 
   handleFocus = () => {
@@ -80,11 +117,14 @@ class FormattedNumberInput extends Component {
       module = "core",
       min = null,
       max = null,
+      value,
       error,
-      allowDecimals = true,
       thousandSeparator,
       numberOfDecimals,
-      pricesAreDecimal,
+      displayZero = false,
+      displayNa = false,
+      allowDecimals = true,
+      decimal,
       ...others
     } = this.props;
 
@@ -96,7 +136,7 @@ class FormattedNumberInput extends Component {
 
     let err = error;
 
-    const numericValue = Number.parseFloat(this.state.rawValue.replace(/\s/g, "").replace(",", "."));
+    const numericValue = this.parseRawValue(this.state.rawValue);
     if (min != null && numericValue < min) {
       err = formatMessageWithValues(intl, module, "validation.minValue", { value: numericValue, min });
     }

@@ -21,32 +21,32 @@ import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { styled } from "@mui/material/styles";
 import { fetchModulesPermissions } from "../actions";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import SearchIcon from "@mui/icons-material/Search";
-import DoubleArrowIcon from "@mui/icons-material/DoubleArrow";
+import GetIconComponent from "../helpers/icons";
+
+const ArrowBackIcon = GetIconComponent("ArrowBack");
+const ArrowForwardIcon = GetIconComponent("ArrowForward");
+const SearchIcon = GetIconComponent("Search");
+const DoubleArrowIcon = GetIconComponent("DoubleArrow");
+const ReversedDoubleArrowIcon = GetIconComponent("DoubleArrow", { rotate: 180 });
 import { formatRoleLabel } from "../helpers/role-label-formatter";
 
-const StyledRoleRightsPanel = styled('div')(({ theme }) => ({
-  '& .item': theme.paper?.item ?? {},
-  '& .paper': theme.paper?.paper ?? {},
-  '& .paperHeader': theme.paper?.paperHeader ?? {},
-  '& .list': {
+const StyledRoleRightsPanel = styled("div")(({ theme }) => ({
+  "& .item": theme.paper?.item ?? {},
+  "& .paper": theme.paper?.paper ?? {},
+  "& .paperHeader": theme.paper?.paperHeader ?? {},
+  "& .list": {
     width: "100%",
     height: "500px",
     position: "relative",
     overflow: "auto",
   },
-  '& .filter': {
+  "& .filter": {
     width: "100%",
   },
-  '& .listItemText': {
+  "& .listItemText": {
     textTransform: "capitalize",
   },
-  '& .reversedArrow': {
-    transform: "rotate(180deg)",
-  },
-  '& .listTitle': {
+  "& .listTitle": {
     display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
@@ -189,7 +189,7 @@ class RoleRightsPanel extends FormPanel {
                 </Paper>
               </Grid>
             </Grid>
-            <Grid container justify="space-between" alignItems="center">
+            <Grid container justifyContent="space-between" alignItems="center">
               <Grid size={6} className="item">
                 <Grid className="item">
                   <Grid className="listTitle">
@@ -220,7 +220,7 @@ class RoleRightsPanel extends FormPanel {
                               this.isFilterMatched(modulePermission.moduleName, permission.permsName),
                           )
                           .map((permission) => (
-                            <ListItem button divider>
+                            <ListItem divider>
                               <ListItemText
                                 className="listItemText"
                                 primary={this.rightLabel(modulePermission.moduleName, permission.permsName)}
@@ -244,7 +244,7 @@ class RoleRightsPanel extends FormPanel {
                   <Grid className="listTitle">
                     <Tooltip title={<FormattedMessage module="core" id="roleManagement.role.removeAllPerms" />}>
                       <IconButton color="primary" disabled={isReadOnly} onClick={this.removeAllChosenPerms}>
-                        <DoubleArrowIcon className="reversedArrow" />
+                        <ReversedDoubleArrowIcon />
                       </IconButton>
                     </Tooltip>
                     <Typography variant="h6">
@@ -269,7 +269,7 @@ class RoleRightsPanel extends FormPanel {
                               this.isFilterMatched(modulePermission.moduleName, permission.permsName),
                           )
                           .map((permission) => (
-                            <ListItem button divider>
+                            <ListItem divider>
                               <ListItemText
                                 className="listItemText"
                                 primary={this.rightLabel(modulePermission.moduleName, permission.permsName)}

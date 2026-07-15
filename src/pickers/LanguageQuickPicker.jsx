@@ -2,8 +2,10 @@ import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { Button, Typography, MenuList, MenuItem, Popper, Paper, Grow, ClickAwayListener } from "@mui/material";
-import Globe from "@mui/icons-material/Public";
-import ExpandMore from "@mui/icons-material/ExpandMore";
+import GetIconComponent from "../helpers/icons";
+
+const Globe = GetIconComponent("Public");
+const ExpandMore = GetIconComponent("ExpandMore");
 
 import SelectDialog from "../components/dialogs/SelectDialog";
 import { changeUserLanguage, fetchLanguages } from "../actions";

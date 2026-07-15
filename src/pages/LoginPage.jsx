@@ -10,10 +10,12 @@ import { useAuthentication } from "../helpers/hooks";
 import Contributions from "./../components/generics/Contributions";
 import { baseApiUrl } from "../actions";
 import { DEFAULT, SAML_LOGIN_PATH } from "../constants";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import GetIconComponent from "../helpers/icons";
 
-const StyledLoginPage = styled('div')(({ theme }) => ({
-  '& .container': {
+const ArrowBackIcon = GetIconComponent("ArrowBack");
+
+const StyledLoginPage = styled("div")(({ theme }) => ({
+  "& .container": {
     position: "absolute",
     top: 0,
     bottom: 0,
@@ -24,8 +26,8 @@ const StyledLoginPage = styled('div')(({ theme }) => ({
     justifyContent: "center",
     alignItems: "center",
   },
-  '& .paper': theme.paper?.paper ?? {},
-  '& .logo': {
+  "& .paper": theme.paper?.paper ?? {},
+  "& .logo": {
     width: "100%",
     padding: theme.spacing(2),
   },
@@ -44,14 +46,13 @@ const LoginPage = ({ logo }) => {
   const [isAuthenticating, setAuthenticating] = useState(false);
   const showMPassProvider = modulesManager.getConf("fe-core", "LoginPage.showMPassProvider", false);
   const linkToUserGuide = modulesManager.getConf("fe-core", "LoginPage.linkToUserGuide", "https://docs.openimis.org/");
-  const isWorker = modulesManager.getConf("fe-core", "isWorker", DEFAULT.IS_WORKER);
   const enablePublicPage = modulesManager.getConf("fe-core", "App.enablePublicPage", DEFAULT.ENABLE_PUBLIC_PAGE);
 
   useEffect(() => {
-    if (auth.isAuthenticated) {
+    if (auth.isAuthenticated && auth.isInitialized) {
       history.push("/");
     }
-  }, []);
+  }, [auth.isAuthenticated, auth.isInitialized, history]);
 
   const handleLoginError = (errorMessage) => {
     setServerResponse({ loginStatus: "CORE_AUTH_ERR", message: errorMessage });
@@ -61,17 +62,17 @@ const LoginPage = ({ logo }) => {
   const onSubmit = async (e) => {
     e.preventDefault();
     setAuthenticating(true);
-  
+
     try {
       const response = await auth.login(credentials);
       if (response.payload?.errors?.length) {
         handleLoginError(response.payload.errors[0].message);
         return;
       }
-  
+
       const { loginStatus, message } = response;
       setServerResponse({ loginStatus, message });
-  
+
       if (loginStatus === "CORE_AUTH_ERR") {
         setAuthenticating(false);
       } else {
@@ -81,7 +82,6 @@ const LoginPage = ({ logo }) => {
       setAuthenticating(false);
     }
   };
-  
 
   const redirectToForgotPassword = (e) => {
     e.preventDefault();
@@ -132,11 +132,11 @@ const LoginPage = ({ logo }) => {
                 )}
                 <Grid container direction="row" alignItems="center">
                   <img className="logo" src={logo} />
-                  {!isWorker && (
+                  {
                     <Box pl={2} fontWeight="fontWeightMedium" fontSize="h4.fontSize">
                       {formatMessage("appName")}
                     </Box>
-                  )}
+                  }
                 </Grid>
                 {showMPassProvider ? (
                   <Grid>
@@ -187,9 +187,9 @@ const LoginPage = ({ logo }) => {
                       />
                     </Grid>
                     {serverResponse?.message && (
-                    <Grid>
-                      <Box color="error.main">{getErrorMessage(serverResponse.message)}</Box>
-                    </Grid>
+                      <Grid>
+                        <Box color="error.main">{getErrorMessage(serverResponse.message)}</Box>
+                      </Grid>
                     )}
                     <Grid>
                       <Button
@@ -207,7 +207,7 @@ const LoginPage = ({ logo }) => {
                       <Contributions contributionKey={LOGIN_PAGE_CONTRIBUTION_KEY} />
                     </Grid>
                   </>
-                  )}
+                )}
               </Grid>
             </Box>
           </form>

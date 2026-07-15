@@ -22,11 +22,11 @@ import nepali_np from "../calendars/NepaliLocaleNp";
 import gregorian from "react-date-object/calendars/gregorian";
 import gregorian_en from "react-date-object/locales/gregorian_en";
 
-const StyledDatePicker = styled('div')(({ theme }) => ({
-  '& .label': {
+const StyledDatePicker = styled("div")(({ theme }) => ({
+  "& .label": {
     color: theme.palette.primary.main,
   },
-  '& .disabledStateVisibilityBoost': {
+  "& .disabledStateVisibilityBoost": {
     "& .MuiFormLabel-root.Mui-disabled": {
       color: "#181716",
     },
@@ -62,13 +62,18 @@ class openIMISDatePicker extends Component {
     this.setState((state, props) => ({ value: props.value ? fromISODateToDayjs(props.value) : null }));
   }
 
-  componentDidUpdate(prevState, prevProps, snapshot) {
-    if (prevState.value !== this.props.value) {
-      this.setState((state, props) => ({ value: props.value ? fromISODateToDayjs(props.value) : null }));
+  componentDidUpdate(prevProps) {
+    if (prevProps.value !== this.props.value) {
+      this.setState({ value: this.props.value ? fromISODateToDayjs(this.props.value) : null });
     }
   }
 
-  dateChange = (d) => {
+  dateChange = (d, context) => {
+    // MUI fires onChange with null while the user is still typing (e.g. partial year in DD-MM-YYYY).
+    // Ignore those intermediate invalid states so the field does not clear day/month sections.
+    if ((d && !d.isValid()) || (!d && context?.validationError)) {
+      return;
+    }
     const jsDate = d ? d.toDate() : null;
     this.setState({ value: d }, () => {
       if (this.props.onChange) {
@@ -221,6 +226,4 @@ const mapStateToProps = (state) => ({
 
 export { StyledDatePicker };
 export { openIMISDatePicker };
-export default injectIntl(
-  withModulesManager(withHistory(connect(mapStateToProps, null)(openIMISDatePicker))),
-);
+export default injectIntl(withModulesManager(withHistory(connect(mapStateToProps, null)(openIMISDatePicker))));

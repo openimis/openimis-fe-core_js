@@ -5,10 +5,12 @@ import { injectIntl } from "react-intl";
 
 import { Grid, FormControlLabel, Checkbox, Fab, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import SupervisedUserCircleIcon from "@mui/icons-material/SupervisedUserCircle";
+import GetIconComponent from "../helpers/icons";
+
+const AddIcon = GetIconComponent("Add");
+const DeleteIcon = GetIconComponent("Delete");
+const EditIcon = GetIconComponent("Edit");
+const SupervisedUserCircleIcon = GetIconComponent("SupervisedUserCircle");
 
 import {
   withModulesManager,
@@ -170,16 +172,16 @@ class Roles extends Component {
     if (prevProps.submittingMutation && !this.props.submittingMutation) {
       this.props.journalize(this.props.mutation);
       this.setState((state) => ({ deleted: state.deleted.concat(state.toDelete) }));
-    } else if (prevProps.confirmed !== this.props.confirmed && !!this.props.confirmed && !!this.state.confirmedAction) {
+    } else if (
+      prevProps.confirmed !== this.props.confirmed &&
+      !!this.props.confirmed &&
+      typeof this.state.confirmedAction === "function"
+    ) {
       this.state.confirmedAction();
     }
   }
 
   onAdd = () => historyPush(this.props.modulesManager, this.props.history, "core.route.role");
-
-  roleUpdatePageUrl = (role) => `${this.props.modulesManager.getRef("core.route.role")}${"/" + role.uuid}`;
-
-  roleDuplicatePageUrl = (role) => `${this.roleUpdatePageUrl(role)}?${QUERY_STRING_DUPLICATE}`;
 
   onDoubleClick = (role, newTab = false) => {
     const { rights, modulesManager, history } = this.props;
@@ -187,6 +189,18 @@ class Roles extends Component {
       historyPush(modulesManager, history, "core.route.role", [role.uuid], newTab);
     }
   };
+
+  onUpdate = (role) => this.onDoubleClick(role, false);
+
+  onDuplicate = (role) =>
+    historyPush(
+      this.props.modulesManager,
+      this.props.history,
+      "core.route.role",
+      [role.uuid],
+      false,
+      `?${QUERY_STRING_DUPLICATE}`,
+    );
 
   fetch = (params) => this.props.fetchRoles(params);
 
@@ -311,7 +325,7 @@ class Roles extends Component {
 
   isRowLocked = (_, role) => this.state.deleted.includes(role.id);
 
-  isOnDoubleClickEnabled = (role) => !this.isRowDisabled(_, role);
+  isOnDoubleClickEnabled = (role) => !this.isRowDisabled(null, role);
 
   componentDidMount = () => {
     const { module } = this.props;

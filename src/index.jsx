@@ -1,4 +1,5 @@
 import App from "./components/App";
+import AppBarIconButton from "./components/AppBarIconButton";
 import React from "react";
 import messages_en from "./translations/en.json";
 import messages_admin_en from "./admin/translations/en.json";
@@ -12,7 +13,6 @@ import SubstitutionEnrolmentOfficerPicker from "./admin/components/pickers/Subst
 import UserRolesPicker from "./admin/components/pickers/UserRolesPicker";
 import UserTypesPicker from "./admin/components/pickers/UserTypesPicker";
 import PaymentPointManagerPicker from "./admin/components/pickers/PaymentPointManagerPicker";
-import AdminMainMenu from "./admin/components/AdminMainMenu";
 import adminReducer from "./admin/reducer";
 import { USER_PICKER_PROJECTION } from "./admin/actions";
 import {
@@ -67,7 +67,10 @@ import MonthPicker from "./pickers/MonthPicker";
 import LanguagePicker from "./pickers/LanguagePicker";
 import AuthorityPicker from "./pickers/AuthorityPicker";
 import Helmet from "./helpers/Helmet";
-import AccountBox from "@mui/icons-material/AccountBox";
+import GetIconComponent from "./helpers/icons";
+
+const AccountBox = GetIconComponent("AccountBox");
+const Person = GetIconComponent("Person");
 import Roles from "./pages/Roles";
 import Role from "./pages/Role";
 import reducer from "./reducer";
@@ -91,6 +94,7 @@ import {
   clearCurrentPaginationPage,
   fetchCustomFilter,
   fetchPasswordPolicy,
+  loadUser,
 } from "./actions";
 import {
   formatMessage,
@@ -113,6 +117,9 @@ import {
   pageInfo,
   formatServerError,
   formatGraphQLError,
+  isSessionError,
+  isImpersonationError,
+  clearExpiredSession,
   formatMutation,
   dispatchMutationReq,
   dispatchMutationResp,
@@ -133,6 +140,13 @@ import {
   useAuthentication,
   useUserQuery,
 } from "./helpers/hooks";
+import {
+  useLocalStorage,
+  getLocalStorage,
+  setLocalStorage,
+  removeLocalStorage,
+  clearLocalStorage,
+} from "./helpers/useLocalStorage";
 import withHistory, {
   historyPush,
   useLocation,
@@ -150,7 +164,7 @@ import { passwordGenerator } from "./helpers/passwordGenerator";
 import { createFieldsBasedOnJSON, renderInputComponent } from "./helpers/json-handler-utils";
 import withModulesManager, { useModulesManager, modulesManagerCtx } from "./helpers/modules";
 import { formatJsonField } from "./helpers/jsonExt";
-import { RIGHT_ROLE_SEARCH, CLEARED_STATE_FILTER, EXPORT_FILE_FORMATS } from "./constants";
+import { RIGHT_ROLE_SEARCH, CLEARED_STATE_FILTER, EXPORT_FILE_FORMATS, ROWS_PER_PAGE_OPTIONS } from "./constants";
 import {
   GRID_RESPONSIVE_STANDARD,
   GRID_RESPONSIVE_SMALL,
@@ -165,6 +179,7 @@ import RegistersStatusReport from "./reports/RegistersStatusReport";
 import SearcherActionButton from "./components/generics/SearcherActionButton";
 import InfoButton from "./components/generics/InfoButton";
 import LoginPage from "./pages/LoginPage";
+import LogoutPage from "./pages/LogoutPage";
 
 const ROUTE_ROLES = "roles";
 const ROUTE_ROLE = "roles/role";
@@ -175,6 +190,7 @@ const ROUTE_ADMIN_USER_OVERVIEW = "admin/users/overview";
 const ROUTE_ADMIN_USER_NEW = "admin/users/new";
 
 const DEFAULT_CONFIG = {
+  "showJournalSidebar": true,
   "translations": [
     { key: "en", messages: messages_en },
     { key: "en", messages: messages_admin_en },
@@ -242,15 +258,31 @@ const DEFAULT_CONFIG = {
   ],
   "core.Boot": [RefreshAuthToken],
   "core.Router": [
-    { path: ROUTE_ROLES, component: Roles },
-    { path: ROUTE_ROLE + "/:role_uuid?", component: Role },
+    {
+      path: ROUTE_ROLES,
+      text: "core.roleManagement.label",
+      id: "admin.roleManagement",
+      component: Roles,
+      rights: [RIGHT_ROLE_SEARCH],
+      icon: "AccountBox",
+    },
+    { path: ROUTE_ROLE + "/:role_uuid?", component: Role, rights: [RIGHT_ROLE_SEARCH], icon: "AccountBox" },
     // Admin routes
-    { path: ROUTE_ADMIN_USERS, component: UsersPage },
-    { path: ROUTE_ADMIN_USER_NEW, component: UserPage },
-    { path: `${ROUTE_ADMIN_USER_OVERVIEW}/:user_id`, component: UserPage },
+    {
+      path: ROUTE_ADMIN_USERS,
+      text: "admin.menu.users",
+      id: "admin.users",
+      component: UsersPage,
+      rights: [RIGHT_USERS],
+      icon: "Person",
+    },
+    { path: ROUTE_ADMIN_USER_NEW, component: UserPage, rights: [RIGHT_USERS], icon: "Person" },
+    { path: `${ROUTE_ADMIN_USER_OVERVIEW}/:user_id`, component: UserPage, rights: [RIGHT_USERS], icon: "Person" },
+    { path: "logout", component: LogoutPage, exact: true },
   ],
-  "core.MainMenu": [{ name: "AdminMainMenu", component: AdminMainMenu }],
+  "core.MainMenu": [{ name: "AdminMainMenu", id: "admin.MainMenu", text: "admin.mainMenu", icon: "LocationCity" }],
   "fe-core.menus": [],
+  "fe-core.menu_strategy": "default",
   "invoice.SubjectAndThirdpartyPicker": [
     {
       type: "user",
@@ -260,11 +292,11 @@ const DEFAULT_CONFIG = {
   ],
   "admin.MainMenu": [
     {
-      text: <FormattedMessage module="core" id="roleManagement.label" />,
-      icon: <AccountBox />,
-      route: "/" + ROUTE_ROLES,
-      filter: (rights) => rights.includes(RIGHT_ROLE_SEARCH),
-      id: "admin.roleManagement",
+      route: ROUTE_ROLES,
+    },
+    {
+      route: ROUTE_ADMIN_USERS,
+      withDivider: true,
     },
   ],
 };
@@ -283,6 +315,7 @@ export function combine(...hocs) {
 
 export * from "./helpers/utils";
 export {
+  GetIconComponent,
   Helmet,
   baseApiUrl,
   AdvancedFiltersDialog,
@@ -300,6 +333,7 @@ export {
   coreConfirm,
   clearConfirm,
   clearCurrentPaginationPage,
+  loadUser,
   openBlob,
   sort,
   formatSorter,
@@ -330,6 +364,9 @@ export {
   pageInfo,
   formatServerError,
   formatGraphQLError,
+  isSessionError,
+  isImpersonationError,
+  clearExpiredSession,
   formatMessage,
   formatMessageWithValues,
   formatDateFromISO,
@@ -392,19 +429,34 @@ export {
   ConfirmDialog,
   useAuthentication,
   useBoolean,
+  useLocalStorage,
+  getLocalStorage,
+  setLocalStorage,
+  removeLocalStorage,
+  clearLocalStorage,
   CLEARED_STATE_FILTER,
   createFieldsBasedOnJSON,
   renderInputComponent,
   SearcherActionButton,
   passwordGenerator,
   EXPORT_FILE_FORMATS,
+  ROWS_PER_PAGE_OPTIONS,
   useToast,
   InfoButton,
   usePublicPageLanguage,
+  AppBarIconButton,
   LoginPage,
   GRID_RESPONSIVE_STANDARD,
   GRID_RESPONSIVE_SMALL,
   GRID_RESPONSIVE_LARGE,
   GRID_RESPONSIVE_FULL,
   GRID_RESPONSIVE_HALF,
+  RIGHT_PRODUCTS,
+  RIGHT_HEALTHFACILITIES,
+  RIGHT_PRICELISTMS,
+  RIGHT_PRICELISTMI,
+  RIGHT_MEDICALSERVICES,
+  RIGHT_MEDICALITEMS,
+  RIGHT_USERS,
+  RIGHT_LOCATIONS,
 };

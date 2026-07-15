@@ -4,8 +4,9 @@ import _ from "lodash-uuid";
 
 import { MenuItem, IconButton, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import GetIconComponent from "../../helpers/icons";
 
-import ClearIcon from "@mui/icons-material/Clear";
+const ClearIcon = GetIconComponent("Clear");
 import FormattedMessage from "../generics/FormattedMessage";
 import TextInput from "./TextInput";
 import { formatMessage } from "../../helpers/i18n";
@@ -45,7 +46,7 @@ class SelectInput extends Component {
   };
 
   handleClear = () => {
-    this.props.onChange("");
+    this.props.onChange(null);
   };
 
   // When there is a value, we pass a dummy div to effectively hide the default dropdown icon.
@@ -96,7 +97,6 @@ class SelectInput extends Component {
             <TextField
               select
               fullWidth
-              variant="outlined"
               required={required}
               disabled={disabled}
               label={withLabel ? labelText : undefined}

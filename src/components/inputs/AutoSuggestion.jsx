@@ -3,8 +3,10 @@ import { styled } from "@mui/material/styles";
 import { FormControl, IconButton, InputAdornment, TextField } from "@mui/material";
 import { Autocomplete } from "@mui/material";
 import SelectInput from "./SelectInput";
-import ClearIcon from "@mui/icons-material/Clear";
-import SearchIcon from "@mui/icons-material/Search";
+import GetIconComponent from "../../helpers/icons";
+
+const ClearIcon = GetIconComponent("Clear");
+const SearchIcon = GetIconComponent("Search");
 import withModulesManager from "../../helpers/modules";
 import { injectIntl } from "react-intl";
 import _ from "lodash";

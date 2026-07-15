@@ -289,7 +289,7 @@ class UserFilter extends Component {
               pubRef="location.DetailedLocationFilter"
               withNull={true}
               filters={filters}
-              onChangeFilters={this.onChangeLocation}
+              onChangeFilters={onChangeFilters}
               anchor="parentLocation"
             />
           </Grid>

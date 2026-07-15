@@ -22,24 +22,26 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from "@mui/material";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import MoreIcon from "@mui/icons-material/KeyboardArrowDown";
-import CheckIcon from "@mui/icons-material/CheckCircleOutline";
-import ErrorIcon from "@mui/icons-material/ErrorOutline";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import GetIconComponent from "../helpers/icons";
+const ChevronLeftIcon = GetIconComponent("ChevronLeft");
+const ChevronRightIcon = GetIconComponent("ChevronRight");
+const MoreIcon = GetIconComponent("KeyboardArrowDown");
+const CheckIcon = GetIconComponent("CheckCircleOutline");
+const ErrorIcon = GetIconComponent("ErrorOutline");
+const ExpandLessIcon = GetIconComponent("ExpandLess");
+const ExpandMoreIcon = GetIconComponent("ExpandMore");
 import { fetchMutation, fetchHistoricalMutations } from "../actions";
 import withModulesManager from "../helpers/modules";
+import { getLocalStorage, setLocalStorage } from "../helpers/useLocalStorage";
 import moment from "moment";
 import _ from "lodash";
 import { CLAIM_STATS_ORDER, GLOBAL_UNDERSCORE, REQUEST_LIMIT, WHITE_SPACE } from "../constants";
 
-const StyledJournalDrawer = styled('div')(({ theme }) => ({
-  '& .toolbar': {
+const StyledJournalDrawer = styled("div")(({ theme }) => ({
+  "& .toolbar": {
     minHeight: 80,
   },
-  '& .drawer': {
+  "& .drawer": {
     position: "fixed",
     right: 0,
     top: 0,
@@ -49,7 +51,7 @@ const StyledJournalDrawer = styled('div')(({ theme }) => ({
     width: 0,
     zIndex: theme.zIndex.drawer,
   },
-  '& .drawerOpen': {
+  "& .drawerOpen": {
     position: "fixed",
     right: 0,
     top: 0,
@@ -60,7 +62,7 @@ const StyledJournalDrawer = styled('div')(({ theme }) => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
   },
-  '& .drawerClose': {
+  "& .drawerClose": {
     position: "fixed",
     right: 0,
     top: 0,
@@ -75,51 +77,51 @@ const StyledJournalDrawer = styled('div')(({ theme }) => ({
       width: theme.spacing(9) + 1,
     },
   },
-  '& .jrnlItem': theme.jrnlDrawer.item,
-  '& .jrnlItemDetail': theme.jrnlDrawer.itemDetail,
-  '& .jrnlItemDetailsError': {
+  "& .jrnlItem": theme.jrnlDrawer.item,
+  "& .jrnlItemDetail": theme.jrnlDrawer.itemDetail,
+  "& .jrnlItemDetailsError": {
     ...theme.jrnlDrawer.itemDetail,
     color: theme.palette.error.main,
-    whiteSpace: 'normal',
-    overflowWrap: 'break-word',
+    whiteSpace: "normal",
+    overflowWrap: "break-word",
   },
-  '& .jrnlItemDetailText': theme.jrnlDrawer.itemDetailText,
-  '& .jrnlIconClickable': {
+  "& .jrnlItemDetailText": theme.jrnlDrawer.itemDetailText,
+  "& .jrnlIconClickable": {
     cursor: "pointer",
   },
-  '& .jrnlIcon': {
+  "& .jrnlIcon": {
     paddingLeft: theme.spacing(1),
   },
-  '& .jrnlErrorItem': {
+  "& .jrnlErrorItem": {
     color: theme.palette.error.main,
   },
-  '& .jrnlErrorIcon': {
+  "& .jrnlErrorIcon": {
     paddingLeft: theme.spacing(1),
     color: theme.palette.error.main,
   },
-  '& .messagePopover': {
+  "& .messagePopover": {
     width: 350,
   },
-  '& .groupMessagePanel': {
+  "& .groupMessagePanel": {
     width: "100%",
     margin: 0,
     padding: 0,
   },
-  '& .errorPanel': {
+  "& .errorPanel": {
     width: "100%",
     color: theme.palette.error.main,
   },
-  '& .messagePanel': {
+  "& .messagePanel": {
     width: "100%",
     margin: theme.spacing(1),
   },
-  '& .centerText': {
-    textAlign: 'center'
+  "& .centerText": {
+    textAlign: "center",
   },
-  '& .boldCenterText': {
-    textAlign: 'center',
-    fontWeight: 'bold',
-  }
+  "& .boldCenterText": {
+    textAlign: "center",
+    fontWeight: "bold",
+  },
 }));
 
 class Messages extends Component {
@@ -174,11 +176,7 @@ class Messages extends Component {
         </Grid>
       );
     } else {
-      return (
-        <Grid key={`message-${idx}-panel`}>
-          {JSON.stringify(message)}
-        </Grid>
-      );
+      return <Grid key={`message-${idx}-panel`}>{JSON.stringify(message)}</Grid>;
     }
   };
 
@@ -243,16 +241,15 @@ class Messages extends Component {
         >
           {stats?.claim_stats && (
             <div>
-              <Typography className="boldCenterText">
-                {stats.claim_stats["header"]}
-              </Typography>
-              {CLAIM_STATS_ORDER.map((key) => (
-                stats.claim_stats.hasOwnProperty(key) && (
-                  <Typography className="centerText" key={key}>
-                    {`${key.replace(GLOBAL_UNDERSCORE, WHITE_SPACE)}: ${stats.claim_stats[key]}`}
-                  </Typography>
-                )
-              ))}
+              <Typography className="boldCenterText">{stats.claim_stats["header"]}</Typography>
+              {CLAIM_STATS_ORDER.map(
+                (key) =>
+                  stats.claim_stats.hasOwnProperty(key) && (
+                    <Typography className="centerText" key={key}>
+                      {`${key.replace(GLOBAL_UNDERSCORE, WHITE_SPACE)}: ${stats.claim_stats[key]}`}
+                    </Typography>
+                  ),
+              )}
             </div>
           )}
           <Grid container>{msgs.map((msg, idx) => this.formatMessage(msg, idx))}</Grid>
@@ -274,7 +271,7 @@ class JournalDrawer extends Component {
       displayedMutations: [],
       messagesAnchor: null,
       expanded: false,
-      limitMutationLogsQuery: props.modulesManager.getConf("fe-core", "journalDrawer.limitMutationLogsQuery", false)
+      limitMutationLogsQuery: props.modulesManager.getConf("fe-core", "journalDrawer.limitMutationLogsQuery", false),
     };
   }
 
@@ -349,58 +346,58 @@ class JournalDrawer extends Component {
   checkProcessing = () => {
     var clientMutationIds = this.state.displayedMutations.filter((m) => m.status === 0).map((m) => m.clientMutationId);
     //TODO: change for a "fetchMutationS(ids)"  > requires id_In backend implementation
-    if(this.state.limitMutationLogsQuery){
-      let mutationLogs = localStorage.getItem('arrayMutations');
-      if(mutationLogs==null){
+    if (this.state.limitMutationLogsQuery) {
+      var mutationLogs = getLocalStorage("arrayMutations");
+      if (mutationLogs == null) {
         mutationLogs = {};
         mutationLogs.arrayMutations = [];
-        clientMutationIds.map((id)=>{
+        clientMutationIds.map((id) => {
           mutationLogs.arrayMutations.push({
             id: id,
             count: 0,
-            time: 0
+            time: 0,
           });
         });
-        localStorage.setItem('arrayMutations', JSON.stringify(mutationLogs));
-      }else{
-        let parsedJson = JSON.parse(mutationLogs);
-      for (let i = 0; i < parsedJson.arrayMutations.length; i++) {
-        let mutationLog = parsedJson.arrayMutations[i];
-        if(!clientMutationIds.includes(mutationLog.id)){
-          //remove success mutationLogs in localStorage
-          parsedJson.arrayMutations = parsedJson.arrayMutations.filter((f) => f.id != mutationLog.id);
-        }else{
-          if(mutationLog.count < REQUEST_LIMIT){
-            this.props.fetchMutation(mutationLog.id);
-            mutationLog.count = mutationLog.count + 1;
-            if(mutationLog.count == 5){
-              mutationLog.time = mutationLog.count;
-              mutationLog.duration = 1;
-            }
-          }else{
-            if(mutationLog.count == mutationLog.time){
+        setLocalStorage("arrayMutations", mutationLogs);
+      } else {
+        let parsedJson = mutationLogs; // already parsed by getLocalStorage
+        for (let i = 0; i < parsedJson.arrayMutations.length; i++) {
+          let mutationLog = parsedJson.arrayMutations[i];
+          if (!clientMutationIds.includes(mutationLog.id)) {
+            //remove success mutationLogs in localStorage
+            parsedJson.arrayMutations = parsedJson.arrayMutations.filter((f) => f.id != mutationLog.id);
+          } else {
+            if (mutationLog.count < REQUEST_LIMIT) {
               this.props.fetchMutation(mutationLog.id);
-              mutationLog.duration = mutationLog.duration * 2;
-              mutationLog.time = mutationLog.count + mutationLog.duration;
+              mutationLog.count = mutationLog.count + 1;
+              if (mutationLog.count == 5) {
+                mutationLog.time = mutationLog.count;
+                mutationLog.duration = 1;
+              }
+            } else {
+              if (mutationLog.count == mutationLog.time) {
+                this.props.fetchMutation(mutationLog.id);
+                mutationLog.duration = mutationLog.duration * 2;
+                mutationLog.time = mutationLog.count + mutationLog.duration;
+              }
+              mutationLog.count = mutationLog.count + 1;
             }
-            mutationLog.count = mutationLog.count + 1;
+            parsedJson.arrayMutations[i] = mutationLog;
           }
-          parsedJson.arrayMutations[i] = mutationLog;
-        }
         }
 
-        for(let j = 0; j < clientMutationIds.length; j++){
-          if(!parsedJson.arrayMutations.map((m)=> m.id).includes(clientMutationIds[j])){
+        for (let j = 0; j < clientMutationIds.length; j++) {
+          if (!parsedJson.arrayMutations.map((m) => m.id).includes(clientMutationIds[j])) {
             parsedJson.arrayMutations.push({
               id: clientMutationIds[j],
               count: 0,
-              time: 0
-            })
+              time: 0,
+            });
           }
         }
-        localStorage.setItem('arrayMutations', JSON.stringify(parsedJson));
+        setLocalStorage("arrayMutations", parsedJson);
       }
-    }else{
+    } else {
       clientMutationIds.forEach((id) => this.props.fetchMutation(id));
     }
   };
@@ -490,7 +487,7 @@ class JournalDrawer extends Component {
                         className={clsx(m.status === 1 ? "jrnlErrorIcon" : "jrnlIcon", { "jrnlIconClickable": !open })}
                         onClick={(e) => this.showMessages(e, m)}
                       >
-                        {m.status === 1 ? <ErrorIcon /> : <CheckIcon/>}
+                        {m.status === 1 ? <ErrorIcon /> : <CheckIcon />}
                       </ListItemIcon>
                       <ListItemText
                         className={m.status === 1 ? "jrnlErrorItem" : "jrnlItem"}
@@ -570,7 +567,6 @@ const mapDispatchToProps = (dispatch) => {
   return bindActionCreators({ fetchMutation, fetchHistoricalMutations }, dispatch);
 };
 
-
 const JournalDrawerWithTheme = (props) => {
   const theme = useTheme();
   return <JournalDrawer {...props} theme={theme} />;
@@ -578,6 +574,4 @@ const JournalDrawerWithTheme = (props) => {
 
 export { StyledJournalDrawer };
 export { Messages };
-export default withModulesManager(
-  connect(mapStateToProps, mapDispatchToProps)(JournalDrawerWithTheme),
-);
+export default withModulesManager(connect(mapStateToProps, mapDispatchToProps)(JournalDrawerWithTheme));

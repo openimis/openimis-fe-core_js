@@ -5,7 +5,9 @@ import { injectIntl } from "react-intl";
 
 import { Button, Tooltip } from "@mui/material";
 import { useTheme, styled } from "@mui/material/styles";
-import { Tab as TabIcon, Delete as DeleteIcon } from "@mui/icons-material";
+import GetIconComponent from "../../helpers/icons";
+const TabIcon = GetIconComponent("Tab");
+const DeleteIcon = GetIconComponent("Delete");
 
 import {
   withModulesManager,
@@ -83,7 +85,7 @@ class UserSearcher extends Component {
     if (prevState.userL0s !== this.props.userL0s) {
       if (this.props.userL0s && this.props.fetchedUserLocation) {
         const prms = [...this.state.params];
-        const hasLocationFilter = prms.some(param => param.includes('parentLocation'));
+        const hasLocationFilter = prms.some((param) => param.includes("parentLocation"));
         if (hasLocationFilter) {
           this.setRegionIds(prms);
         }
@@ -110,7 +112,7 @@ class UserSearcher extends Component {
     if (state.orderBy) {
       prms.push(`orderBy: ["${state.orderBy}"]`);
     }
-    if (this.props.fetchedUserLocation && state.filters['parentLocation'] && state.filters['parentLocation'].filter) {
+    if (this.props.fetchedUserLocation && state.filters["parentLocation"] && state.filters["parentLocation"].filter) {
       this.setRegionIds(prms);
     }
     return prms;

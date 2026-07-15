@@ -1,12 +1,23 @@
 import React from "react";
 import _ from "lodash-uuid";
 import { IconButton } from "@mui/material";
-import SortIcon from "@mui/icons-material/UnfoldMore";
-import SortAscIcon from "@mui/icons-material/ExpandLess";
-import SortDescIcon from "@mui/icons-material/ExpandMore";
+import GetIconComponent from "./icons";
+import { clearLocalStorage, getLocalStorage } from "./useLocalStorage";
+
+const SortIcon = GetIconComponent("UnfoldMore");
+const SortAscIcon = GetIconComponent("ExpandLess");
+const SortDescIcon = GetIconComponent("ExpandMore");
 
 function _entityAndFilters(entity, filters) {
   return `${entity}${!!filters && filters.length ? `(${filters.join(",")})` : ""}`;
+}
+
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export function getOperationName(operation, entity) {
+  return `${operation}${capitalize(entity)}`;
 }
 
 function _pageAndEdges(projections) {
@@ -23,49 +34,49 @@ function _pageAndEdges(projections) {
 
 export function formatQuery(entity, filters, projections) {
   return `
-    {
-      ${_entityAndFilters(entity, filters)}
-      ${
-        !!projections
-          ? `{
-        ${projections.join(",")}
-      }`
-          : ""
-      }
-    }`;
+query ${getOperationName("Get", entity)} {
+  ${_entityAndFilters(entity, filters)}
+  ${
+    !!projections
+      ? `{
+    ${projections.join(",")}
+  }`
+      : ""
+  }
+}`;
 }
 
 export function formatNodeQuery(entityGQLType, nodeId, projections = ["id"]) {
   return `
-  {
-    node (id: "${nodeId}") {
-      ...on ${entityGQLType} {
-        ${projections.join(',')}
-      }
+query ${getOperationName("Get", "node")} {
+  node (id: "${nodeId}") {
+    ...on ${entityGQLType} {
+      ${projections.join(",")}
     }
   }
-  `
+}
+`;
 }
 
 export function formatPageQuery(entity, filters, projections) {
   return `
-    {
-      ${_entityAndFilters(entity, filters)}
-      {
-        ${_pageAndEdges(projections)}
-      }
-    }`;
+query ${getOperationName("Get", entity)} {
+  ${_entityAndFilters(entity, filters)}
+  {
+    ${_pageAndEdges(projections)}
+  }
+}`;
 }
 
 export function formatPageQueryWithCount(entity, filters, projections) {
   return `
-    {
-      ${_entityAndFilters(entity, filters)}
-      {
-        totalCount
-        ${_pageAndEdges(projections)}
-      }
-    }`;
+query ${getOperationName("Get", entity)} {
+  ${_entityAndFilters(entity, filters)}
+  {
+    totalCount
+    ${_pageAndEdges(projections)}
+  }
+}`;
 }
 
 export function formatGQLString(str) {
@@ -84,7 +95,7 @@ export function formatGQLString(str) {
 export function formatMutation(operationName, input, clientMutationLabel, clientMutationDetails) {
   const clientMutationId = _.uuid();
   const payload = `
-    mutation {
+    mutation ${operationName} {
       ${operationName}(
         input: {
           clientMutationId: "${clientMutationId}"
@@ -115,20 +126,35 @@ export function parseData(data) {
 }
 
 export function dispatchMutationReq(state, action) {
+  const meta = action.meta || {};
+  // Sanitize common non-serializable values (e.g. Date objects from older call sites)
+  const requestedDateTime =
+    meta.requestedDateTime instanceof Date ? meta.requestedDateTime.toISOString() : meta.requestedDateTime;
+  const cleanMeta = {
+    ...meta,
+    requestedDateTime,
+    id: meta.id || meta.clientMutationId || null,
+  };
   return {
     ...state,
     submittingMutation: true,
-    mutation: action.meta,
+    mutation: cleanMeta,
   };
 }
 
 export function dispatchMutationResp(state, service, action) {
-  var mutation = state.mutation;
-  mutation.id = action.payload.data[service].internalId;
+  const prevMutation = state.mutation || {};
+  const mutation = {
+    ...prevMutation,
+    id: action.payload?.data?.[service]?.internalId ?? prevMutation.id ?? null,
+  };
   return {
     ...state,
     submittingMutation: false,
-    mutation,
+    mutation: {
+      ...state.mutation,
+      id: action.payload?.data?.[service]?.internalId,
+    },
   };
 }
 
@@ -162,6 +188,90 @@ export function formatGraphQLError(payload) {
         detail: payload.errors.map((e) => e.message).join("; "),
       };
 }
+
+const SESSION_ERROR_MESSAGES = new Set([
+  "csrftoken",
+  "unauthorized",
+  "user not authorized for this operation",
+  "authentication credentials were not provided",
+  "csrf token missing or incorrect",
+  "error decoding signature",
+  "invalid token",
+  "not authenticated",
+]);
+
+export const normalizeGraphqlErrorMessage = (message) =>
+  String(message || "")
+    .toLowerCase()
+    .replace(/['"]/g, "")
+    .trim();
+
+export const hasStoredAuthSession = () => {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  return Boolean(getLocalStorage("csrfToken"));
+};
+
+export const isSessionError = (status, gqlErrors = []) => {
+  if (status === 401) {
+    return true;
+  }
+
+  return gqlErrors.some((error) => {
+    const message = normalizeGraphqlErrorMessage(error?.message);
+    return (
+      SESSION_ERROR_MESSAGES.has(message) ||
+      message.includes("csrf token missing or incorrect") ||
+      message.includes("authentication credentials were not provided")
+    );
+  });
+};
+
+export const isImpersonationError = (gqlErrors = []) => {
+  return gqlErrors.some((error) => {
+    const message = normalizeGraphqlErrorMessage(error?.message);
+    return message.includes("invalid impersonation target");
+  });
+};
+
+const LOGOUT_MUTATION = `
+  mutation {
+    deleteTokenCookie {
+      deleted
+    }
+    deleteRefreshTokenCookie {
+      deleted
+    }
+  }
+`;
+
+function getApiUrl() {
+  let baseApiUrl = process.env.REACT_APP_API_URL ?? "/api";
+  if (baseApiUrl.indexOf("/") !== 0) {
+    baseApiUrl = `/${baseApiUrl}`;
+  }
+  return baseApiUrl;
+}
+
+export const clearExpiredSession = async () => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  clearLocalStorage();
+
+  try {
+    await fetch(`${getApiUrl()}/graphql`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ query: LOGOUT_MUTATION }),
+    });
+  } catch (error) {
+    console.warn("Failed to clear auth cookies", error);
+  }
+};
 
 export function openBlob(data, filename, mime) {
   var a = document.createElement("a");

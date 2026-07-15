@@ -195,7 +195,7 @@ class Messages extends Component {
           <AccordionDetails className="groupMessagePanel">
             <Grid container spacing={0}>
               {message.list.map((m, i) => (
-                <Grid key={i} size={12}>
+                <Grid key={m.code || m.message || `msg-${idx}-${i}`} size={12}>
                   {this.formatSingleMessage(m, `${idx}.${i}`)}
                 </Grid>
               ))}
@@ -286,6 +286,10 @@ class JournalDrawer extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
+    if (this.props.open && prevProps.open !== this.props.open) {
+      this.hideMessages();
+    }
+
     if (prevProps.fetchingHistoricalMutations && !this.props.fetchingHistoricalMutations) {
       this.setState((state, props) => ({
         displayedMutations: [...state.displayedMutations, ...props.mutations],
@@ -309,9 +313,9 @@ class JournalDrawer extends Component {
   }
 
   handleAutoMessagesOnMutationStatusUpdate = (previousMutations, currentMutations) => {
-     if (this.props.open) {
-       return;
-     }
+    if (this.props.open) {
+      return;
+    }
     const previousMutationsById = new Map(
       (previousMutations || []).map((mutation) => [mutation.clientMutationId, mutation]),
     );
@@ -443,11 +447,11 @@ class JournalDrawer extends Component {
       <StyledJournalDrawer>
         <ClickAwayListener onClickAway={(e) => open && handleDrawer()}>
           <nav className="drawer">
-             <span
-               ref={this.autoMessagesAnchorRef}
-               aria-hidden="true"
-               style={{ position: "fixed", top: 0, right: 0, height: "100vh", width: 0 }}
-             />
+            <span
+              ref={this.autoMessagesAnchorRef}
+              aria-hidden="true"
+              style={{ position: "fixed", top: 0, right: 0, height: "100vh", width: 0 }}
+            />
             <Messages
               anchorEl={this.state.messagesAnchor}
               messages={this.state.messages}

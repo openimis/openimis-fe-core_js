@@ -24,7 +24,7 @@ function getMenus(modulesManager, key, rights, menuVariant, history, intl) {
     if (!config.entries && !config.submenus && !config.contributionKey) {
       console.warn(`Menu ${config.id} has no entries or submenus or valid contributionKey.`);
     }
-    config.text = getMenuText(config.text, intl);
+    config.text = getMenuText(config.name, intl);
   });
   // Sort by position (default 99 if missing; stable for duplicates)
   const sortedMenuConfigs = unsortedMenuEntries.sort((a, b) => (a.position || 99) - (b.position || 99));

@@ -4,21 +4,21 @@ import { injectIntl } from "react-intl";
 import { Fab, Grid, Paper, IconButton, Typography, Divider, Tooltip } from "@mui/material";
 import GetIconComponent from "../../helpers/icons";
 
-const AddIcon = GetIconComponent("Add")
-const SaveIcon = GetIconComponent("Save")
-const ChevronLeftIcon = GetIconComponent("ChevronLeft")
+const AddIcon = GetIconComponent("Add");
+const SaveIcon = GetIconComponent("Save");
+const ChevronLeftIcon = GetIconComponent("ChevronLeft");
 import FormattedMessage from "./FormattedMessage";
 import Contributions from "./Contributions";
 import withHistory from "../../helpers/history";
 import { withTooltip, formatMessage } from "../../helpers/i18n";
 import _ from "lodash";
 
-const StyledForm = styled('div')(({ theme }) => ({
-  '& .paper': theme.paper?.paper ?? {},
-  '& .paperHeader': theme.paper?.header ?? {},
-  '& .paperHeaderAction': theme.paper?.action ?? {},
-  '& .tooltipContainer': theme.tooltipContainer ?? {},
-  '& .flexTooltip': theme.flexTooltip ?? {},
+const StyledForm = styled("div")(({ theme }) => ({
+  "& .paper": theme.paper?.paper ?? {},
+  "& .paperHeader": theme.paper?.header ?? {},
+  "& .paperHeaderAction": theme.paper?.action ?? {},
+  "& .tooltipContainer": theme.tooltipContainer ?? {},
+  "& .flexTooltip": theme.flexTooltip ?? {},
 }));
 
 class Form extends Component {
@@ -101,7 +101,7 @@ class Form extends Component {
                 onClick={(e) => this.save(this.props.edited)}
               >
                 <SaveIcon />
-            </Fab>
+              </Fab>
             )}
           </span>
         ),
@@ -118,11 +118,11 @@ class Form extends Component {
         ),
         tooltip: fabTooltip,
       },
-    ]
+    ];
 
     const allTooltips = [...(additionalTooltips || []), ...defaultTooltips];
 
-    const filteredTooltips = allTooltips.filter(tooltip => tooltip.condition);
+    const filteredTooltips = allTooltips.filter((tooltip) => tooltip.condition);
 
     return (
       <StyledForm>
@@ -196,7 +196,7 @@ class Form extends Component {
             </Grid>
           </Grid>
           {!!Panels &&
-            Panels.filter(P => !!P).map((P, idx) => (
+            Panels.filter((P) => !!P).map((P, idx) => (
               <Grid key={`form_panel_${idx}`} size={12}>
                 <P
                   {...others}

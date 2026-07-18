@@ -12,6 +12,7 @@ export const mapQueriesUserToStore = (u) => {
     u.otherNames = u.iUser.otherNames;
     u.email = u.iUser.email;
     u.phoneNumber = u.iUser.phone;
+    u.defaultRowsPerPage = u.iUser.defaultRowsPerPage;
     u.healthFacility = u.iUser.healthFacility;
     u.language = u.iUser.languageId;
     u.roles = u.iUser.roles;
@@ -63,6 +64,7 @@ export const mapUserValuesToInput = (values) => {
     substitutionOfficerId: values.substitutionOfficer?.id ? decodeId(values.substitutionOfficer.id) : null,
     worksTo: values.worksTo,
     villageIds: values.officerVillages?.map((location) => decodeId(location.id)),
+    defaultRowsPerPage: Number.isInteger(values.defaultRowsPerPage) ? values.defaultRowsPerPage : null,
   };
   return input;
 };

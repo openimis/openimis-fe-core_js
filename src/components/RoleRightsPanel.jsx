@@ -23,30 +23,30 @@ import { styled } from "@mui/material/styles";
 import { fetchModulesPermissions } from "../actions";
 import GetIconComponent from "../helpers/icons";
 
-const ArrowBackIcon = GetIconComponent("ArrowBack")
-const ArrowForwardIcon = GetIconComponent("ArrowForward")
-const SearchIcon = GetIconComponent("Search")
-const DoubleArrowIcon = GetIconComponent("DoubleArrow")
-const ReversedDoubleArrowIcon = GetIconComponent("DoubleArrow", { rotate: 180 })
+const ArrowBackIcon = GetIconComponent("ArrowBack");
+const ArrowForwardIcon = GetIconComponent("ArrowForward");
+const SearchIcon = GetIconComponent("Search");
+const DoubleArrowIcon = GetIconComponent("DoubleArrow");
+const ReversedDoubleArrowIcon = GetIconComponent("DoubleArrow", { rotate: 180 });
 import { formatRoleLabel } from "../helpers/role-label-formatter";
 
-const StyledRoleRightsPanel = styled('div')(({ theme }) => ({
-  '& .item': theme.paper?.item ?? {},
-  '& .paper': theme.paper?.paper ?? {},
-  '& .paperHeader': theme.paper?.paperHeader ?? {},
-  '& .list': {
+const StyledRoleRightsPanel = styled("div")(({ theme }) => ({
+  "& .item": theme.paper?.item ?? {},
+  "& .paper": theme.paper?.paper ?? {},
+  "& .paperHeader": theme.paper?.paperHeader ?? {},
+  "& .list": {
     width: "100%",
     height: "500px",
     position: "relative",
     overflow: "auto",
   },
-  '& .filter': {
+  "& .filter": {
     width: "100%",
   },
-  '& .listItemText': {
+  "& .listItemText": {
     textTransform: "capitalize",
   },
-  '& .listTitle': {
+  "& .listTitle": {
     display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",

@@ -32,10 +32,19 @@ class YearPicker extends Component {
       ..._.range(min, max).map((v) => ({
         value: v,
         label: v,
-      }))
+      })),
     );
     return (
-      <SelectInput module={module} label={label} options={options} readOnly={readOnly} name={name} value={value} required={required} onChange={onChange} />
+      <SelectInput
+        module={module}
+        label={label}
+        options={options}
+        readOnly={readOnly}
+        name={name}
+        value={value}
+        required={required}
+        onChange={onChange}
+      />
     );
   }
 }

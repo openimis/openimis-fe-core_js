@@ -22,11 +22,11 @@ import nepali_np from "../calendars/NepaliLocaleNp";
 import gregorian from "react-date-object/calendars/gregorian";
 import gregorian_en from "react-date-object/locales/gregorian_en";
 
-const StyledDatePicker = styled('div')(({ theme }) => ({
-  '& .label': {
+const StyledDatePicker = styled("div")(({ theme }) => ({
+  "& .label": {
     color: theme.palette.primary.main,
   },
-  '& .disabledStateVisibilityBoost': {
+  "& .disabledStateVisibilityBoost": {
     "& .MuiFormLabel-root.Mui-disabled": {
       color: "#181716",
     },
@@ -176,21 +176,21 @@ class openIMISDatePicker extends Component {
           <FormControl fullWidth={fullWidth}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <MUIDatePicker
-              {...otherProps}
-              maxDate={maxDate ? dayjs(maxDate) : undefined}
-              minDate={minDate ? dayjs(minDate) : undefined}
-              format={format}
-              disabled={readOnly}
-              className={clsx({
-                "disabledStateVisibilityBoost": this.disabledVisibilityBoost && readOnly,
-              })}
-              value={this.state.value}
-              InputLabelProps={{
-                className: "label",
-              }}
-              label={!!label ? formatMessage(intl, module, label).concat(required ? " *" : "") : null}
-              onChange={this.dateChange}
-              disablePast={disablePast}
+                {...otherProps}
+                maxDate={maxDate ? dayjs(maxDate) : undefined}
+                minDate={minDate ? dayjs(minDate) : undefined}
+                format={format}
+                disabled={readOnly}
+                className={clsx({
+                  "disabledStateVisibilityBoost": this.disabledVisibilityBoost && readOnly,
+                })}
+                value={this.state.value}
+                InputLabelProps={{
+                  className: "label",
+                }}
+                label={!!label ? formatMessage(intl, module, label).concat(required ? " *" : "") : null}
+                onChange={this.dateChange}
+                disablePast={disablePast}
               />
             </LocalizationProvider>
           </FormControl>
@@ -206,6 +206,4 @@ const mapStateToProps = (state) => ({
 
 export { StyledDatePicker };
 export { openIMISDatePicker };
-export default injectIntl(
-  withModulesManager(withHistory(connect(mapStateToProps, null)(openIMISDatePicker))),
-);
+export default injectIntl(withModulesManager(withHistory(connect(mapStateToProps, null)(openIMISDatePicker))));

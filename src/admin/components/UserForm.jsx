@@ -3,10 +3,9 @@ import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
 
-
 import { useTheme, styled } from "@mui/material/styles";
 import GetIconComponent from "../../helpers/icons";
-const ReplayIcon = GetIconComponent("Replay")
+const ReplayIcon = GetIconComponent("Replay");
 
 import {
   Helmet,
@@ -26,7 +25,7 @@ import {
   INTERACTIVE_USER_TYPE,
   RIGHT_USERS,
   RIGHT_CLAIMADMINISTRATOR,
-  RIGHT_ENROLMENTOFFICER
+  RIGHT_ENROLMENTOFFICER,
 } from "../constants";
 import EnrolmentOfficerFormPanel from "./EnrolmentOfficerFormPanel";
 import ClaimAdministratorFormPanel from "./ClaimAdministratorFormPanel";
@@ -43,8 +42,8 @@ import {
 } from "../actions";
 import UserMasterPanel from "./UserMasterPanel";
 
-const StyledDiv = styled('div')(({ theme }) => ({
-  '&.locked': theme.page?.locked ?? {},
+const StyledDiv = styled("div")(({ theme }) => ({
+  "&.locked": theme.page?.locked ?? {},
 }));
 
 const USER_OVERVIEW_MUTATIONS_KEY = "user.UserOverview.mutations";
@@ -53,8 +52,8 @@ const setupState = (props) => ({
   isLocked: false,
   user: !props?.userId
     ? {
-      userTypes: [INTERACTIVE_USER_TYPE],
-    }
+        userTypes: [INTERACTIVE_USER_TYPE],
+      }
     : props.user,
   isSaved: false,
   reset: 0,
@@ -216,7 +215,7 @@ class UserForm extends Component {
   render() {
     const {
       modulesManager,
-      
+
       state,
       rights,
       userId,
@@ -229,7 +228,7 @@ class UserForm extends Component {
       obligatoryUserFields,
       obligatoryEoFields,
       usernameLength,
-      passwordPolicy
+      passwordPolicy,
     } = this.props;
     const { user, isSaved, reset } = this.state;
 
@@ -266,7 +265,7 @@ class UserForm extends Component {
             HeadPanel={UserMasterPanel}
             Panels={[
               ...(rights.includes(RIGHT_ENROLMENTOFFICER) ? [EnrolmentOfficerFormPanel] : []),
-              ...(rights.includes(RIGHT_CLAIMADMINISTRATOR) ? [ClaimAdministratorFormPanel] : [])
+              ...(rights.includes(RIGHT_CLAIMADMINISTRATOR) ? [ClaimAdministratorFormPanel] : []),
             ]}
             user={user}
             onEditedChanged={this.onEditedChanged}
@@ -323,6 +322,4 @@ const mapDispatchToProps = (dispatch) =>
 
 export { StyledDiv };
 export { UserForm };
-  export default withHistory(
-    withModulesManager(connect(mapStateToProps, mapDispatchToProps)(injectIntl(UserForm))),
-  );
+export default withHistory(withModulesManager(connect(mapStateToProps, mapDispatchToProps)(injectIntl(UserForm))));

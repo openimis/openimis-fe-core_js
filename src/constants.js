@@ -17,7 +17,7 @@ export const USER_ACTIVITY_REPORT_ACTION_DELETE = "D";
 export const USER_ACTIVITY_REPORT_ACTIONS = [
   USER_ACTIVITY_REPORT_ACTION_INSERT,
   USER_ACTIVITY_REPORT_ACTION_UPDATE,
-  USER_ACTIVITY_REPORT_ACTION_DELETE
+  USER_ACTIVITY_REPORT_ACTION_DELETE,
 ];
 
 export const USER_ACTIVITY_REPORT_ENTITY_CLAIM = "Claim";
@@ -51,7 +51,7 @@ export const STORAGE_KEY_SECONDARY_CALENDAR = "isSecondaryCalendarEnabled";
 export const DEFAULT_SETTINGS = {
   SECOND_CALENDAR_FORMAT: "DD-MM-YYYY",
   SECOND_CALENDAR_LANG: "en",
-  };
+};
 
 export const USER_ACTIVITY_REPORT_ENTITIES = [
   USER_ACTIVITY_REPORT_ENTITY_BATCH_RUN,
@@ -79,7 +79,7 @@ export const USER_ACTIVITY_REPORT_ENTITIES = [
   USER_ACTIVITY_REPORT_ENTITY_RELATIVE_DISTRIBUTION,
   USER_ACTIVITY_REPORT_ENTITY_SERVICE,
   USER_ACTIVITY_REPORT_ENTITY_USER,
-  USER_ACTIVITY_REPORT_ENTITY_USER_DISTRICT
+  USER_ACTIVITY_REPORT_ENTITY_USER_DISTRICT,
 ];
 
 // consts relate do custom filters
@@ -87,21 +87,25 @@ export const BOOL_OPTIONS = [
   { value: "True", label: "True" },
   { value: "False", label: "False" },
 ];
-export const CLEARED_STATE_FILTER = { field: "", filter: "", type: "", value: "" }
+export const CLEARED_STATE_FILTER = { field: "", filter: "", type: "", value: "" };
 export const BENEFIT_PLAN = "BenefitPlan";
-export const CUSTOM_FILTERS = "customFilters"
+export const CUSTOM_FILTERS = "customFilters";
 export const INTEGER = "integer";
 export const NUMBER = "number";
 export const STRING = "string";
 export const BOOLEAN = "boolean";
 export const DATE = "date";
 export const FIELD_TYPES = {
-  INTEGER, NUMBER, STRING, BOOLEAN, DATE
-}
+  INTEGER,
+  NUMBER,
+  STRING,
+  BOOLEAN,
+  DATE,
+};
 
 export const WHITE_SPACE = " ";
 export const DOUBLE_UNDERSCORE = "__";
-export const GLOBAL_UNDERSCORE = /_/g;;
+export const GLOBAL_UNDERSCORE = /_/g;
 export const EQUALS_SIGN = "=";
 
 export const CLAIM_STATS_ORDER = [
@@ -113,14 +117,15 @@ export const CLAIM_STATS_ORDER = [
   "items_passed",
   "items_rejected",
   "services_passed",
-  "services_rejected"
-]
+  "services_rejected",
+];
 
-export const CORE_MIS_CONFLUENCE_URL = "https://openimis.atlassian.net/wiki/spaces/OP/pages/3531407380/Project+2022.T3+CORE-MIS+Merger";
+export const CORE_MIS_CONFLUENCE_URL =
+  "https://openimis.atlassian.net/wiki/spaces/OP/pages/3531407380/Project+2022.T3+CORE-MIS+Merger";
 export const DEFAULT_URL = "https://docs.openimis.org/";
 
-export const  SAML_LOGIN_PATH = "/msystems/saml/login/";
-export const  SAML_LOGOUT_PATH = "/msystems/saml/logout/";
+export const SAML_LOGIN_PATH = "/msystems/saml/login/";
+export const SAML_LOGOUT_PATH = "/msystems/saml/logout/";
 
 export const RIGHT_VIEW_EU_MODAL = 203000;
 
@@ -133,7 +138,7 @@ export const DEFAULT = {
   ENABLE_PUBLIC_PAGE: false,
   SHOW_JOURNAL_SIDEBAR: true,
   DISABLED_VISIBILITY_BOOST: false,
-}
+};
 
 export const EXPORT_FILE_FORMATS = {
   // By default, the export file format is CSV
@@ -143,4 +148,4 @@ export const EXPORT_FILE_FORMATS = {
   xlsx: "xlsx",
 };
 
-export const REQUEST_LIMIT = 5
+export const REQUEST_LIMIT = 5;

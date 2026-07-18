@@ -6,16 +6,16 @@ import { useDebounceCb } from "../../helpers/hooks";
 import { useTranslations } from "../../helpers/i18n";
 import { useModulesManager } from "../../helpers/modules";
 
-const StyledAutocomplete = styled('div')(({ theme }) => ({
-  '& .label': {
+const StyledAutocomplete = styled("div")(({ theme }) => ({
+  "& .label": {
     color: theme.palette.primary.main,
   },
-  '& .MuiAutocomplete-root': {
-    minWidth: '150px',
+  "& .MuiAutocomplete-root": {
+    minWidth: "150px",
     width: "100%",
   },
-  '& .MuiTextField-root': {
-    minWidth: '150px',
+  "& .MuiTextField-root": {
+    minWidth: "150px",
     width: "100%",
   },
 }));
@@ -118,7 +118,7 @@ const Autocomplete = (props) => {
                   required={required}
                   InputLabelProps={{ shrink: value !== undefined, className: "label" }}
                   label={withLabel && (label || formatMessage("label"))}
-                  placeholder={!readOnly && withPlaceholder ? (placeholder || formatMessage("placeholder")) : undefined}
+                  placeholder={!readOnly && withPlaceholder ? placeholder || formatMessage("placeholder") : undefined}
                 />
               )
         }

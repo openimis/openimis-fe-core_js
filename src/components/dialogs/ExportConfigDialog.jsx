@@ -14,16 +14,16 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import GetIconComponent from "../../helpers/icons";
-const RadioButtonCheckedIcon = GetIconComponent("RadioButtonChecked")
-const RadioButtonUncheckedIcon = GetIconComponent("RadioButtonUnchecked")
+const RadioButtonCheckedIcon = GetIconComponent("RadioButtonChecked");
+const RadioButtonUncheckedIcon = GetIconComponent("RadioButtonUnchecked");
 
 import { useModulesManager } from "../../helpers/modules";
 import { useTranslations } from "../../helpers/i18n";
 import { isEmptyObject } from "../../helpers/utils";
 
-const StyledDialog = styled('div')(({ theme }) => ({
-  '& .primaryButton': theme?.dialog?.primaryButton ?? {},
-  '& .secondaryButton': theme?.dialog?.secondaryButton ?? {},
+const StyledDialog = styled("div")(({ theme }) => ({
+  "& .primaryButton": theme?.dialog?.primaryButton ?? {},
+  "& .secondaryButton": theme?.dialog?.secondaryButton ?? {},
 }));
 
 const ExportConfigDialog = ({

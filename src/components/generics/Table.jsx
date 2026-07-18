@@ -2,9 +2,10 @@ import React, { Component } from "react";
 import clsx from "clsx";
 import { injectIntl } from "react-intl";
 import _ from "lodash";
+import { connect } from "react-redux";
 import GetIconComponent from "../../helpers/icons";
 
-const DeleteIcon = GetIconComponent("Delete")
+const DeleteIcon = GetIconComponent("Delete");
 import { styled, alpha } from "@mui/material/styles";
 import {
   Typography,
@@ -20,11 +21,13 @@ import {
   Grid,
   TablePagination,
   Checkbox,
+  Tooltip,
 } from "@mui/material";
 import FormattedMessage from "./FormattedMessage";
 import ProgressOrError from "./ProgressOrError";
 import withModulesManager from "../../helpers/modules";
 import { formatMessage, formatMessageWithValues } from "../../helpers/i18n";
+import { saveCurrentUserDefaultRowsPerPage } from "../../actions";
 
 const StyledTable = styled("div")(({ theme }) => ({
   "& .table": {
@@ -81,6 +84,7 @@ const StyledTable = styled("div")(({ theme }) => ({
 class Table extends Component {
   state = {
     selection: {},
+    isRowsPerPageLocked: false,
   };
 
   _atom = (a) =>
@@ -96,6 +100,9 @@ class Table extends Component {
         selection: this._atom(props.selection || []),
       }));
     }
+    const rowsPerPage = this.getCurrentRowsPerPage();
+    const userDefaultRowsPerPage = this.props.user?.i_user?.default_rows_per_page;
+    this.setState({ isRowsPerPageLocked: userDefaultRowsPerPage === rowsPerPage });
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -113,7 +120,27 @@ class Table extends Component {
         (e) => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection)),
       );
     }
+    const prevUserDefaultRowsPerPage = prevProps.user?.i_user?.default_rows_per_page;
+    const userDefaultRowsPerPage = this.props.user?.i_user?.default_rows_per_page;
+    const rowsPerPage = this.getCurrentRowsPerPage();
+    if (prevUserDefaultRowsPerPage !== userDefaultRowsPerPage) {
+      this.setState({ isRowsPerPageLocked: userDefaultRowsPerPage === rowsPerPage });
+    }
   }
+
+  getCurrentRowsPerPage = () => {
+    const { pageSize, rowsPerPageOptions = [10, 20, 50] } = this.props;
+    return Number(pageSize || rowsPerPageOptions[0]);
+  };
+
+  onToggleRowsPerPageLock = async (e) => {
+    const { intl } = this.props;
+    const isRowsPerPageLocked = e.target.checked;
+    this.setState({ isRowsPerPageLocked });
+    const defaultRowsPerPage = isRowsPerPageLocked ? this.getCurrentRowsPerPage() : null;
+    const clientMutationLabel = formatMessage(intl, "core", "Table.lockRowsPerPage.mutationLabel");
+    await this.props.saveCurrentUserDefaultRowsPerPage(defaultRowsPerPage, clientMutationLabel);
+  };
 
   itemIdentifier = (i) => {
     if (!!this.props.itemIdentifier) {
@@ -415,21 +442,34 @@ class Table extends Component {
             {!!withPagination && !!count && (
               <TableFooter className="tableFooter">
                 <TableRow>
-                  <TablePagination
-                    className="pager"
-                    colSpan={localItemFormatters.length + (selectWithCheckbox ? 1 : 0)}
-                    labelRowsPerPage={formatMessage(intl, "core", "rowsPerPage")}
-                    labelDisplayedRows={({ from, to, count }) =>
-                      `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`
-                    }
-                    count={count}
-                    page={page}
-                    rowsPerPage={rowsPerPage}
-                    rowsPerPageOptions={rowsPerPageOptions}
-                    onRowsPerPageChange={(e) => onChangeRowsPerPage(e.target.value)}
-                    onPageChange={onChangePage}
-
-                  />
+                  <TableCell colSpan={localItemFormatters.length + (selectWithCheckbox ? 1 : 0)}>
+                    <Box display="flex" justifyContent="flex-end" alignItems="center" width="100%">
+                      <Box display="flex" justifyContent="flex-end" alignItems="center">
+                        <Tooltip title={formatMessage(intl, "core", "Table.lockRowsPerPage.tooltip")}>
+                          <Checkbox checked={this.state.isRowsPerPageLocked} onChange={this.onToggleRowsPerPageLock} />
+                        </Tooltip>
+                        {formatMessage(intl, "core", "Table.lockRowsPerPage.label")}
+                      </Box>
+                      <TablePagination
+                        className="pager"
+                        component="div"
+                        labelRowsPerPage={formatMessage(intl, "core", "rowsPerPage")}
+                        labelDisplayedRows={({ from, to, count }) => {
+                          if (this.state.ordinalNumberFrom !== from) this.setState({ ordinalNumberFrom: from });
+                          return `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`;
+                        }}
+                        count={count}
+                        page={page}
+                        rowsPerPage={rowsPerPage}
+                        rowsPerPageOptions={rowsPerPageOptions}
+                        SelectProps={{ disabled: this.state.isRowsPerPageLocked }}
+                        onRowsPerPageChange={(e) =>
+                          !this.state.isRowsPerPageLocked && onChangeRowsPerPage?.(e.target.value)
+                        }
+                        onPageChange={onChangePage}
+                      />
+                    </Box>
+                  </TableCell>
                 </TableRow>
               </TableFooter>
             )}
@@ -447,4 +487,12 @@ class Table extends Component {
 }
 
 export { StyledTable };
-export default withModulesManager(injectIntl(Table));
+const mapStateToProps = (state) => ({
+  user: state.core?.user,
+});
+
+const mapDispatchToProps = {
+  saveCurrentUserDefaultRowsPerPage,
+};
+
+export default withModulesManager(injectIntl(connect(mapStateToProps, mapDispatchToProps)(Table)));

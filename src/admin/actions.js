@@ -13,7 +13,6 @@ import { mapUserValuesToInput } from "./utils";
 const USER_SUMMARY_PROJECTION_BASE = [
   "id",
   "username",
-  "userTypes",
   "officer{id,dob,phone,lastName,otherNames,email}",
   "iUser{id,phone,lastName,otherNames,email,roles{id,name}}",
   "clientMutationId",
@@ -224,12 +223,19 @@ export function fetchUser(mm, userId, clientMutationId) {
               languageId
               lastName
               otherNames
+              defaultRowsPerPage
               roles { id name isSystem}
               healthFacility ${mm.getProjection("location.HealthFacilityPicker.projection")}
               email
               districts: userdistrictSet { location { id name code uuid parent { id code uuid name }}}
             }
-            ${mm.getConf("fe-admin", "enableClaimAdminFields", false) ? `claimAdmin{ id hasLogin emailId phone dob lastName otherNames healthFacility ${mm.getProjection("location.HealthFacilityPicker.projection")} }` : ``}
+            ${
+              mm.getConf("fe-admin", "enableClaimAdminFields", false)
+                ? `claimAdmin{ id hasLogin emailId phone dob lastName otherNames healthFacility ${mm.getProjection(
+                    "location.HealthFacilityPicker.projection",
+                  )} }`
+                : ``
+            }
           }
         }
       }

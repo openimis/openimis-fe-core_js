@@ -9,13 +9,7 @@ const SearcherActionButton = ({ onClick, startIcon, label }) => {
   const modulesManager = useModulesManager();
 
   return (
-    <Button 
-      variant="text" 
-      onClick={onClick} 
-      startIcon={startIcon} 
-      color="inherit"
-      size="medium"
-    >
+    <Button variant="text" onClick={onClick} startIcon={startIcon} color="inherit" size="medium">
       {label}
     </Button>
   );

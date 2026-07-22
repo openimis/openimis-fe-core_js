@@ -98,5 +98,7 @@
   "admin.password.medium": "Medium",
   "admin.password.strong": "Password is strong.",
   "admin.password.veryStrong": "Password is very strong.",
-  "admin.password.unknownScore": "Unknown score."
+  "admin.password.unknownScore": "Unknown score.",
+  "admin.ProgramPicker.placeholder": "Select Program",
+  "admin.menu.programs": "Programs"
 }

@@ -188,6 +188,15 @@ const ROUTE_ROLE = "roles/role";
 const ROUTE_ADMIN_USERS = "admin/users";
 const ROUTE_ADMIN_USER_OVERVIEW = "admin/users/overview";
 const ROUTE_ADMIN_USER_NEW = "admin/users/new";
+const ROUTE_ADMIN_PROGRAMS = "program/programs";
+
+const ADMIN_PROGRAMS_MENU_ENTRY = {
+  text: "admin.menu.programs",
+  icon: "FormatAlignLeft",
+  route: ROUTE_ADMIN_PROGRAMS,
+  id: "admin.programs",
+  withDivider: true,
+};
 
 const DEFAULT_CONFIG = {
   "showJournalSidebar": true,
@@ -304,6 +313,9 @@ const DEFAULT_CONFIG = {
 export const CoreModule = (cfg) => {
   let def = { ...DEFAULT_CONFIG };
   def.refs.push({ key: "core.DatePicker", ref: openIMISDatePicker });
+  if (cfg?.["fe-core.isProgramAvailable"] ?? true) {
+    def["admin.MainMenu"] = [...def["admin.MainMenu"], ADMIN_PROGRAMS_MENU_ENTRY];
+  }
   return { ...def, ...cfg };
 };
 

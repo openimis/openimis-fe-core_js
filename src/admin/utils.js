@@ -17,6 +17,7 @@ export const mapQueriesUserToStore = (u) => {
     u.language = u.iUser.languageId;
     u.roles = u.iUser.roles;
     u.districts = u.iUser.districts.map((d) => d.location);
+    u.programs = u.iUser.programSet?.edges?.map((p) => p.node) || [];
   }
   if (u.claimAdmin) {
     u.hasLogin = u.hasLogin || u.claimAdmin.hasLogin;
@@ -26,6 +27,7 @@ export const mapQueriesUserToStore = (u) => {
     u.phoneNumber = u.claimAdmin.phone;
     u.birthDate = u.claimAdmin.dob;
     u.healthFacility = u.claimAdmin.healthFacility;
+    u.programs = u.claimAdmin.programs;
   }
   if (u.officer) {
     u.hasLogin = u.hasLogin || u.officer.hasLogin;
@@ -64,6 +66,7 @@ export const mapUserValuesToInput = (values) => {
     substitutionOfficerId: values.substitutionOfficer?.id ? decodeId(values.substitutionOfficer.id) : null,
     worksTo: values.worksTo,
     villageIds: values.officerVillages?.map((location) => decodeId(location.id)),
+    programs: values.programs?.map((p) => decodeId(p.id)) || [],
     defaultRowsPerPage: Number.isInteger(values.defaultRowsPerPage) ? values.defaultRowsPerPage : null,
   };
   return input;

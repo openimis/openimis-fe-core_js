@@ -84,6 +84,8 @@ const UserMasterPanel = (props) => {
     DEFAULT.RENDER_LAST_NAME_FIRST,
   );
 
+  const isProgramAvailable = modulesManager.getConf("fe-core", "isProgramAvailable", true);
+
   const shouldValidateUsername = (inputValue) => {
     const shouldBeValidated = inputValue !== savedUsername;
     return shouldBeValidated;
@@ -284,6 +286,20 @@ const UserMasterPanel = (props) => {
           onChange={(roles) => onEditedChanged({ ...edited, roles })}
         />
       </Grid>
+      {isProgramAvailable && (
+        <Grid item xs={4} className={classes.item}>
+          <PublishedComponent
+            pubRef="program.ProgramPicker"
+            name="program"
+            label={formatMessage("user.programPicker.label")}
+            placeholder={formatMessage("user.programPicker.placeholder")}
+            value={edited?.programs ?? []}
+            multiple={true}
+            readOnly={readOnly}
+            onChange={(programs) => onEditedChanged({ ...edited, programs })}
+          />
+        </Grid>
+      )}
       <Grid size={2} className="item">
         <PublishedComponent
           pubRef="location.LocationPicker"

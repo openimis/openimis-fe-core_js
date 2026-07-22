@@ -217,6 +217,7 @@ export function fetchUser(mm, userId, clientMutationId) {
               otherNames
               defaultRowsPerPage
               roles { id name isSystem}
+              programSet { edges{node{id idProgram nameProgram validityDateFrom}}}
               healthFacility ${mm.getProjection("location.HealthFacilityPicker.projection")}
               email
               districts: userdistrictSet { location { id name code uuid parent { id code uuid name }}}

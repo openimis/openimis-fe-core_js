@@ -39,6 +39,7 @@ const ValidatedTextInput = ({
   invalidValueFormatLabel,
   invalidValueFormat,
   maxLengthKey,
+  showValidationErrorAsHelperText = false,
 }) => {
   const modulesManager = useModulesManager();
 
@@ -83,6 +84,7 @@ const ValidatedTextInput = ({
           placeholder={placeholder}
           type={type}
           error={error}
+          helperText={showValidationErrorAsHelperText ? error : null}
           value={value}
           inputProps={inputProps}
           maxLengthKey={maxLengthKey}
@@ -109,6 +111,7 @@ const ValidatedTextInput = ({
           value={value}
           readOnly={readOnly}
           error={error}
+          helperText={showValidationErrorAsHelperText ? error : null}
           required={required}
           type={type}
           onChange={debounce(onChange, DEFAULT_DEBOUNCE_TIME)}

@@ -279,7 +279,12 @@ export function graphqlMutation(
 }
 
 export function fetch(config) {
-  const csrfToken = getLocalStorage("csrfToken");
+  // `silent` suppresses the session-expiry dialog on 401 (for boot probes); it
+  // must not reach the RSAA action.
+  const { silent, ...rsaaConfig } = config;
+
+  // Cookie fallback lets a session authenticated outside /front (e.g. Django) pass CSRF.
+  const csrfToken = getLocalStorage("csrfToken") ?? getCsrfToken();
 
   return async (dispatch, getState) => {
     const state = getState();
@@ -289,13 +294,13 @@ export function fetch(config) {
     try {
       action = await dispatch({
         [RSAA]: {
-          ...config,
+          ...rsaaConfig,
           headers: {
             "Content-Type": "application/json",
             "X-Requested-With": "XMLHttpRequest",
             "X-CSRFToken": csrfToken,
             ...(impersonatedUser && { "X-Impersonate-User": decodeId(impersonatedUser.id) }),
-            ...config.headers,
+            ...rsaaConfig.headers,
           },
         },
       });
@@ -315,7 +320,7 @@ export function fetch(config) {
 
       if (isSessionError(status, gqlErrors)) {
         dispatch({ type: "CORE_STOP_IMPERSONATION" });
-        if (isUnauthenticatedRoute()) {
+        if (isUnauthenticatedRoute() || silent) {
           clearExpiredSession();
           dispatch({ type: "CORE_AUTH_LOGOUT" });
         } else {
@@ -402,10 +407,11 @@ export function fetch(config) {
   };
 }
 
-export function loadUser() {
+export function loadUser(options = {}) {
   return fetch({
     endpoint: `${baseApiUrl}/core/users/current_user/`,
     method: "GET",
+    silent: options.silent,
     types: ["CORE_USERS_CURRENT_USER_REQ", "CORE_USERS_CURRENT_USER_RESP", "CORE_USERS_CURRENT_USER_ERR"],
   });
 }
@@ -554,12 +560,28 @@ export function refreshAuthToken() {
 
 export function initialize() {
   return async (dispatch) => {
-    if (isUnauthenticatedRoute() || !hasStoredAuthSession()) {
+    if (isUnauthenticatedRoute()) {
       dispatch({ type: "CORE_AUTH_LOGOUT" });
       return dispatch({ type: "CORE_INITIALIZED" });
     }
 
-    await dispatch(login());
+    // Silent probe: a valid auth cookie (/front JWT or Django session)
+    // authenticates; an anonymous boot logs out without the expiry dialog.
+    const action = await dispatch(loadUser({ silent: true }));
+    const status = action?.payload?.response?.status ?? action?.payload?.status;
+    const errors = action?.payload?.errors || action?.payload?.response?.errors || [];
+
+    if (action?.error || isSessionError(status, errors)) {
+      await clearExpiredSession();
+      dispatch({ type: "CORE_AUTH_LOGOUT" });
+    } else if (!getLocalStorage("csrfToken")) {
+      // Mirror the csrftoken cookie so later mutations send a matching X-CSRFToken.
+      const cookieCsrf = getCsrfToken();
+      if (cookieCsrf) {
+        setLocalStorage("csrfToken", cookieCsrf);
+      }
+    }
+
     return dispatch({ type: "CORE_INITIALIZED" });
   };
 }

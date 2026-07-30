@@ -55,6 +55,10 @@ function getCsrfToken() {
   const CSRF_TOKEN_NAME = "csrftoken";
   const CSRF_NOT_FOUND = null;
 
+  if (typeof document === "undefined") {
+    return CSRF_NOT_FOUND;
+  }
+
   const cookies = document.cookie;
   const cookieArray = cookies.split("; ");
 
@@ -321,7 +325,7 @@ export function fetch(config) {
       if (isSessionError(status, gqlErrors)) {
         dispatch({ type: "CORE_STOP_IMPERSONATION" });
         if (isUnauthenticatedRoute() || silent) {
-          clearExpiredSession();
+          await clearExpiredSession();
           dispatch({ type: "CORE_AUTH_LOGOUT" });
         } else {
           dispatch(
@@ -531,17 +535,12 @@ export function initialize() {
       return dispatch({ type: "CORE_INITIALIZED" });
     }
 
-    // Silent probe: a valid auth cookie (/front JWT or Django session)
-    // authenticates; an anonymous boot logs out without the expiry dialog.
+    // Silent probe: a valid auth cookie (/front JWT or Django session) loads the
+    // user; on success, mirror the csrftoken cookie for later mutations. Errors
+    // are handled downstream (401/403 clears the user, 5xx preserves state).
     const action = await dispatch(loadUser({ silent: true }));
-    const status = action?.payload?.response?.status ?? action?.payload?.status;
-    const errors = action?.payload?.errors || action?.payload?.response?.errors || [];
 
-    if (action?.error || isSessionError(status, errors)) {
-      await clearExpiredSession();
-      dispatch({ type: "CORE_AUTH_LOGOUT" });
-    } else if (!getLocalStorage("csrfToken")) {
-      // Mirror the csrftoken cookie so later mutations send a matching X-CSRFToken.
+    if (!action?.error && !getLocalStorage("csrfToken")) {
       const cookieCsrf = getCsrfToken();
       if (cookieCsrf) {
         setLocalStorage("csrfToken", cookieCsrf);

@@ -12,7 +12,7 @@ import {
 } from "./helpers/api";
 import * as Sentry from "@sentry/react";
 import { getLocalStorage, setLocalStorage } from "./helpers/useLocalStorage";
-import { isSessionError, clearExpiredSession, hasStoredAuthSession, isImpersonationError } from "./helpers/api";
+import { isSessionError, clearExpiredSession, isImpersonationError } from "./helpers/api";
 import { isUnauthenticatedRoute, redirectToLogin } from "./helpers/utils";
 
 const REQUESTED_WITH = "webapp";
@@ -484,40 +484,6 @@ export function login(credentials) {
         dispatch(authError({ message: error.message }));
         return { loginStatus: "CORE_AUTH_ERR", message: error.message };
       }
-    } else {
-      if (!hasStoredAuthSession()) {
-        dispatch({ type: "CORE_AUTH_LOGOUT" });
-        return { loginStatus: "CORE_AUTH_LOGOUT", message: "" };
-      }
-
-      const refreshResult = await dispatch(refreshAuthToken());
-      const refreshStatus = refreshResult?.payload?.response?.status;
-      const refreshErrors = refreshResult?.payload?.errors || refreshResult?.payload?.response?.errors || [];
-
-      if (refreshResult?.error || isSessionError(refreshStatus, refreshErrors)) {
-        dispatch({ type: "CORE_STOP_IMPERSONATION" });
-        await clearExpiredSession();
-        dispatch({ type: "CORE_AUTH_LOGOUT" });
-        return { loginStatus: "CORE_AUTH_LOGOUT", message: "" };
-      }
-
-      const action = await dispatch(loadUser());
-      const loadUserStatus = action?.payload?.response?.status ?? action?.payload?.status;
-      const loadUserErrors = action?.payload?.errors || action?.payload?.response?.errors || [];
-
-      if (action?.error || action.type === "CORE_USERS_CURRENT_USER_ERR") {
-        if (isSessionError(loadUserStatus, loadUserErrors)) {
-          dispatch({ type: "CORE_STOP_IMPERSONATION" });
-          await clearExpiredSession();
-          dispatch({ type: "CORE_AUTH_LOGOUT" });
-          return { loginStatus: "CORE_AUTH_LOGOUT", message: "" };
-        }
-      }
-
-      return {
-        loginStatus: action.type,
-        message: action?.payload?.response?.detail ?? "Error occurred while loading user.",
-      };
     }
   };
 }

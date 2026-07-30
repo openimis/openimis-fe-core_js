@@ -2,7 +2,7 @@ import React from "react";
 import _ from "lodash-uuid";
 import { IconButton } from "@mui/material";
 import GetIconComponent from "./icons";
-import { clearLocalStorage, getLocalStorage } from "./useLocalStorage";
+import { clearLocalStorage } from "./useLocalStorage";
 
 const SortIcon = GetIconComponent("UnfoldMore");
 const SortAscIcon = GetIconComponent("ExpandLess");
@@ -205,13 +205,6 @@ export const normalizeGraphqlErrorMessage = (message) =>
     .toLowerCase()
     .replace(/['"]/g, "")
     .trim();
-
-export const hasStoredAuthSession = () => {
-  if (typeof window === "undefined") {
-    return false;
-  }
-  return Boolean(getLocalStorage("csrfToken"));
-};
 
 export const isSessionError = (status, gqlErrors = []) => {
   if (status === 401) {

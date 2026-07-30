@@ -59,11 +59,11 @@ function getCsrfToken() {
     return CSRF_NOT_FOUND;
   }
 
-  const cookies = document.cookie;
-  const cookieArray = cookies.split("; ");
+  const prefix = `${CSRF_TOKEN_NAME}=`;
+  const cookieArray = document.cookie.split("; ");
 
-  const csrfCookie = cookieArray.find((cookie) => cookie.startsWith(CSRF_TOKEN_NAME));
-  return csrfCookie?.split("=")[1] ?? CSRF_NOT_FOUND;
+  const csrfCookie = cookieArray.find((cookie) => cookie.startsWith(prefix));
+  return csrfCookie ? csrfCookie.slice(prefix.length) : CSRF_NOT_FOUND;
 }
 
 export function apiHeaders() {

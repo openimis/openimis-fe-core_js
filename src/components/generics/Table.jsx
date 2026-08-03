@@ -224,6 +224,8 @@ class Table extends Component {
       colSpans = [],
       items,
       itemFormatters,
+      detailRowFormatter = null,
+      onRowClick = null,
       rowHighlighted = null,
       rowHighlightedAlt = null,
       rowSecondaryHighlighted = null,
@@ -373,70 +375,81 @@ class Table extends Component {
               {items &&
                 items.length > 0 &&
                 items.map((i, iidx) => (
-                  <TableRow
-                    key={iidx}
-                    selected={this.isSelected(i)}
-                    onClick={(e) => !selectWithCheckbox && this.select(i, e)}
-                    onContextMenu={onDoubleClick ? () => onDoubleClick(i, true) : undefined}
-                    onDoubleClick={onDoubleClick ? () => onDoubleClick(i) : undefined}
-                    className={clsx(
-                      "tableRow",
-                      !!rowLocked && rowLocked(i) ? "tableLockedRow" : null,
-                      !!rowHighlighted && rowHighlighted(i) ? "tableHighlightedRow" : null,
-                      !!rowHighlightedAlt && rowHighlightedAlt(i) ? "tableHighlightedAltRow" : null,
-                      !!rowSecondaryHighlighted && rowSecondaryHighlighted(i) ? "tableSecondaryHighlightedRow" : null,
-                      !!rowDisabled && rowDisabled(i) ? "tableDisabledRow" : null,
-                      !!onDoubleClick && "clickable",
+                  <React.Fragment key={iidx}>
+                    <TableRow
+                      selected={this.isSelected(i)}
+                      onClick={(e) => {
+                        !selectWithCheckbox && this.select(i, e);
+                        onRowClick?.(i, e);
+                      }}
+                      onContextMenu={onDoubleClick ? () => onDoubleClick(i, true) : undefined}
+                      onDoubleClick={onDoubleClick ? () => onDoubleClick(i) : undefined}
+                      className={clsx(
+                        "tableRow",
+                        !!rowLocked && rowLocked(i) ? "tableLockedRow" : null,
+                        !!rowHighlighted && rowHighlighted(i) ? "tableHighlightedRow" : null,
+                        !!rowHighlightedAlt && rowHighlightedAlt(i) ? "tableHighlightedAltRow" : null,
+                        !!rowSecondaryHighlighted && rowSecondaryHighlighted(i) ? "tableSecondaryHighlightedRow" : null,
+                        !!rowDisabled && rowDisabled(i) ? "tableDisabledRow" : null,
+                        (!!onDoubleClick || !!onRowClick) && "clickable",
+                      )}
+                    >
+                      {selectWithCheckbox && withSelection && (
+                        <TableCell padding="checkbox">
+                          <Checkbox checked={this.isSelected(i)} onChange={(e) => this.select(i, e)} color="primary" />
+                        </TableCell>
+                      )}
+                      {showOrdinalNumber && (
+                        <TableCell
+                          className={clsx(
+                            !!rowLocked && rowLocked(i) ? "tableLockedCell" : null,
+                            !!rowHighlighted && rowHighlighted(i) ? "tableHighlightedCell" : null,
+                            !!rowHighlightedAlt && rowHighlightedAlt(i) ? "tableHighlightedAltCell" : null,
+                            !!rowSecondaryHighlighted && rowSecondaryHighlighted(i)
+                              ? "tableSecondaryHighlightedCell"
+                              : null,
+                            !!rowDisabled && rowDisabled(i) ? "tableDisabledCell" : null,
+                            aligns.length > 0 && aligns[0],
+                          )}
+                          key={`v-${this.calculateOrdinalNumber(iidx, withPagination)}-0`}
+                        >
+                          <span>{this.calculateOrdinalNumber(iidx, withPagination)}</span>
+                        </TableCell>
+                      )}
+                      {localItemFormatters &&
+                        localItemFormatters.map((f, fidx) => {
+                          if (colSpans.length > fidx && !colSpans[fidx]) return null;
+                          // NOTE: The 'f' function can explicitly be set to null, enabling the option to omit
+                          // a column  and suppress its display under specific conditions.
+                          if (f === null) return null;
+                          return (
+                            <TableCell
+                              colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
+                              className={clsx(
+                                !!rowLocked && rowLocked(i) ? "tableLockedCell" : null,
+                                !!rowHighlighted && rowHighlighted(i) ? "tableHighlightedCell" : null,
+                                !!rowHighlightedAlt && rowHighlightedAlt(i) ? "tableHighlightedAltCell" : null,
+                                !!rowSecondaryHighlighted && rowSecondaryHighlighted(i)
+                                  ? "tableSecondaryHighlightedCell"
+                                  : null,
+                                !!rowDisabled && rowDisabled(i) ? "tableDisabledCell" : null,
+                                aligns.length > fidx && aligns[fidx],
+                              )}
+                              key={`v-${iidx}-${fidx}`}
+                            >
+                              {f(i, iidx)}
+                            </TableCell>
+                          );
+                        })}
+                    </TableRow>
+                    {!!detailRowFormatter && detailRowFormatter(i, iidx) && (
+                      <TableRow>
+                        <TableCell colSpan={localItemFormatters.length + (selectWithCheckbox ? 1 : 0) + (showOrdinalNumber ? 1 : 0)}>
+                          {detailRowFormatter(i, iidx)}
+                        </TableCell>
+                      </TableRow>
                     )}
-                  >
-                    {selectWithCheckbox && withSelection && (
-                      <TableCell padding="checkbox">
-                        <Checkbox checked={this.isSelected(i)} onChange={(e) => this.select(i, e)} color="primary" />
-                      </TableCell>
-                    )}
-                    {showOrdinalNumber && (
-                      <TableCell
-                        className={clsx(
-                          !!rowLocked && rowLocked(i) ? "tableLockedCell" : null,
-                          !!rowHighlighted && rowHighlighted(i) ? "tableHighlightedCell" : null,
-                          !!rowHighlightedAlt && rowHighlightedAlt(i) ? "tableHighlightedAltCell" : null,
-                          !!rowSecondaryHighlighted && rowSecondaryHighlighted(i)
-                            ? "tableSecondaryHighlightedCell"
-                            : null,
-                          !!rowDisabled && rowDisabled(i) ? "tableDisabledCell" : null,
-                          aligns.length > 0 && aligns[0],
-                        )}
-                        key={`v-${this.calculateOrdinalNumber(iidx, withPagination)}-0`}
-                      >
-                        <span>{this.calculateOrdinalNumber(iidx, withPagination)}</span>
-                      </TableCell>
-                    )}
-                    {localItemFormatters &&
-                      localItemFormatters.map((f, fidx) => {
-                        if (colSpans.length > fidx && !colSpans[fidx]) return null;
-                        // NOTE: The 'f' function can explicitly be set to null, enabling the option to omit
-                        // a column  and suppress its display under specific conditions.
-                        if (f === null) return null;
-                        return (
-                          <TableCell
-                            colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
-                            className={clsx(
-                              !!rowLocked && rowLocked(i) ? "tableLockedCell" : null,
-                              !!rowHighlighted && rowHighlighted(i) ? "tableHighlightedCell" : null,
-                              !!rowHighlightedAlt && rowHighlightedAlt(i) ? "tableHighlightedAltCell" : null,
-                              !!rowSecondaryHighlighted && rowSecondaryHighlighted(i)
-                                ? "tableSecondaryHighlightedCell"
-                                : null,
-                              !!rowDisabled && rowDisabled(i) ? "tableDisabledCell" : null,
-                              aligns.length > fidx && aligns[fidx],
-                            )}
-                            key={`v-${iidx}-${fidx}`}
-                          >
-                            {f(i, iidx)}
-                          </TableCell>
-                        );
-                      })}
-                  </TableRow>
+                  </React.Fragment>
                 ))}
             </TableBody>
             {!!withPagination && !!count && (

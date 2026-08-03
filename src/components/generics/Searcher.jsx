@@ -572,6 +572,8 @@ class Searcher extends Component {
       fetchedItems,
       errorItems,
       itemFormatters,
+      detailRowFormatter = null,
+      onRowClick = null,
       onDoubleClick,
       actions,
       processing = false,
@@ -715,6 +717,8 @@ class Searcher extends Component {
                     headerActions={this.headerActions(this.state.filters)}
                     aligns={!!aligns && aligns()}
                     itemFormatters={itemFormatters(this.state.filters)}
+                    detailRowFormatter={detailRowFormatter}
+                    onRowClick={onRowClick}
                     rowLocked={(i) => rowLocked(this.state.selection, i)}
                     rowHighlighted={(i) => rowHighlighted(this.state.selection, i)}
                     rowHighlightedAlt={(i) => rowHighlightedAlt(this.state.selection, i)}

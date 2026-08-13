@@ -381,7 +381,8 @@ class Searcher extends Component {
       if (filter.value === null) {
         delete filters[filter.id];
       } else {
-        filters[filter.id] = { value: filter.value, filter: filter.filter };
+        // Fix: include id field in the assigned object to address PR review comment
+        filters[filter.id] = { id: filter.id, value: filter.value, filter: filter.filter };
       }
     });
     this.setState({ filters }, () => {

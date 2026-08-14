@@ -241,5 +241,6 @@
   "roleManagement.editButton.buttonText": "Edit",
   "roleManagement.duplicateButton.buttonText": "Duplicate",
   "roleManagement.deleteButton.buttonText": "Delete",
-  "input.maxLengthReached": "You have reached the maximum number of characters allowed for this field ({max})"
+  "input.maxLengthReached": "You have reached the maximum number of characters allowed for this field ({max})",
+  "core.confirmSelect": "Confirm"
 }

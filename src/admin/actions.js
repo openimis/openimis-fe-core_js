@@ -107,9 +107,6 @@ export function createUser(mm, user, clientMutationLabel) {
     { clientMutationLabel },
   );
 
-  // eslint-disable-next-line no-param-reassign
-  user.clientMutationId = mutation.clientMutationId;
-
   return graphqlWithVariables(
     mutation.operation,
     mutation.variables,
@@ -132,9 +129,6 @@ export function updateUser(mm, user, clientMutationLabel) {
     { clientMutationLabel },
   );
 
-  // eslint-disable-next-line no-param-reassign
-  user.clientMutationId = mutation.clientMutationId;
-
   return graphqlWithVariables(
     mutation.operation,
     mutation.variables,
@@ -145,8 +139,6 @@ export function updateUser(mm, user, clientMutationLabel) {
 
 export function deleteUser(mm, user, clientMutationLabel) {
   const mutation = formatMutation("deleteUser", `uuids: ["${decodeId(user.id)}"]`, clientMutationLabel);
-  // eslint-disable-next-line no-param-reassign
-  user.clientMutationId = mutation.clientMutationId;
   return (dispatch) => {
     dispatch(
       graphql(mutation.payload, ["ADMIN_USER_MUTATION_REQ", "ADMIN_USER_DELETE_RESP", "ADMIN_USER_MUTATION_ERR"], {

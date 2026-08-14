@@ -16,6 +16,7 @@ import {
   GRID_RESPONSIVE_STANDARD,
   GRID_RESPONSIVE_SMALL,
   GRID_RESPONSIVE_HALF,
+  GRID_RESPONSIVE_LARGE
 } from "@openimis/fe-core";
 import { DEFAULT, RIGHT_HEALTHFACILITIES } from "../constants";
 
@@ -248,7 +249,7 @@ class UserFilter extends Component {
             module="admin"
             id="userFilter.userRoles"
             field={
-              <Grid size={GRID_RESPONSIVE_STANDARD} className="item">
+              <Grid size={GRID_RESPONSIVE_LARGE} className="item">
                 <PublishedComponent
                   pubRef="admin.UserRolesPicker"
                   value={this.filterValue("roles")}
@@ -266,7 +267,7 @@ class UserFilter extends Component {
                   <PublishedComponent
                     pubRef="location.HealthFacilityPicker"
                     withNull={true}
-                    value={this.filterValue("healthFacilityId") || ""}
+                    value={this.filterValue("healthFacility") || ""}
                     district={selectedDistrict}
                     onChange={(v) => {
                       onChangeFilters([

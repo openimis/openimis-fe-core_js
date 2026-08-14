@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
+import _ from "lodash"
 
 import { useTheme, styled } from "@mui/material/styles";
 import GetIconComponent from "../../helpers/icons";
@@ -159,10 +160,13 @@ class UserForm extends Component {
     this.setState(setupState(this.props));
   };
 
+  doesUserChange = () => _.isEqual(this.props.user, this.state.user);
+
   canSave = () => {
     const { user } = this.state;
 
     if (!user) return false;
+    if (this.doesUserChange()) return false;
     if (
       !(
         user.lastName &&

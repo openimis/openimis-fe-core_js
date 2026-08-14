@@ -68,6 +68,7 @@ import LanguagePicker from "./pickers/LanguagePicker";
 import AuthorityPicker from "./pickers/AuthorityPicker";
 import Helmet from "./helpers/Helmet";
 import GetIconComponent from "./helpers/icons";
+import ActionMenu from "./components/ActionMenu";
 
 const AccountBox = GetIconComponent("AccountBox");
 const Person = GetIconComponent("Person");
@@ -459,4 +460,5 @@ export {
   RIGHT_MEDICALITEMS,
   RIGHT_USERS,
   RIGHT_LOCATIONS,
+  ActionMenu,
 };

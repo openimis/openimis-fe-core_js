@@ -106,6 +106,11 @@ export function formatMutation(operationName, input, clientMutationLabel, client
       ) {
         clientMutationId
         internalId
+        status
+        success
+        error
+        message
+        metadata
       }
     }`;
   return { clientMutationId, payload };
@@ -144,17 +149,20 @@ export function dispatchMutationReq(state, action) {
 
 export function dispatchMutationResp(state, service, action) {
   const prevMutation = state.mutation || {};
+  const resData = action.payload?.data?.[service];
   const mutation = {
     ...prevMutation,
-    id: action.payload?.data?.[service]?.internalId ?? prevMutation.id ?? null,
+    id: resData?.internalId ?? prevMutation.id ?? null,
+    status: resData?.status ?? prevMutation.status ?? (resData?.internalId ? 2 : 0),
+    success: resData?.success ?? (resData?.status === 2),
+    error: resData?.error ?? prevMutation.error ?? null,
+    message: resData?.message ?? prevMutation.message ?? null,
+    metadata: resData?.metadata ?? prevMutation.metadata ?? null,
   };
   return {
     ...state,
     submittingMutation: false,
-    mutation: {
-      ...state.mutation,
-      id: action.payload?.data?.[service]?.internalId,
-    },
+    mutation,
   };
 }
 

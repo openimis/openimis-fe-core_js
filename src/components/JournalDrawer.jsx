@@ -262,8 +262,10 @@ class JournalDrawer extends Component {
     this.notifiedMutations = new Set();
     this.initialHistoricalLoaded = false;
     (props.mutations || []).forEach((m) => {
-      if (m.clientMutationId) this.notifiedMutations.add(m.clientMutationId);
-      if (m.id) this.notifiedMutations.add(m.id);
+      if (m.status === 1 || m.status === 2) {
+        if (m.clientMutationId) this.notifiedMutations.add(m.clientMutationId);
+        if (m.id) this.notifiedMutations.add(m.id);
+      }
     });
     this.state = {
       pageSize: props.modulesManager.getConf("fe-core", "journalDrawer.pageSize", 5),
@@ -299,10 +301,17 @@ class JournalDrawer extends Component {
           : (intl ? formatMessage(intl, "core", "mutationSuccess") : "Operation completed successfully.");
       }
 
+      let detailText = null;
+      if (m.metadata) {
+        detailText = typeof m.metadata === "object" ? JSON.stringify(m.metadata, null, 2) : String(m.metadata);
+      }
+
       this.props.coreAlert({
         title,
         message: messageText,
+        detail: detailText,
         type: "success",
+        metadata: m.metadata || null,
       });
     } else if (m.status === 1) {
       const title = m.clientMutationLabel
@@ -345,11 +354,16 @@ class JournalDrawer extends Component {
         errorMsgs = [intl ? formatMessage(intl, "core", "mutationError") : "Operation failed."];
       }
 
+      if (!errorDetail && m.metadata) {
+        errorDetail = typeof m.metadata === "object" ? JSON.stringify(m.metadata, null, 2) : String(m.metadata);
+      }
+
       this.props.coreAlert({
         title,
         message: errorMsgs,
         detail: errorDetail,
         type: "error",
+        metadata: m.metadata || null,
       });
     }
   };
@@ -368,29 +382,29 @@ class JournalDrawer extends Component {
     if (prevProps.fetchingHistoricalMutations && !this.props.fetchingHistoricalMutations) {
       if (!this.initialHistoricalLoaded) {
         (this.props.mutations || []).forEach((m) => {
-          if (m.clientMutationId) this.notifiedMutations.add(m.clientMutationId);
-          if (m.id) this.notifiedMutations.add(m.id);
+          if (m.status === 1 || m.status === 2) {
+            if (m.clientMutationId) this.notifiedMutations.add(m.clientMutationId);
+            if (m.id) this.notifiedMutations.add(m.id);
+          }
         });
         this.initialHistoricalLoaded = true;
       }
       this.setState((state, props) => ({
         displayedMutations: [...state.displayedMutations, ...props.mutations],
-        afterCursor: props.mutationsPageInfo.endCursor,
-        hasNextPage: props.mutationsPageInfo.hasNextPage,
+        afterCursor: props.mutationsPageInfo ? props.mutationsPageInfo.endCursor : null,
+        hasNextPage: props.mutationsPageInfo ? props.mutationsPageInfo.hasNextPage : false,
       }));
     } else if (!_.isEqual(prevProps.mutations, this.props.mutations)) {
-      if (this.initialHistoricalLoaded) {
-        (this.props.mutations || []).forEach((m) => {
+      (this.props.mutations || []).forEach((m) => {
+        if (m.status === 1 || m.status === 2) {
           const key = m.clientMutationId || m.id;
           if (key && !this.notifiedMutations.has(key)) {
-            if (m.status === 1 || m.status === 2) {
-              if (m.clientMutationId) this.notifiedMutations.add(m.clientMutationId);
-              if (m.id) this.notifiedMutations.add(m.id);
-              this.notifyMutationResult(m);
-            }
+            if (m.clientMutationId) this.notifiedMutations.add(m.clientMutationId);
+            if (m.id) this.notifiedMutations.add(m.id);
+            this.notifyMutationResult(m);
           }
-        });
-      }
+        }
+      });
       this.setState({
         displayedMutations: [...this.props.mutations],
       });

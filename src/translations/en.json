@@ -163,6 +163,8 @@
   "core.error": "Error",
   "core.mutationSuccess": "Operation completed successfully.",
   "core.mutationError": "Operation failed.",
+  "core.showDetails": "Show details",
+  "core.hideDetails": "Hide details",
   "core.NeDateFormatter.dateOutOfRange": "DATE_OUT_OF_RANGE",
   "core.AuthorityPicker.label": "Authority",
   "core.AuthorityPicker.placeholder": "Search...",

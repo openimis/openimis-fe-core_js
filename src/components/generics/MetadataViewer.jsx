@@ -1,4 +1,5 @@
 import React from "react";
+import { injectIntl } from "react-intl";
 import {
   Table,
   TableBody,
@@ -10,9 +11,16 @@ import {
   Typography,
   Box,
 } from "@mui/material";
+import { formatMessage } from "../../helpers/i18n";
 
-const formatKeyLabel = (key) => {
+const formatKeyLabel = (key, intl, module = "core") => {
   if (!key) return "";
+  if (intl) {
+    const translated = formatMessage(intl, module, `metadata.${key}`);
+    if (translated && !translated.startsWith("?") && translated !== `metadata.${key}`) {
+      return translated;
+    }
+  }
   if (key === "uuid" || key === "id") return "UUID";
   if (key === "chf_id" || key === "chfId") return "CHF ID";
   if (key === "client_mutation_id" || key === "clientMutationId") return "Mutation ID";
@@ -31,7 +39,7 @@ const formatValue = (val) => {
   return String(val);
 };
 
-export function MetadataViewer({ metadata, title = null, style = {} }) {
+export function MetadataViewerComponent({ metadata, title = null, module = "core", intl, style = {} }) {
   if (!metadata) return null;
 
   let parsed = metadata;
@@ -57,11 +65,21 @@ export function MetadataViewer({ metadata, title = null, style = {} }) {
 
   if (entries.length === 0) return null;
 
+  let resolvedTitle = null;
+  if (title === true) {
+    resolvedTitle = formatMessage(intl, "core", "metadataViewer.title") || "Details";
+  } else if (typeof title === "string" && title.trim()) {
+    const translatedTitle = formatMessage(intl, module, title);
+    resolvedTitle = (translatedTitle && !translatedTitle.startsWith("?") && translatedTitle !== title)
+      ? translatedTitle
+      : title;
+  }
+
   return (
     <Box style={{ marginTop: 10, width: "100%", ...style }}>
-      {title && (
+      {resolvedTitle && (
         <Typography variant="caption" style={{ fontWeight: 600, color: "#666", marginBottom: 4, display: "block" }}>
-          {title}
+          {resolvedTitle}
         </Typography>
       )}
       <TableContainer
@@ -90,7 +108,7 @@ export function MetadataViewer({ metadata, title = null, style = {} }) {
                     borderBottom: "1px solid #e2e8f0",
                   }}
                 >
-                  {formatKeyLabel(key)}
+                  {formatKeyLabel(key, intl, module)}
                 </TableCell>
                 <TableCell
                   style={{
@@ -129,4 +147,5 @@ export function MetadataViewer({ metadata, title = null, style = {} }) {
   );
 }
 
+export const MetadataViewer = injectIntl(MetadataViewerComponent);
 export default MetadataViewer;

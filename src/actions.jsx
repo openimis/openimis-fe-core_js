@@ -633,16 +633,20 @@ export function fetchHistoricalMutations(pageSize, afterCursor) {
   return graphql(payload, "CORE_HISTORICAL_MUTATIONS");
 }
 
-export function coreAlert(titleOrObject, message, detail) {
+export function coreAlert(titleOrObject, message, detail, type = "error") {
   let payload;
 
   if (_.isObject(titleOrObject)) {
-    payload = titleOrObject;
+    payload = {
+      type: titleOrObject.type || "error",
+      ...titleOrObject,
+    };
   } else {
     payload = {
       title: titleOrObject,
       message,
       detail,
+      type: type || "error",
     };
   }
 

@@ -27,7 +27,7 @@ import MetadataViewer from "../generics/MetadataViewer";
 
 class AlertDialog extends Component {
   state = {
-    expanded: false,
+    expanded: true,
   };
 
   toggleOpen = () => {

@@ -97,6 +97,35 @@ function isCsrfError(error) {
   return error?.message?.includes("CSRF token missing or incorrect.");
 }
 
+function handleMutationResponseAlert(dispatch, response) {
+  const data = response?.payload?.data;
+  if (data && typeof data === "object") {
+    const mutationKey = Object.keys(data).find((key) => {
+      const val = data[key];
+      return (
+        val &&
+        typeof val === "object" &&
+        ("clientMutationId" in val || "internalId" in val || "metadata" in val || "status" in val)
+      );
+    });
+    if (mutationKey) {
+      const resData = data[mutationKey];
+      if (resData && (resData.status === 1 || resData.status === 2 || resData.success !== undefined || resData.metadata)) {
+        const isSuccess = resData.success !== undefined ? Boolean(resData.success) : (resData.status === 2 || !resData.error);
+        dispatch(
+          coreAlert({
+            title: resData.message || (isSuccess ? "Success" : "Error"),
+            message: isSuccess ? (resData.message || "Operation completed successfully.") : (resData.error || resData.message || "Operation failed."),
+            detail: isSuccess ? null : resData.error,
+            type: isSuccess ? "success" : "error",
+            metadata: resData.metadata || null,
+          })
+        );
+      }
+    }
+  }
+}
+
 export function graphql(payload, type = "GRAPHQL_QUERY", params = {}) {
   let req = type + "_REQ";
   let resp = type + "_RESP";
@@ -130,6 +159,8 @@ export function graphql(payload, type = "GRAPHQL_QUERY", params = {}) {
       if (response?.error) {
         dispatch(coreAlert(formatServerError(response.payload)));
       }
+
+      handleMutationResponseAlert(dispatch, response);
 
       const gqlErrors = response?.payload?.errors || [];
       if (isImpersonationError(gqlErrors)) {
@@ -193,6 +224,7 @@ export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY
         ],
       }),
     );
+    handleMutationResponseAlert(dispatch, response);
     return response;
   };
 }

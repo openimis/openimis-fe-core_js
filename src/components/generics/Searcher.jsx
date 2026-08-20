@@ -381,10 +381,25 @@ class Searcher extends Component {
       if (filter.value === null) {
         delete filters[filter.id];
       } else {
-        filters[filter.id] = { value: filter.value, filter: filter.filter };
+        // Fix: include id field in the assigned object to address PR review comment
+        filters[filter.id] = { id: filter.id, value: filter.value, filter: filter.filter };
       }
     });
-    this.setState({ filters });
+    this.setState({ filters }, () => {
+      if (fltrs.some(f => f.id === 'showHistory')) {
+        this.applyFilters();
+      }
+    });
+  };
+
+  onShowHistory = (value) => {
+    this.onChangeFilters([
+      {
+        id: "showHistory",
+        value: value,
+        filter: `showHistory: ${value}`,
+      },
+    ]);
   };
 
   _notifyFiltersApplied = () => {
@@ -608,6 +623,7 @@ class Searcher extends Component {
       displayClearAllColsButton,
       infoButtonContent = "",
       searcherActionsPosition = "top-right",
+      withHistory = false,
     } = this.props;
     return (
       <StyledSearcher>
@@ -618,6 +634,8 @@ class Searcher extends Component {
             refresh={this.applyFilters}
             del={this.deleteFilter}
             filters={this.state.filters}
+            onShowHistory={withHistory ? this.onShowHistory : null}
+            showHistory={!!this.state.filters.showHistory?.value}
             filterPane={
               <FilterPane
                 filters={this.state.filters}

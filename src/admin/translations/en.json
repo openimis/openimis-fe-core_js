@@ -16,6 +16,7 @@
   "admin.menu.users": "Users",
   "admin.menu.usersProfiles": "Users Profiles",
   "admin.showHistory": "Show historical values",
+  "admin.hideHistory": "Hide historical values",
   "admin.user.CreateUser.mutationLabel": "Create user",
   "admin.user.UserOverview.newTitle": "New User",
   "admin.user.UserOverview.title": "User Details",

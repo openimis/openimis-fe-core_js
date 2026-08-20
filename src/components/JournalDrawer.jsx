@@ -259,14 +259,6 @@ class Messages extends Component {
 class JournalDrawer extends Component {
   constructor(props) {
     super(props);
-    this.notifiedMutations = new Set();
-    this.initialHistoricalLoaded = false;
-    (props.mutations || []).forEach((m) => {
-      if (m.status === 1 || m.status === 2) {
-        if (m.clientMutationId) this.notifiedMutations.add(m.clientMutationId);
-        if (m.id) this.notifiedMutations.add(m.id);
-      }
-    });
     this.state = {
       pageSize: props.modulesManager.getConf("fe-core", "journalDrawer.pageSize", 5),
       afterCursor: null,
@@ -277,96 +269,6 @@ class JournalDrawer extends Component {
       limitMutationLogsQuery: props.modulesManager.getConf("fe-core", "journalDrawer.limitMutationLogsQuery", false),
     };
   }
-
-  notifyMutationResult = (m) => {
-    if (!m || m.status === 0) return;
-    const { intl } = this.props;
-
-    if (m.status === 2) {
-      const title =
-        m.clientMutationLabel ||
-        (intl ? formatMessage(intl, "core", "success") : "Success");
-      let messageText = m.clientMutationDetails || null;
-      if (messageText && typeof messageText === "string") {
-        try {
-          const parsed = JSON.parse(messageText);
-          if (Array.isArray(parsed)) {
-            messageText = parsed.join(", ");
-          }
-        } catch (e) {}
-      }
-      if (!messageText) {
-        messageText = m.clientMutationLabel
-          ? `${m.clientMutationLabel} - ${intl ? formatMessage(intl, "core", "mutationSuccess") : "Completed successfully"}`
-          : (intl ? formatMessage(intl, "core", "mutationSuccess") : "Operation completed successfully.");
-      }
-
-      let detailText = null;
-      if (m.metadata) {
-        detailText = typeof m.metadata === "object" ? JSON.stringify(m.metadata, null, 2) : String(m.metadata);
-      }
-
-      this.props.coreAlert({
-        title,
-        message: messageText,
-        detail: detailText,
-        type: "success",
-        metadata: m.metadata || null,
-      });
-    } else if (m.status === 1) {
-      const title = m.clientMutationLabel
-        ? `${m.clientMutationLabel}`
-        : (intl ? formatMessage(intl, "core", "error") : "Error");
-      let errorMsgs = [];
-      let errorDetail = null;
-
-      try {
-        let raw = m.error;
-        let parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
-        if (typeof parsed === "string") {
-          try {
-            parsed = JSON.parse(parsed);
-          } catch (e) {}
-        }
-
-        if (Array.isArray(parsed)) {
-          errorMsgs = parsed.map((e) =>
-            typeof e === "object" ? e.message || JSON.stringify(e) : String(e)
-          );
-          const details = parsed
-            .map((e) => (typeof e === "object" ? e.detail : null))
-            .filter(Boolean);
-          if (details.length > 0) {
-            errorDetail = details.join("\n");
-          }
-        } else if (parsed && typeof parsed === "object") {
-          if (parsed.message) errorMsgs.push(parsed.message);
-          if (parsed.detail) errorDetail = parsed.detail;
-          if (errorMsgs.length === 0) errorMsgs.push(JSON.stringify(parsed));
-        } else if (parsed) {
-          errorMsgs.push(String(parsed));
-        }
-      } catch (e) {
-        errorMsgs = [m.error || (intl ? formatMessage(intl, "core", "mutationError") : "Operation failed.")];
-      }
-
-      if (errorMsgs.length === 0) {
-        errorMsgs = [intl ? formatMessage(intl, "core", "mutationError") : "Operation failed."];
-      }
-
-      if (!errorDetail && m.metadata) {
-        errorDetail = typeof m.metadata === "object" ? JSON.stringify(m.metadata, null, 2) : String(m.metadata);
-      }
-
-      this.props.coreAlert({
-        title,
-        message: errorMsgs,
-        detail: errorDetail,
-        type: "error",
-        metadata: m.metadata || null,
-      });
-    }
-  };
 
   componentDidMount() {
     if (!this.props.fetchedHistoricalMutations) {
@@ -380,31 +282,12 @@ class JournalDrawer extends Component {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (prevProps.fetchingHistoricalMutations && !this.props.fetchingHistoricalMutations) {
-      if (!this.initialHistoricalLoaded) {
-        (this.props.mutations || []).forEach((m) => {
-          if (m.status === 1 || m.status === 2) {
-            if (m.clientMutationId) this.notifiedMutations.add(m.clientMutationId);
-            if (m.id) this.notifiedMutations.add(m.id);
-          }
-        });
-        this.initialHistoricalLoaded = true;
-      }
       this.setState((state, props) => ({
         displayedMutations: [...state.displayedMutations, ...props.mutations],
         afterCursor: props.mutationsPageInfo ? props.mutationsPageInfo.endCursor : null,
         hasNextPage: props.mutationsPageInfo ? props.mutationsPageInfo.hasNextPage : false,
       }));
     } else if (!_.isEqual(prevProps.mutations, this.props.mutations)) {
-      (this.props.mutations || []).forEach((m) => {
-        if (m.status === 1 || m.status === 2) {
-          const key = m.clientMutationId || m.id;
-          if (key && !this.notifiedMutations.has(key)) {
-            if (m.clientMutationId) this.notifiedMutations.add(m.clientMutationId);
-            if (m.id) this.notifiedMutations.add(m.id);
-            this.notifyMutationResult(m);
-          }
-        }
-      });
       this.setState({
         displayedMutations: [...this.props.mutations],
       });

@@ -1,8 +1,27 @@
 import { useModulesManager } from "./modules";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { refreshAuthToken, login, logout, initialize, graphqlWithVariables, graphqlMutation } from "../actions";
+import { refreshAuthToken, login, logout, initialize, graphqlWithVariables, graphqlMutation, coreAlert } from "../actions";
 import _ from "lodash";
+
+export const enrichMutationOperation = (operation) => {
+  if (typeof operation !== "string") return operation;
+  if (!operation.includes("metadata") && /clientMutationId|internalId/.test(operation)) {
+    return operation.replace(
+      /\{\s*(?:internalId|clientMutationId)[\s\S]*?\}/,
+      `{
+        internalId
+        clientMutationId
+        status
+        success
+        error
+        message
+        metadata
+      }`
+    );
+  }
+  return operation;
+};
 
 export const useDebounceCb = (cb, duration = 0) => {
   const [payload, setPayload] = useState();
@@ -107,8 +126,9 @@ export const useGraphqlMutation = (operation, config) => {
         const variables = {
           input,
         };
+        const enrichedOperation = enrichMutationOperation(operation);
         const result = await dispatch(
-          graphqlMutation(operation, variables, config.type, { operation, input }, config.wait),
+          graphqlMutation(enrichedOperation, variables, config.type, { operation: enrichedOperation, input }, config.wait),
         );
 
         // Handle graphql errors
@@ -116,6 +136,19 @@ export const useGraphqlMutation = (operation, config) => {
 
         if (error) {
           throw new Error(error);
+        }
+
+        const mutationName = Object.keys(result?.data || {})[0];
+        const resData = mutationName ? result.data[mutationName] : null;
+        if (resData && (resData.status === 1 || resData.status === 2 || resData.success !== undefined)) {
+          dispatch(
+            coreAlert({
+              title: resData.message || (resData.success || resData.status === 2 ? "Success" : "Error"),
+              message: resData.error || resData.message || (resData.success || resData.status === 2 ? "Operation completed successfully." : "Operation failed."),
+              type: resData.success || resData.status === 2 ? "success" : "error",
+              metadata: resData.metadata || null,
+            })
+          );
         }
 
         setState({ isLoading: false, error: error });

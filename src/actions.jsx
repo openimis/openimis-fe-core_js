@@ -97,6 +97,50 @@ function isCsrfError(error) {
   return error?.message?.includes("CSRF token missing or incorrect.");
 }
 
+function parseMutationError(error, defaultMsg = "Operation failed.") {
+  if (!error) return { messages: [defaultMsg], detail: null };
+  let parsed = error;
+  if (typeof error === "string") {
+    try {
+      parsed = JSON.parse(error);
+    } catch (e) {
+      return { messages: [error], detail: null };
+    }
+  }
+
+  if (typeof parsed === "string") {
+    try {
+      parsed = JSON.parse(parsed);
+    } catch (e) {}
+  }
+
+  const messages = [];
+  const details = [];
+
+  if (Array.isArray(parsed)) {
+    parsed.forEach((item) => {
+      if (typeof item === "object" && item !== null) {
+        if (item.message) messages.push(item.message);
+        if (item.detail) details.push(item.detail);
+        if (!item.message && !item.detail) messages.push(JSON.stringify(item));
+      } else if (item) {
+        messages.push(String(item));
+      }
+    });
+  } else if (typeof parsed === "object" && parsed !== null) {
+    if (parsed.message) messages.push(parsed.message);
+    if (parsed.detail) details.push(parsed.detail);
+    if (messages.length === 0 && details.length === 0) messages.push(JSON.stringify(parsed));
+  } else if (parsed) {
+    messages.push(String(parsed));
+  }
+
+  return {
+    messages: messages.length > 0 ? messages : [defaultMsg],
+    detail: details.length > 0 ? details.join("\n") : null,
+  };
+}
+
 function handleMutationResponseAlert(dispatch, response) {
   const data = response?.payload?.data;
   if (data && typeof data === "object") {
@@ -112,15 +156,27 @@ function handleMutationResponseAlert(dispatch, response) {
       const resData = data[mutationKey];
       if (resData && (resData.status === 1 || resData.status === 2 || resData.success !== undefined || resData.metadata)) {
         const isSuccess = resData.success !== undefined ? Boolean(resData.success) : (resData.status === 2 || !resData.error);
-        dispatch(
-          coreAlert({
-            title: resData.message || (isSuccess ? "Success" : "Error"),
-            message: isSuccess ? (resData.message || "Operation completed successfully.") : (resData.error || resData.message || "Operation failed."),
-            detail: isSuccess ? null : resData.error,
-            type: isSuccess ? "success" : "error",
-            metadata: resData.metadata || null,
-          })
-        );
+        if (isSuccess) {
+          dispatch(
+            coreAlert({
+              title: resData.message || "Success",
+              message: resData.message || "Operation completed successfully.",
+              type: "success",
+              metadata: resData.metadata || null,
+            })
+          );
+        } else {
+          const { messages, detail } = parseMutationError(resData.error, resData.message || "Operation failed.");
+          dispatch(
+            coreAlert({
+              title: resData.message || "Error",
+              message: messages,
+              detail: detail,
+              type: "error",
+              metadata: resData.metadata || null,
+            })
+          );
+        }
       }
     }
   }

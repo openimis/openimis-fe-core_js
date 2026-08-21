@@ -138,20 +138,7 @@ export const useGraphqlMutation = (operation, config) => {
           throw new Error(error);
         }
 
-        const mutationName = Object.keys(result?.data || {})[0];
-        const resData = mutationName ? result.data[mutationName] : null;
-        if (resData && (resData.status === 1 || resData.status === 2 || resData.success !== undefined)) {
-          dispatch(
-            coreAlert({
-              title: resData.message || (resData.success || resData.status === 2 ? "Success" : "Error"),
-              message: resData.error || resData.message || (resData.success || resData.status === 2 ? "Operation completed successfully." : "Operation failed."),
-              type: resData.success || resData.status === 2 ? "success" : "error",
-              metadata: resData.metadata || null,
-            })
-          );
-        }
-
-        setState({ isLoading: false, error: error });
+        setState({ isLoading: false, error: null });
         if (config.onSuccess) {
           resolve(config.onSuccess(result));
         } else {

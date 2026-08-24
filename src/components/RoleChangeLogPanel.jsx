@@ -10,7 +10,7 @@ import ProgressOrError from "./generics/ProgressOrError";
 import withModulesManager from "../helpers/modules";
 import { formatMessage, formatDateTimeFromISO } from "../helpers/i18n";
 import { formatRoleLabel } from "../helpers/role-label-formatter";
-import { fetchRoleChangeLog } from "../actions";
+import { fetchModulesPermissions, fetchRoleChangeLog } from "../actions";
 import { DEFAULT_PAGE_SIZE, ROWS_PER_PAGE_OPTIONS, ROLE_CHANGE_LOG_TYPE, SYSTEM_AUDIT_USER_ID } from "../constants";
 
 const EMPTY_VALUE = "";
@@ -29,6 +29,10 @@ class RoleChangeLogPanel extends Component {
   };
 
   componentDidMount() {
+    const { fetchedModulePermissions, fetchingModulePermissions, fetchModulesPermissions } = this.props;
+    if (!fetchedModulePermissions && !fetchingModulePermissions) {
+      fetchModulesPermissions();
+    }
     this.query();
   }
 
@@ -175,11 +179,13 @@ const mapStateToProps = (state) => ({
   fetchingRoleChangeLog: state.core.fetchingRoleChangeLog,
   errorRoleChangeLog: state.core.errorRoleChangeLog,
   modulePermissions: state.core.modulePermissions,
+  fetchingModulePermissions: state.core.fetchingModulePermissions,
+  fetchedModulePermissions: state.core.fetchedModulePermissions,
   submittingMutation: state.core.submittingMutation,
 });
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ fetchRoleChangeLog }, dispatch);
+  return bindActionCreators({ fetchModulesPermissions, fetchRoleChangeLog }, dispatch);
 };
 
 export { StyledRoleChangeLogPanel };

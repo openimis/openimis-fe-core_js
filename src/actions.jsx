@@ -30,6 +30,11 @@ const ROLE_FULL_PROJECTION = () => [
 
 const ROLERIGHT_FULL_PROJECTION = () => ["rightId"];
 
+const ROLE_CHANGE_LOG_PROJECTION = () => [
+  "totalCount",
+  "items{timestamp,changeType,field,oldValue,newValue,auditUserId,auditUserName}",
+];
+
 const LANGUAGE_FULL_PROJECTION = () => ["name", "code"];
 
 const MODULEPERMISSION_FULL_PROJECTION = () => ["modulePermsList{moduleName, permissions{permsName, permsValue}}"];
@@ -694,6 +699,14 @@ export function fetchRole(params) {
 export function fetchRoleRights(params) {
   const payload = formatPageQuery("roleRight", params, ROLERIGHT_FULL_PROJECTION());
   return graphql(payload, "CORE_ROLERIGHTS");
+}
+
+export function fetchRoleChangeLog(roleUuid, first, offset) {
+  const filters = [`roleUuid: "${roleUuid}"`];
+  if (!!first) filters.push(`first: ${first}`);
+  if (!!offset) filters.push(`offset: ${offset}`);
+  const payload = formatQuery("roleChangeLog", filters, ROLE_CHANGE_LOG_PROJECTION());
+  return graphql(payload, "CORE_ROLE_CHANGE_LOG");
 }
 
 export function fetchModulesPermissions() {

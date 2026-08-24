@@ -37,6 +37,11 @@ function reducer(
     fetchedRoleRights: false,
     roleRights: [],
     errorRoleRights: null,
+    fetchingRoleChangeLog: false,
+    fetchedRoleChangeLog: false,
+    roleChangeLog: [],
+    roleChangeLogTotalCount: 0,
+    errorRoleChangeLog: null,
     isInitialized: false,
     authError: null,
     paginationPage: 0,
@@ -307,6 +312,28 @@ function reducer(
         ...state,
         fetchingRoleRights: false,
         errorRoleRights: formatServerError(action.payload),
+      };
+    case "CORE_ROLE_CHANGE_LOG_REQ":
+      return {
+        ...state,
+        fetchingRoleChangeLog: true,
+        fetchedRoleChangeLog: false,
+        errorRoleChangeLog: null,
+      };
+    case "CORE_ROLE_CHANGE_LOG_RESP":
+      return {
+        ...state,
+        fetchingRoleChangeLog: false,
+        fetchedRoleChangeLog: true,
+        roleChangeLog: action.payload.data.roleChangeLog?.items ?? [],
+        roleChangeLogTotalCount: action.payload.data.roleChangeLog?.totalCount ?? 0,
+        errorRoleChangeLog: formatGraphQLError(action.payload),
+      };
+    case "CORE_ROLE_CHANGE_LOG_ERR":
+      return {
+        ...state,
+        fetchingRoleChangeLog: false,
+        errorRoleChangeLog: formatServerError(action.payload),
       };
     case "CORE_ROLE_NAME_VALIDATION_FIELDS_REQ":
       return {

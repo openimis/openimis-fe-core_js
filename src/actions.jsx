@@ -703,8 +703,8 @@ export function fetchRoleRights(params) {
 
 export function fetchRoleChangeLog(roleUuid, first, offset) {
   const filters = [`roleUuid: "${formatGQLString(roleUuid)}"`];
-  if (!!first) filters.push(`first: ${first}`);
-  if (!!offset) filters.push(`offset: ${offset}`);
+  if (first) filters.push(`first: ${first}`);
+  if (offset) filters.push(`offset: ${offset}`);
   const payload = formatQuery("roleChangeLog", filters, ROLE_CHANGE_LOG_PROJECTION());
   return graphql(payload, "CORE_ROLE_CHANGE_LOG");
 }

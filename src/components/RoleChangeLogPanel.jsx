@@ -45,7 +45,7 @@ class RoleChangeLogPanel extends Component {
 
   query = () => {
     const { roleUuid, isDuplicate, fetchRoleChangeLog } = this.props;
-    if (!roleUuid || !!isDuplicate) return;
+    if (!roleUuid || isDuplicate) return;
     const { page, pageSize } = this.state;
     fetchRoleChangeLog(roleUuid, pageSize, page * pageSize);
   };
@@ -57,7 +57,7 @@ class RoleChangeLogPanel extends Component {
   translation = (id, fallback) => {
     const { intl } = this.props;
     const key = `core.${id}`;
-    return !!intl.messages[key] ? intl.formatMessage({ id: key }) : fallback;
+    return intl.messages[key] ? intl.formatMessage({ id: key }) : fallback;
   };
 
   rightsByValue = () => {
@@ -80,7 +80,7 @@ class RoleChangeLogPanel extends Component {
     if (!right) return rightId ?? EMPTY_VALUE;
     const { intl } = this.props;
     const key = `${right.moduleName}.${right.permsName}`;
-    return !!intl.messages[key]
+    return intl.messages[key]
       ? intl.formatMessage({ id: key })
       : formatRoleLabel(right.moduleName, right.permsName, true);
   };
@@ -116,8 +116,8 @@ class RoleChangeLogPanel extends Component {
     if (entry.auditUserId === SYSTEM_AUDIT_USER_ID) {
       return formatMessage(intl, "core", "roleManagement.changeLog.author.system");
     }
-    if (!!entry.auditUserName) return entry.auditUserName;
-    if (!!entry.auditUserId) return `#${entry.auditUserId}`;
+    if (entry.auditUserName) return entry.auditUserName;
+    if (entry.auditUserId) return `#${entry.auditUserId}`;
     return formatMessage(intl, "core", "roleManagement.changeLog.author.unknown");
   };
 
@@ -131,7 +131,7 @@ class RoleChangeLogPanel extends Component {
   itemFormatters = () => {
     const { intl, modulesManager } = this.props;
     return [
-      (entry) => (!!entry.timestamp ? formatDateTimeFromISO(modulesManager, intl, entry.timestamp) : EMPTY_VALUE),
+      (entry) => (entry.timestamp ? formatDateTimeFromISO(modulesManager, intl, entry.timestamp) : EMPTY_VALUE),
       (entry) => this.changeTypeLabel(entry.changeType),
       (entry) => this.detail(entry),
       (entry) => this.author(entry),
@@ -148,7 +148,7 @@ class RoleChangeLogPanel extends Component {
       fetchingRoleChangeLog,
       errorRoleChangeLog,
     } = this.props;
-    if (!roleUuid || !!isDuplicate) return null;
+    if (!roleUuid || isDuplicate) return null;
     return (
       <StyledRoleChangeLogPanel>
         <Paper className="paper">

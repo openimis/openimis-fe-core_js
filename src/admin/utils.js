@@ -67,22 +67,6 @@ export const mapUserValuesToInput = (values) => {
   return input;
 };
 
-export const toggleUserRoles = (edited, data, isValid, isEnabled, hasRole, onEditedChanged, roleIsSystem) => {
-  const roles = edited?.roles ?? [];
-
-  if (isValid && isEnabled && !hasRole) {
-    const role = data?.role?.edges?.[0]?.node;
-    if (!role) return;
-    roles.push(role);
-    edited.roles = roles;
-    onEditedChanged({ ...edited });
-  } else if (isValid && !isEnabled) {
-    const filteredRoles = roles.filter((tempRole) => tempRole.isSystem !== roleIsSystem);
-    edited.roles = filteredRoles;
-    onEditedChanged({ ...edited });
-  }
-};
-
 export const setUserTypeEnabled = (user, type, enabled) => {
   const userTypes = user.userTypes ? [...user.userTypes] : [];
   const hasType = userTypes.includes(type);
@@ -94,10 +78,6 @@ export const setUserTypeEnabled = (user, type, enabled) => {
     return { ...user, userTypes: userTypes.filter((x) => x !== type) };
   }
   return user;
-};
-
-export const toggleSwitchButton = (edited, hasRole, hasUserType, setIsEnabled) => {
-  setIsEnabled(() => hasRole || hasUserType);
 };
 
 export const fetchSubstitutionEOs = (dispatch, mm, officerUuid, searchString, villages) => {

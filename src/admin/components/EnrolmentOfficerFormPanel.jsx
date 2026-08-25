@@ -1,39 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 
 import { Grid, Typography, Paper, Switch } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
-import {
-  useTranslations,
-  withModulesManager,
-  PublishedComponent,
-  TextInput,
-  useGraphqlQuery,
-} from "@openimis/fe-core";
+import { useTranslations, withModulesManager, PublishedComponent, TextInput, useGraphqlQuery } from "@openimis/fe-core";
 import { ENROLMENT_OFFICER_USER_TYPE, OFFICER_ROLE_IS_SYSTEM } from "../constants";
-import { toggleUserRoles, toggleSwitchButton, setUserTypeEnabled } from "../utils";
+import { setUserTypeEnabled } from "../utils";
 import EnrolmentVillagesPicker from "./EnrolmentVillagesPicker";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
-  ...theme.paper?.paper ?? {},
-  '& .title': theme.paper?.title ?? {},
-  '& .item': theme.paper?.item ?? {},
+  ...(theme.paper?.paper ?? {}),
+  "& .title": theme.paper?.title ?? {},
+  "& .item": theme.paper?.item ?? {},
 }));
 
 const EnrolmentOfficerFormPanel = (props) => {
   const { edited, modulesManager, onEditedChanged, readOnly } = props;
   const { formatMessage } = useTranslations("admin.EnrolmentOfficerFormPanel", modulesManager);
-  const [isEnabled, setIsEnabled] = useState(false);
 
   const hasOfficerUserType = edited.userTypes?.includes(ENROLMENT_OFFICER_USER_TYPE);
-  const hasOfficerRole = edited.roles
-    ? edited.roles.filter((x) => x.isSystem === OFFICER_ROLE_IS_SYSTEM).length !== 0
-    : false;
+  const hasOfficerRole = edited.roles ? edited.roles.some((x) => x.isSystem === OFFICER_ROLE_IS_SYSTEM) : false;
+  const isEnabled = hasOfficerRole || hasOfficerUserType;
 
-  const {
-    isLoading,
-    data,
-  } = useGraphqlQuery(
+  const { data } = useGraphqlQuery(
     `
       query UserRolesPicker ($system_id: Int) {
         role(systemRoleId: $system_id) {
@@ -48,19 +37,38 @@ const EnrolmentOfficerFormPanel = (props) => {
     { system_id: OFFICER_ROLE_IS_SYSTEM },
   );
 
-  const isValid = !isLoading;
+  // Ensure the system role is present whenever the EO panel is enabled
   useEffect(() => {
-    toggleUserRoles(edited, data, isValid, isEnabled, hasOfficerRole, onEditedChanged, OFFICER_ROLE_IS_SYSTEM);
-  }, [isEnabled, isValid]);
-
-  useEffect(() => {
-    toggleSwitchButton(edited, hasOfficerRole, hasOfficerUserType, setIsEnabled);
-  }, [hasOfficerRole, hasOfficerUserType]);
+    if (isEnabled && !hasOfficerRole) {
+      const role = data?.role?.edges?.[0]?.node;
+      if (role) {
+        const roles = edited.roles ? [...edited.roles] : [];
+        if (!roles.some((r) => r.isSystem === OFFICER_ROLE_IS_SYSTEM)) {
+          onEditedChanged({ ...edited, roles: [...roles, role] });
+        }
+      }
+    }
+  }, [data, isEnabled, hasOfficerRole]);
 
   const handleToggle = () => {
     const nextEnabled = !isEnabled;
-    setIsEnabled(nextEnabled);
-    onEditedChanged(setUserTypeEnabled(edited, ENROLMENT_OFFICER_USER_TYPE, nextEnabled));
+    let newEdited = setUserTypeEnabled(edited, ENROLMENT_OFFICER_USER_TYPE, nextEnabled);
+    if (nextEnabled && !hasOfficerRole) {
+      const role = data?.role?.edges?.[0]?.node;
+      if (role) {
+        const roles = newEdited.roles ? [...newEdited.roles] : [];
+        if (!roles.some((r) => r.isSystem === OFFICER_ROLE_IS_SYSTEM)) {
+          roles.push(role);
+          newEdited = { ...newEdited, roles };
+        }
+      }
+    } else if (!nextEnabled) {
+      newEdited = {
+        ...newEdited,
+        roles: (newEdited.roles || []).filter((r) => r.isSystem !== OFFICER_ROLE_IS_SYSTEM),
+      };
+    }
+    onEditedChanged(newEdited);
   };
 
   return (
@@ -69,12 +77,7 @@ const EnrolmentOfficerFormPanel = (props) => {
         <Grid container justifyContent="space-between" alignItems="center">
           <Typography variant="h6">{formatMessage("title")}</Typography>
           {(edited || !isEnabled) && (
-            <Switch
-              color="secondary"
-              disabled={readOnly}
-              checked={isEnabled}
-              onChange={handleToggle}
-            />
+            <Switch color="secondary" disabled={readOnly} checked={isEnabled} onChange={handleToggle} />
           )}
         </Grid>
       </Grid>

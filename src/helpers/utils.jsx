@@ -43,27 +43,103 @@ export function GetIconFromId(conf, routes, id) {
   return conf || routes[id]?.icon;
 }
 
-export function prepareMenuEntries(rights, intl, entries, routes) {
-  const rightsSet = new Set(rights.map(r => String(r)))
+export const MENU_GROUP_TYPE = "group";
 
-  // Filter entries by rights and convert icon strings to components
-  const filteredEntries = entries
-    .filter((entry) => {
-      const routeRef = entry.route || entry.id;
-      const entryRights = GetRightsFromId(entry.rights, routes, routeRef );
-      return (routeRef !== undefined) && (!entryRights || entryRights.some(er => rightsSet.has(String(er))));
-    })
-    .map((entry) => ({
+// A group is an intermediate level between a main menu and its leaves: it has
+// children but no route of its own. Either flag it with type: "group" or simply
+// nest an `entries` array in it.
+export function isMenuGroup(entry) {
+  return (
+    typeof entry === "object" &&
+    entry !== null &&
+    !entry.route &&
+    (entry.type === MENU_GROUP_TYPE || Array.isArray(entry.entries))
+  );
+}
+
+// Walks groups to collect the leaves only (route-bearing entries).
+export function flattenMenuLeaves(entries) {
+  return ensureArray(entries).reduce(
+    (leaves, entry) => leaves.concat(isMenuGroup(entry) ? flattenMenuLeaves(entry.entries) : [entry]),
+    [],
+  );
+}
+
+function matchesRights(entryRights, rightsSet) {
+  return !entryRights || !entryRights.length || entryRights.some((er) => rightsSet.has(String(er)));
+}
+
+// Prepares one level of menu items. Groups are kept as { type, text, entries }
+// nodes when allowed (i.e. directly under a main menu); deeper nesting is not
+// rendered, so such groups are flattened into their parent.
+function prepareMenuLevel(rightsSet, intl, entries, routes, allowGroups) {
+  const prepared = [];
+
+  ensureArray(entries).forEach((entry) => {
+    if (isMenuGroup(entry)) {
+      const children = prepareMenuLevel(rightsSet, intl, entry.entries, routes, false);
+      if (!children.length) return;
+      if (!allowGroups) {
+        prepared.push(...children);
+        return;
+      }
+      if (!matchesRights(ensureArray(entry.rights), rightsSet)) return;
+      prepared.push({
+        ...entry,
+        type: MENU_GROUP_TYPE,
+        text: getMenuText(entry.text, intl),
+        entries: children,
+      });
+      return;
+    }
+
+    const routeRef = entry.route || entry.id;
+    if (routeRef === undefined) return;
+    if (!matchesRights(GetRightsFromId(entry.rights, routes, routeRef), rightsSet)) return;
+    prepared.push({
       ...entry,
-      icon: GetIconComponent(GetIconFromId(entry.icon, routes, entry.route || entry.id)),
-      text: getMenuText(GetTextFromId(entry.text, routes, entry.route || entry.id), intl),
-      route: "/" + GetRouteFromId(entry.route, routes, entry.id)
-    }));
+      icon: GetIconComponent(GetIconFromId(entry.icon, routes, routeRef)),
+      text: getMenuText(GetTextFromId(entry.text, routes, routeRef), intl),
+      route: "/" + GetRouteFromId(entry.route, routes, entry.id),
+    });
+  });
 
   // Sort by position (default 99 if missing; stable for duplicates)
-  filteredEntries.sort((a, b) => (a.position || 99) - (b.position || 99));
+  prepared.sort((a, b) => (a.position || 99) - (b.position || 99));
 
-  return filteredEntries;
+  return prepared;
+}
+
+// Turns the prepared entries (leaves and level-1.5 groups) into a flat render
+// list: a titled separator opens each group and a plain separator closes it,
+// unless the group is last or immediately followed by another group.
+export function buildMenuItems(entries) {
+  const items = [];
+  const list = ensureArray(entries);
+
+  list.forEach((entry, idx) => {
+    // index-suffixed so duplicated ids cannot collide as React keys
+    const key = `${entry.id || "item"}_${idx}`;
+    if (!isMenuGroup(entry)) {
+      items.push({ kind: "entry", entry, key });
+      return;
+    }
+    items.push({ kind: "groupHeader", text: entry.text, key: `${key}_groupHeader` });
+    ensureArray(entry.entries).forEach((child, childIdx) => {
+      items.push({ kind: "entry", entry: child, key: `${key}_${child.id || childIdx}_${childIdx}` });
+    });
+    const next = list[idx + 1];
+    if (next && !isMenuGroup(next)) {
+      items.push({ kind: "groupFooter", key: `${key}_groupFooter` });
+    }
+  });
+
+  return items;
+}
+
+export function prepareMenuEntries(rights, intl, entries, routes) {
+  const rightsSet = new Set(ensureArray(rights).map((r) => String(r)));
+  return prepareMenuLevel(rightsSet, intl, entries, routes, true);
 }
 
 

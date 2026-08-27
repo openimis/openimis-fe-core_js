@@ -26,7 +26,7 @@ import {
   Box,
 } from "@mui/material";
 import withModulesManager from "../../helpers/modules";
-import { menuEntryMatchesLocationPath } from "../../helpers/utils";
+import { menuEntryMatchesLocationPath, isMenuGroup, buildMenuItems } from "../../helpers/utils";
 
 const StyledMainMenu = styled("div")(({ theme }) => ({
   "& .panel": {
@@ -78,6 +78,27 @@ const StyledMainMenu = styled("div")(({ theme }) => ({
   },
   "& .drawerDivider": {
     // width: 100
+  },
+  "& .menuGroupDivider": {
+    margin: theme.spacing(1, 0),
+    "&::before, &::after": {
+      borderColor: "currentColor",
+      opacity: 0.3,
+    },
+    "& .MuiDivider-wrapper": {
+      fontSize: (theme.menu?.appBar?.fontSize || 14) - 2,
+      fontWeight: 600,
+      textTransform: "uppercase",
+      letterSpacing: "0.08em",
+      opacity: 0.8,
+      padding: theme.spacing(0, 1),
+    },
+  },
+  "& .MuiAccordionDetails-root .menuGroupDivider": {
+    color: theme.palette.text.secondary,
+  },
+  "& .appBarMenuPaper .menuGroupDivider": {
+    color: theme.palette.text.primary,
   },
   "& .menuHeading": {
     fontSize: (theme.menu?.appBar?.fontSize || 14) + 1,
@@ -273,15 +294,27 @@ class MainMenuContribution extends Component {
           <Paper className="appBarMenuPaper" id={`${this.props.header}-menu-list`}>
             <ClickAwayListener onClickAway={this.handleMenuClose}>
               <MenuList>
-                {entries.map((entry, idx) => {
+                {buildMenuItems(entries).map((item) => {
+                  const itemKey = `${this.props.header}_${item.key}`;
+                  if (item.kind === "groupHeader") {
+                    return (
+                      <Divider key={itemKey} component="li" textAlign="left" className="menuGroupDivider">
+                        {item.text}
+                      </Divider>
+                    );
+                  }
+                  if (item.kind === "groupFooter") {
+                    return <Divider key={itemKey} component="li" className="menuGroupDivider" />;
+                  }
+                  const { entry } = item;
                   return (
-                    <div key={`${this.props.header}_${idx}_menuItem`}>
+                    <div key={`${itemKey}_menuItem`}>
                         <MenuItem component={Link} to={entry.route} onClick={(e) => this.handleMenuSelect(e, entry.route)}>
                           <ListItemIcon>{typeof entry.icon === 'function' ? (() => { const Icon = entry.icon; return <Icon />; })() : entry.icon}</ListItemIcon>
                           <ListItemText primary={entry.text} />
                         </MenuItem>
                       {entry.withDivider && (
-                        <Divider key={`${this.props.header}_${idx}_divider`} className="drawerDivider" />
+                        <Divider key={`${itemKey}_divider`} className="drawerDivider" />
                       )}
                     </div>
                   );
@@ -309,11 +342,23 @@ class MainMenuContribution extends Component {
           </AccordionSummary>
           <AccordionDetails>
             <List component="nav">
-              {entries.map((entry, idx) => {
+              {buildMenuItems(entries).map((item) => {
+                const itemKey = `${this.props.header}_${item.key}`;
+                if (item.kind === "groupHeader") {
+                  return (
+                    <Divider key={itemKey} component="li" textAlign="left" className="menuGroupDivider">
+                      {item.text}
+                    </Divider>
+                  );
+                }
+                if (item.kind === "groupFooter") {
+                  return <Divider key={itemKey} component="li" className="menuGroupDivider" />;
+                }
+                const { entry } = item;
                 return (
-                  <Fragment key={`${this.props.header}_${idx}`}>
+                  <Fragment key={itemKey}>
                     <ListItem
-                      key={`${this.props.header}_${idx}_item`}
+                      key={`${itemKey}_item`}
                       component={Link}
                       to={entry.route}
                       onClick={this.toggleExpanded}
@@ -324,7 +369,7 @@ class MainMenuContribution extends Component {
                       <ListItemText primary={entry.text} />
                     </ListItem>
                     {entry.withDivider && (
-                      <Divider key={`${this.props.header}_${idx}_divider`} className="drawerDivider" />
+                      <Divider key={`${itemKey}_divider`} className="drawerDivider" />
                     )}
                   </Fragment>
                 );

@@ -42,6 +42,7 @@
   "core.roleManagement.changeLog.author.unknown": "Unknown",
   "core.roleManagement.changeLog.author.system": "System",
   "core.roleManagement.changeLog.type.ROLE_CREATED": "Role created",
+  "core.roleManagement.changeLog.type.ROLE_DELETED": "Role deleted",
   "core.roleManagement.changeLog.type.ATTRIBUTE_CHANGED": "Attribute changed",
   "core.roleManagement.changeLog.type.RIGHT_GRANTED": "Permission granted",
   "core.roleManagement.changeLog.type.RIGHT_REVOKED": "Permission revoked",

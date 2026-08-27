@@ -325,8 +325,8 @@ function reducer(
         ...state,
         fetchingRoleChangeLog: false,
         fetchedRoleChangeLog: true,
-        roleChangeLog: action.payload.data.roleChangeLog?.items ?? [],
-        roleChangeLogTotalCount: action.payload.data.roleChangeLog?.totalCount ?? 0,
+        roleChangeLog: action.payload?.data?.roleChangeLog?.items ?? [],
+        roleChangeLogTotalCount: action.payload?.data?.roleChangeLog?.totalCount ?? 0,
         errorRoleChangeLog: formatGraphQLError(action.payload),
       };
     case "CORE_ROLE_CHANGE_LOG_ERR":

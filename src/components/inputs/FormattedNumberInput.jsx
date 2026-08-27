@@ -31,9 +31,7 @@ class FormattedNumberInput extends Component {
     if (value == null || isNaN(value)) return "";
 
     const { numberOfDecimals, thousandSeparator } = this.props;
-    const decimals = numberOfDecimals === undefined
-      ? getDecimalPlaces(value)
-      : numberOfDecimals;
+    const decimals = numberOfDecimals === undefined ? getDecimalPlaces(value) : numberOfDecimals;
 
     return new Intl.NumberFormat(thousandSeparator, {
       minimumFractionDigits: decimals,
@@ -45,7 +43,7 @@ class FormattedNumberInput extends Component {
     if (event.key === "." && this.props.numberOfDecimals === 0) {
       event.preventDefault();
     }
-  };  
+  };
 
   parseRawValue = (raw) => parseLocalizedNumber(raw, this.props.thousandSeparator);
 
@@ -54,7 +52,7 @@ class FormattedNumberInput extends Component {
     this.setState({ rawValue: raw });
 
     const value = this.parseRawValue(raw);
-    this.props.onChange(isNaN(value) ? undefined : value);
+    this.props.onChange(isNaN(value) ? null : value);
   };
 
   formatInput = (value, displayZero, displayNa, decimal) => {
@@ -82,11 +80,10 @@ class FormattedNumberInput extends Component {
 
   handleNaBlur = () => {
     if ((isNaN(this.props.value) || this.props.value === "") && this.state.isEdited) {
-      this.props.onChange(undefined);
+      this.props.onChange(null);
     }
     this.setState({ isEdited: false });
   };
-
 
   handleBlur = () => {
     const { intl, displayNa } = this.props;

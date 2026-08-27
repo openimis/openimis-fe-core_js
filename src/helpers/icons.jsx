@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
 const toIconName = (input) => {
-  let name = input.replace(/Icon$/, '').replace(/Outlined$/, '');
+  let name = input.replace(/Icon$/, "").replace(/Outlined$/, "");
   let snake = name
-    .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
-    .replace(/([a-zA-Z])([0-9]+)/g, '$1_$2')
+    .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
+    .replace(/([a-zA-Z])([0-9]+)/g, "$1_$2")
     .toLowerCase()
-    .replace(/__+/g, '_');
+    .replace(/__+/g, "_");
   return snake;
 };
 
@@ -47,19 +47,19 @@ const GetIconComponent = (inputName, options = {}) => {
   }
 
   // === Already a component function ===
-  if (typeof inputName === 'function') {
-    console.log(`GetIconComponent: Received component function → ${inputName.name || 'Anonymous'}`);
+  if (typeof inputName === "function") {
+    console.log(`GetIconComponent: Received component function → ${inputName.name || "Anonymous"}`);
     return inputName;
   }
 
   // === Already a component ===
-  if ( React.isValidElement(inputName)) {
-    console.log(`GetIconComponent: Received component → ${inputName.displayName || inputName.name || 'Unknown'}`);
-    return inputName;   // return as-is (best for performance)
+  if (React.isValidElement(inputName)) {
+    console.log(`GetIconComponent: Received component → ${inputName.displayName || inputName.name || "Unknown"}`);
+    return inputName; // return as-is (best for performance)
   }
 
   // === String case ===
-  if (typeof inputName === 'string') {
+  if (typeof inputName === "string") {
     const iconName = toIconName(inputName);
     return createIconSpan(iconName);
   }

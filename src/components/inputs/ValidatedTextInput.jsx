@@ -3,10 +3,10 @@ import { useDispatch } from "react-redux";
 import GetIconComponent from "../../helpers/icons";
 
 import { Box, CircularProgress, InputAdornment } from "@mui/material";
-const CheckOutlinedIcon = GetIconComponent("CheckOutlined")
+const CheckOutlinedIcon = GetIconComponent("CheckOutlined");
 import clsx from "clsx";
 import { debounce } from "lodash";
-const ErrorOutlineOutlinedIcon = GetIconComponent("ErrorOutlineOutlined")
+const ErrorOutlineOutlinedIcon = GetIconComponent("ErrorOutlineOutlined");
 
 import TextInput from "./TextInput";
 import { useModulesManager } from "../../helpers/modules";
@@ -38,6 +38,8 @@ const ValidatedTextInput = ({
   value,
   invalidValueFormatLabel,
   invalidValueFormat,
+  maxLengthKey,
+  showValidationErrorAsHelperText = false,
 }) => {
   const modulesManager = useModulesManager();
 
@@ -82,8 +84,10 @@ const ValidatedTextInput = ({
           placeholder={placeholder}
           type={type}
           error={error}
+          helperText={showValidationErrorAsHelperText ? error : null}
           value={value}
           inputProps={inputProps}
+          maxLengthKey={maxLengthKey}
           endAdornment={
             <InputAdornment position="end" component={!error ? ValidIcon : InvalidIcon}>
               <>
@@ -107,10 +111,12 @@ const ValidatedTextInput = ({
           value={value}
           readOnly={readOnly}
           error={error}
+          helperText={showValidationErrorAsHelperText ? error : null}
           required={required}
           type={type}
           onChange={debounce(onChange, DEFAULT_DEBOUNCE_TIME)}
           inputProps={inputProps}
+          maxLengthKey={maxLengthKey}
           endAdornment={
             <InputAdornment position="end" component={!error ? ValidIcon : InvalidIcon}>
               <>

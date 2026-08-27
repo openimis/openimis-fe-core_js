@@ -18,20 +18,19 @@ import GetIconComponent from "../helpers/icons";
 function getMenus(modulesManager, key, rights, menuVariant, history, intl) {
   // Get backend overrides
   const backendMenuConfigs = modulesManager.getConf("fe-core", "menus", []);
-  const routes = modulesManager.getRoutes()
+  const routes = modulesManager.getRoutes();
   // get default entries
   const menuEntries = modulesManager.getMenuEntries();
   const unsortedMenuEntries = backendMenuConfigs.length > 0 ? backendMenuConfigs : menuEntries;
   // Default contributionKey to id for all configs (backend/module); override if specified
-  unsortedMenuEntries.forEach(config => {
+  unsortedMenuEntries.forEach((config) => {
     if (!config.contributionKey) {
-      config.contributionKey = config.id;  // Use id as key to pull submenus, e.g., "individual.MainMenu"
+      config.contributionKey = config.id; // Use id as key to pull submenus, e.g., "individual.MainMenu"
     }
     if (!config.entries && !config.submenus && !config.contributionKey) {
       console.warn(`Menu ${config.id} has no entries or submenus or valid contributionKey.`);
     }
-    config.text = getMenuText(config.text, intl)
-
+    config.text = getMenuText(config.name || config.text, intl);
   });
   // Sort by position (default 99 if missing; stable for duplicates)
   const sortedMenuConfigs = unsortedMenuEntries.sort((a, b) => (a.position || 99) - (b.position || 99));
@@ -40,7 +39,8 @@ function getMenus(modulesManager, key, rights, menuVariant, history, intl) {
   const activeMenuId = findActiveMenuId(sortedMenuConfigs, routes);
 
   // Process each menu config into a MainMenuContribution component
-  const menuComponents = sortedMenuConfigs.filter(m => m.text !== undefined )
+  const menuComponents = sortedMenuConfigs
+    .filter((m) => m.text !== undefined)
     .map((config) => {
       const rawEntries = config.entries || config.submenus || [];
       const filteredEntries = prepareMenuEntries(rights, intl, rawEntries, routes);
@@ -50,7 +50,6 @@ function getMenus(modulesManager, key, rights, menuVariant, history, intl) {
 
       // Resolve icon
       const IconComponent = GetIconComponent(config.icon);
-
 
       return (
         <MainMenuContribution
@@ -93,12 +92,11 @@ const MainMenuBar = ({ children = null, contributionKey, reverse = false, menuVa
   const rights = useSelector((state) => state.core?.user?.i_user?.rights || []);
   const components = useMemo(() => {
     const comps = getMenus(modulesManager, contributionKey, rights, menuVariant, history, intl);
-      if (reverse) {
-        comps.reverse();
-      }
-      return comps;
-    }, [contributionKey, reverse, rights, menuVariant, history, intl]
-  );
+    if (reverse) {
+      comps.reverse();
+    }
+    return comps;
+  }, [contributionKey, reverse, rights, menuVariant, history, intl]);
 
   return (
     <>
@@ -109,18 +107,12 @@ const MainMenuBar = ({ children = null, contributionKey, reverse = false, menuVa
           return React.cloneElement(item, {
             key: `${contributionKey}_${idx}`,
             menuVariant,
-            ...delegated
+            ...delegated,
           });
         }
         // Component reference (from old-style core.MainMenu)
         const Comp = item;
-        return (
-          <Comp
-            key={`${contributionKey}_${idx}`}
-            menuVariant={menuVariant}
-            {...delegated}
-          />
-        );
+        return <Comp key={`${contributionKey}_${idx}`} menuVariant={menuVariant} {...delegated} />;
       })}
     </>
   );

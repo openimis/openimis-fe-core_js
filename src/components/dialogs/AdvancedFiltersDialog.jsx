@@ -15,8 +15,8 @@ import AdvancedFilterRowValue from "./AdvancedFilterRowValue";
 import { fetchCustomFilter } from "../../actions";
 import GetIconComponent from "../../helpers/icons";
 
-const AddCircle = GetIconComponent("Add")
-const FilterListIcon = GetIconComponent("FilterList")
+const AddCircle = GetIconComponent("Add");
+const FilterListIcon = GetIconComponent("FilterList");
 import { CLEARED_STATE_FILTER, CUSTOM_FILTERS, DOUBLE_UNDERSCORE, EQUALS_SIGN, WHITE_SPACE } from "../../constants";
 
 const StyledDialog = styled("div")(({ theme }) => ({

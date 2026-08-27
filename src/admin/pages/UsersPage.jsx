@@ -5,7 +5,7 @@ import { injectIntl } from "react-intl";
 
 import { Fab } from "@mui/material";
 import GetIconComponent from "../../helpers/icons";
-const AddIcon = GetIconComponent("Add")
+const AddIcon = GetIconComponent("Add");
 import { useTheme, styled } from "@mui/material/styles";
 
 import {
@@ -19,9 +19,9 @@ import {
 import { RIGHT_USER_ADD, MODULE_NAME } from "../constants";
 import UserSearcher from "../components/UserSearcher";
 
-const StyledDiv = styled('div')(({ theme }) => ({
-  ...theme.page ?? {},
-  '& .fab': theme.fab ?? {},
+const StyledDiv = styled("div")(({ theme }) => ({
+  ...(theme.page ?? {}),
+  "& .fab": theme.fab ?? {},
 }));
 
 class UsersPage extends Component {
@@ -66,8 +66,4 @@ const mapDispatchToProps = (dispatch) => bindActionCreators({ clearCurrentPagina
 
 export { StyledDiv };
 export { UsersPage };
-export default injectIntl(
-  withModulesManager(
-    withHistory(connect(mapStateToProps, mapDispatchToProps)(UsersPage)),
-  ),
-);
+export default injectIntl(withModulesManager(withHistory(connect(mapStateToProps, mapDispatchToProps)(UsersPage))));

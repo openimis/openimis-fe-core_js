@@ -7,9 +7,9 @@ import { CLAIM_ADMIN_USER_TYPE, CLAIM_ADMIN_IS_SYSTEM } from "../constants";
 import { toggleUserRoles, toggleSwitchButton, setUserTypeEnabled } from "../utils";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
-  ...theme.paper?.paper ?? {},
-  '& .title': theme.paper?.title ?? {},
-  '& .item': theme.paper?.item ?? {},
+  ...(theme.paper?.paper ?? {}),
+  "& .title": theme.paper?.title ?? {},
+  "& .item": theme.paper?.item ?? {},
 }));
 
 const ClaimAdministratorFormPanel = (props) => {
@@ -20,10 +20,7 @@ const ClaimAdministratorFormPanel = (props) => {
     ? edited.roles.filter((x) => x.isSystem === CLAIM_ADMIN_IS_SYSTEM).length !== 0
     : false;
   const [isEnabled, setIsEnabled] = useState(false);
-  const {
-    isLoading,
-    data,
-  } = useGraphqlQuery(
+  const { isLoading, data } = useGraphqlQuery(
     `
     query UserRolesPicker ($system_id: Int) {
       role(systemRoleId: $system_id) {
@@ -40,15 +37,7 @@ const ClaimAdministratorFormPanel = (props) => {
   const isValid = !isLoading;
 
   useEffect(() => {
-    toggleUserRoles(
-      edited,
-      data,
-      isValid,
-      isEnabled,
-      hasClaimRole,
-      onEditedChanged,
-      CLAIM_ADMIN_IS_SYSTEM,
-    );
+    toggleUserRoles(edited, data, isValid, isEnabled, hasClaimRole, onEditedChanged, CLAIM_ADMIN_IS_SYSTEM);
   }, [isEnabled, isValid]);
 
   useEffect(() => {
@@ -67,12 +56,7 @@ const ClaimAdministratorFormPanel = (props) => {
         <Grid container justifyContent="space-between" alignItems="center">
           <Typography variant="h6">{formatMessage("title")}</Typography>
           {(edited || !isEnabled) && (
-            <Switch
-              color="secondary"
-              disabled={readOnly}
-              checked={isEnabled}
-              onChange={handleToggle}
-            />
+            <Switch color="secondary" disabled={readOnly} checked={isEnabled} onChange={handleToggle} />
           )}
         </Grid>
       </Grid>

@@ -3,8 +3,8 @@ import { styled } from "@mui/material/styles";
 import { CircularProgress } from "@mui/material";
 import Error from "./Error";
 
-const StyledProgressOrError = styled('div')(({ theme }) => ({
-  '& .progress': {
+const StyledProgressOrError = styled("div")(({ theme }) => ({
+  "& .progress": {
     display: "block",
     marginLeft: "auto",
     marginRight: "auto",

@@ -23,14 +23,7 @@ const FatalErrorPage = (props) => {
     description = error?.message || "An unexpected error occurred";
   }
 
-  return (
-    <ErrorPage
-      status={error?.code || "Unknown"}
-      title={title}
-      description={description}
-      {...props}
-    />
-  );
+  return <ErrorPage status={error?.code || "Unknown"} title={title} description={description} {...props} />;
 };
 
 export default FatalErrorPage;

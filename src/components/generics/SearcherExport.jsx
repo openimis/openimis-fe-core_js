@@ -6,21 +6,21 @@ import { MenuItem, Tooltip, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import GetIconComponent from "../../helpers/icons";
 
-const GetAppIcon = GetIconComponent("GetApp")
+const GetAppIcon = GetIconComponent("GetApp");
 
 import { closeExportConfigDialog, openExportConfigDialog } from "../../actions";
 import { EXPORT_FILE_FORMATS } from "../../constants";
 import { formatMessage } from "../../helpers/i18n";
 import ExportConfigDialog from "../dialogs/ExportConfigDialog";
 
-const StyledSearcherExport = styled('div')(({ theme }) => ({
-  '& .error': {
+const StyledSearcherExport = styled("div")(({ theme }) => ({
+  "& .error": {
     padding: theme.spacing(2),
   },
-  '& .errorHeader': {
+  "& .errorHeader": {
     color: theme.palette.error.main,
   },
-  '& .errorDetail': {
+  "& .errorDetail": {
     color: theme.palette.error.main,
   },
 }));
@@ -123,7 +123,10 @@ function SearcherExport(props) {
 
       <div>
         {entries.map((item, idx) => (
-          <Tooltip key={`selectionsMenu-export-${idx}`} title={formatMessage(intl, "core", "exportSearchResult.tooltip")}>
+          <Tooltip
+            key={`selectionsMenu-export-${idx}`}
+            title={formatMessage(intl, "core", "exportSearchResult.tooltip")}
+          >
             <div>
               {downloadWithIconButton ? (
                 <Button

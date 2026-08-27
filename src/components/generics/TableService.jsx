@@ -4,7 +4,7 @@ import { injectIntl } from "react-intl";
 import _ from "lodash";
 import GetIconComponent from "../../helpers/icons";
 
-const DeleteIcon = GetIconComponent("Delete")
+const DeleteIcon = GetIconComponent("Delete");
 import { styled } from "@mui/material/styles";
 import {
   Typography,
@@ -28,34 +28,34 @@ import TextInput from "../inputs/TextInput";
 import NumberInput from "../inputs/NumberInput";
 import AmountInput from "../inputs/AmountInput";
 
-const StyledTableService = styled('div')(({ theme }) => ({
-  '& .table': theme.table ?? {},
-  '& .tableTitle': theme.table?.title,
-  '& .tableHeader': theme.table?.header,
-  '& .tableRow': theme.table?.row,
-  '& .tableLockedRow': theme.table?.lockedRow,
-  '& .tableLockedCell': theme.table?.lockedCell,
-  '& .tableHighlightedRow': theme.table?.highlightedRow,
-  '& .tableHighlightedCell': theme.table?.highlightedCell,
-  '& .tableHighlightedAltRow': theme.table?.highlightedAltRow,
-  '& .tableHighlightedAltCell': theme.table?.highlightedAltCell,
-  '& .tableDisabledRow': theme.table?.disabledRow,
-  '& .tableDisabledCell': theme.table?.disabledCell,
-  '& .tableFooter': theme.table?.footer,
-  '& .pager': theme.table?.pager,
-  '& .left': {
+const StyledTableService = styled("div")(({ theme }) => ({
+  "& .table": theme.table ?? {},
+  "& .tableTitle": theme.table?.title,
+  "& .tableHeader": theme.table?.header,
+  "& .tableRow": theme.table?.row,
+  "& .tableLockedRow": theme.table?.lockedRow,
+  "& .tableLockedCell": theme.table?.lockedCell,
+  "& .tableHighlightedRow": theme.table?.highlightedRow,
+  "& .tableHighlightedCell": theme.table?.highlightedCell,
+  "& .tableHighlightedAltRow": theme.table?.highlightedAltRow,
+  "& .tableHighlightedAltCell": theme.table?.highlightedAltCell,
+  "& .tableDisabledRow": theme.table?.disabledRow,
+  "& .tableDisabledCell": theme.table?.disabledCell,
+  "& .tableFooter": theme.table?.footer,
+  "& .pager": theme.table?.pager,
+  "& .left": {
     textAlign: "left",
   },
-  '& .right': {
+  "& .right": {
     textAlign: "right",
   },
-  '& .center': {
+  "& .center": {
     textAlign: "center",
   },
-  '& .clickable': {
+  "& .clickable": {
     cursor: "pointer",
   },
-  '& .loader': {
+  "& .loader": {
     position: "absolute",
     top: 0,
     bottom: 0,
@@ -143,7 +143,17 @@ class Table extends Component {
     return value != undefined && value.packagetype != undefined && value.packagetype !== "S";
   };
 
-  renderItemCells = (i, iidx, formatters, aligns, colSpans, rowLocked, rowHighlighted, rowHighlightedAlt, rowDisabled) =>
+  renderItemCells = (
+    i,
+    iidx,
+    formatters,
+    aligns,
+    colSpans,
+    rowLocked,
+    rowHighlighted,
+    rowHighlightedAlt,
+    rowDisabled,
+  ) =>
     formatters.map((f, fidx) => {
       if (colSpans.length > fidx && !colSpans[fidx]) return null;
       return (
@@ -172,9 +182,7 @@ class Table extends Component {
       return rowList
         .filter((row) => row?.props?.children)
         .map((row, rowIdx) => (
-          <TableRow key={`sub-${iidx}-${sfidx}-${rowIdx}`}>
-            {React.Children.toArray(row.props.children)}
-          </TableRow>
+          <TableRow key={`sub-${iidx}-${sfidx}-${rowIdx}`}>{React.Children.toArray(row.props.children)}</TableRow>
         ));
     });
   };
@@ -211,17 +219,15 @@ class Table extends Component {
       error = null,
       forReview,
       subServicesItemsFormatters,
-      subServicesItemsFormattersReview,
-      subServiceHeaders
+      subServiceHeaders,
     } = this.props;
     let localHeaders = [...(headers || [])];
     let localSubServiceHeaders = [...(subServiceHeaders || [])];
     let localPreHeaders = !!preHeaders ? [...preHeaders] : null;
     let localItemFormatters = [...itemFormatters];
     let localSubServicesItemsFormatters = [...(subServicesItemsFormatters || [])];
-    let localsubServicesItemsFormattersReview = [...(subServicesItemsFormattersReview || [])];
     var i = !!headers && headers.length;
-    var localForReview = forReview
+    var localForReview = forReview;
     while (localHeaders && i--) {
       if (modulesManager?.hideField(module, localHeaders[i])) {
         if (!!localPreHeaders) localPreHeaders.splice(i, 1);
@@ -277,9 +283,6 @@ class Table extends Component {
               {items &&
                 items.length > 0 &&
                 items.map((i, iidx) => {
-                  const activeSubFormatters = forReview
-                    ? localsubServicesItemsFormattersReview
-                    : localSubServicesItemsFormatters;
                   const showSubServices = this.shouldShowSubServices(i, iidx, localItemFormatters);
 
                   if (i.claimlinkedService != undefined) {
@@ -323,7 +326,7 @@ class Table extends Component {
                                 </TableCell>
                               ))}
                             </TableRow>
-                            {this.renderSubServiceRows(i, iidx, activeSubFormatters)}
+                            {this.renderSubServiceRows(i, iidx, localSubServicesItemsFormatters)}
                           </Fragment>
                         )}
                       </Fragment>
@@ -356,54 +359,53 @@ class Table extends Component {
                         )}
                       </TableRow>
                       {showSubServices && (
-                        <Fragment>
-                          <TableRow>
-                            {localSubServiceHeaders.map((h, idx) => (
-                              <TableCell key={`sub-header-${iidx}-${idx}`} className="tableHeader">
-                                <FormattedMessage module={module} id={h} />
-                              </TableCell>
-                            ))}
-                          </TableRow>
-                          {this.renderSubServiceRows(i, iidx, activeSubFormatters)}
-                        </Fragment>
+                        <TableRow>
+                          <TableCell colSpan={cleanedHeaders.length || 1}>
+                              <TableRow>
+                                {localSubServiceHeaders.map((h, idx) => (
+                                  <TableCell 
+                                  key={`sub-header-${iidx}-${idx}`} className="tableHeader">
+                                    <FormattedMessage module={module} id={h} />
+                                  </TableCell>
+                                ))}
+                              </TableRow>
+                            {this.renderSubServiceRows(i, iidx, localSubServicesItemsFormatters)}
+                          </TableCell>
+                        </TableRow>
                       )}
                     </Fragment>
                   );
                 })}
             </TableBody>
 
-            {
-              !!withPagination && !!count && (
-                <TableFooter className="tableFooter">
-                  <TableRow>
-                    <TablePagination
-                      className="pager"
-                      colSpan={localItemFormatters.length}
-                      labelRowsPerPage={formatMessage(intl, "core", "rowsPerPage")}
-                      labelDisplayedRows={({ from, to, count }) =>
-                        `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`
-                      }
-                      count={count}
-                      page={page}
-                      rowsPerPage={rowsPerPage}
-                      rowsPerPageOptions={rowsPerPageOptions}
-                      onRowsPerPageChange={(e) => onChangeRowsPerPage(e.target.value)}
-                      onPageChange={onChangePage}
-                    />
-                  </TableRow>
-                </TableFooter>
-              )
-            }
+            {!!withPagination && !!count && (
+              <TableFooter className="tableFooter">
+                <TableRow>
+                  <TablePagination
+                    className="pager"
+                    colSpan={localItemFormatters.length}
+                    labelRowsPerPage={formatMessage(intl, "core", "rowsPerPage")}
+                    labelDisplayedRows={({ from, to, count }) =>
+                      `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`
+                    }
+                    count={count}
+                    page={page}
+                    rowsPerPage={rowsPerPage}
+                    rowsPerPageOptions={rowsPerPageOptions}
+                    onRowsPerPageChange={(e) => onChangeRowsPerPage(e.target.value)}
+                    onPageChange={onChangePage}
+                  />
+                </TableRow>
+              </TableFooter>
+            )}
           </MUITable>
-          {
-            (fetching || error) && (
-              <Grid className="loader" container justifyContent="center" alignItems="center">
-                <ProgressOrError progress={items?.length && fetching} error={error} />{" "}
-                {/* We do not want to display the spinner with the empty table */}
-              </Grid>
-            )
-          }
-        </Box >
+          {(fetching || error) && (
+            <Grid className="loader" container justifyContent="center" alignItems="center">
+              <ProgressOrError progress={items?.length && fetching} error={error} />{" "}
+              {/* We do not want to display the spinner with the empty table */}
+            </Grid>
+          )}
+        </Box>
       </StyledTableService>
     );
   }

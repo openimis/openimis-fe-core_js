@@ -14,8 +14,8 @@ import {
 } from "../index";
 import { roleNameValidationCheck, roleNameValidationClear, roleNameSetValid } from "../actions";
 
-const StyledRoleHeadPanel = styled('div')(({ theme }) => ({
-  '& .item': theme.paper?.item ?? {},
+const StyledRoleHeadPanel = styled("div")(({ theme }) => ({
+  "& .item": theme.paper?.item ?? {},
 }));
 
 class RoleHeadPanel extends FormPanel {
@@ -24,8 +24,7 @@ class RoleHeadPanel extends FormPanel {
     return inputValue !== savedRoleName;
   };
   render() {
-    const { intl, edited, isRequiredFieldsEmpty, isReadOnly, isRoleNameValid, roleNameValidationError } =
-      this.props;
+    const { intl, edited, isRequiredFieldsEmpty, isReadOnly, isRoleNameValid, roleNameValidationError } = this.props;
     return (
       <StyledRoleHeadPanel>
         <Fragment>

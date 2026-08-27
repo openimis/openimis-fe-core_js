@@ -8,7 +8,7 @@ import withModulesManager, { ModulesManagerProvider } from "../helpers/modules";
 import Helmet from "../helpers/Helmet";
 import RequireAuth from "./RequireAuth";
 import FatalErrorPage from "./generics/FatalError";
-import { clearConfirm, toggleCurrentCalendarType } from "../actions";
+import { clearConfirm, toggleCurrentCalendarType, fetchMaxLengthConstraints } from "../actions";
 import AlertDialog from "./dialogs/AlertDialog";
 import ConfirmDialog from "./dialogs/ConfirmDialog";
 import { bindActionCreators } from "redux";
@@ -52,8 +52,8 @@ export const ECONOMIC_UNIT_DIALOG_CONTRIBUTION_KEY = "policyholder.EconomicUnitD
 const ECONOMIC_UNIT_STORAGE_KEY = "userEconomicUnit";
 const PUBLIC_PAGE_LANGUAGE_STORAGE_KEY = "publicPageLanguage";
 
-const StyledApp = styled('div')(({ theme }) => ({
-  '& .fetching': {
+const StyledApp = styled("div")(({ theme }) => ({
+  "& .fetching": {
     margin: 0,
     position: "absolute",
     top: "50%",
@@ -125,16 +125,12 @@ const App = (props) => {
         location.replace(basename);
       }
     }
+    dispatch(fetchMaxLengthConstraints());
   }, []);
 
   useEffect(() => {
     const userHasModalRight = user?.rights ? user.rights.includes(RIGHT_VIEW_EU_MODAL) : false;
-    if (
-      economicUnitConfig &&
-      userHasModalRight &&
-      auth.isAuthenticated &&
-      !economicUnit
-    ) {
+    if (economicUnitConfig && userHasModalRight && auth.isAuthenticated && !economicUnit) {
       setEconomicUnitDialogOpen(true);
     }
 
@@ -206,9 +202,7 @@ const App = (props) => {
                         exact
                         key={route.path}
                         path={"/" + route.path}
-                        render={(props) => (
-                          <route.component modulesManager={modulesManager} {...props} {...others} />
-                        )}
+                        render={(props) => <route.component modulesManager={modulesManager} {...props} {...others} />}
                       />
                     ))}
                     {routes.map((route) => (

@@ -1,4 +1,4 @@
-import zxcvbn from 'zxcvbn';
+import zxcvbn from "zxcvbn";
 
 export const addSuggestion = (suggestions, condition, message) => {
   if (condition) {
@@ -8,7 +8,7 @@ export const addSuggestion = (suggestions, condition, message) => {
 
 export const generateFeedback = (suggestions, formatMessageWithValues) => {
   if (suggestions.length > 0) {
-    const requirements = suggestions.join(', ');
+    const requirements = suggestions.join(", ");
     const formattedMessage = formatMessageWithValues("admin.password.requirements", { requirements });
     return { feedback: formattedMessage, score: 0 };
   }
@@ -23,19 +23,34 @@ export const validatePassword = (password, passwordPolicy, formatMessage, format
   const jsonPasswordPolicy = JSON.parse(passwordPolicy);
   const suggestions = [];
 
-  const {
-    min_length,
-    require_lower_case,
-    require_upper_case,
-    require_numbers,
-    require_special_characters
-  } = jsonPasswordPolicy || {};
+  const { min_length, require_lower_case, require_upper_case, require_numbers, require_special_characters } =
+    jsonPasswordPolicy || {};
 
-  addSuggestion(suggestions, password.length < min_length, formatMessageWithValues("admin.password.minLength", { count: min_length }));
-  addSuggestion(suggestions, require_lower_case && !/[a-z]/.test(password), formatMessageWithValues("admin.password.lowerCase", { count: require_lower_case }));
-  addSuggestion(suggestions, require_upper_case && !/[A-Z]/.test(password), formatMessageWithValues("admin.password.upperCase", { count: require_upper_case }));
-  addSuggestion(suggestions, require_numbers && !/\d/.test(password), formatMessageWithValues("admin.password.numbers", { count: require_numbers }));
-  addSuggestion(suggestions, require_special_characters && !/[^a-zA-Z0-9]/.test(password), formatMessageWithValues("admin.password.specialCharacters", { count: require_special_characters }));
+  addSuggestion(
+    suggestions,
+    password.length < min_length,
+    formatMessageWithValues("admin.password.minLength", { count: min_length }),
+  );
+  addSuggestion(
+    suggestions,
+    require_lower_case && !/[a-z]/.test(password),
+    formatMessageWithValues("admin.password.lowerCase", { count: require_lower_case }),
+  );
+  addSuggestion(
+    suggestions,
+    require_upper_case && !/[A-Z]/.test(password),
+    formatMessageWithValues("admin.password.upperCase", { count: require_upper_case }),
+  );
+  addSuggestion(
+    suggestions,
+    require_numbers && !/\d/.test(password),
+    formatMessageWithValues("admin.password.numbers", { count: require_numbers }),
+  );
+  addSuggestion(
+    suggestions,
+    require_special_characters && !/[^a-zA-Z0-9]/.test(password),
+    formatMessageWithValues("admin.password.specialCharacters", { count: require_special_characters }),
+  );
 
   const feedbackResult = generateFeedback(suggestions, formatMessageWithValues);
   if (feedbackResult) {

@@ -7,7 +7,7 @@ import MuiAccordionDetails from "@mui/material/AccordionDetails";
 import MuiAccordionSummary from "@mui/material/AccordionSummary";
 import GetIconComponent from "../../helpers/icons";
 
-const ExpandMoreIcon = GetIconComponent("ExpandMore")
+const ExpandMoreIcon = GetIconComponent("ExpandMore");
 import Typography from "@mui/material/Typography";
 import { styled, alpha } from "@mui/material/styles";
 import ListItem from "@mui/material/ListItem";
@@ -175,12 +175,11 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   display: "block",
 }));
 
-
 function fetchSubmenuConfig(modulesManager, allEntries, entries, menuId, rights) {
   const menuConfig = modulesManager.getConf("fe-core", "menus", []);
   if (!Array.isArray(menuConfig)) {
     console.error("Malformed fe-core menus config: expected array, got", menuConfig);
-    return [];  // Fallback to empty
+    return []; // Fallback to empty
   }
   const isMenuConfigEmpty = !menuConfig.length;
   const submenuMapping = {};
@@ -205,7 +204,7 @@ function fetchSubmenuConfig(modulesManager, allEntries, entries, menuId, rights)
         return {
           ...entry,
           position: submenuMapping[entry.id] || null,
-          icon: customIcon ? GetIconComponent(customIcon) : (entry.icon || GetIconComponent(null)),
+          icon: customIcon ? GetIconComponent(customIcon) : entry.icon || GetIconComponent(null),
         };
       })
       .filter((entry) => entry.position !== null)
@@ -278,7 +277,12 @@ class MainMenuContribution extends Component {
         <Button ref={this.state.anchorRef} onClick={this.toggleExpanded} className="menuHeading">
           {(this.props.mainMenuVariant === "icon" || this.props.mainMenuVariant === "icon_text") && this.props.icon && (
             <ListItemIcon>
-              {typeof this.props.icon === 'function' ? (() => { const Icon = this.props.icon; return <Icon />; })() : this.props.icon}
+              {typeof this.props.icon === "function"
+                ? (() => {
+                    const Icon = this.props.icon;
+                    return <Icon />;
+                  })()
+                : this.props.icon}
             </ListItemIcon>
           )}
           {(this.props.mainMenuVariant === "text" || this.props.mainMenuVariant === "icon_text") && this.props.header}
@@ -335,9 +339,17 @@ class MainMenuContribution extends Component {
         <Accordion className="panel" expanded={this.state.expanded} onChange={this.toggleExpanded}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />} id={`${this.props.header}-header`}>
             <Box display="flex" alignItems="center">
-              {this.props.icon && <ListItemIcon>{typeof this.props.icon === 'function' ? (() => { const Icon = this.props.icon; return <Icon />; })() : this.props.icon}</ListItemIcon>}
+              {this.props.icon && (
+                <ListItemIcon>
+                  {typeof this.props.icon === "function"
+                    ? (() => {
+                        const Icon = this.props.icon;
+                        return <Icon />;
+                      })()
+                    : this.props.icon}
+                </ListItemIcon>
+              )}
               <Typography className="drawerHeading">{this.props.header}</Typography>
-
             </Box>
           </AccordionSummary>
           <AccordionDetails>
@@ -365,7 +377,16 @@ class MainMenuContribution extends Component {
                       selected={menuEntryMatchesLocationPath(entry)}
                       className={menuEntryMatchesLocationPath(entry) ? "menuItemActive" : undefined}
                     >
-                      {entry.icon && <ListItemIcon>{typeof entry.icon === 'function' ? (() => { const Icon = entry.icon; return <Icon />; })() : entry.icon}</ListItemIcon>}
+                      {entry.icon && (
+                        <ListItemIcon>
+                          {typeof entry.icon === "function"
+                            ? (() => {
+                                const Icon = entry.icon;
+                                return <Icon />;
+                              })()
+                            : entry.icon}
+                        </ListItemIcon>
+                      )}
                       <ListItemText primary={entry.text} />
                     </ListItem>
                     {entry.withDivider && (

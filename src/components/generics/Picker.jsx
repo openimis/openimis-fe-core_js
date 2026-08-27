@@ -16,18 +16,18 @@ import {
 import { formatMessage } from "../../helpers/i18n";
 import GetIconComponent from "../../helpers/icons";
 
-const ClearIcon = GetIconComponent("Clear")
-const SearchIcon = GetIconComponent("Search")
+const ClearIcon = GetIconComponent("Clear");
+const SearchIcon = GetIconComponent("Search");
 import FormattedMessage from "./FormattedMessage";
 import Table from "./Table";
 import FakeInput from "../inputs/FakeInput";
 
-const StyledPicker = styled('div')(({ theme }) => ({
-  '& .label': {
+const StyledPicker = styled("div")(({ theme }) => ({
+  "& .label": {
     color: theme.palette.primary.main,
   },
-  '& .dialogTitle': theme?.dialog?.title ?? {},
-  '& .dialogContent': theme?.dialog?.content ?? {},
+  "& .dialogTitle": theme?.dialog?.title ?? {},
+  "& .dialogContent": theme?.dialog?.content ?? {},
 }));
 
 class RawPickerDialog extends Component {

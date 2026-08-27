@@ -29,7 +29,6 @@ function reducer(
       error: null,
     },
 
-
     usersSummaries: {
       items: [],
       isFetching: false,

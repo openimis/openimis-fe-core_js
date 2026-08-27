@@ -4,10 +4,10 @@ import { styled } from "@mui/material/styles";
 import SelectInput from "../inputs/SelectInput";
 import { formatMessage } from "../../helpers/i18n";
 
-const StyledConstantBasedPicker = styled('div')(({ theme }) => ({
-  width: '100%',
-  '& .MuiFormControl-root': {
-    width: '100%',
+const StyledConstantBasedPicker = styled("div")(({ theme }) => ({
+  width: "100%",
+  "& .MuiFormControl-root": {
+    width: "100%",
   },
 }));
 
@@ -69,7 +69,7 @@ class ConstantBasedPicker extends Component {
         .map((v) => ({
           value: v,
           label: this._formatValue(v),
-        }))
+        })),
     );
     return (
       <StyledConstantBasedPicker>

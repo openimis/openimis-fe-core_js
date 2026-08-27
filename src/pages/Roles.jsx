@@ -7,10 +7,10 @@ import { Grid, FormControlLabel, Checkbox, Fab, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import GetIconComponent from "../helpers/icons";
 
-const AddIcon = GetIconComponent("Add")
-const DeleteIcon = GetIconComponent("Delete")
-const EditIcon = GetIconComponent("Edit")
-const SupervisedUserCircleIcon = GetIconComponent("SupervisedUserCircle")
+const AddIcon = GetIconComponent("Add");
+const DeleteIcon = GetIconComponent("Delete");
+const EditIcon = GetIconComponent("Edit");
+const SupervisedUserCircleIcon = GetIconComponent("SupervisedUserCircle");
 
 import {
   withModulesManager,

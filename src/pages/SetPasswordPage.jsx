@@ -10,16 +10,16 @@ import { useGraphqlMutation } from "../helpers/hooks";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import { fetchPasswordPolicy } from "../actions";
-import { validatePassword } from '../helpers/passwordValidator';
+import { validatePassword } from "../helpers/passwordValidator";
 import { passwordGenerator } from "../helpers/passwordGenerator";
 import GetIconComponent from "../helpers/icons";
 
-const VisibilityIcon = GetIconComponent("Visibility")
-const VisibilityOffIcon = GetIconComponent("VisibilityOff")
-const ClearIcon = GetIconComponent("Clear")
+const VisibilityIcon = GetIconComponent("Visibility");
+const VisibilityOffIcon = GetIconComponent("VisibilityOff");
+const ClearIcon = GetIconComponent("Clear");
 
-const StyledSetPasswordPage = styled('div')(({ theme }) => ({
-  '& .container': {
+const StyledSetPasswordPage = styled("div")(({ theme }) => ({
+  "& .container": {
     position: "absolute",
     top: "30%",
     left: 0,
@@ -28,19 +28,18 @@ const StyledSetPasswordPage = styled('div')(({ theme }) => ({
     display: "flex",
     justifyContent: "center",
   },
-  '& .paper': theme.paper?.paper ?? {},
-  '& .logo': {
+  "& .paper": theme.paper?.paper ?? {},
+  "& .logo": {
     maxHeight: 100,
   },
-  '& .passwordFeedback': {
+  "& .passwordFeedback": {
     marginTop: theme.spacing(1),
   },
-  '& .buttonGroup': {
+  "& .buttonGroup": {
     display: "flex",
     justifyContent: "space-between",
   },
 }));
-
 
 const SetPasswordPage = ({ fetchPasswordPolicy, passwordPolicy }) => {
   const history = useHistory();

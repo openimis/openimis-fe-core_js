@@ -1,6 +1,6 @@
 import { baseApiUrl, logout } from "../actions";
 import { SAML_LOGOUT_PATH } from "../constants";
-import GetIconComponent from "./icons"
+import GetIconComponent from "./icons";
 import React from "react";
 import { clearExpiredSession } from "./api";
 import { clearLocalStorage } from "./useLocalStorage";
@@ -20,8 +20,8 @@ export function getMenuText(text, intl) {
     return text;
   }
   if (text) {
-    const [module, ...rest] = text.split('.');
-    const message = rest.join('.').trim() || text;
+    const [module, ...rest] = text.split(".");
+    const message = rest.join(".").trim() || text;
     const fallback = intl.formatMessage({ module: module, id: message, defaultMessage: text });
     return intl.formatMessage({ id: text, defaultMessage: fallback });
   }
@@ -142,7 +142,6 @@ export function prepareMenuEntries(rights, intl, entries, routes) {
   return prepareMenuLevel(rightsSet, intl, entries, routes, true);
 }
 
-
 export const prepareForComparison = (stateRole, propsRole, roleRights) => {
   const tempStateRole = { ...stateRole };
   delete tempStateRole.roleRights;
@@ -236,7 +235,7 @@ export const redirectToSamlLogout = (e) => {
 
 export const getLanguageNameByCode = (languages, languageCode) => {
   return languages.find((language) => language.code === languageCode)?.name;
-}
+};
 
 export function isEmptyObject(obj) {
   return Object.keys(obj).length === 0;
@@ -245,8 +244,7 @@ export function isEmptyObject(obj) {
 export function getDecimalPlaces(value) {
   if (value == null || Number.isNaN(Number(value))) return 0;
 
-  const str =
-    typeof value === "string" && value.includes(".") ? value.trim() : String(Number(value));
+  const str = typeof value === "string" && value.includes(".") ? value.trim() : String(Number(value));
   if (!str.includes(".")) return 0;
   return str.split(".")[1]?.length || 0;
 }
@@ -266,9 +264,7 @@ export function parseLocalizedNumber(raw, locale = "en") {
     const lastDecimalIndex = normalized.lastIndexOf(decimalSeparator);
     if (lastDecimalIndex !== -1) {
       normalized =
-        normalized.slice(0, lastDecimalIndex) +
-        "." +
-        normalized.slice(lastDecimalIndex + decimalSeparator.length);
+        normalized.slice(0, lastDecimalIndex) + "." + normalized.slice(lastDecimalIndex + decimalSeparator.length);
     }
   }
   return parseFloat(normalized);

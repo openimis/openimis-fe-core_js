@@ -8,7 +8,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Grid from "@mui/material/Grid";
 import { formatMessage } from "../../helpers/i18n";
 import SearcherActionButton from "../generics/SearcherActionButton";
-import { styled } from "@mui/material/styles";
+import { styled, useTheme } from "@mui/material/styles";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import AdvancedFilterRowValue from "./AdvancedFilterRowValue";
@@ -49,6 +49,7 @@ const AdvancedFiltersDialog = ({
   const [isOpen, setIsOpen] = useState(false);
   const [currentFilter, setCurrentFilter] = useState({ field: "", filter: "", type: "", value: "" });
   const [filters, setFilters] = useState([currentFilter]);
+  const theme = useTheme();
 
   const searchCriteriaToArray = () => {
     return hasCustomFilters()
@@ -217,7 +218,7 @@ const AdvancedFiltersDialog = ({
               />
             );
           })}
-          <div style={{ backgroundColor: "#DFEDEF", paddingLeft: "10px", paddingBottom: "10px" }}>
+          <div style={{ backgroundColor: theme.palette.background.default, paddingLeft: "10px", paddingBottom: "10px" }}>
             <AddCircle
               style={{
                 border: "thin solid",

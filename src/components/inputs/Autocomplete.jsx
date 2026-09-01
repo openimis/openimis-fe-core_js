@@ -5,13 +5,11 @@ import { TextField, Paper, Button } from "@mui/material";
 import { useDebounceCb } from "../../helpers/hooks";
 import { useTranslations } from "../../helpers/i18n";
 import { useModulesManager } from "../../helpers/modules";
+import { DEFAULT } from "../../constants";
 
-const StyledAutocomplete = styled("div")(({ theme }) => ({
-  "& .label": {
-    color: theme.palette.primary.main,
-  },
-  "& .MuiAutocomplete-root": {
-    minWidth: "150px",
+const StyledAutocomplete = styled('div')(({ theme }) => ({
+  '& .MuiAutocomplete-root': {
+    minWidth: '150px',
     width: "100%",
   },
   "& .MuiTextField-root": {
@@ -72,6 +70,11 @@ const Autocomplete = (props) => {
   } = props;
   const modulesManager = useModulesManager();
   const minCharLookup = modulesManager.getConf("fe-admin", "usersMinCharLookup", 2);
+  const inputVariant = modulesManager.getConf(
+    "fe-core",
+    "Input.variant",
+    DEFAULT.INPUT_VARIANT,
+  );
   const { formatMessage } = useTranslations("core.Autocomplete", modulesManager);
   const [open, setOpen] = useState(false);
   const [resetKey, setResetKey] = useState(Date.now());
@@ -144,15 +147,15 @@ const Autocomplete = (props) => {
           !!renderInput
             ? renderInput
             : (inputProps) => (
-              <TextField
-                {...inputProps}
-                required={required}
-                InputLabelProps={{ shrink: value !== undefined, className: "label" }}
-                label={withLabel && (label || formatMessage("label"))}
-                placeholder={!readOnly && !hasValue && withPlaceholder ? placeholder || formatMessage("placeholder") : undefined
-                }
-              />
-            )
+                <TextField
+                  {...inputProps}
+                  variant={inputVariant}
+                  required={required}
+                  InputLabelProps={{ shrink: value !== undefined }}
+                  label={withLabel && (label || formatMessage("label"))}
+                  placeholder={!readOnly && !hasValue && withPlaceholder ? placeholder || formatMessage("placeholder") : undefined
+                />
+              )
         }
       />
     </StyledAutocomplete>

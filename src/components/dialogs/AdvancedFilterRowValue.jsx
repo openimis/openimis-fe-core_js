@@ -12,20 +12,20 @@ import CustomFilterTypeStatusPicker from "../../pickers/CustomFilterTypeStatusPi
 import { BOOL_OPTIONS, CLEARED_STATE_FILTER, INTEGER, DATE, STRING, BOOLEAN } from "../../constants";
 
 const StyledGrid = styled(Grid)(({ theme }) => ({
-  "& .item": theme.paper?.item ?? {},
-  backgroundColor: theme.paper?.paper?.backgroundColor ?? "#dbeef0",
-  "& .removeIcon": {
-    transform: "translate(-50%, -50%)",
-    fontSize: "16px",
+  '& .item': theme.paper?.item ?? {},
+  backgroundColor: theme.paper?.paper?.backgroundColor ?? theme.palette.background.default,
+  '& .removeIcon': {
+    transform: 'translate(-50%, -50%)',
+    fontSize: '16px',
     color: theme.palette.primary.main,
     cursor: "pointer",
   },
-  "& .removeIconContainer": {
-    backgroundColor: theme.paper?.paper?.backgroundColor ?? "#dbeef0",
-    width: "25px",
-    height: "25px",
-    marginTop: "25px",
-  },
+  '& .removeIconContainer': {
+    backgroundColor: theme.paper?.paper?.backgroundColor ?? theme.palette.background.default,
+    width: '25px',
+    height: '25px',
+    marginTop: '25px',
+  }
 }));
 
 const AdvancedFilterRowValue = ({

@@ -22,19 +22,23 @@ import nepali_np from "../calendars/NepaliLocaleNp";
 import gregorian from "react-date-object/calendars/gregorian";
 import gregorian_en from "react-date-object/locales/gregorian_en";
 
-const StyledDatePicker = styled("div")(({ theme }) => ({
-  "& .label": {
-    color: theme.palette.primary.main,
+const StyledDatePicker = styled('div')(({ theme }) => ({
+  // Ensure custom (non-MUI) date pickers (e.g. secondary calendar) inherit theme colors
+  '& label': {
+    color: theme.palette.text.secondary,
+  },
+  '& input': {
+    color: theme.palette.text.primary,
   },
   "& .disabledStateVisibilityBoost": {
     "& .MuiFormLabel-root.Mui-disabled": {
-      color: "#181716",
+      color: theme.palette.text.secondary,
     },
     "& .MuiInputBase-input.Mui-disabled": {
-      color: "#5E5B50",
+      color: theme.palette.text.primary,
     },
     "& .MuiInput-underline:before": {
-      borderBottom: `1px dotted #5E5B50`,
+      borderBottom: `1px dotted ${theme.palette.text.disabled || theme.palette.divider}`,
     },
   },
 }));
@@ -52,6 +56,11 @@ class openIMISDatePicker extends Component {
       "Input.disabledVisibilityBoost",
       DEFAULT.DISABLED_VISIBILITY_BOOST,
     );
+    this.inputVariant = props.modulesManager.getConf(
+        "fe-core",
+        "Input.variant",
+        DEFAULT.INPUT_VARIANT,
+      );
   }
 
   state = {
@@ -128,6 +137,7 @@ class openIMISDatePicker extends Component {
       module,
       label,
       readOnly = false,
+      disabled = false,
       required = false,
       fullWidth = true,
       format = "DD-MM-YYYY",
@@ -136,8 +146,15 @@ class openIMISDatePicker extends Component {
       modulesManager,
       minDate,
       maxDate,
+      inputVariant,
       ...otherProps
     } = this.props;
+
+    const toBool = (v) => {
+      if (v === false || v === "false" || v === 0 || v === "0" || v == null || v === "") return false;
+      return !!v;
+    };
+    const isDisabled = toBool(readOnly) || toBool(disabled);
 
     if (isSecondaryCalendarEnabled) {
       const secondCalendarFormatting = modulesManager.getConf("fe-core", "secondCalendarFormatting", format);
@@ -146,13 +163,13 @@ class openIMISDatePicker extends Component {
 
       return (
         <StyledDatePicker>
-          <FormControl fullWidth={fullWidth} required={required}>
-            <label className="label">
-              {label ? formatMessage(intl, module, label) : null}
+          <FormControl fullWidth={fullWidth}>
+            <label>
+              {!!label ? formatMessage(intl, module, label).concat(required ? " *" : "") : null}
             </label>
             <DatePicker
               format={secondCalendarFormatting}
-              disabled={readOnly}
+              disabled={isDisabled}
               value={this.state.value ? this.moveByOneDay(new Date(this.state.value)) : null}
               {...((minDate || disablePast) && this.setMinDate())}
               {...(maxDate && { maxDate: this.moveByOneDay(new Date(maxDate)) })}
@@ -195,25 +212,24 @@ class openIMISDatePicker extends Component {
 
       return (
         <StyledDatePicker>
-          <FormControl fullWidth={fullWidth} required={required}>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <MUIDatePicker
+        <FormControl fullWidth={fullWidth} required={required}>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <MUIDatePicker
                 {...otherProps}
                 maxDate={maxDate ? dayjs(maxDate) : undefined}
                 minDate={minDate ? dayjs(minDate) : undefined}
                 format={format}
-                disabled={readOnly}
-                required={required}
+                disabled={isDisabled}
                 className={clsx({
-                  "disabledStateVisibilityBoost": this.disabledVisibilityBoost && readOnly,
+                  "disabledStateVisibilityBoost": this.disabledVisibilityBoost && isDisabled,
                 })}
                 value={this.state.value}
-                label={label ? formatMessage(intl, module, label) : null}
+                label={!!label ? formatMessage(intl, module, label).concat(required ? " *" : "") : null}
                 onChange={this.dateChange}
                 disablePast={disablePast}
-                slotProps={slotProps}
-              />
-            </LocalizationProvider>
+                variant={inputVariant}
+                />
+              </LocalizationProvider>
           </FormControl>
         </StyledDatePicker>
       );

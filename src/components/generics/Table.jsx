@@ -5,8 +5,8 @@ import _ from "lodash";
 import { connect } from "react-redux";
 import GetIconComponent from "../../helpers/icons";
 
-const DeleteIcon = GetIconComponent("Delete");
-import { styled, alpha } from "@mui/material/styles";
+const DeleteIcon = GetIconComponent("Delete")
+import { styled } from "@mui/material/styles";
 import {
   Typography,
   Divider,
@@ -36,10 +36,10 @@ const StyledTable = styled("div")(({ theme }) => ({
   },
   "& .MuiTableCell-root": {
     padding: theme.spacing(0.5, 1),
-    borderColor: alpha(theme.palette.primary.main, 0.1),
+    borderColor: theme.palette.divider,
   },
   "& .MuiTableRow-root:hover": {
-    backgroundColor: alpha(theme.palette.primary.main, 0.05),
+    backgroundColor: theme.palette.action.hover,
   },
   "& .tableTitle": {
     ...theme.table?.title,

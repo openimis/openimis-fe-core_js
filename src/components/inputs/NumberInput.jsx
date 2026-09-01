@@ -12,7 +12,7 @@ class NumberInput extends Component {
     this.state = {
       isEdited: false,
     };
-    this.thousandSeparator = props.modulesManager.getConf("fe-core", "thousandSeparator", "en")
+    this.thousandSeparator = props.modulesManager.getConf("fe-core", "thousandSeparator", "en");
   }
 
   getEffectiveNumberOfDecimals = () => {
@@ -46,9 +46,7 @@ class NumberInput extends Component {
     if (isNaN(numericValue)) return "";
 
     const effectiveDecimals = this.getEffectiveNumberOfDecimals();
-    const decimals = effectiveDecimals !== undefined
-      ? effectiveDecimals
-      : getDecimalPlaces(numericValue);
+    const decimals = effectiveDecimals !== undefined ? effectiveDecimals : getDecimalPlaces(numericValue);
 
     if (decimals > 0) {
       if (typeof value === "string" && strValue.includes(".") && strValue.split(".")[1].length > 0) {
@@ -62,7 +60,7 @@ class NumberInput extends Component {
 
   handleNaBlur = () => {
     if ((isNaN(this.props.value) || this.props.value === "") && this.state.isEdited) {
-      this.props.onChange(undefined);
+      this.props.onChange(null);
     }
     this.setState({ isEdited: false });
   };

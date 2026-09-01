@@ -1,7 +1,7 @@
 import React from "react";
 import { Grid } from "@mui/material";
-import PublishedComponent from "../components/generics/PublishedComponent"
-import ConstantBasedPicker from "../components/generics/ConstantBasedPicker"
+import PublishedComponent from "../components/generics/PublishedComponent";
+import ConstantBasedPicker from "../components/generics/ConstantBasedPicker";
 import { useModulesManager } from "../helpers/modules";
 import { useTranslations } from "../helpers/i18n";
 import { USER_ACTIVITY_REPORT_ACTIONS, USER_ACTIVITY_REPORT_ENTITIES } from "../constants";

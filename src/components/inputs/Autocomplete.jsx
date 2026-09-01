@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { styled } from "@mui/material/styles";
 import MuiAutocomplete from "@mui/material/Autocomplete";
-import { TextField } from "@mui/material";
+import { TextField, Paper, Button } from "@mui/material";
 import { useDebounceCb } from "../../helpers/hooks";
 import { useTranslations } from "../../helpers/i18n";
 import { useModulesManager } from "../../helpers/modules";
@@ -12,13 +12,34 @@ const StyledAutocomplete = styled('div')(({ theme }) => ({
     minWidth: '150px',
     width: "100%",
   },
-  '& .MuiTextField-root': {
-    minWidth: '150px',
+  "& .MuiTextField-root": {
+    minWidth: "150px",
     width: "100%",
+  },
+  "& .MuiChip-deleteIcon": {
+    fontSize: "16px",
   },
 }));
 
 const defaultGetOptionSelected = (option, v) => option.id === v?.id;
+
+const PaperWithConfirm = ({ multiple, onConfirm, confirmLabel, ...paperProps }) => (
+  <Paper {...paperProps}>
+    {paperProps.children}
+    {multiple && (
+      <Button
+        fullWidth
+        size="small"
+        variant="text"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={onConfirm}
+        sx={{ borderTop: "1px solid", borderColor: "divider" }}
+      >
+        {confirmLabel}
+      </Button>
+    )}
+  </Paper>
+);
 
 const Autocomplete = (props) => {
   const {
@@ -81,6 +102,8 @@ const Autocomplete = (props) => {
     setResetKey(Date.now());
   }, [value]);
 
+  const hasValue = multiple ? value?.length > 0 : !!value;
+
   return (
     <StyledAutocomplete>
       <MuiAutocomplete
@@ -102,7 +125,7 @@ const Autocomplete = (props) => {
         autoHighlight={autoHighlight}
         open={open}
         onOpen={() => setOpen(true)}
-        onClose={() => setOpen(false)}
+        onClose={() => !multiple && setOpen(false)}
         limitTags={limitTags ?? -1}
         autoComplete
         value={value}
@@ -112,6 +135,14 @@ const Autocomplete = (props) => {
         filterOptions={filterOptions}
         filterSelectedOptions={filterSelectedOptions}
         onInputChange={(__, query) => handleInputChange(query)}
+        PaperComponent={(paperProps) => (
+          <PaperWithConfirm
+            {...paperProps}
+            multiple={multiple}
+            onConfirm={() => setOpen(false)}
+            confirmLabel={formatMessage("core.confirmSelect")}
+          />
+        )}
         renderInput={
           !!renderInput
             ? renderInput
@@ -122,7 +153,7 @@ const Autocomplete = (props) => {
                   required={required}
                   InputLabelProps={{ shrink: value !== undefined }}
                   label={withLabel && (label || formatMessage("label"))}
-                  placeholder={!readOnly && withPlaceholder ? (placeholder || formatMessage("placeholder")) : undefined}
+                  placeholder={!readOnly && !hasValue && withPlaceholder ? placeholder || formatMessage("placeholder") : undefined
                 />
               )
         }

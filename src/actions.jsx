@@ -88,6 +88,15 @@ export function journalize(mutation, meta) {
   };
 }
 
+export function fetchMaxLengthConstraints() {
+  const payload = formatQuery("maxLengthConstraints", {}, ["constraints"]);
+  return graphql(payload, "FETCH_MAX_LENGTH_CONSTRAINTS");
+}
+
+function isCsrfError(error) {
+  return error?.message?.includes("CSRF token missing or incorrect.");
+}
+
 export function graphql(payload, type = "GRAPHQL_QUERY", params = {}) {
   let req = type + "_REQ";
   let resp = type + "_RESP";
@@ -399,6 +408,35 @@ export function loadUser() {
     method: "GET",
     types: ["CORE_USERS_CURRENT_USER_REQ", "CORE_USERS_CURRENT_USER_RESP", "CORE_USERS_CURRENT_USER_ERR"],
   });
+}
+
+export function saveCurrentUserDefaultRowsPerPage(defaultRowsPerPage, clientMutationLabel = null) {
+  return async (dispatch) => {
+    try {
+      const mutationResult = await dispatch(
+        graphqlMutation(
+          `
+            mutation ($input: ChangeUserDefaultRowsPerPageMutationInput!) {
+              changeUserDefaultRowsPerPage(input: $input) {
+                internalId
+                clientMutationId
+              }
+            }
+          `,
+          { input: { defaultRowsPerPage, clientMutationLabel } },
+          "PROFILE_DEFAULT_ROWS_PER_PAGE_MUTATION",
+          {},
+        ),
+      );
+      if (!mutationResult || mutationResult?.error) return mutationResult;
+      return dispatch(loadUser());
+    } catch (e) {
+      return { 
+        error: true, 
+        message: e?.message || 'An unexpected error occurred'
+      };
+    }
+  };
 }
 
 export function login(credentials) {

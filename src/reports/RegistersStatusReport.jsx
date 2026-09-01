@@ -16,10 +16,11 @@ const RegistersStatusReport = (props) => {
           pubRef="location.LocationPicker"
           onChange={(region) =>
             setValues({
-                ...values,
-                region,
-                district:null,
-          })}
+              ...values,
+              region,
+              district: null,
+            })
+          }
           value={values.region}
           locationLevel={0}
           label={formatMessage("RegistersStatusReport.region")}
@@ -30,9 +31,10 @@ const RegistersStatusReport = (props) => {
           pubRef="location.LocationPicker"
           onChange={(district) =>
             setValues({
-                ...values,
-                district,
-          })}
+              ...values,
+              district,
+            })
+          }
           value={values.district}
           parentLocation={values.region}
           locationLevel={1}

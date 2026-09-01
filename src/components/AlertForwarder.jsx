@@ -11,7 +11,7 @@ class AlertForwarder extends Component {
       this.props.coreAlert(
         formatMessage(this.props.intl, "core", "FatalError.title"),
         formatMessage(this.props.intl, "core", "FatalError.message"),
-        this.props.alert
+        this.props.alert,
       );
     }
   }

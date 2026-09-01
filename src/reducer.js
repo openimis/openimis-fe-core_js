@@ -390,6 +390,28 @@ function reducer(
         fetchingCustomFilters: false,
         errorCustomFilters: formatServerError(action.payload),
       };
+    case "FETCH_MAX_LENGTH_CONSTRAINTS_REQ":
+      return {
+        ...state,
+        fetchingMaxLengthConstraints: true,
+        fetchedMaxLengthConstraints: false,
+        maxLengthConstraints: [],
+        errorMaxLengthConstraints: null,
+      };
+    case "FETCH_MAX_LENGTH_CONSTRAINTS_RESP":
+      return {
+        ...state,
+        fetchingMaxLengthConstraints: false,
+        fetchedMaxLengthConstraints: true,
+        maxLengthConstraints: action.payload?.data?.maxLengthConstraints || [],
+        errorMaxLengthConstraints: formatGraphQLError(action.payload),
+      };
+    case "FETCH_MAX_LENGTH_CONSTRAINTS_ERR":
+      return {
+        ...state,
+        fetchingMaxLengthConstraints: false,
+        errorMaxLengthConstraints: formatServerError(action.payload),
+      };
     case "CORE_ROLE_MUTATION_REQ":
       return dispatchMutationReq(state, action);
     case "CORE_ROLE_MUTATION_ERR":

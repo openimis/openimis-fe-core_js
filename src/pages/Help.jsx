@@ -6,7 +6,7 @@ import { useModulesManager } from "../helpers/modules";
 import { CORE_MIS_CONFLUENCE_URL, DEFAULT_URL, MODULE_NAME } from "../constants";
 import { useTranslations } from "../helpers/i18n";
 import GetIconComponent from "../helpers/icons";
-const HelpOutline = GetIconComponent("HelpOutline")
+const HelpOutline = GetIconComponent("HelpOutline");
 const StyledHelp = styled("div")(({ theme }) => ({
   "& .button": {
     color: theme.palette.secondary.main,

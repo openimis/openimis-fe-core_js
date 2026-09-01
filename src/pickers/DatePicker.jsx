@@ -30,7 +30,7 @@ const StyledDatePicker = styled('div')(({ theme }) => ({
   '& input': {
     color: theme.palette.text.primary,
   },
-  '& .disabledStateVisibilityBoost': {
+  "& .disabledStateVisibilityBoost": {
     "& .MuiFormLabel-root.Mui-disabled": {
       color: theme.palette.text.secondary,
     },
@@ -78,9 +78,7 @@ class openIMISDatePicker extends Component {
   }
 
   dateChange = (d, context) => {
-    // MUI fires onChange with null while the user is still typing (e.g. partial year in DD-MM-YYYY).
-    // Ignore those intermediate invalid states so the field does not clear day/month sections.
-    if ((d && !d.isValid()) || (!d && context?.validationError)) {
+    if ((d && !d.isValid()) || (!d && context?.validationError && context.validationError !== 'required')) {
       return;
     }
     const jsDate = d ? d.toDate() : null;
@@ -93,7 +91,7 @@ class openIMISDatePicker extends Component {
 
   secondaryCalendarDateChange = (d) => {
     this.setState({ value: toISODate(d.toDate()) }, (i) =>
-      !!this.props.onChange ? this.props.onChange(toISODate(d.toDate())) : null,
+      this.props.onChange ? this.props.onChange(toISODate(d.toDate())) : null,
     );
   };
 
@@ -173,8 +171,8 @@ class openIMISDatePicker extends Component {
               format={secondCalendarFormatting}
               disabled={isDisabled}
               value={this.state.value ? this.moveByOneDay(new Date(this.state.value)) : null}
-              {...((!!minDate || disablePast) && this.setMinDate())}
-              {...(!!maxDate && { maxDate: this.moveByOneDay(new Date(maxDate)) })}
+              {...((minDate || disablePast) && this.setMinDate())}
+              {...(maxDate && { maxDate: this.moveByOneDay(new Date(maxDate)) })}
               onChange={this.secondaryCalendarDateChange}
               highlightToday={false}
               calendar={this.getDictionaryValueOrDefault(this.secondaryCalendarsOptions, secondCalendarType)}
@@ -188,25 +186,51 @@ class openIMISDatePicker extends Component {
         </StyledDatePicker>
       );
     } else {
+      const slotProps = {
+        ...otherProps.slotProps,
+        actionBar: {
+          ...(otherProps.slotProps?.actionBar ?? undefined),
+          actions: otherProps.slotProps?.actionBar?.actions ?? ["clear", "cancel", "accept"],
+        },
+        toolbar: {
+          ...(otherProps.slotProps?.toolbar ?? undefined),
+          hidden: otherProps.slotProps?.toolbar?.hidden ?? false,
+          sx: {
+            backgroundColor: "primary.main",
+            color: "primary.contrastText",
+            "& .MuiTypography-root": {
+              color: "white",
+            },
+          },
+        },
+        textField: {
+          ...(otherProps.slotProps?.textField ?? undefined),
+          required,
+          InputLabelProps: { className: "label" },
+        },
+      };
+
       return (
         <StyledDatePicker>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <MUIDatePicker
-              {...otherProps}
-              maxDate={maxDate ? dayjs(maxDate) : undefined}
-              minDate={minDate ? dayjs(minDate) : undefined}
-              format={format}
-              disabled={isDisabled}
-              className={clsx({
-                "disabledStateVisibilityBoost": this.disabledVisibilityBoost && isDisabled,
-              })}
-              value={this.state.value}
-              label={!!label ? formatMessage(intl, module, label).concat(required ? " *" : "") : null}
-              onChange={this.dateChange}
-              disablePast={disablePast}
-              variant={inputVariant}
-              />
-            </LocalizationProvider>
+        <FormControl fullWidth={fullWidth} required={required}>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <MUIDatePicker
+                {...otherProps}
+                maxDate={maxDate ? dayjs(maxDate) : undefined}
+                minDate={minDate ? dayjs(minDate) : undefined}
+                format={format}
+                disabled={isDisabled}
+                className={clsx({
+                  "disabledStateVisibilityBoost": this.disabledVisibilityBoost && isDisabled,
+                })}
+                value={this.state.value}
+                label={!!label ? formatMessage(intl, module, label).concat(required ? " *" : "") : null}
+                onChange={this.dateChange}
+                disablePast={disablePast}
+                variant={inputVariant}
+                />
+              </LocalizationProvider>
+          </FormControl>
         </StyledDatePicker>
       );
     }
@@ -219,6 +243,4 @@ const mapStateToProps = (state) => ({
 
 export { StyledDatePicker };
 export { openIMISDatePicker };
-export default injectIntl(
-  withModulesManager(withHistory(connect(mapStateToProps, null)(openIMISDatePicker))),
-);
+export default injectIntl(withModulesManager(withHistory(connect(mapStateToProps, null)(openIMISDatePicker))));

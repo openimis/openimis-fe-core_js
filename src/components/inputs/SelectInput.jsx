@@ -6,7 +6,7 @@ import { MenuItem, IconButton, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import GetIconComponent from "../../helpers/icons";
 
-const ClearIcon = GetIconComponent("Clear")
+const ClearIcon = GetIconComponent("Clear");
 import FormattedMessage from "../generics/FormattedMessage";
 import TextInput from "./TextInput";
 import { formatMessage } from "../../helpers/i18n";

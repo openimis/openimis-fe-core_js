@@ -3,12 +3,12 @@ import React from "react";
 import { Typography, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import GetIconComponent from "../helpers/icons";
-const ArrowBackIcon = GetIconComponent("ArrowBack")
+const ArrowBackIcon = GetIconComponent("ArrowBack");
 
 import { useHistory } from "../helpers/history";
 
-const StyledErrorPage = styled('div')(({ theme }) => ({
-  '& .container': {
+const StyledErrorPage = styled("div")(({ theme }) => ({
+  "& .container": {
     textAlign: "center",
     height: "70vh",
     display: "flex",
@@ -16,21 +16,21 @@ const StyledErrorPage = styled('div')(({ theme }) => ({
     justifyContent: "center",
     alignItems: "center",
   },
-  '& .logo': {
+  "& .logo": {
     verticalAlign: "middle",
     margin: theme.spacing(2),
     maxHeight: theme.spacing(16),
   },
-  '& .title': {
+  "& .title": {
     margin: theme.spacing(2),
     textTransform: "uppercase",
     fontWeight: "bold",
   },
-  '& .description': {
+  "& .description": {
     margin: theme.spacing(2),
     fontSize: "18px",
   },
-  '& .button': {
+  "& .button": {
     marginTop: theme.spacing(2),
   },
 }));

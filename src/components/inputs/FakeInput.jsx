@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import { styled } from "@mui/material/styles";
 import { FormControl, InputBase } from "@mui/material";
 
-const StyledFakeInput = styled('div')(({ theme }) => ({
-  '& .fakeInput': theme.fakeInput,
+const StyledFakeInput = styled("div")(({ theme }) => ({
+  "& .fakeInput": theme.fakeInput,
 }));
 
 class FakeInput extends Component {

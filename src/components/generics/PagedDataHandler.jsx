@@ -32,7 +32,7 @@ class PagedDataHandler extends Component {
         afterCursor: null,
         beforeCursor: null,
       },
-      (e) => this.query()
+      (e) => this.query(),
     );
   };
 
@@ -44,7 +44,7 @@ class PagedDataHandler extends Component {
           beforeCursor: null,
           afterCursor: props.pageInfo.endCursor,
         }),
-        (e) => this.query()
+        (e) => this.query(),
       );
     } else if (nbr < this.state.page) {
       this.setState(
@@ -53,7 +53,7 @@ class PagedDataHandler extends Component {
           beforeCursor: props.pageInfo.startCursor,
           afterCursor: null,
         }),
-        (e) => this.query()
+        (e) => this.query(),
       );
     }
   };

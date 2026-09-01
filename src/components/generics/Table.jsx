@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import clsx from "clsx";
 import { injectIntl } from "react-intl";
 import _ from "lodash";
+import { connect } from "react-redux";
 import GetIconComponent from "../../helpers/icons";
 
 const DeleteIcon = GetIconComponent("Delete")
@@ -20,11 +21,13 @@ import {
   Grid,
   TablePagination,
   Checkbox,
+  Tooltip,
 } from "@mui/material";
 import FormattedMessage from "./FormattedMessage";
 import ProgressOrError from "./ProgressOrError";
 import withModulesManager from "../../helpers/modules";
 import { formatMessage, formatMessageWithValues } from "../../helpers/i18n";
+import { saveCurrentUserDefaultRowsPerPage } from "../../actions";
 
 const StyledTable = styled("div")(({ theme }) => ({
   "& .table": {
@@ -76,11 +79,24 @@ const StyledTable = styled("div")(({ theme }) => ({
     right: 0,
     background: "rgba(0, 0, 0, 0.12)",
   },
+  "& .paginationWrapper": {
+    display: "flex",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    width: "100%",
+  },
+  "& .lockControl": {
+    display: "flex",
+    alignItems: "center",
+    marginRight: theme.spacing(2),
+  },
 }));
 
 class Table extends Component {
   state = {
     selection: {},
+    isRowsPerPageLocked: false,
+    ordinalNumberFrom: null,
   };
 
   _atom = (a) =>
@@ -96,6 +112,9 @@ class Table extends Component {
         selection: this._atom(props.selection || []),
       }));
     }
+    const rowsPerPage = this.getCurrentRowsPerPage();
+    const userDefaultRowsPerPage = this.props.user?.i_user?.default_rows_per_page;
+    this.setState({ isRowsPerPageLocked: userDefaultRowsPerPage === rowsPerPage });
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -113,7 +132,27 @@ class Table extends Component {
         (e) => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection)),
       );
     }
+    const prevUserDefaultRowsPerPage = prevProps.user?.i_user?.default_rows_per_page;
+    const userDefaultRowsPerPage = this.props.user?.i_user?.default_rows_per_page;
+    const rowsPerPage = this.getCurrentRowsPerPage();
+    if (prevUserDefaultRowsPerPage !== userDefaultRowsPerPage) {
+      this.setState({ isRowsPerPageLocked: userDefaultRowsPerPage === rowsPerPage });
+    }
   }
+
+  getCurrentRowsPerPage = () => {
+    const { pageSize, rowsPerPageOptions = [10, 20, 50] } = this.props;
+    return Number(pageSize || rowsPerPageOptions[0]);
+  };
+
+  onToggleRowsPerPageLock = async (e) => {
+    const { intl } = this.props;
+    const isRowsPerPageLocked = e.target.checked;
+    this.setState({ isRowsPerPageLocked });
+    const defaultRowsPerPage = isRowsPerPageLocked ? this.getCurrentRowsPerPage() : null;
+    const clientMutationLabel = formatMessage(intl, "core", "Table.lockRowsPerPage.mutationLabel");
+    await this.props.saveCurrentUserDefaultRowsPerPage(defaultRowsPerPage, clientMutationLabel);
+  };
 
   itemIdentifier = (i) => {
     if (!!this.props.itemIdentifier) {
@@ -126,7 +165,6 @@ class Table extends Component {
   isSelected = (i) => !!this.props.withSelection && !!this.state.selection[this.itemIdentifier(i)];
 
   select = (i, e) => {
-    // block normal href only for left click
     if (e.type === "click" || this.props.selectWithCheckbox) {
       if (!this.props.withSelection) return;
       let s = this.state.selection;
@@ -256,6 +294,7 @@ class Table extends Component {
     if (showOrdinalNumber) {
       localHeaders.unshift("core.Table.ordinalNumberHeader");
     }
+
     return (
       <StyledTable>
         <Box position="relative" overflow="auto">
@@ -387,8 +426,6 @@ class Table extends Component {
                     {localItemFormatters &&
                       localItemFormatters.map((f, fidx) => {
                         if (colSpans.length > fidx && !colSpans[fidx]) return null;
-                        // NOTE: The 'f' function can explicitly be set to null, enabling the option to omit
-                        // a column  and suppress its display under specific conditions.
                         if (f === null) return null;
                         return (
                           <TableCell
@@ -415,29 +452,41 @@ class Table extends Component {
             {!!withPagination && !!count && (
               <TableFooter className="tableFooter">
                 <TableRow>
-                  <TablePagination
-                    className="pager"
-                    colSpan={localItemFormatters.length + (selectWithCheckbox ? 1 : 0)}
-                    labelRowsPerPage={formatMessage(intl, "core", "rowsPerPage")}
-                    labelDisplayedRows={({ from, to, count }) =>
-                      `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`
-                    }
-                    count={count}
-                    page={page}
-                    rowsPerPage={rowsPerPage}
-                    rowsPerPageOptions={rowsPerPageOptions}
-                    onRowsPerPageChange={(e) => onChangeRowsPerPage(e.target.value)}
-                    onPageChange={onChangePage}
-
-                  />
+                  <TableCell colSpan={localItemFormatters.length + (selectWithCheckbox ? 1 : 0)}>
+                    <Box className="paginationWrapper">
+                      <Box className="lockControl">
+                        <Tooltip title={formatMessage(intl, "core", "Table.lockRowsPerPage.tooltip")}>
+                          <Checkbox checked={this.state.isRowsPerPageLocked} onChange={this.onToggleRowsPerPageLock} />
+                        </Tooltip>
+                        {formatMessage(intl, "core", "Table.lockRowsPerPage.label")}
+                      </Box>
+                      <TablePagination
+                        className="pager"
+                        component="div"
+                        labelRowsPerPage={formatMessage(intl, "core", "rowsPerPage")}
+                        labelDisplayedRows={({ from, to, count }) => {
+                          if (this.state.ordinalNumberFrom !== from) this.setState({ ordinalNumberFrom: from });
+                          return `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`;
+                        }}
+                        count={count}
+                        page={page}
+                        rowsPerPage={rowsPerPage}
+                        rowsPerPageOptions={rowsPerPageOptions}
+                        SelectProps={{ disabled: this.state.isRowsPerPageLocked }}
+                        onRowsPerPageChange={(e) =>
+                          !this.state.isRowsPerPageLocked && onChangeRowsPerPage?.(e.target.value)
+                        }
+                        onPageChange={onChangePage}
+                      />
+                    </Box>
+                  </TableCell>
                 </TableRow>
               </TableFooter>
             )}
           </MUITable>
           {(fetching || error) && (
             <Grid className="loader" container justifyContent="center" alignItems="center">
-              <ProgressOrError progress={items?.length && fetching} error={error} />{" "}
-              {/* We do not want to display the spinner with the empty table */}
+              <ProgressOrError progress={items?.length && fetching} error={error} />
             </Grid>
           )}
         </Box>
@@ -447,4 +496,13 @@ class Table extends Component {
 }
 
 export { StyledTable };
-export default withModulesManager(injectIntl(Table));
+
+const mapStateToProps = (state) => ({
+  user: state.core?.user,
+});
+
+const mapDispatchToProps = {
+  saveCurrentUserDefaultRowsPerPage,
+};
+
+export default withModulesManager(injectIntl(connect(mapStateToProps, mapDispatchToProps)(Table)));

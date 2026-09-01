@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { withModulesManager, useTranslations, PublishedComponent, ProgressOrError } from "@openimis/fe-core";
 import GetIconComponent from "../../helpers/icons";
 
-const DeleteIcon = GetIconComponent("Delete")
+const DeleteIcon = GetIconComponent("Delete");
 import { styled } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
-const AddIcon = GetIconComponent("Add")
+const AddIcon = GetIconComponent("Add");
 import {
   TableContainer,
   TableHead,
@@ -21,15 +21,15 @@ import {
 import { fetchDataFromDistrict, clearDistrictData } from "../actions";
 
 const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
-  '& .footer': {
+  "& .footer": {
     marginInline: 16,
     marginBlock: 12,
   },
-  '& .headerTitle': theme.table?.title ?? {},
-  '& .actionCell': {
+  "& .headerTitle": theme.table?.title ?? {},
+  "& .actionCell": {
     width: 60,
   },
-  '& .header': theme.table?.header ?? {},
+  "& .header": theme.table?.header ?? {},
 }));
 
 const groupVillagesByMunicipality = (villages) => {
@@ -166,8 +166,8 @@ const EnrolmentVillagesPicker = (props) => {
   return (
     <StyledTableContainer component={Paper}>
       <Table size="small">
-                    <TableHead className="header">
-              <TableRow className="headerTitle">
+        <TableHead className="header">
+          <TableRow className="headerTitle">
             <TableCell>{formatMessage("table.municipality")}</TableCell>
             <TableCell>{formatMessage("table.villages")}</TableCell>
             <TableCell></TableCell>
@@ -207,7 +207,7 @@ const EnrolmentVillagesPicker = (props) => {
                   locationLevel={3}
                 />
               </TableCell>
-                                <TableCell className="actionCell">
+              <TableCell className="actionCell">
                 <IconButton disabled={readOnly} onClick={() => onRemoveRow(item)}>
                   <DeleteIcon />
                 </IconButton>

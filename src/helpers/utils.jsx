@@ -79,11 +79,11 @@ function prepareMenuLevel(rightsSet, intl, entries, routes, allowGroups) {
     if (isMenuGroup(entry)) {
       const children = prepareMenuLevel(rightsSet, intl, entry.entries, routes, false);
       if (!children.length) return;
+      if (!matchesRights(ensureArray(entry.rights), rightsSet)) return;
       if (!allowGroups) {
         prepared.push(...children);
         return;
       }
-      if (!matchesRights(ensureArray(entry.rights), rightsSet)) return;
       prepared.push({
         ...entry,
         type: MENU_GROUP_TYPE,

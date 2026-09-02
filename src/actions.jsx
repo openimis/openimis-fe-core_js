@@ -97,6 +97,91 @@ function isCsrfError(error) {
   return error?.message?.includes("CSRF token missing or incorrect.");
 }
 
+function parseMutationError(error, defaultMsg = "Operation failed.") {
+  if (!error) return { messages: [defaultMsg], detail: null };
+  let parsed = error;
+  if (typeof error === "string") {
+    try {
+      parsed = JSON.parse(error);
+    } catch (e) {
+      return { messages: [error], detail: null };
+    }
+  }
+
+  if (typeof parsed === "string") {
+    try {
+      parsed = JSON.parse(parsed);
+    } catch (e) {}
+  }
+
+  const messages = [];
+  const details = [];
+
+  if (Array.isArray(parsed)) {
+    parsed.forEach((item) => {
+      if (typeof item === "object" && item !== null) {
+        if (item.message) messages.push(item.message);
+        if (item.detail) details.push(item.detail);
+        if (!item.message && !item.detail) messages.push(JSON.stringify(item));
+      } else if (item) {
+        messages.push(String(item));
+      }
+    });
+  } else if (typeof parsed === "object" && parsed !== null) {
+    if (parsed.message) messages.push(parsed.message);
+    if (parsed.detail) details.push(parsed.detail);
+    if (messages.length === 0 && details.length === 0) messages.push(JSON.stringify(parsed));
+  } else if (parsed) {
+    messages.push(String(parsed));
+  }
+
+  return {
+    messages: messages.length > 0 ? messages : [defaultMsg],
+    detail: details.length > 0 ? details.join("\n") : null,
+  };
+}
+
+function handleMutationResponseAlert(dispatch, response) {
+  const data = response?.payload?.data;
+  if (data && typeof data === "object") {
+    const mutationKey = Object.keys(data).find((key) => {
+      const val = data[key];
+      return (
+        val &&
+        typeof val === "object" &&
+        ("clientMutationId" in val || "internalId" in val || "metadata" in val || "status" in val)
+      );
+    });
+    if (mutationKey) {
+      const resData = data[mutationKey];
+      if (resData && (resData.status === 1 || resData.status === 2 || resData.success !== undefined || resData.metadata)) {
+        const isSuccess = resData.success !== undefined ? Boolean(resData.success) : (resData.status === 2 || !resData.error);
+        if (isSuccess) {
+          dispatch(
+            coreAlert({
+              title: resData.message || "Success",
+              message: resData.message || "Operation completed successfully.",
+              type: "success",
+              metadata: resData.metadata || null,
+            })
+          );
+        } else {
+          const { messages, detail } = parseMutationError(resData.error, resData.message || "Operation failed.");
+          dispatch(
+            coreAlert({
+              title: resData.message || "Error",
+              message: messages,
+              detail: detail,
+              type: "error",
+              metadata: resData.metadata || null,
+            })
+          );
+        }
+      }
+    }
+  }
+}
+
 export function graphql(payload, type = "GRAPHQL_QUERY", params = {}) {
   let req = type + "_REQ";
   let resp = type + "_RESP";
@@ -130,6 +215,8 @@ export function graphql(payload, type = "GRAPHQL_QUERY", params = {}) {
       if (response?.error) {
         dispatch(coreAlert(formatServerError(response.payload)));
       }
+
+      handleMutationResponseAlert(dispatch, response);
 
       const gqlErrors = response?.payload?.errors || [];
       if (isImpersonationError(gqlErrors)) {
@@ -193,6 +280,7 @@ export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY
         ],
       }),
     );
+    handleMutationResponseAlert(dispatch, response);
     return response;
   };
 }
@@ -602,6 +690,7 @@ export function fetchMutation(clientMutationId) {
     [
       "id",
       "status",
+      "success",
       "error",
       "clientMutationId",
       "clientMutationLabel",
@@ -633,16 +722,20 @@ export function fetchHistoricalMutations(pageSize, afterCursor) {
   return graphql(payload, "CORE_HISTORICAL_MUTATIONS");
 }
 
-export function coreAlert(titleOrObject, message, detail) {
+export function coreAlert(titleOrObject, message, detail, type = "error") {
   let payload;
 
   if (_.isObject(titleOrObject)) {
-    payload = titleOrObject;
+    payload = {
+      type: titleOrObject.type || "error",
+      ...titleOrObject,
+    };
   } else {
     payload = {
       title: titleOrObject,
       message,
       detail,
+      type: type || "error",
     };
   }
 

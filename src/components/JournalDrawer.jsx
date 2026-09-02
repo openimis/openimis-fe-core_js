@@ -30,7 +30,9 @@ const CheckIcon = GetIconComponent("CheckCircleOutline");
 const ErrorIcon = GetIconComponent("ErrorOutline");
 const ExpandLessIcon = GetIconComponent("ExpandLess");
 const ExpandMoreIcon = GetIconComponent("ExpandMore");
-import { fetchMutation, fetchHistoricalMutations } from "../actions";
+import { fetchMutation, fetchHistoricalMutations, coreAlert } from "../actions";
+import { injectIntl } from "react-intl";
+import { formatMessage } from "../helpers/i18n";
 import withModulesManager from "../helpers/modules";
 import { getLocalStorage, setLocalStorage } from "../helpers/useLocalStorage";
 import moment from "moment";
@@ -293,8 +295,8 @@ class JournalDrawer extends Component {
     if (prevProps.fetchingHistoricalMutations && !this.props.fetchingHistoricalMutations) {
       this.setState((state, props) => ({
         displayedMutations: [...state.displayedMutations, ...props.mutations],
-        afterCursor: props.mutationsPageInfo.endCursor,
-        hasNextPage: props.mutationsPageInfo.hasNextPage,
+        afterCursor: props.mutationsPageInfo ? props.mutationsPageInfo.endCursor : null,
+        hasNextPage: props.mutationsPageInfo ? props.mutationsPageInfo.hasNextPage : false,
       }));
     } else if (!_.isEqual(prevProps.mutations, this.props.mutations)) {
       this.setState({
@@ -568,7 +570,7 @@ const mapStateToProps = (state, props) => ({
 });
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ fetchMutation, fetchHistoricalMutations }, dispatch);
+  return bindActionCreators({ fetchMutation, fetchHistoricalMutations, coreAlert }, dispatch);
 };
 
 const JournalDrawerWithTheme = (props) => {
@@ -578,4 +580,4 @@ const JournalDrawerWithTheme = (props) => {
 
 export { StyledJournalDrawer };
 export { Messages };
-export default withModulesManager(connect(mapStateToProps, mapDispatchToProps)(JournalDrawerWithTheme));
+export default injectIntl(withModulesManager(connect(mapStateToProps, mapDispatchToProps)(JournalDrawerWithTheme)));

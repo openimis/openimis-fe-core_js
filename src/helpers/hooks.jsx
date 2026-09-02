@@ -1,8 +1,27 @@
 import { useModulesManager } from "./modules";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { refreshAuthToken, login, logout, initialize, graphqlWithVariables, graphqlMutation } from "../actions";
+import { refreshAuthToken, login, logout, initialize, graphqlWithVariables, graphqlMutation, coreAlert } from "../actions";
 import _ from "lodash";
+
+export const enrichMutationOperation = (operation) => {
+  if (typeof operation !== "string") return operation;
+  if (!operation.includes("metadata") && /clientMutationId|internalId/.test(operation)) {
+    return operation.replace(
+      /\{\s*(?:internalId|clientMutationId)[\s\S]*?\}/,
+      `{
+        internalId
+        clientMutationId
+        status
+        success
+        error
+        message
+        metadata
+      }`
+    );
+  }
+  return operation;
+};
 
 export const useDebounceCb = (cb, duration = 0) => {
   const [payload, setPayload] = useState();
@@ -107,8 +126,9 @@ export const useGraphqlMutation = (operation, config) => {
         const variables = {
           input,
         };
+        const enrichedOperation = enrichMutationOperation(operation);
         const result = await dispatch(
-          graphqlMutation(operation, variables, config.type, { operation, input }, config.wait),
+          graphqlMutation(enrichedOperation, variables, config.type, { operation: enrichedOperation, input }, config.wait),
         );
 
         // Handle graphql errors
@@ -118,7 +138,7 @@ export const useGraphqlMutation = (operation, config) => {
           throw new Error(error);
         }
 
-        setState({ isLoading: false, error: error });
+        setState({ isLoading: false, error: null });
         if (config.onSuccess) {
           resolve(config.onSuccess(result));
         } else {

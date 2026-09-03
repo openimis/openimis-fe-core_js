@@ -2,7 +2,7 @@ import React from "react";
 import _ from "lodash-uuid";
 import { IconButton } from "@mui/material";
 import GetIconComponent from "./icons";
-import { clearLocalStorage, getLocalStorage } from "./useLocalStorage";
+import { clearLocalStorage } from "./useLocalStorage";
 
 const SortIcon = GetIconComponent("UnfoldMore");
 const SortAscIcon = GetIconComponent("ExpandLess");
@@ -189,44 +189,21 @@ export function formatGraphQLError(payload) {
       };
 }
 
-const SESSION_ERROR_MESSAGES = new Set([
-  "csrftoken",
-  "unauthorized",
-  "user not authorized for this operation",
-  "authentication credentials were not provided",
-  "csrf token missing or incorrect",
-  "error decoding signature",
-  "invalid token",
-  "not authenticated",
-]);
-
 export const normalizeGraphqlErrorMessage = (message) =>
   String(message || "")
     .toLowerCase()
     .replace(/['"]/g, "")
     .trim();
 
-export const hasStoredAuthSession = () => {
-  if (typeof window === "undefined") {
-    return false;
-  }
-  return Boolean(getLocalStorage("csrfToken"));
-};
+// CSRF failures come back as HTTP 200 with the error in the body, so match by message.
+export const isCsrfError = (error) =>
+  normalizeGraphqlErrorMessage(error?.message).includes("csrf token missing or incorrect");
 
-export const isSessionError = (status, gqlErrors = []) => {
-  if (status === 401) {
-    return true;
-  }
-
-  return gqlErrors.some((error) => {
-    const message = normalizeGraphqlErrorMessage(error?.message);
-    return (
-      SESSION_ERROR_MESSAGES.has(message) ||
-      message.includes("csrf token missing or incorrect") ||
-      message.includes("authentication credentials were not provided")
-    );
-  });
-};
+// True when the session needs re-authentication: HTTP 401 or a CSRF failure.
+// Name is a misnomer (not a generic session error); kept to avoid a coordinated
+// export rename in openimis-fe_js — isReauthRequired would fit better.
+export const isSessionError = (status, gqlErrors = []) =>
+  status === 401 || gqlErrors.some(isCsrfError);
 
 export const isImpersonationError = (gqlErrors = []) => {
   return gqlErrors.some((error) => {

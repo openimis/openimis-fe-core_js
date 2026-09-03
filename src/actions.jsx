@@ -12,7 +12,7 @@ import {
 } from "./helpers/api";
 import * as Sentry from "@sentry/react";
 import { getLocalStorage, setLocalStorage } from "./helpers/useLocalStorage";
-import { isReauthRequired, clearExpiredSession, isImpersonationError } from "./helpers/api";
+import { isSessionError, clearExpiredSession, isImpersonationError } from "./helpers/api";
 import { isUnauthenticatedRoute, redirectToLogin } from "./helpers/utils";
 
 const REQUESTED_WITH = "webapp";
@@ -140,7 +140,7 @@ export function graphql(payload, type = "GRAPHQL_QUERY", params = {}) {
       }
 
       const status = response?.payload?.status ?? response?.payload?.response?.status;
-      if (isReauthRequired(status, gqlErrors)) {
+      if (isSessionError(status, gqlErrors)) {
         dispatch({ type: "CORE_STOP_IMPERSONATION" });
         await clearExpiredSession();
         dispatch({ type: "CORE_AUTH_LOGOUT" });
@@ -322,7 +322,7 @@ export function fetch(config) {
         return action;
       }
 
-      if (isReauthRequired(status, gqlErrors)) {
+      if (isSessionError(status, gqlErrors)) {
         dispatch({ type: "CORE_STOP_IMPERSONATION" });
         // Silent requests (boot probe/refresh) surface the error so the caller
         // can decide — it may still refresh — instead of clearing cookies now.
@@ -540,7 +540,7 @@ export function initialize() {
     }
 
     const authFailed = (a) =>
-      isReauthRequired(
+      isSessionError(
         a?.payload?.status ?? a?.payload?.response?.status,
         a?.payload?.errors || a?.payload?.response?.errors || [],
       );

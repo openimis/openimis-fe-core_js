@@ -202,7 +202,11 @@ export const isCsrfError = (error) =>
 
 // The backend returns 401 for every other authentication failure. Either way the
 // session must be re-established.
-export const isReauthRequired = (status, gqlErrors = []) =>
+// TODO: rename to isReauthRequired to match intent — this now means "the session
+// needs re-authentication" (HTTP 401 or CSRF), not a generic session error. Kept
+// as isSessionError for now to avoid a coordinated rename of the export in
+// openimis-fe_js.
+export const isSessionError = (status, gqlErrors = []) =>
   status === 401 || gqlErrors.some(isCsrfError);
 
 export const isImpersonationError = (gqlErrors = []) => {

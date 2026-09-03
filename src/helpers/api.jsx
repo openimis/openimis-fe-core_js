@@ -197,7 +197,7 @@ export const normalizeGraphqlErrorMessage = (message) =>
 
 // CSRF failures come back as HTTP 200 with the error in the body, so match by message.
 export const isCsrfError = (error) =>
-  normalizeGraphqlErrorMessage(error?.message).includes("csrf");
+  normalizeGraphqlErrorMessage(error?.message).includes("csrf token missing or incorrect");
 
 // True when the session needs re-authentication: HTTP 401 or a CSRF failure.
 // Name is a misnomer (not a generic session error); kept to avoid a coordinated

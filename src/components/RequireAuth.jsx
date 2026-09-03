@@ -366,6 +366,9 @@ const RequireAuth = (props) => {
             <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
               <div className="grow" />
             </Contributions>
+            {preparedIcons.map((iconProps, idx) => (
+              <AppBarIconButton key={`appbar_icon_${idx}`} {...iconProps} />
+            ))}
             {showImpersonationPicker && (
               <UserPicker
                 readOnly={Boolean(impersonatedUser)}

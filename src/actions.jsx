@@ -13,7 +13,7 @@ import {
 import * as Sentry from "@sentry/react";
 import { getLocalStorage, setLocalStorage } from "./helpers/useLocalStorage";
 import { isSessionError, clearExpiredSession, isImpersonationError } from "./helpers/api";
-import { isUnauthenticatedRoute, redirectToLogin } from "./helpers/utils";
+import { isUnauthenticatedRoute } from "./helpers/utils";
 
 const REQUESTED_WITH = "webapp";
 
@@ -131,27 +131,7 @@ export function graphql(payload, type = "GRAPHQL_QUERY", params = {}) {
         dispatch(coreAlert(formatServerError(response.payload)));
       }
 
-      const gqlErrors = response?.payload?.errors || [];
-      if (isImpersonationError(gqlErrors)) {
-        dispatch({ type: "CORE_STOP_IMPERSONATION" });
-        dispatch(coreAlert("Impersonation ended", "Invalid impersonation target. Impersonation has been stopped."));
-        dispatch(loadUser());
-        return response;
-      }
-
-      const status = response?.payload?.status ?? response?.payload?.response?.status;
-      if (isSessionError(status, gqlErrors)) {
-        dispatch({ type: "CORE_STOP_IMPERSONATION" });
-        await clearExpiredSession();
-        dispatch({ type: "CORE_AUTH_LOGOUT" });
-
-        if (!isUnauthenticatedRoute()) {
-          await redirectToLogin();
-        }
-
-        return;
-      }
-
+      // Impersonation and session errors are handled in fetch(); surface the response.
       return response;
     } catch (err) {
       console.error(err);
@@ -285,8 +265,9 @@ export function fetch(config) {
   // the caller (boot probe) can still refresh. Must not reach the RSAA action.
   const { silent, ...rsaaConfig } = config;
 
-  // Cookie fallback lets a session authenticated outside /front (e.g. Django) pass CSRF.
-  const csrfToken = getLocalStorage("csrfToken") ?? getCsrfToken();
+  // Prefer the live cookie (Django rotates it on login; a stale stored value fails
+  // CSRF); fall back to storage when there is no cookie (prod session-based CSRF).
+  const csrfToken = getCsrfToken() ?? getLocalStorage("csrfToken");
 
   return async (dispatch, getState) => {
     const state = getState();

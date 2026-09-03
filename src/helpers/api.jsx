@@ -195,17 +195,13 @@ export const normalizeGraphqlErrorMessage = (message) =>
     .replace(/['"]/g, "")
     .trim();
 
-// A CSRF mismatch is the one authentication-adjacent failure the backend still
-// returns as HTTP 200 (error in the body), so it must be matched by message.
+// CSRF failures come back as HTTP 200 with the error in the body, so match by message.
 export const isCsrfError = (error) =>
   normalizeGraphqlErrorMessage(error?.message).includes("csrf");
 
-// The backend returns 401 for every other authentication failure. Either way the
-// session must be re-established.
-// TODO: rename to isReauthRequired to match intent — this now means "the session
-// needs re-authentication" (HTTP 401 or CSRF), not a generic session error. Kept
-// as isSessionError for now to avoid a coordinated rename of the export in
-// openimis-fe_js.
+// True when the session needs re-authentication: HTTP 401 or a CSRF failure.
+// Name is a misnomer (not a generic session error); kept to avoid a coordinated
+// export rename in openimis-fe_js — isReauthRequired would fit better.
 export const isSessionError = (status, gqlErrors = []) =>
   status === 401 || gqlErrors.some(isCsrfError);
 

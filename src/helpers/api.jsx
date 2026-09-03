@@ -189,37 +189,21 @@ export function formatGraphQLError(payload) {
       };
 }
 
-const SESSION_ERROR_MESSAGES = new Set([
-  "csrftoken",
-  "unauthorized",
-  "user not authorized for this operation",
-  "authentication credentials were not provided",
-  "csrf token missing or incorrect",
-  "error decoding signature",
-  "invalid token",
-  "not authenticated",
-]);
-
 export const normalizeGraphqlErrorMessage = (message) =>
   String(message || "")
     .toLowerCase()
     .replace(/['"]/g, "")
     .trim();
 
-export const isSessionError = (status, gqlErrors = []) => {
-  if (status === 401) {
-    return true;
-  }
+// A CSRF mismatch is the one authentication-adjacent failure the backend still
+// returns as HTTP 200 (error in the body), so it must be matched by message.
+export const isCsrfError = (error) =>
+  normalizeGraphqlErrorMessage(error?.message).includes("csrf");
 
-  return gqlErrors.some((error) => {
-    const message = normalizeGraphqlErrorMessage(error?.message);
-    return (
-      SESSION_ERROR_MESSAGES.has(message) ||
-      message.includes("csrf token missing or incorrect") ||
-      message.includes("authentication credentials were not provided")
-    );
-  });
-};
+// The backend returns 401 for every other authentication failure. Either way the
+// session must be re-established.
+export const isReauthRequired = (status, gqlErrors = []) =>
+  status === 401 || gqlErrors.some(isCsrfError);
 
 export const isImpersonationError = (gqlErrors = []) => {
   return gqlErrors.some((error) => {

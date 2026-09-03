@@ -12,7 +12,7 @@ import {
 } from "./helpers/api";
 import * as Sentry from "@sentry/react";
 import { getLocalStorage, setLocalStorage } from "./helpers/useLocalStorage";
-import { isSessionError, clearExpiredSession, isImpersonationError } from "./helpers/api";
+import { isReauthRequired, clearExpiredSession, isImpersonationError } from "./helpers/api";
 import { isUnauthenticatedRoute, redirectToLogin } from "./helpers/utils";
 
 const REQUESTED_WITH = "webapp";
@@ -97,10 +97,6 @@ export function fetchMaxLengthConstraints() {
   return graphql(payload, "FETCH_MAX_LENGTH_CONSTRAINTS");
 }
 
-function isCsrfError(error) {
-  return error?.message?.includes("CSRF token missing or incorrect.");
-}
-
 export function graphql(payload, type = "GRAPHQL_QUERY", params = {}) {
   let req = type + "_REQ";
   let resp = type + "_RESP";
@@ -143,7 +139,8 @@ export function graphql(payload, type = "GRAPHQL_QUERY", params = {}) {
         return response;
       }
 
-      if (isSessionError(null, gqlErrors)) {
+      const status = response?.payload?.status ?? response?.payload?.response?.status;
+      if (isReauthRequired(status, gqlErrors)) {
         dispatch({ type: "CORE_STOP_IMPERSONATION" });
         await clearExpiredSession();
         dispatch({ type: "CORE_AUTH_LOGOUT" });
@@ -163,7 +160,7 @@ export function graphql(payload, type = "GRAPHQL_QUERY", params = {}) {
   };
 }
 
-export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY", params = {}, customHeaders = {}) {
+export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY", params = {}, customHeaders = {}, options = {}) {
   let req, resp, err;
   if (Array.isArray(type)) {
     [req, resp, err] = type;
@@ -178,6 +175,7 @@ export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY
         endpoint: `${baseApiUrl}/graphql`,
         method: "POST",
         body: JSON.stringify({ query: operation, variables }),
+        silent: options.silent,
         headers: {
           ...customHeaders,
         },
@@ -283,8 +281,8 @@ export function graphqlMutation(
 }
 
 export function fetch(config) {
-  // `silent` suppresses the session-expiry dialog on 401 (for boot probes); it
-  // must not reach the RSAA action.
+  // `silent` requests own their 401 handling: no dialog and no cleanup here, so
+  // the caller (boot probe) can still refresh. Must not reach the RSAA action.
   const { silent, ...rsaaConfig } = config;
 
   // Cookie fallback lets a session authenticated outside /front (e.g. Django) pass CSRF.
@@ -310,9 +308,11 @@ export function fetch(config) {
       });
 
       // Session error detection uses a minimal extraction; full error reporting is consolidated below.
+      // On a failed request redux-api-middleware puts the HTTP status on the
+      // ApiError itself (payload.status); payload.response is the parsed body.
       const payload = action?.payload || {};
       const response = payload?.response;
-      const status = response?.status;
+      const status = payload?.status ?? response?.status;
       const gqlErrors = payload?.errors || response?.errors || [];
 
       if (isImpersonationError(gqlErrors)) {
@@ -322,19 +322,23 @@ export function fetch(config) {
         return action;
       }
 
-      if (isSessionError(status, gqlErrors)) {
+      if (isReauthRequired(status, gqlErrors)) {
         dispatch({ type: "CORE_STOP_IMPERSONATION" });
-        if (isUnauthenticatedRoute() || silent) {
-          await clearExpiredSession();
-          dispatch({ type: "CORE_AUTH_LOGOUT" });
-        } else {
-          dispatch(
-            coreConfirm(
-              "Session Expired",
-              "Your session has expired, You will be redirected to the login page.",
-              "csrf_logout",
-            ),
-          );
+        // Silent requests (boot probe/refresh) surface the error so the caller
+        // can decide — it may still refresh — instead of clearing cookies now.
+        if (!silent) {
+          if (isUnauthenticatedRoute()) {
+            await clearExpiredSession();
+            dispatch({ type: "CORE_AUTH_LOGOUT" });
+          } else {
+            dispatch(
+              coreConfirm(
+                "Session Expired",
+                "Your session has expired, You will be redirected to the login page.",
+                "csrf_logout",
+              ),
+            );
+          }
         }
         return action;
       }
@@ -515,7 +519,7 @@ export function fetchCsrfToken(jwtToken) {
   };
 }
 
-export function refreshAuthToken() {
+export function refreshAuthToken(options = {}) {
   return (dispatch) => {
     const mutation = `
     mutation refreshAuthToken {
@@ -524,7 +528,7 @@ export function refreshAuthToken() {
       }
     }
   `;
-    return dispatch(graphqlMutation(mutation, {}, "CORE_AUTH_REFRESH_TOKEN"));
+    return dispatch(graphqlWithVariables(mutation, {}, "CORE_AUTH_REFRESH_TOKEN", {}, {}, options));
   };
 }
 
@@ -535,12 +539,32 @@ export function initialize() {
       return dispatch({ type: "CORE_INITIALIZED" });
     }
 
-    // Silent probe: a valid auth cookie (/front JWT or Django session) loads the
-    // user; on success, mirror the csrftoken cookie for later mutations. Errors
-    // are handled downstream (401/403 clears the user, 5xx preserves state).
-    const action = await dispatch(loadUser({ silent: true }));
+    const authFailed = (a) =>
+      isReauthRequired(
+        a?.payload?.status ?? a?.payload?.response?.status,
+        a?.payload?.errors || a?.payload?.response?.errors || [],
+      );
 
-    if (!action?.error && !getLocalStorage("csrfToken")) {
+    // Silent probe: a valid auth cookie (/front JWT or Django session) loads the user.
+    let session = await dispatch(loadUser({ silent: true }));
+
+    // If it failed, the access token (1d) may have expired while the refresh
+    // token (30d) is still valid; try one silent refresh and re-probe. A cookie
+    // session without a refresh token (e.g. Django) just fails the refresh.
+    if (authFailed(session)) {
+      const refresh = await dispatch(refreshAuthToken({ silent: true }));
+      if (!refresh?.error && !authFailed(refresh)) {
+        session = await dispatch(loadUser({ silent: true }));
+      }
+    }
+
+    // Act on the resolved session.
+    if (authFailed(session)) {
+      // Still unauthenticated: clear any stale session and show login.
+      await clearExpiredSession();
+      dispatch({ type: "CORE_AUTH_LOGOUT" });
+    } else if (!session?.error && !getLocalStorage("csrfToken")) {
+      // Mirror the csrftoken cookie so later mutations send a matching X-CSRFToken.
       const cookieCsrf = getCsrfToken();
       if (cookieCsrf) {
         setLocalStorage("csrfToken", cookieCsrf);

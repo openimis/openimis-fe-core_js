@@ -66,7 +66,7 @@ export function flattenMenuLeaves(entries) {
 }
 
 function matchesRights(entryRights, rightsSet) {
-  return !entryRights || !entryRights.length || entryRights.some((er) => rightsSet.has(String(er)));
+  return !entryRights || ensureArray(entryRights).some((er) => rightsSet.has(String(er)));
 }
 
 // Prepares one level of menu items. Groups are kept as { type, text, entries }
@@ -79,7 +79,7 @@ function prepareMenuLevel(rightsSet, intl, entries, routes, allowGroups) {
     if (isMenuGroup(entry)) {
       const children = prepareMenuLevel(rightsSet, intl, entry.entries, routes, false);
       if (!children.length) return;
-      if (!matchesRights(ensureArray(entry.rights), rightsSet)) return;
+      if (!matchesRights(entry.rights, rightsSet)) return;
       if (!allowGroups) {
         prepared.push(...children);
         return;

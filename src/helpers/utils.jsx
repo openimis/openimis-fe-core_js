@@ -69,6 +69,19 @@ function matchesRights(entryRights, rightsSet) {
   return !entryRights || ensureArray(entryRights).some((er) => rightsSet.has(String(er)));
 }
 
+const byPosition = (a, b) => (a.position || 99) - (b.position || 99);
+
+// Resolves a route-bearing entry: icon string → component, i18n text, and full path.
+function prepareRouteEntry(entry, routes, intl) {
+  const routeRef = entry.route || entry.id;
+  return {
+    ...entry,
+    icon: GetIconComponent(GetIconFromId(entry.icon, routes, routeRef)),
+    text: getMenuText(GetTextFromId(entry.text, routes, routeRef), intl),
+    route: "/" + GetRouteFromId(entry.route, routes, entry.id),
+  };
+}
+
 // Prepares one level of menu items. Groups are kept as { type, text, entries }
 // nodes when allowed (i.e. directly under a main menu); deeper nesting is not
 // rendered, so such groups are flattened into their parent.
@@ -96,16 +109,11 @@ function prepareMenuLevel(rightsSet, intl, entries, routes, allowGroups) {
     const routeRef = entry.route || entry.id;
     if (routeRef === undefined) return;
     if (!matchesRights(GetRightsFromId(entry.rights, routes, routeRef), rightsSet)) return;
-    prepared.push({
-      ...entry,
-      icon: GetIconComponent(GetIconFromId(entry.icon, routes, routeRef)),
-      text: getMenuText(GetTextFromId(entry.text, routes, routeRef), intl),
-      route: "/" + GetRouteFromId(entry.route, routes, entry.id),
-    });
+    prepared.push(prepareRouteEntry(entry, routes, intl));
   });
 
   // Sort by position (default 99 if missing; stable for duplicates)
-  prepared.sort((a, b) => (a.position || 99) - (b.position || 99));
+  prepared.sort(byPosition);
 
   return prepared;
 }
@@ -140,6 +148,45 @@ export function buildMenuItems(entries) {
 export function prepareMenuEntries(rights, intl, entries, routes) {
   const rightsSet = new Set(ensureArray(rights).map((r) => String(r)));
   return prepareMenuLevel(rightsSet, intl, entries, routes, true);
+}
+
+// Prepares the `core.AppBarIcons` entries for the top-right area. Unlike the main
+// menu, an entry here may be:
+//   - a single icon → route:           { icon, route|id, text }        (rendered as AppBarIconButton)
+//   - a dropdown:                       { icon, text, entries: [...] }  (rendered as AppBarMenu)
+// and a dropdown's sub-items may be a link ({ route|id, icon, text }),
+// { type: "divider" }, { type: "label", text }, or { type: "language" } (built-in
+// language switcher). Rights filtering applies to links; kind-items always pass.
+export function prepareAppBarIcons(rights, intl, entries, routes) {
+  const rightsSet = new Set(ensureArray(rights).map((r) => String(r)));
+
+  const prepareItem = (entry) => {
+    // kind-items carry no route and are rendered specially by AppBarMenu
+    if (entry.type === "divider") return { position: entry.position, type: "divider" };
+    if (entry.type === "language" || entry.type === "label") {
+      return { position: entry.position, type: entry.type, text: getMenuText(entry.text, intl) };
+    }
+
+    // dropdown: has children, no route of its own
+    if (Array.isArray(entry.entries) && !entry.route) {
+      const children = ensureArray(entry.entries).map(prepareItem).filter(Boolean).sort(byPosition);
+      if (!children.length) return null;
+      return {
+        position: entry.position,
+        type: "menu",
+        icon: GetIconComponent(GetIconFromId(entry.icon, routes, entry.id)),
+        text: getMenuText(GetTextFromId(entry.text, routes, entry.id), intl),
+        entries: children,
+      };
+    }
+
+    // leaf link → route
+    const routeRef = entry.route || entry.id;
+    if (routeRef === undefined || !matchesRights(GetRightsFromId(entry.rights, routes, routeRef), rightsSet)) return null;
+    return { ...prepareRouteEntry(entry, routes, intl), type: "link" };
+  };
+
+  return ensureArray(entries).map(prepareItem).filter(Boolean).sort(byPosition);
 }
 
 export const prepareForComparison = (stateRole, propsRole, roleRights) => {

@@ -20,9 +20,10 @@ import {
 } from "@mui/material";
 import GetIconComponent from "../helpers/icons";
 const MenuIcon = GetIconComponent("Menu");
-import { prepareMenuEntries } from "../helpers/utils";
+import { prepareMenuEntries, prepareAppBarIcons } from "../helpers/utils";
 import Contributions from "./generics/Contributions";
 import AppBarIconButton from "./AppBarIconButton";
+import AppBarMenu from "./AppBarMenu";
 import FormattedMessage from "./generics/FormattedMessage";
 import MainMenuBar from "./MainMenuBar";
 import JournalDrawer from "./JournalDrawer";
@@ -345,13 +346,8 @@ const RequireAuth = (props) => {
       // Merge backend entries with module contribs, backend overrides by id
       iconsEntries = (backendAppBarIconsConfig.find((config) => config.id === "core.AppBarIcons") || {})?.entries || [];
     }
-    // Sort by position
-    return prepareMenuEntries(
-      rights,
-      intl,
-      iconsEntries.sort((a, b) => (a.position || 99) - (b.position || 99)),
-      routes,
-    );
+    // Prepare app-bar entries: single icon→route (AppBarIconButton) or dropdown (AppBarMenu)
+    return prepareAppBarIcons(rights, intl, iconsEntries, routes);
   });
 
   if (!auth.isAuthenticated) {
@@ -366,9 +362,13 @@ const RequireAuth = (props) => {
             <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
               <div className="grow" />
             </Contributions>
-            {preparedIcons.map((iconProps, idx) => (
-              <AppBarIconButton key={`appbar_icon_${idx}`} {...iconProps} />
-            ))}
+            {preparedIcons.map((iconProps, idx) =>
+              iconProps.type === "menu" ? (
+                <AppBarMenu key={`appbar_icon_${idx}`} {...iconProps} />
+              ) : (
+                <AppBarIconButton key={`appbar_icon_${idx}`} {...iconProps} />
+              ),
+            )}
             {showImpersonationPicker && (
               <UserPicker
                 readOnly={Boolean(impersonatedUser)}
@@ -461,9 +461,13 @@ const RequireAuth = (props) => {
                 <div className="grow" />
               </Contributions>
             }
-            {preparedIcons.map((iconProps, idx) => (
-              <AppBarIconButton key={`appbar_icon_${idx}`} {...iconProps} />
-            ))}
+            {preparedIcons.map((iconProps, idx) =>
+              iconProps.type === "menu" ? (
+                <AppBarMenu key={`appbar_icon_${idx}`} {...iconProps} />
+              ) : (
+                <AppBarIconButton key={`appbar_icon_${idx}`} {...iconProps} />
+              ),
+            )}
           </Box>
 
           <Box display="flex" alignItems="center" gap={1}>

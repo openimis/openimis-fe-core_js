@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { connect, useDispatch } from "react-redux";
 
 import { useTheme, styled } from "@mui/material/styles";
-import { Grid, Divider, Typography, Button, InputAdornment, IconButton, Box } from "@mui/material";
+import { Grid, Divider, Typography, Button, InputAdornment, IconButton, Box, Checkbox, FormControlLabel } from "@mui/material";
 import GetIconComponent from "../../helpers/icons";
 
 const VisibilityIcon = GetIconComponent("Visibility")
@@ -63,6 +63,7 @@ const UserMasterPanel = (props) => {
     usernameLength,
     passwordPolicy,
     rights,
+    canManageSuperuser,
   } = props;
   const { formatMessage, formatMessageWithValues } = useTranslations("admin", modulesManager);
   const dispatch = useDispatch();
@@ -137,6 +138,10 @@ const UserMasterPanel = (props) => {
     IS_PASSWORD_SECURED = true;
     onEditedChanged({ ...edited, password: generatedPassword, confirmPassword: generatedPassword, isPasswordValid: IS_PASSWORD_SECURED });
   };
+
+  // savedIsSuperuser is the core user flag as stored, edited.isSuperuser is only set once
+  // the checkbox is touched so that the flag stays out of the mutation input otherwise
+  const isSuperuser = edited?.isSuperuser ?? edited?.savedIsSuperuser ?? false;
 
   const renderLastNameField = (edited, readOnly) => (
     <Grid size={4} className="item">
@@ -294,6 +299,23 @@ const UserMasterPanel = (props) => {
         />
       </Grid>
 
+      {canManageSuperuser && (
+        <Grid size={12} className="item">
+          <FormControlLabel
+            control={
+              <Checkbox
+                id="user.isSuperuser"
+                color="primary"
+                disabled={readOnly}
+                checked={isSuperuser}
+                onChange={(e) => onEditedChanged({ ...edited, isSuperuser: e.target.checked })}
+              />
+            }
+            label={formatMessage("user.isSuperuser")}
+          />
+        </Grid>
+      )}
+
       <Grid size={12} className="sectionHeader">
         <Typography className="sectionTitle">{formatMessage("UserMasterPanel.loginDetailsTitle")}</Typography>
         <Divider variant="fullWidth" />
@@ -373,6 +395,8 @@ const UserMasterPanel = (props) => {
 
 const mapStateToProps = (state) => ({
   rights: state.core?.user?.i_user?.rights ?? [],
+  // the backend lets any IMIS administrator grant the flag, not only an actual superuser
+  canManageSuperuser: (state.core?.user?.is_superuser || state.core?.user?.is_imis_admin) ?? false,
   isUsernameValid: state.admin.validationFields?.username?.isValid,
   isUsernameValidating: state.admin.validationFields?.username?.isValidating,
   usernameValidationError: state.admin.validationFields?.username?.validationError,

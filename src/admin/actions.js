@@ -179,6 +179,7 @@ export function fetchUser(mm, userId, clientMutationId) {
             id
             username
             userTypes
+            savedIsSuperuser: isSuperuser
             officer {
               id
               uuid

@@ -143,7 +143,8 @@ const StyledMainMenu = styled("div")(({ theme }) => ({
   },
   "& .menuHeading .MuiListItemIcon-root": {
     color: "inherit",
-    minWidth: 40,
+    minWidth: 0,
+    marginRight: theme.spacing(0.75),
   },
   "& .appBarMenuPaper": {
     borderTopLeftRadius: 0,

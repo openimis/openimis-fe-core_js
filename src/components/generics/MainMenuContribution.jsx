@@ -105,6 +105,7 @@ const StyledMainMenu = styled("div")(({ theme }) => ({
   },
   "& .menuGroupDivider": {
     margin: theme.spacing(1, 0),
+    overflow: "hidden",
     "&::before, &::after": {
       borderColor: "currentColor",
       opacity: 0.3,
@@ -116,6 +117,7 @@ const StyledMainMenu = styled("div")(({ theme }) => ({
       letterSpacing: "0.08em",
       opacity: 0.8,
       padding: theme.spacing(0, 1),
+      flexShrink: 0,
     },
   },
   "& .MuiAccordionDetails-root .menuGroupDivider": {

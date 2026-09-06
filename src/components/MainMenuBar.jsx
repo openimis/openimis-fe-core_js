@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { injectIntl } from "react-intl";
 import { useModulesManager } from "../helpers/modules";
-import { ErrorBoundary } from "@openimis/fe-core";
 import { useToast } from "../helpers/ToastContext";
 import {
   menuEntryMatchesLocationPath,

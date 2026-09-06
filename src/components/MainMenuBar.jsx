@@ -5,7 +5,13 @@ import { injectIntl } from "react-intl";
 import { useModulesManager } from "../helpers/modules";
 import { ErrorBoundary } from "@openimis/fe-core";
 import { useToast } from "../helpers/ToastContext";
-import { menuEntryMatchesLocationPath, getMenuText, prepareMenuEntries, ensureArray } from "../helpers/utils";
+import {
+  menuEntryMatchesLocationPath,
+  getMenuText,
+  prepareMenuEntries,
+  ensureArray,
+  flattenMenuLeaves,
+} from "../helpers/utils";
 import MainMenuContribution from "./generics/MainMenuContribution";
 import GetIconComponent from "../helpers/icons";
 
@@ -69,7 +75,9 @@ function getMenus(modulesManager, key, rights, menuVariant, history, intl) {
 const findActiveMenuId = (menuConfigs, routes = null) => {
   if (!Array.isArray(menuConfigs)) return null;
   for (const menuConfig of menuConfigs) {
-    const rawLeaves = ensureArray(menuConfig.entries).concat(ensureArray(menuConfig.submenus));
+    const rawLeaves = flattenMenuLeaves(
+      ensureArray(menuConfig.entries).concat(ensureArray(menuConfig.submenus)),
+    );
     if (rawLeaves.some((leaf) => menuEntryMatchesLocationPath(leaf, routes))) {
       return menuConfig.id;
     }

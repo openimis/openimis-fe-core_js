@@ -17,10 +17,11 @@ import GetIconComponent from "../helpers/icons";
 function getMenus(modulesManager, key, rights, menuVariant, history, intl) {
   // Get backend overrides
   const backendMenuConfigs = modulesManager.getConf("fe-core", "menus", []);
-  const routes = modulesManager.getRoutes();
+  const frontendMenuConfigs = modulesManager.getContribs("fe-core.menus");
+  const routes = modulesManager.getRoutes()
   // get default entries
   const menuEntries = modulesManager.getMenuEntries();
-  const unsortedMenuEntries = backendMenuConfigs.length > 0 ? backendMenuConfigs : menuEntries;
+  const unsortedMenuEntries = backendMenuConfigs.length > 0 ? backendMenuConfigs : (frontendMenuConfigs.length > 0 ? frontendMenuConfigs : menuEntries);
   // Default contributionKey to id for all configs (backend/module); override if specified
   unsortedMenuEntries.forEach((config) => {
     if (!config.contributionKey) {

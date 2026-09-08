@@ -4,8 +4,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { Button, Typography, MenuList, MenuItem, Popper, Paper, Grow, ClickAwayListener } from "@mui/material";
 import GetIconComponent from "../helpers/icons";
 
-const Globe = GetIconComponent("Public")
-const ExpandMore = GetIconComponent("ExpandMore")
+const Globe = GetIconComponent("Public");
+const ExpandMore = GetIconComponent("ExpandMore");
 
 import SelectDialog from "../components/dialogs/SelectDialog";
 import { changeUserLanguage, fetchLanguages } from "../actions";

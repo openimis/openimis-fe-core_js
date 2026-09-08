@@ -6,10 +6,12 @@ import { MenuItem, IconButton, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import GetIconComponent from "../../helpers/icons";
 
-const ClearIcon = GetIconComponent("Clear")
+const ClearIcon = GetIconComponent("Clear");
 import FormattedMessage from "../generics/FormattedMessage";
 import TextInput from "./TextInput";
 import { formatMessage } from "../../helpers/i18n";
+import withModulesManager from "../../helpers/modules";
+import { DEFAULT } from "../../constants";
 
 const StyledSelectInput = styled("div")(({ theme }) => ({
   "& .formControl": {
@@ -35,6 +37,11 @@ class SelectInput extends Component {
   constructor(props) {
     super(props);
     this.uuid = props.name || _.uuid();
+    this.inputVariant = props.modulesManager.getConf(
+      "fe-core",
+      "Input.variant",
+      DEFAULT.INPUT_VARIANT,
+    );
   }
 
   _onChange = (e) => {
@@ -96,6 +103,7 @@ class SelectInput extends Component {
           {!readOnly && (
             <TextField
               select
+              variant={this.props.variant || this.inputVariant}
               fullWidth
               required={required}
               disabled={disabled}
@@ -156,4 +164,4 @@ class SelectInput extends Component {
 }
 
 export { StyledSelectInput };
-export default injectIntl(SelectInput);
+export default withModulesManager(injectIntl(SelectInput));

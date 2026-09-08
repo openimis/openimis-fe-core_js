@@ -68,6 +68,7 @@ import LanguagePicker from "./pickers/LanguagePicker";
 import AuthorityPicker from "./pickers/AuthorityPicker";
 import Helmet from "./helpers/Helmet";
 import GetIconComponent from "./helpers/icons";
+import ActionMenu from "./components/ActionMenu";
 
 const AccountBox = GetIconComponent("AccountBox");
 const Person = GetIconComponent("Person");
@@ -94,6 +95,7 @@ import {
   clearCurrentPaginationPage,
   fetchCustomFilter,
   fetchPasswordPolicy,
+  loadUser,
 } from "./actions";
 import {
   formatMessage,
@@ -163,7 +165,7 @@ import { passwordGenerator } from "./helpers/passwordGenerator";
 import { createFieldsBasedOnJSON, renderInputComponent } from "./helpers/json-handler-utils";
 import withModulesManager, { useModulesManager, modulesManagerCtx } from "./helpers/modules";
 import { formatJsonField } from "./helpers/jsonExt";
-import { RIGHT_ROLE_SEARCH, CLEARED_STATE_FILTER, EXPORT_FILE_FORMATS } from "./constants";
+import { RIGHT_ROLE_SEARCH, CLEARED_STATE_FILTER, EXPORT_FILE_FORMATS, ROWS_PER_PAGE_OPTIONS } from "./constants";
 import {
   GRID_RESPONSIVE_STANDARD,
   GRID_RESPONSIVE_SMALL,
@@ -332,6 +334,7 @@ export {
   coreConfirm,
   clearConfirm,
   clearCurrentPaginationPage,
+  loadUser,
   openBlob,
   sort,
   formatSorter,
@@ -438,6 +441,7 @@ export {
   SearcherActionButton,
   passwordGenerator,
   EXPORT_FILE_FORMATS,
+  ROWS_PER_PAGE_OPTIONS,
   useToast,
   InfoButton,
   usePublicPageLanguage,
@@ -456,4 +460,5 @@ export {
   RIGHT_MEDICALITEMS,
   RIGHT_USERS,
   RIGHT_LOCATIONS,
+  ActionMenu,
 };

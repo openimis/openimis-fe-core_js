@@ -12,10 +12,10 @@ import { baseApiUrl } from "../actions";
 import { DEFAULT, SAML_LOGIN_PATH } from "../constants";
 import GetIconComponent from "../helpers/icons";
 
-const ArrowBackIcon = GetIconComponent("ArrowBack")
+const ArrowBackIcon = GetIconComponent("ArrowBack");
 
-const StyledLoginPage = styled('div')(({ theme }) => ({
-  '& .container': {
+const StyledLoginPage = styled("div")(({ theme }) => ({
+  "& .container": {
     position: "absolute",
     top: 0,
     bottom: 0,
@@ -26,8 +26,8 @@ const StyledLoginPage = styled('div')(({ theme }) => ({
     justifyContent: "center",
     alignItems: "center",
   },
-  '& .paper': theme.paper?.paper ?? {},
-  '& .logo': {
+  "& .paper": theme.paper?.paper ?? {},
+  "& .logo": {
     width: "100%",
     padding: theme.spacing(2),
   },
@@ -62,17 +62,17 @@ const LoginPage = ({ logo }) => {
   const onSubmit = async (e) => {
     e.preventDefault();
     setAuthenticating(true);
-  
+
     try {
       const response = await auth.login(credentials);
       if (response.payload?.errors?.length) {
         handleLoginError(response.payload.errors[0].message);
         return;
       }
-  
+
       const { loginStatus, message } = response;
       setServerResponse({ loginStatus, message });
-  
+
       if (loginStatus === "CORE_AUTH_ERR") {
         setAuthenticating(false);
       } else {
@@ -82,7 +82,6 @@ const LoginPage = ({ logo }) => {
       setAuthenticating(false);
     }
   };
-  
 
   const redirectToForgotPassword = (e) => {
     e.preventDefault();
@@ -188,9 +187,9 @@ const LoginPage = ({ logo }) => {
                       />
                     </Grid>
                     {serverResponse?.message && (
-                    <Grid>
-                      <Box color="error.main">{getErrorMessage(serverResponse.message)}</Box>
-                    </Grid>
+                      <Grid>
+                        <Box color="error.main">{getErrorMessage(serverResponse.message)}</Box>
+                      </Grid>
                     )}
                     <Grid>
                       <Button
@@ -208,7 +207,7 @@ const LoginPage = ({ logo }) => {
                       <Contributions contributionKey={LOGIN_PAGE_CONTRIBUTION_KEY} />
                     </Grid>
                   </>
-                  )}
+                )}
               </Grid>
             </Box>
           </form>

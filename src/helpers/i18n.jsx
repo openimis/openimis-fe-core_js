@@ -5,7 +5,7 @@ import moment from "moment";
 import { formatDateFromISO as adFormateDateFromISO } from "../pickers/AdDateFormatter";
 import { formatDateTimeFromISO as adFormateDateTimeFromISO } from "../pickers/AdDateTimeFormatter";
 import { formatDateFromISO as neFormateDateFromISO } from "../pickers/NeDateFormatter";
-import { STORAGE_KEY_SECONDARY_CALENDAR, DEFAULT_SETTINGS} from "../constants";
+import { STORAGE_KEY_SECONDARY_CALENDAR, DEFAULT_SETTINGS } from "../constants";
 import { getLocalStorage } from "./useLocalStorage";
 
 //formatting with values is expansive.. so let's have separated methods
@@ -44,8 +44,16 @@ export function formatAmount(mm, intl, amount) {
 export function formatDateFromISO(mm, intl, date) {
   const isSecondaryCalendar = getLocalStorage(STORAGE_KEY_SECONDARY_CALENDAR, false);
   if (isSecondaryCalendar) {
-    const secondCalendarFormatting = mm.getConf("fe-core", "secondCalendarFormatting", DEFAULT_SETTINGS.SECOND_CALENDAR_FORMAT);
-    const secondCalendarFormattingLang = mm.getConf("fe-core", "secondCalendarFormattingLang", DEFAULT_SETTINGS.SECOND_CALENDAR_LANG);
+    const secondCalendarFormatting = mm.getConf(
+      "fe-core",
+      "secondCalendarFormatting",
+      DEFAULT_SETTINGS.SECOND_CALENDAR_FORMAT,
+    );
+    const secondCalendarFormattingLang = mm.getConf(
+      "fe-core",
+      "secondCalendarFormattingLang",
+      DEFAULT_SETTINGS.SECOND_CALENDAR_LANG,
+    );
     return neFormateDateFromISO(date, intl, [secondCalendarFormatting, secondCalendarFormattingLang]);
   }
   return adFormateDateFromISO(mm, intl, date);

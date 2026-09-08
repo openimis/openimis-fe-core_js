@@ -176,6 +176,9 @@
   "core.InfoButton.tooltip": "More Information",
   "core.Table.nextPage": "Next page",
   "core.Table.previousPage": "Previous page",
+  "core.Table.lockRowsPerPage.label": "Lock",
+  "core.Table.lockRowsPerPage.tooltip": "Lock rows per page",
+  "core.Table.lockRowsPerPage.mutationLabel": "Update default rows per page",
   "core.gql_query_users_perms": "Core | Query Users",
   "core.gql_mutation_create_users_perms": "Core | Mutation Create Users",
   "core.gql_mutation_update_users_perms": "Core | Mutation Update Users",
@@ -237,5 +240,7 @@
   "core.back.buttonText": "Back",
   "roleManagement.editButton.buttonText": "Edit",
   "roleManagement.duplicateButton.buttonText": "Duplicate",
-  "roleManagement.deleteButton.buttonText": "Delete"
+  "roleManagement.deleteButton.buttonText": "Delete",
+  "input.maxLengthReached": "You have reached the maximum number of characters allowed for this field ({max})",
+  "core.confirmSelect": "Confirm"
 }

@@ -16,7 +16,7 @@ const AppBarIconButton = ({ intl, icon, route, text }) => {
   return (
     <Tooltip title={text}>
       <IconButton color="inherit" onClick={handleClick}>
-       <Icon />
+        <Icon />
       </IconButton>
     </Tooltip>
   );

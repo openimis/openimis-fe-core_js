@@ -5,7 +5,7 @@ import { Typography } from "@mui/material";
 import FormattedMessage from "./FormattedMessage";
 
 const StyledTypography = styled(Typography)(({ theme }) => ({
-  ...theme.typography?.label ?? {},
+  ...(theme.typography?.label ?? {}),
 }));
 
 class FieldLabel extends Component {

@@ -1,14 +1,7 @@
 import { useModulesManager } from "./modules";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  refreshAuthToken,
-  login,
-  logout,
-  initialize,
-  graphqlWithVariables,
-  graphqlMutation,
-} from "../actions";
+import { refreshAuthToken, login, logout, initialize, graphqlWithVariables, graphqlMutation } from "../actions";
 import _ from "lodash";
 
 export const useDebounceCb = (cb, duration = 0) => {

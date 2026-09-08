@@ -95,13 +95,19 @@ function reducer(
         user: action.payload,
       };
     case "CORE_USERS_CURRENT_USER_ERR":
-      if (action.payload?.status === 401 || action.payload?.status === 403) {
+      // 401 (authN): session invalid — drop the in-memory user so the app shows login.
+      if (action.payload?.status === 401) {
         return {
           ...state,
           user: null,
           error: null,
           authError: null,
         };
+      }
+      // 403 (authZ): authenticated but forbidden — not a session end. Keep the user
+      // so an authorization failure never flips isAuthenticated / logs anyone out.
+      if (action.payload?.status === 403) {
+        return state;
       }
       return {
         ...state,
@@ -389,6 +395,28 @@ function reducer(
         ...state,
         fetchingCustomFilters: false,
         errorCustomFilters: formatServerError(action.payload),
+      };
+    case "FETCH_MAX_LENGTH_CONSTRAINTS_REQ":
+      return {
+        ...state,
+        fetchingMaxLengthConstraints: true,
+        fetchedMaxLengthConstraints: false,
+        maxLengthConstraints: [],
+        errorMaxLengthConstraints: null,
+      };
+    case "FETCH_MAX_LENGTH_CONSTRAINTS_RESP":
+      return {
+        ...state,
+        fetchingMaxLengthConstraints: false,
+        fetchedMaxLengthConstraints: true,
+        maxLengthConstraints: action.payload?.data?.maxLengthConstraints || [],
+        errorMaxLengthConstraints: formatGraphQLError(action.payload),
+      };
+    case "FETCH_MAX_LENGTH_CONSTRAINTS_ERR":
+      return {
+        ...state,
+        fetchingMaxLengthConstraints: false,
+        errorMaxLengthConstraints: formatServerError(action.payload),
       };
     case "CORE_ROLE_MUTATION_REQ":
       return dispatchMutationReq(state, action);

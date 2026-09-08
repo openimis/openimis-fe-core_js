@@ -5,11 +5,12 @@ import { Autocomplete } from "@mui/material";
 import SelectInput from "./SelectInput";
 import GetIconComponent from "../../helpers/icons";
 
-const ClearIcon = GetIconComponent("Clear")
-const SearchIcon = GetIconComponent("Search")
+const ClearIcon = GetIconComponent("Clear");
+const SearchIcon = GetIconComponent("Search");
 import withModulesManager from "../../helpers/modules";
 import { injectIntl } from "react-intl";
 import _ from "lodash";
+import { DEFAULT } from "../../constants";
 
 const StyledAutoSuggestion = styled("div")(({ theme }) => ({
   "& .paper": {
@@ -21,9 +22,6 @@ const StyledAutoSuggestion = styled("div")(({ theme }) => ({
     color: theme.palette.primary.main,
     backgroundColor: theme.palette.grey[100],
     padding: theme.spacing(1),
-  },
-  "& .label": {
-    color: theme.palette.primary.main,
   },
   "& .textField": {
     width: "100%",
@@ -71,6 +69,11 @@ class AutoSuggestion extends Component {
   constructor(props) {
     super(props);
     this.limitDisplay = props.modulesManager.getConf("fe-core", "AutoSuggestion.limitDisplay", 10);
+    this.inputVariant = props.modulesManager.getConf(
+      "fe-core",
+      "Input.variant",
+      DEFAULT.INPUT_VARIANT,
+    );
   }
 
   state = INIT_STATE;
@@ -183,14 +186,12 @@ class AutoSuggestion extends Component {
   renderInputComponent = ({ inputRef, ...inputProps }) => {
     const { label } = this.props;
     return (
-      <FormControl fullWidth>
+      <FormControl fullWidth variant={this.inputVariant}>
         <TextField
           {...inputProps}
+          variant={this.inputVariant}
           label={label}
-          InputLabelProps={{
-            ...inputProps.InputLabelProps,
-            className: "label",
-          }}
+          InputLabelProps={inputProps.InputLabelProps}
           inputRef={inputRef}
           InputProps={{
             ...inputProps.InputProps,
@@ -322,7 +323,7 @@ class AutoSuggestion extends Component {
     if (readOnly) {
       return (
         <StyledAutoSuggestion>
-          <TextField label={label} className="textField" disabled value={value || ""} title={title} />
+          <TextField variant={this.inputVariant} label={label} className="textField" disabled value={value || ""} title={title} />
         </StyledAutoSuggestion>
       );
     }

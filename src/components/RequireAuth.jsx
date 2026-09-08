@@ -19,10 +19,10 @@ import {
   Box,
 } from "@mui/material";
 import GetIconComponent from "../helpers/icons";
-const MenuIcon = GetIconComponent("Menu")
-import { prepareMenuEntries } from "../helpers/utils"
+const MenuIcon = GetIconComponent("Menu");
+import { prepareMenuEntries } from "../helpers/utils";
 import Contributions from "./generics/Contributions";
-import AppBarIconButton from './AppBarIconButton';
+import AppBarIconButton from "./AppBarIconButton";
 import FormattedMessage from "./generics/FormattedMessage";
 import MainMenuBar from "./MainMenuBar";
 import JournalDrawer from "./JournalDrawer";
@@ -333,22 +333,26 @@ const RequireAuth = (props) => {
   }, [theme.menu?.variant]);
 
   const dispatch = useDispatch();
-  const impersonatedUser = useSelector(state => state.core.impersonatedUser);
+  const impersonatedUser = useSelector((state) => state.core.impersonatedUser);
   const showImpersonationPicker = auth.user?.is_superuser || Boolean(impersonatedUser);
 
   const preparedIcons = useMemo(() => {
-    const rightsSet = new Set(rights.map(r => String(r)))
-    const routes = modulesManager.getRoutes()
-    let iconsEntries = modulesManager.getContribs('core.AppBarIcons');
+    const rightsSet = new Set(rights.map((r) => String(r)));
+    const routes = modulesManager.getRoutes();
+    let iconsEntries = modulesManager.getContribs("core.AppBarIcons");
     const backendAppBarIconsConfig = modulesManager.getConf("fe-core", "menus", []);
-    if (backendAppBarIconsConfig.length>0) {
+    if (backendAppBarIconsConfig.length > 0) {
       // Merge backend entries with module contribs, backend overrides by id
-      iconsEntries = (backendAppBarIconsConfig.find(config => config.id === "core.AppBarIcons") || {})?.entries || []
+      iconsEntries = (backendAppBarIconsConfig.find((config) => config.id === "core.AppBarIcons") || {})?.entries || [];
     }
     // Sort by position
-    return prepareMenuEntries(rights, intl, iconsEntries.sort((a, b) => (a.position || 99) - (b.position || 99)), routes);
-  })
-
+    return prepareMenuEntries(
+      rights,
+      intl,
+      iconsEntries.sort((a, b) => (a.position || 99) - (b.position || 99)),
+      routes,
+    );
+  });
 
   if (!auth.isAuthenticated) {
     return <Redirect to={redirectTo} />;
@@ -454,7 +458,9 @@ const RequireAuth = (props) => {
                 <div className="grow" />
               </Contributions>
             }
-            {preparedIcons.map((iconProps, idx) => <AppBarIconButton key={`appbar_icon_${idx}`} {...iconProps} />)}
+            {preparedIcons.map((iconProps, idx) => (
+              <AppBarIconButton key={`appbar_icon_${idx}`} {...iconProps} />
+            ))}
           </Box>
 
           <Box display="flex" alignItems="center" gap={1}>

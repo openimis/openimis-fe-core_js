@@ -23,9 +23,9 @@ import { prepareForComparison } from "../helpers/utils";
 import RoleHeadPanel from "../components/RoleHeadPanel";
 import RoleRightsPanel from "../components/RoleRightsPanel";
 
-const StyledRole = styled('div')(({ theme }) => ({
-  '& .page': theme.page ?? {},
-  '& .locked': theme.page?.locked ?? {},
+const StyledRole = styled("div")(({ theme }) => ({
+  "& .page": theme.page ?? {},
+  "& .locked": theme.page?.locked ?? {},
 }));
 
 class Role extends Component {
@@ -165,41 +165,40 @@ class Role extends Component {
     const { intl, rights, roleUuid } = this.props;
     return (
       <StyledRole>
-        {rights.includes(RIGHT_ROLE_SEARCH) &&
-          rights.includes(RIGHT_ROLE_CREATE) && (
-            <div className={clsx("page", this.state.isLocked && "locked")}>
-              <Helmet
-                title={formatMessageWithValues(
-                  this.props.intl,
-                  "core",
-                  "roleManagement.role.page.title",
-                  this.titleParams(this.state.role),
-                )}
-              />
-              <Form
-                module="core"
-                title="roleManagement.role.page.title"
-                titleParams={this.titleParams(this.state.role)}
-                edited={this.state.role}
-                back={this.back}
-                canSave={this.canSave}
-                save={this.save}
-                onEditedChanged={this.onEditedChanged}
-                HeadPanel={RoleHeadPanel}
-                Panels={[RoleRightsPanel]}
-                isRequiredFieldsEmpty={this.isRequiredFieldsEmpty()}
-                saveTooltip={formatMessage(
-                  intl,
-                  "core",
-                  `roleManagement.saveButton.tooltip.${this.canSave() ? "enabled" : "disabled"}`,
-                )}
-                isReadOnly={!!this.state.isSystemRole || !rights.includes(RIGHT_ROLE_UPDATE) || this.state.isLocked}
-                reset={this.state.reset}
-                roleUuid={roleUuid}
-                openDirty={rights.includes(RIGHT_ROLE_UPDATE) ? this.save : null}
-              />
-            </div>
-          )}
+        {rights.includes(RIGHT_ROLE_SEARCH) && rights.includes(RIGHT_ROLE_CREATE) && (
+          <div className={clsx("page", this.state.isLocked && "locked")}>
+            <Helmet
+              title={formatMessageWithValues(
+                this.props.intl,
+                "core",
+                "roleManagement.role.page.title",
+                this.titleParams(this.state.role),
+              )}
+            />
+            <Form
+              module="core"
+              title="roleManagement.role.page.title"
+              titleParams={this.titleParams(this.state.role)}
+              edited={this.state.role}
+              back={this.back}
+              canSave={this.canSave}
+              save={this.save}
+              onEditedChanged={this.onEditedChanged}
+              HeadPanel={RoleHeadPanel}
+              Panels={[RoleRightsPanel]}
+              isRequiredFieldsEmpty={this.isRequiredFieldsEmpty()}
+              saveTooltip={formatMessage(
+                intl,
+                "core",
+                `roleManagement.saveButton.tooltip.${this.canSave() ? "enabled" : "disabled"}`,
+              )}
+              isReadOnly={!!this.state.isSystemRole || !rights.includes(RIGHT_ROLE_UPDATE) || this.state.isLocked}
+              reset={this.state.reset}
+              roleUuid={roleUuid}
+              openDirty={rights.includes(RIGHT_ROLE_UPDATE) ? this.save : null}
+            />
+          </div>
+        )}
       </StyledRole>
     );
   }
@@ -224,6 +223,4 @@ const mapDispatchToProps = (dispatch) => {
 };
 
 export { StyledRole };
-export default withHistory(
-  withModulesManager(injectIntl(connect(mapStateToProps, mapDispatchToProps)(Role))),
-);
+export default withHistory(withModulesManager(injectIntl(connect(mapStateToProps, mapDispatchToProps)(Role))));

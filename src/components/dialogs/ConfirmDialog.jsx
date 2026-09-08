@@ -4,13 +4,13 @@ import { styled } from "@mui/material/styles";
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import { formatMessage } from "../../helpers/i18n";
 
-const StyledDialog = styled('div')(({ theme }) => ({
-  '& .primaryButton': theme?.dialog?.primaryButton ?? {},
-  '& .secondaryButton': theme?.dialog?.secondaryButton ?? {},
+const StyledDialog = styled("div")(({ theme }) => ({
+  "& .primaryButton": theme?.dialog?.primaryButton ?? {},
+  "& .secondaryButton": theme?.dialog?.secondaryButton ?? {},
 }));
 
-const ConfirmDialog = props => {
-  const { intl, confirm, onConfirm} = props;
+const ConfirmDialog = (props) => {
+  const { intl, confirm, onConfirm } = props;
   return (
     <StyledDialog>
       <Dialog open={!!confirm} onClose={() => onConfirm(false)}>
@@ -31,7 +31,7 @@ const ConfirmDialog = props => {
       </Dialog>
     </StyledDialog>
   );
-}
+};
 
 export { StyledDialog };
 export default injectIntl(ConfirmDialog);

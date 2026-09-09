@@ -351,6 +351,7 @@ const RequireAuth = (props) => {
       intl,
       iconsEntries.sort((a, b) => (a.position || 99) - (b.position || 99)),
       routes,
+      modulesManager,
     );
   });
 

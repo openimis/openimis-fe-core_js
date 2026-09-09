@@ -72,12 +72,24 @@ function matchesRights(entryRights, rightsSet) {
 // Prepares one level of menu items. Groups are kept as { type, text, entries }
 // nodes when allowed (i.e. directly under a main menu); deeper nesting is not
 // rendered, so such groups are flattened into their parent.
-function prepareMenuLevel(rightsSet, intl, entries, routes, allowGroups) {
+// Menu entries may be provided directly or as a function of modulesManager
+// (so a module can make entries conditional on config, e.g. the hide flag used
+// by feature 37855). Resolve such functions before filtering/preparing.
+function resolveMenuEntries(entries, modulesManager = null) {
+  return ensureArray(entries).flatMap((entry) =>
+    typeof entry === "function" ? (modulesManager ? ensureArray(entry(modulesManager)) : []) : [entry],
+  );
+}
+
+function prepareMenuLevel(rightsSet, intl, entries, routes, allowGroups, modulesManager = null) {
   const prepared = [];
 
-  ensureArray(entries).forEach((entry) => {
+  resolveMenuEntries(entries, modulesManager).forEach((entry) => {
+    // Generic hide flag: entries can opt out at render time (feature 37855).
+    if (entry.hide === true) return;
+
     if (isMenuGroup(entry)) {
-      const children = prepareMenuLevel(rightsSet, intl, entry.entries, routes, false);
+      const children = prepareMenuLevel(rightsSet, intl, entry.entries, routes, false, modulesManager);
       if (!children.length) return;
       if (!matchesRights(entry.rights, rightsSet)) return;
       if (!allowGroups) {
@@ -137,9 +149,9 @@ export function buildMenuItems(entries) {
   return items;
 }
 
-export function prepareMenuEntries(rights, intl, entries, routes) {
+export function prepareMenuEntries(rights, intl, entries, routes, modulesManager = null) {
   const rightsSet = new Set(ensureArray(rights).map((r) => String(r)));
-  return prepareMenuLevel(rightsSet, intl, entries, routes, true);
+  return prepareMenuLevel(rightsSet, intl, entries, routes, true, modulesManager);
 }
 
 export const prepareForComparison = (stateRole, propsRole, roleRights) => {

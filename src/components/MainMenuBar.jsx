@@ -14,7 +14,6 @@ import {
 import MainMenuContribution from "./generics/MainMenuContribution";
 import GetIconComponent from "../helpers/icons";
 
-
 function getMenus(modulesManager, key, rights, menuVariant, history, intl) {
   // Get backend overrides
   const backendMenuConfigs = modulesManager.getConf("fe-core", "menus", []);

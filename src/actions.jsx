@@ -801,6 +801,10 @@ export function impersonateUser(user) {
   };
 }
 
+export function setImpersonationDialogOpen(open) {
+  return (dispatch) => dispatch({ type: "CORE_SET_IMPERSONATION_DIALOG", payload: open });
+}
+
 export function stopImpersonation() {
   return async (dispatch) => {
     dispatch({ type: "CORE_STOP_IMPERSONATION" });

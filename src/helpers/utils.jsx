@@ -163,6 +163,7 @@ export function prepareAppBarIcons(rights, intl, entries, routes) {
   const prepareItem = (entry) => {
     // kind-items carry no route and are rendered specially by AppBarMenu
     if (entry.type === "divider") return { position: entry.position, type: "divider" };
+    if (entry.type === "impersonation") return { position: entry.position, type: "impersonation" };
     if (entry.type === "language" || entry.type === "label") {
       return { position: entry.position, type: entry.type, text: getMenuText(entry.text, intl) };
     }

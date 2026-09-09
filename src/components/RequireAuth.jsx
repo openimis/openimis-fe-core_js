@@ -33,9 +33,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import { Switch } from "@mui/material";
 import { useTranslations } from "../helpers/i18n";
 import { DEFAULT, RIGHT_USERS } from "../admin/constants";
-import { useDispatch, useSelector } from "react-redux";
-import UserPicker from "../admin/components/pickers/UserPicker";
-import { impersonateUser, stopImpersonation } from "../actions";
+import ImpersonationDialog from "./ImpersonationDialog";
 import { injectIntl } from "react-intl";
 
 export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
@@ -333,22 +331,23 @@ const RequireAuth = (props) => {
     return typeof variant === "string" && variant.trim().toUpperCase() === "APPBAR";
   }, [theme.menu?.variant]);
 
-  const dispatch = useDispatch();
-  const impersonatedUser = useSelector((state) => state.core.impersonatedUser);
-  const showImpersonationPicker = auth.user?.is_superuser || Boolean(impersonatedUser);
-
   const preparedIcons = useMemo(() => {
-    const rightsSet = new Set(rights.map((r) => String(r)));
     const routes = modulesManager.getRoutes();
+    // A backend config replaces the contributed default only if it declares
+    // core.AppBarIcons; a menus config that omits it keeps the default profile dropdown.
     let iconsEntries = modulesManager.getContribs("core.AppBarIcons");
-    const backendAppBarIconsConfig = modulesManager.getConf("fe-core", "menus", []);
-    if (backendAppBarIconsConfig.length > 0) {
-      // Merge backend entries with module contribs, backend overrides by id
-      iconsEntries = (backendAppBarIconsConfig.find((config) => config.id === "core.AppBarIcons") || {})?.entries || [];
+    const configAppBar = modulesManager.getConf("fe-core", "menus", []).find((c) => c.id === "core.AppBarIcons");
+    if (configAppBar) {
+      iconsEntries = configAppBar.entries || [];
     }
-    // Prepare app-bar entries: single icon→route (AppBarIconButton) or dropdown (AppBarMenu)
     return prepareAppBarIcons(rights, intl, iconsEntries, routes);
   });
+
+  // Hide the standalone LanguageQuickPicker when a dropdown already provides language.
+  const configDeclaresLanguage = useMemo(
+    () => preparedIcons.some((i) => i.type === "language" || i.entries?.some((e) => e.type === "language")),
+    [preparedIcons],
+  );
 
   if (!auth.isAuthenticated) {
     return <Redirect to={redirectTo} />;
@@ -357,6 +356,7 @@ const RequireAuth = (props) => {
   if (menuLeft) {
     return (
       <StyledRequireAuth>
+        <ImpersonationDialog />
         <AppBar className="appBarDrawer">
           <Toolbar className="toolbarDrawer">
             <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
@@ -368,22 +368,6 @@ const RequireAuth = (props) => {
               ) : (
                 <AppBarIconButton key={`appbar_icon_${idx}`} {...iconProps} />
               ),
-            )}
-            {showImpersonationPicker && (
-              <UserPicker
-                readOnly={Boolean(impersonatedUser)}
-                onChange={(user) => {
-                  if (!user) {
-                    dispatch(stopImpersonation());
-                  } else if (!impersonatedUser) {
-                    dispatch(impersonateUser(user));
-                  }
-                }}
-                value={impersonatedUser}
-                withLabel={false}
-                placeholder="Impersonate user"
-                multiple={false}
-              />
             )}
             <LogoutButton className="toolbarDrawerLogout" />
             <Help />
@@ -420,6 +404,7 @@ const RequireAuth = (props) => {
   const { formatMessage } = useTranslations("core", modulesManager);
   return (
     <StyledRequireAuth>
+      <ImpersonationDialog />
       <AppBar
         className={clsx("appBar", {
           appBarShift: isOpen && isMdUp,
@@ -480,27 +465,11 @@ const RequireAuth = (props) => {
                 labelPlacement="start"
               />
             )}
-            <LanguageQuickPicker />
+            {!configDeclaresLanguage && <LanguageQuickPicker />}
             <Contributions
               contributionKey={ECONOMIC_UNIT_BUTTON_CONTRIBUTION_KEY}
               onEconomicDialogOpen={onEconomicDialogOpen}
             />
-            {showImpersonationPicker && (
-              <UserPicker
-                readOnly={Boolean(impersonatedUser)}
-                onChange={(user) => {
-                  if (!user) {
-                    dispatch(stopImpersonation());
-                  } else if (!impersonatedUser) {
-                    dispatch(impersonateUser(user));
-                  }
-                }}
-                value={impersonatedUser}
-                withLabel={false}
-                placeholder="Impersonate user"
-                multiple={false}
-              />
-            )}
             <LogoutButton />
             <Help />
           </Box>

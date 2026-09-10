@@ -22,12 +22,9 @@ import FormattedMessage from "./FormattedMessage";
 import Table from "./Table";
 import FakeInput from "../inputs/FakeInput";
 
-const StyledPicker = styled("div")(({ theme }) => ({
-  "& .label": {
-    color: theme.palette.primary.main,
-  },
-  "& .dialogTitle": theme?.dialog?.title ?? {},
-  "& .dialogContent": theme?.dialog?.content ?? {},
+const StyledPicker = styled('div')(({ theme }) => ({
+  '& .dialogTitle': theme?.dialog?.title ?? {},
+  '& .dialogContent': theme?.dialog?.content ?? {},
 }));
 
 class RawPickerDialog extends Component {
@@ -131,6 +128,22 @@ class Picker extends Component {
 
   renderIcon() {
     const { IconRender, title } = this.props;
+    if (React.isValidElement(IconRender)) {
+      const elType = IconRender.type;
+      const typeName = (typeof elType === "string" ? elType : elType && (elType.displayName || elType.name)) || "";
+      if (/button/i.test(typeName)) {
+        return React.cloneElement(IconRender, { title, onClick: this.onClick });
+      }
+      return (
+        <IconButton title={title} onClick={this.onClick}>
+          {IconRender}
+        </IconButton>
+      );
+    }
+    const compName = (IconRender && (IconRender.displayName || IconRender.name)) || "";
+    if (/button/i.test(compName)) {
+      return <IconRender title={title} onClick={this.onClick} />;
+    }
     return (
       <IconButton title={title} onClick={this.onClick}>
         <IconRender />
@@ -149,9 +162,6 @@ class Picker extends Component {
           label={!!label && formatMessage(intl, module, label)}
           onClick={(e) => this.setState({ open: true })}
           value={suggestionFormatter(value)}
-          InputLabelProps={{
-            className: "label",
-          }}
           InputProps={{
             startAdornment: !readOnly && (
               <InputAdornment position="start">

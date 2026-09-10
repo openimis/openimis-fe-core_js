@@ -13,6 +13,7 @@ const UserRolesPicker = ({
   label,
   filterOptions,
   filterSelectedOptions,
+  limitTags,
 }) => {
   const [searchString, setSearchString] = useState();
   const { formatMessage } = useTranslations("admin");
@@ -53,6 +54,7 @@ const UserRolesPicker = ({
       filterOptions={filterOptions}
       filterSelectedOptions={filterSelectedOptions}
       onInputChange={() => setSearchString(searchString)}
+      limitTags={2}
     />
   );
 };

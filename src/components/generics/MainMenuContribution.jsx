@@ -26,7 +26,31 @@ import {
   Box,
 } from "@mui/material";
 import withModulesManager from "../../helpers/modules";
-import { menuEntryMatchesLocationPath } from "../../helpers/utils";
+import { menuEntryMatchesLocationPath, isMenuGroup, buildMenuItems } from "../../helpers/utils";
+
+// Renders a menu icon that may be a component reference or an already-built element.
+const renderMenuIcon = (icon) => {
+  if (typeof icon !== "function") return icon;
+  const Icon = icon;
+  return <Icon />;
+};
+
+// Group boundaries render as dividers: a titled one opens a group, a plain one
+// closes it. Returns the divider element for a groupHeader/groupFooter item, or
+// null for a normal entry (which each menu variant renders itself).
+const renderGroupDivider = (item, key) => {
+  if (item.kind === "groupHeader") {
+    return (
+      <Divider key={key} component="li" textAlign="left" className="menuGroupDivider">
+        {item.text}
+      </Divider>
+    );
+  }
+  if (item.kind === "groupFooter") {
+    return <Divider key={key} component="li" className="menuGroupDivider" />;
+  }
+  return null;
+};
 
 const StyledMainMenu = styled("div")(({ theme }) => ({
   "& .panel": {
@@ -79,6 +103,29 @@ const StyledMainMenu = styled("div")(({ theme }) => ({
   "& .drawerDivider": {
     // width: 100
   },
+  "& .menuGroupDivider": {
+    margin: theme.spacing(1, 0),
+    overflow: "hidden",
+    "&::before, &::after": {
+      borderColor: "currentColor",
+      opacity: 0.3,
+    },
+    "& .MuiDivider-wrapper": {
+      fontSize: (theme.menu?.appBar?.fontSize || 14) - 2,
+      fontWeight: 600,
+      textTransform: "uppercase",
+      letterSpacing: "0.08em",
+      opacity: 0.8,
+      padding: theme.spacing(0, 1),
+      flexShrink: 0,
+    },
+  },
+  "& .MuiAccordionDetails-root .menuGroupDivider": {
+    color: theme.palette.text.secondary,
+  },
+  "& .appBarMenuPaper .menuGroupDivider": {
+    color: theme.palette.text.primary,
+  },
   "& .menuHeading": {
     fontSize: (theme.menu?.appBar?.fontSize || 14) + 1,
     fontWeight: 500,
@@ -96,7 +143,8 @@ const StyledMainMenu = styled("div")(({ theme }) => ({
   },
   "& .menuHeading .MuiListItemIcon-root": {
     color: "inherit",
-    minWidth: 40,
+    minWidth: 0,
+    marginRight: theme.spacing(0.75),
   },
   "& .appBarMenuPaper": {
     borderTopLeftRadius: 0,
@@ -255,14 +303,7 @@ class MainMenuContribution extends Component {
       <StyledMainMenu>
         <Button ref={this.state.anchorRef} onClick={this.toggleExpanded} className="menuHeading">
           {(this.props.mainMenuVariant === "icon" || this.props.mainMenuVariant === "icon_text") && this.props.icon && (
-            <ListItemIcon>
-              {typeof this.props.icon === "function"
-                ? (() => {
-                    const Icon = this.props.icon;
-                    return <Icon />;
-                  })()
-                : this.props.icon}
-            </ListItemIcon>
+            <ListItemIcon>{renderMenuIcon(this.props.icon)}</ListItemIcon>
           )}
           {(this.props.mainMenuVariant === "text" || this.props.mainMenuVariant === "icon_text") && this.props.header}
         </Button>
@@ -277,27 +318,18 @@ class MainMenuContribution extends Component {
           <Paper className="appBarMenuPaper" id={`${this.props.header}-menu-list`}>
             <ClickAwayListener onClickAway={this.handleMenuClose}>
               <MenuList>
-                {entries.map((entry, idx) => {
+                {buildMenuItems(entries).map((item) => {
+                  const itemKey = `${this.props.header}_${item.key}`;
+                  const divider = renderGroupDivider(item, itemKey);
+                  if (divider) return divider;
+                  const { entry } = item;
                   return (
-                    <div key={`${this.props.header}_${idx}_menuItem`}>
-                      <MenuItem
-                        component={Link}
-                        to={entry.route}
-                        onClick={(e) => this.handleMenuSelect(e, entry.route)}
-                      >
-                        <ListItemIcon>
-                          {typeof entry.icon === "function"
-                            ? (() => {
-                                const Icon = entry.icon;
-                                return <Icon />;
-                              })()
-                            : entry.icon}
-                        </ListItemIcon>
+                    <div key={`${itemKey}_menuItem`}>
+                      <MenuItem component={Link} to={entry.route} onClick={(e) => this.handleMenuSelect(e, entry.route)}>
+                        <ListItemIcon>{renderMenuIcon(entry.icon)}</ListItemIcon>
                         <ListItemText primary={entry.text} />
                       </MenuItem>
-                      {entry.withDivider && (
-                        <Divider key={`${this.props.header}_${idx}_divider`} className="drawerDivider" />
-                      )}
+                      {entry.withDivider && <Divider key={`${itemKey}_divider`} className="drawerDivider" />}
                     </div>
                   );
                 })}
@@ -317,47 +349,31 @@ class MainMenuContribution extends Component {
         <Accordion className="panel" expanded={this.state.expanded} onChange={this.toggleExpanded}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />} id={`${this.props.header}-header`}>
             <Box display="flex" alignItems="center">
-              {this.props.icon && (
-                <ListItemIcon>
-                  {typeof this.props.icon === "function"
-                    ? (() => {
-                        const Icon = this.props.icon;
-                        return <Icon />;
-                      })()
-                    : this.props.icon}
-                </ListItemIcon>
-              )}
+              {this.props.icon && <ListItemIcon>{renderMenuIcon(this.props.icon)}</ListItemIcon>}
               <Typography className="drawerHeading">{this.props.header}</Typography>
             </Box>
           </AccordionSummary>
           <AccordionDetails>
             <List component="nav">
-              {entries.map((entry, idx) => {
+              {buildMenuItems(entries).map((item) => {
+                const itemKey = `${this.props.header}_${item.key}`;
+                const divider = renderGroupDivider(item, itemKey);
+                if (divider) return divider;
+                const { entry } = item;
                 return (
-                  <Fragment key={`${this.props.header}_${idx}`}>
+                  <Fragment key={itemKey}>
                     <ListItem
-                      key={`${this.props.header}_${idx}_item`}
+                      key={`${itemKey}_item`}
                       component={Link}
                       to={entry.route}
                       onClick={this.toggleExpanded}
                       selected={menuEntryMatchesLocationPath(entry)}
                       className={menuEntryMatchesLocationPath(entry) ? "menuItemActive" : undefined}
                     >
-                      {entry.icon && (
-                        <ListItemIcon>
-                          {typeof entry.icon === "function"
-                            ? (() => {
-                                const Icon = entry.icon;
-                                return <Icon />;
-                              })()
-                            : entry.icon}
-                        </ListItemIcon>
-                      )}
+                      {entry.icon && <ListItemIcon>{renderMenuIcon(entry.icon)}</ListItemIcon>}
                       <ListItemText primary={entry.text} />
                     </ListItem>
-                    {entry.withDivider && (
-                      <Divider key={`${this.props.header}_${idx}_divider`} className="drawerDivider" />
-                    )}
+                    {entry.withDivider && <Divider key={`${itemKey}_divider`} className="drawerDivider" />}
                   </Fragment>
                 );
               })}

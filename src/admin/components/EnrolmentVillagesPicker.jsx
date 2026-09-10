@@ -174,7 +174,7 @@ const EnrolmentVillagesPicker = (props) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          <ProgressOrError progress={fetchingDistrictMunAndVil} error={errorDistrictMunAndVil} />
+          <ProgressOrError progress={fetchingDistrictMunAndVil} error={errorDistrictMunAndVil} colSpan={3} />
           {items.map((item, idx) => (
             <TableRow key={item.parent?.id ?? `row-${idx}`}>
               <TableCell>
@@ -216,15 +216,19 @@ const EnrolmentVillagesPicker = (props) => {
           ))}
         </TableBody>
         <TableFooter>
-          <Button
-            disabled={readOnly}
-            variant="contained"
-            onClick={onInsertRow}
-            startIcon={<AddIcon />}
-            className="footer"
-          >
-            {formatMessage("table.newRow")}
-          </Button>
+          <TableRow>
+            <TableCell colSpan={3}>
+              <Button
+                disabled={readOnly}
+                variant="contained"
+                onClick={onInsertRow}
+                startIcon={<AddIcon />}
+                className="footer"
+              >
+                {formatMessage("table.newRow")}
+              </Button>
+            </TableCell>
+          </TableRow>
         </TableFooter>
       </Table>
     </StyledTableContainer>

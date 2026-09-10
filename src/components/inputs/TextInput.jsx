@@ -8,10 +8,7 @@ import { formatMessage, formatMessageWithValues } from "../../helpers/i18n";
 import { DEFAULT } from "../../constants";
 import withModulesManager from "../../helpers/modules";
 
-const StyledTextInput = styled("div")(({ theme }) => ({
-  "& .label": {
-    color: theme.palette.primary.main,
-  },
+const StyledTextInput = styled('div')(({ theme }) => ({
   // NOTE: This is used to hide the increment/decrement arrows from the number input
   "& .numberInput": {
     "& input[type=number]": {
@@ -28,14 +25,14 @@ const StyledTextInput = styled("div")(({ theme }) => ({
   },
   "& .disabledStateVisibilityBoost": {
     "& .Mui-disabled": {
-      color: "#5E5B50",
+      color: theme.palette.text.primary,
     },
     "& .MuiInput-underline:before": {
-      borderBottom: `1px dotted #5E5B50`,
+      borderBottom: `1px dotted ${theme.palette.text.disabled || theme.palette.divider}`,
     },
     "& .MuiFormLabel-root.Mui-disabled": {
-      color: "#181716",
-    },
+      color: theme.palette.text.secondary,
+    }
   },
 }));
 
@@ -49,6 +46,11 @@ class TextInput extends Component {
       "fe-core",
       "Input.disabledVisibilityBoost",
       DEFAULT.DISABLED_VISIBILITY_BOOST,
+    );
+    this.inputVariant = props.modulesManager.getConf(
+      "fe-core",
+      "Input.variant",
+      DEFAULT.INPUT_VARIANT,
     );
   }
 
@@ -151,6 +153,7 @@ class TextInput extends Component {
     return (
       <StyledTextInput>
         <TextField
+          variant={this.inputVariant}
           {...others}
           className={clsx({
             "numberInput": true,
@@ -159,9 +162,6 @@ class TextInput extends Component {
           fullWidth
           disabled={readOnly}
           label={!!label && formatMessage(intl, module, label)}
-          InputLabelProps={{
-            className: "label",
-          }}
           InputProps={{ inputProps: effectiveInputProps, startAdornment, endAdornment }}
           onChange={this._onChange}
           value={this.state.value}

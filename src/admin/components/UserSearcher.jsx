@@ -2,8 +2,6 @@ import React, { Component } from "react";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
-
-import { Button, Tooltip } from "@mui/material";
 import { useTheme, styled } from "@mui/material/styles";
 import GetIconComponent from "../../helpers/icons";
 const TabIcon = GetIconComponent("Tab");
@@ -17,6 +15,7 @@ import {
   formatDateFromISO,
   ConfirmDialog,
   decodeId,
+  ActionMenu
 } from "@openimis/fe-core";
 import { fetchUsersSummaries, deleteUser } from "../actions";
 import { DEFAULT, RIGHT_USER_DELETE } from "../constants";
@@ -152,22 +151,23 @@ class UserSearcher extends Component {
 
       (u) => (
         <div className="horizontalButtonContainer">
-          <Tooltip title={formatMessage(this.props.intl, "admin.user", "openNewTab")}>
-            <Button startIcon={<TabIcon />} onClick={() => this.props.onDoubleClick(u, true)}>
-              {formatMessage(this.props.intl, "admin.user", "openNewTab.buttonText")}
-            </Button>
-          </Tooltip>
-          {this.props.rights.includes(RIGHT_USER_DELETE) && u.validityTo ? null : (
-            <Tooltip title={formatMessage(this.props.intl, "admin.user", "deleteUser.tooltip")}>
-              <Button
-                startIcon={<DeleteIcon />}
-                onClick={() => this.setState({ deleteUser: u })}
-                disabled={u.validityTo}
-              >
-                {formatMessage(this.props.intl, "admin.user", "deleteUser.buttonText")}
-              </Button>
-            </Tooltip>
-          )}
+          <ActionMenu 
+            actions={[
+              {
+                icon: <TabIcon />,
+                label: formatMessage(this.props.intl, "admin.user", "openNewTab.buttonText"),
+                tooltip: formatMessage(this.props.intl, "admin.user", "openNewTab"),
+                onClick: () => this.props.onDoubleClick(u, true)
+              },
+              this.props.rights.includes(RIGHT_USER_DELETE) && !u.validityTo && {
+                divider: true,
+                icon: <DeleteIcon />,
+                label: formatMessage(this.props.intl, "admin.user", "deleteUser.buttonText"),
+                tooltip: formatMessage(this.props.intl, "admin.user", "deleteUser.tooltip"),
+                onClick: () => this.setState({ deleteUser: u }),
+              }
+            ]}
+          />
         </div>
       ),
     ];

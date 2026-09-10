@@ -5,8 +5,8 @@ import _ from "lodash";
 import { connect } from "react-redux";
 import GetIconComponent from "../../helpers/icons";
 
-const DeleteIcon = GetIconComponent("Delete");
-import { styled, alpha } from "@mui/material/styles";
+const DeleteIcon = GetIconComponent("Delete")
+import { styled } from "@mui/material/styles";
 import {
   Typography,
   Divider,
@@ -36,10 +36,10 @@ const StyledTable = styled("div")(({ theme }) => ({
   },
   "& .MuiTableCell-root": {
     padding: theme.spacing(0.5, 1),
-    borderColor: alpha(theme.palette.primary.main, 0.1),
+    borderColor: theme.palette.divider,
   },
   "& .MuiTableRow-root:hover": {
-    backgroundColor: alpha(theme.palette.primary.main, 0.05),
+    backgroundColor: theme.palette.action.hover,
   },
   "& .tableTitle": {
     ...theme.table?.title,
@@ -79,12 +79,24 @@ const StyledTable = styled("div")(({ theme }) => ({
     right: 0,
     background: "rgba(0, 0, 0, 0.12)",
   },
+  "& .paginationWrapper": {
+    display: "flex",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    width: "100%",
+  },
+  "& .lockControl": {
+    display: "flex",
+    alignItems: "center",
+    marginRight: theme.spacing(2),
+  },
 }));
 
 class Table extends Component {
   state = {
     selection: {},
     isRowsPerPageLocked: false,
+    ordinalNumberFrom: null,
   };
 
   _atom = (a) =>
@@ -153,7 +165,6 @@ class Table extends Component {
   isSelected = (i) => !!this.props.withSelection && !!this.state.selection[this.itemIdentifier(i)];
 
   select = (i, e) => {
-    // block normal href only for left click
     if (e.type === "click" || this.props.selectWithCheckbox) {
       if (!this.props.withSelection) return;
       let s = this.state.selection;
@@ -285,6 +296,7 @@ class Table extends Component {
     if (showOrdinalNumber) {
       localHeaders.unshift("core.Table.ordinalNumberHeader");
     }
+
     return (
       <StyledTable>
         <Box position="relative" overflow="auto">
@@ -456,8 +468,8 @@ class Table extends Component {
               <TableFooter className="tableFooter">
                 <TableRow>
                   <TableCell colSpan={localItemFormatters.length + (selectWithCheckbox ? 1 : 0)}>
-                    <Box display="flex" justifyContent="flex-end" alignItems="center" width="100%">
-                      <Box display="flex" justifyContent="flex-end" alignItems="center">
+                    <Box className="paginationWrapper">
+                      <Box className="lockControl">
                         <Tooltip title={formatMessage(intl, "core", "Table.lockRowsPerPage.tooltip")}>
                           <Checkbox checked={this.state.isRowsPerPageLocked} onChange={this.onToggleRowsPerPageLock} />
                         </Tooltip>
@@ -489,8 +501,7 @@ class Table extends Component {
           </MUITable>
           {(fetching || error) && (
             <Grid className="loader" container justifyContent="center" alignItems="center">
-              <ProgressOrError progress={items?.length && fetching} error={error} />{" "}
-              {/* We do not want to display the spinner with the empty table */}
+              <ProgressOrError progress={items?.length && fetching} error={error} />
             </Grid>
           )}
         </Box>
@@ -500,6 +511,7 @@ class Table extends Component {
 }
 
 export { StyledTable };
+
 const mapStateToProps = (state) => ({
   user: state.core?.user,
 });

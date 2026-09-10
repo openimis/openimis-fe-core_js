@@ -1,26 +1,45 @@
 import React, { useEffect, useState } from "react";
 import { styled } from "@mui/material/styles";
 import MuiAutocomplete from "@mui/material/Autocomplete";
-import { TextField } from "@mui/material";
+import { TextField, Paper, Button } from "@mui/material";
 import { useDebounceCb } from "../../helpers/hooks";
 import { useTranslations } from "../../helpers/i18n";
 import { useModulesManager } from "../../helpers/modules";
+import { DEFAULT } from "../../constants";
 
-const StyledAutocomplete = styled("div")(({ theme }) => ({
-  "& .label": {
-    color: theme.palette.primary.main,
-  },
-  "& .MuiAutocomplete-root": {
-    minWidth: "150px",
+const StyledAutocomplete = styled('div')(({ theme }) => ({
+  '& .MuiAutocomplete-root': {
+    minWidth: '150px',
     width: "100%",
   },
   "& .MuiTextField-root": {
     minWidth: "150px",
     width: "100%",
   },
+  "& .MuiChip-deleteIcon": {
+    fontSize: "16px",
+  },
 }));
 
 const defaultGetOptionSelected = (option, v) => option.id === v?.id;
+
+const PaperWithConfirm = ({ multiple, onConfirm, confirmLabel, ...paperProps }) => (
+  <Paper {...paperProps}>
+    {paperProps.children}
+    {multiple && (
+      <Button
+        fullWidth
+        size="small"
+        variant="text"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={onConfirm}
+        sx={{ borderTop: "1px solid", borderColor: "divider" }}
+      >
+        {confirmLabel}
+      </Button>
+    )}
+  </Paper>
+);
 
 const Autocomplete = (props) => {
   const {
@@ -51,6 +70,11 @@ const Autocomplete = (props) => {
   } = props;
   const modulesManager = useModulesManager();
   const minCharLookup = modulesManager.getConf("fe-admin", "usersMinCharLookup", 2);
+  const inputVariant = modulesManager.getConf(
+    "fe-core",
+    "Input.variant",
+    DEFAULT.INPUT_VARIANT,
+  );
   const { formatMessage } = useTranslations("core.Autocomplete", modulesManager);
   const [open, setOpen] = useState(false);
   const [resetKey, setResetKey] = useState(Date.now());
@@ -78,6 +102,8 @@ const Autocomplete = (props) => {
     setResetKey(Date.now());
   }, [value]);
 
+  const hasValue = multiple ? value?.length > 0 : !!value;
+
   return (
     <StyledAutocomplete>
       <MuiAutocomplete
@@ -99,7 +125,7 @@ const Autocomplete = (props) => {
         autoHighlight={autoHighlight}
         open={open}
         onOpen={() => setOpen(true)}
-        onClose={() => setOpen(false)}
+        onClose={() => !multiple && setOpen(false)}
         limitTags={limitTags ?? -1}
         autoComplete
         value={value}
@@ -109,16 +135,25 @@ const Autocomplete = (props) => {
         filterOptions={filterOptions}
         filterSelectedOptions={filterSelectedOptions}
         onInputChange={(__, query) => handleInputChange(query)}
+        PaperComponent={(paperProps) => (
+          <PaperWithConfirm
+            {...paperProps}
+            multiple={multiple}
+            onConfirm={() => setOpen(false)}
+            confirmLabel={formatMessage("core.confirmSelect")}
+          />
+        )}
         renderInput={
           !!renderInput
             ? renderInput
             : (inputProps) => (
                 <TextField
                   {...inputProps}
+                  variant={inputVariant}
                   required={required}
-                  InputLabelProps={{ shrink: value !== undefined, className: "label" }}
+                  InputLabelProps={{ shrink: value !== undefined }}
                   label={withLabel && (label || formatMessage("label"))}
-                  placeholder={!readOnly && withPlaceholder ? placeholder || formatMessage("placeholder") : undefined}
+                  placeholder={!readOnly && !hasValue && withPlaceholder ? placeholder || formatMessage("placeholder") : undefined}
                 />
               )
         }

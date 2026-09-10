@@ -6,6 +6,7 @@ import { styled, useTheme } from "@mui/material/styles";
 import {
   CircularProgress,
   ClickAwayListener,
+  Fade,
   List,
   ListItem,
   ListItemText,
@@ -194,7 +195,9 @@ class Messages extends Component {
           <AccordionDetails className="groupMessagePanel">
             <Grid container spacing={0}>
               {message.list.map((m, i) => (
-                <Grid size={12}>{this.formatSingleMessage(m, `${idx}.${i}`)}</Grid>
+                <Grid key={m.code || m.message || `msg-${idx}-${i}`} size={12}>
+                  {this.formatSingleMessage(m, `${idx}.${i}`)}
+                </Grid>
               ))}
             </Grid>
           </AccordionDetails>
@@ -223,6 +226,8 @@ class Messages extends Component {
         <Popover
           open={!!anchorEl}
           anchorEl={anchorEl}
+          TransitionComponent={Fade}
+          transitionDuration={{ enter: 250, exit: 250 }}
           anchorOrigin={{
             vertical: "center",
             horizontal: "left",
@@ -257,6 +262,8 @@ class Messages extends Component {
 class JournalDrawer extends Component {
   constructor(props) {
     super(props);
+    this.autoMessagesAnchorRef = React.createRef();
+    this.autoHideMessagesTimeoutId = null;
     this.state = {
       pageSize: props.modulesManager.getConf("fe-core", "journalDrawer.pageSize", 5),
       afterCursor: null,
@@ -279,6 +286,10 @@ class JournalDrawer extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
+    if (this.props.open && prevProps.open !== this.props.open) {
+      this.hideMessages();
+    }
+
     if (prevProps.fetchingHistoricalMutations && !this.props.fetchingHistoricalMutations) {
       this.setState((state, props) => ({
         displayedMutations: [...state.displayedMutations, ...props.mutations],
@@ -289,12 +300,53 @@ class JournalDrawer extends Component {
       this.setState({
         displayedMutations: [...this.props.mutations],
       });
+      this.handleAutoMessagesOnMutationStatusUpdate(prevProps.mutations, this.props.mutations);
     }
   }
 
   componentWillUnmount() {
     clearTimeout(this.state.timeoutId);
+    if (this.autoHideMessagesTimeoutId) {
+      clearTimeout(this.autoHideMessagesTimeoutId);
+      this.autoHideMessagesTimeoutId = null;
+    }
   }
+
+  handleAutoMessagesOnMutationStatusUpdate = (previousMutations, currentMutations) => {
+    if (this.props.open) {
+      return;
+    }
+    const previousMutationsById = new Map(
+      (previousMutations || []).map((mutation) => [mutation.clientMutationId, mutation]),
+    );
+    const finishedMutations = (currentMutations || []).filter((mutation) => {
+      const previousMutation = previousMutationsById.get(mutation.clientMutationId);
+      return previousMutation?.status === 0 && mutation.status !== 0;
+    });
+
+    if (!finishedMutations.length) {
+      return;
+    }
+
+    const latestFinishedMutation = finishedMutations[finishedMutations.length - 1];
+    const stableAnchor = this.autoMessagesAnchorRef.current;
+    if (!stableAnchor) {
+      return;
+    }
+
+    this.setState({
+      messagesAnchor: stableAnchor,
+      messages: latestFinishedMutation,
+    });
+
+    if (this.autoHideMessagesTimeoutId) {
+      clearTimeout(this.autoHideMessagesTimeoutId);
+    }
+    this.autoHideMessagesTimeoutId = setTimeout(() => {
+      this.hideMessages();
+      this.autoHideMessagesTimeoutId = null;
+    }, 3000);
+  };
   checkProcessing = () => {
     var clientMutationIds = this.state.displayedMutations.filter((m) => m.status === 0).map((m) => m.clientMutationId);
     //TODO: change for a "fetchMutationS(ids)"  > requires id_In backend implementation
@@ -361,6 +413,10 @@ class JournalDrawer extends Component {
     if (this.props.open) {
       return;
     }
+    if (this.autoHideMessagesTimeoutId) {
+      clearTimeout(this.autoHideMessagesTimeoutId);
+      this.autoHideMessagesTimeoutId = null;
+    }
     this.setState({
       messagesAnchor: e.currentTarget,
       messages: m,
@@ -368,6 +424,10 @@ class JournalDrawer extends Component {
   };
 
   hideMessages = (e) => {
+    if (this.autoHideMessagesTimeoutId) {
+      clearTimeout(this.autoHideMessagesTimeoutId);
+      this.autoHideMessagesTimeoutId = null;
+    }
     this.setState({
       messagesAnchor: null,
       messages: null,
@@ -387,7 +447,16 @@ class JournalDrawer extends Component {
       <StyledJournalDrawer>
         <ClickAwayListener onClickAway={(e) => open && handleDrawer()}>
           <nav className="drawer">
-            <Messages anchorEl={this.state.messagesAnchor} messages={this.state.messages} onClick={this.hideMessages} />
+            <span
+              ref={this.autoMessagesAnchorRef}
+              aria-hidden="true"
+              style={{ position: "fixed", top: 0, right: 0, height: "100vh", width: 0 }}
+            />
+            <Messages
+              anchorEl={this.state.messagesAnchor}
+              messages={this.state.messages}
+              onClick={this.hideMessages}
+            />
             <Drawer
               variant="permanent"
               anchor="right"

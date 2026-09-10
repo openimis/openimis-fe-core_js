@@ -174,11 +174,4 @@ describe("core reducer", () => {
     });
   });
 
-  describe("impersonation", () => {
-    it("clears the impersonated user when stopping", () => {
-      const impersonating = { ...initial(), impersonatedUser: { id: 7 } };
-
-      expect(on(impersonating, "CORE_STOP_IMPERSONATION").impersonatedUser).toBeNull();
-    });
-  });
 });

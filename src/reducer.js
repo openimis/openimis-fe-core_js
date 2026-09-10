@@ -52,8 +52,6 @@ function reducer(
     fetchedLanguages: false,
     languages: [],
     errorLanguages: null,
-    impersonatedUser: null,
-    impersonationDialogOpen: false,
   },
   action,
 ) {
@@ -467,7 +465,6 @@ function reducer(
         modulePermissions: [],
         role: null,
         roleRights: [],
-        impersonatedUser: null,
       };
     case "CORE_PAGINATION_PAGE":
       return {
@@ -493,23 +490,6 @@ function reducer(
       return {
         ...state,
         isSecondaryCalendarEnabled: action.payload.isSecondaryCalendarEnabled,
-      };
-    case "CORE_IMPERSONATE_USER":
-      return {
-        ...state,
-        impersonatedUser: action.payload,
-        impersonationDialogOpen: false,
-      };
-    case "CORE_STOP_IMPERSONATION":
-      return {
-        ...state,
-        impersonatedUser: null,
-        impersonationDialogOpen: false,
-      };
-    case "CORE_SET_IMPERSONATION_DIALOG":
-      return {
-        ...state,
-        impersonationDialogOpen: action.payload,
       };
     default:
       return state;

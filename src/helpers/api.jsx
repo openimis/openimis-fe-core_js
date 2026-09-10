@@ -205,13 +205,6 @@ export const isCsrfError = (error) =>
 export const isSessionError = (status, gqlErrors = []) =>
   status === 401 || gqlErrors.some(isCsrfError);
 
-export const isImpersonationError = (gqlErrors = []) => {
-  return gqlErrors.some((error) => {
-    const message = normalizeGraphqlErrorMessage(error?.message);
-    return message.includes("invalid impersonation target");
-  });
-};
-
 const LOGOUT_MUTATION = `
   mutation {
     deleteTokenCookie {

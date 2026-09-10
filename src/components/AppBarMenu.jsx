@@ -15,7 +15,6 @@ import {
 } from "@mui/material";
 import { Link } from "../helpers/history";
 import LanguageMenuItems from "./LanguageMenuItems";
-import ImpersonationMenuItem from "./ImpersonationMenuItem";
 
 // GetIconComponent returns a component function; entries may also carry a ready element.
 const renderIcon = (icon) => (typeof icon === "function" ? React.createElement(icon) : icon || null);
@@ -26,7 +25,6 @@ const renderIcon = (icon) => (typeof icon === "function" ? React.createElement(i
 //   { type: "divider" }
 //   { type: "label", text }              – non-clickable section heading
 //   { type: "language" }                 – built-in language switcher (LanguageMenuItems)
-//   { type: "impersonation" }            – built-in superuser impersonation entry
 const AppBarMenu = ({ icon, text, entries = [] }) => {
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
@@ -75,9 +73,6 @@ const AppBarMenu = ({ icon, text, entries = [] }) => {
                     }
                     if (item.type === "language") {
                       return <LanguageMenuItems key={`lang_${idx}`} />;
-                    }
-                    if (item.type === "impersonation") {
-                      return <ImpersonationMenuItem key={`imp_${idx}`} onClose={close} />;
                     }
                     // default: a navigating link
                     return (

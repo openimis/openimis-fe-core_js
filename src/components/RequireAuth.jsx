@@ -298,6 +298,46 @@ const popupJournalLayout = (theme) => ({
   },
 });
 
+/**
+ * The left menu paper, and the rules its content relies on. A temporary Drawer portals its paper
+ * out of the styled wrapper, so these cannot be plain descendant rules there.
+ */
+const menuDrawerPaperStyles = (theme) => ({
+  width: theme.menu.drawer.width,
+  flexShrink: 0,
+  backgroundColor: theme.menu.drawer.backgroundColor,
+  color: theme.menu.drawer.textColor,
+  zIndex: theme.zIndex.appBar + 1,
+  "& .appName": {
+    ...theme.mixins.toolbar,
+    color: theme.palette.secondary.main,
+    textTransform: "none",
+    fontSize: theme.typography.h6.fontSize,
+    fontWeight: "bold",
+    whiteSpace: "nowrap",
+    display: "flex",
+    alignItems: "center",
+  },
+  "& .appVersions": {
+    color: theme.palette.secondary.main,
+    fontSize: theme.typography.h6.fontSize / 2,
+    verticalAlign: "text-bottom",
+    marginLeft: theme.spacing(1),
+    opacity: 0.8,
+    [theme.breakpoints.down("lg")]: {
+      display: "none",
+    },
+  },
+  "& .logo": {
+    verticalAlign: "middle",
+    marginRight: theme.spacing(2),
+    maxHeight: 32,
+  },
+  "& .drawerContainer": {
+    overflow: "auto",
+  },
+});
+
 const StyledRequireAuth = styled("div", {
   shouldForwardProp: (prop) => prop !== "journalSidebar",
 })(({ theme, journalSidebar }) => ({
@@ -437,8 +477,12 @@ const RequireAuth = (props) => {
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const menuDrawerBreakpoint = theme.layout?.menuDrawerBreakpoint ?? "lg";
   const isMenuDrawerUp = useMediaQuery(theme.breakpoints.up(menuDrawerBreakpoint));
+  const journalSidebarBreakpoint = theme.layout?.journalSidebarBreakpoint ?? "md";
+  const isJournalSidebarUp = useMediaQuery(theme.breakpoints.up(journalSidebarBreakpoint));
+  // the always-there sidebar does not fit a narrow screen: fall back to the popup journal there
+  const journalSidebar = showJournalSidebar && isJournalSidebarUp;
   // the classic sidebar layout keeps the historical md breakpoint, the popup one is configurable
-  const isMenuBarUp = showJournalSidebar ? isMdUp : isMenuDrawerUp;
+  const isMenuBarUp = journalSidebar ? isMdUp : isMenuDrawerUp;
 
   const isAppBarMenu = useMemo(() => {
     const variant = theme.menu?.variant || "AppBar";
@@ -496,10 +540,10 @@ const RequireAuth = (props) => {
 
   if (menuLeft) {
     return (
-      <StyledRequireAuth journalSidebar={showJournalSidebar}>
+      <StyledRequireAuth journalSidebar={journalSidebar}>
         <AppBar className="appBarDrawer">
-          <Toolbar className={clsx("toolbarDrawer", { journalOpen: showJournalSidebar && isDrawerOpen })}>
-            {!showJournalSidebar && !isMenuBarUp && (
+          <Toolbar className={clsx("toolbarDrawer", { journalOpen: journalSidebar && isDrawerOpen })}>
+            {!journalSidebar && !isMenuBarUp && (
               <IconButton color="inherit" onClick={setOpen.toggle} className="menuButton">
                 <MenuIcon />
               </IconButton>
@@ -523,14 +567,21 @@ const RequireAuth = (props) => {
                 multiple={false}
               />
             )}
-            {!showJournalSidebar && <JournalButtonTrigger onClick={setDrawerOpen.toggle} />}
+            {!journalSidebar && <JournalButtonTrigger onClick={setDrawerOpen.toggle} />}
             <LogoutButton className="toolbarDrawerLogout" />
             <Help />
           </Toolbar>
         </AppBar>
         <Box className="layoutWrapper">
-          {showJournalSidebar || isMenuBarUp ? (
-            <Drawer className="drawerRoot" variant="permanent" PaperProps={{ className: "drawerPaper" }} anchor="left">
+          {journalSidebar || isMenuBarUp ? (
+            <Drawer
+              className="drawerRoot"
+              variant="permanent"
+              anchor="left"
+              slotProps={{
+                paper: { sx: (theme) => ({ ...menuDrawerPaperStyles(theme), position: "fixed", inset: "0 auto 0 0" }) },
+              }}
+            >
               {leftMenuDrawer}
             </Drawer>
           ) : (
@@ -540,14 +591,14 @@ const RequireAuth = (props) => {
               anchor="left"
               open={isOpen}
               onClose={setOpen.off}
-              PaperProps={{ className: "drawerPaper" }}
+              slotProps={{ paper: { sx: menuDrawerPaperStyles } }}
             >
               {leftMenuDrawer}
             </Drawer>
           )}
           <main className="contentShiftLeftSideMenu">{children}</main>
           <JournalDrawer
-            journalSidebar={showJournalSidebar}
+            journalSidebar={journalSidebar}
             open={isDrawerOpen}
             handleDrawer={setDrawerOpen.toggle}
           />
@@ -558,13 +609,13 @@ const RequireAuth = (props) => {
 
   const { formatMessage } = useTranslations("core", modulesManager);
   return (
-    <StyledRequireAuth journalSidebar={showJournalSidebar}>
+    <StyledRequireAuth journalSidebar={journalSidebar}>
       <AppBar
         className={clsx("appBar", {
           appBarShift: isOpen && isMenuBarUp,
         })}
       >
-        <Toolbar className={clsx("topToolbar", { journalOpen: showJournalSidebar && isDrawerOpen })}>
+        <Toolbar className={clsx("topToolbar", { journalOpen: journalSidebar && isDrawerOpen })}>
           <Box display="flex" alignItems="center">
             <IconButton
               color="inherit"
@@ -636,14 +687,14 @@ const RequireAuth = (props) => {
                 multiple={false}
               />
             )}
-            {!showJournalSidebar && <JournalButtonTrigger onClick={setDrawerOpen.toggle} />}
+            {!journalSidebar && <JournalButtonTrigger onClick={setDrawerOpen.toggle} />}
             <LogoutButton />
             <Help />
           </Box>
         </Toolbar>
 
         {isAppBarMenu && isMenuBarUp && (
-          <Toolbar className={clsx("menuToolbar", { journalOpen: showJournalSidebar && isDrawerOpen })} variant="dense">
+          <Toolbar className={clsx("menuToolbar", { journalOpen: journalSidebar && isDrawerOpen })} variant="dense">
             <MainMenuBar {...others} menuVariant="AppBar" contributionKey={MAIN_MENU_CONTRIBUTION_KEY}>
               <div onClick={setOpen.off} />
             </MainMenuBar>
@@ -678,10 +729,10 @@ const RequireAuth = (props) => {
             </nav>
           </ClickAwayListener>
         )}
-        <main className={clsx({ content: showJournalSidebar, jrnlContentShift: showJournalSidebar && isDrawerOpen })}>
+        <main className={clsx({ content: journalSidebar, jrnlContentShift: journalSidebar && isDrawerOpen })}>
           {children}
         </main>
-        <JournalDrawer journalSidebar={showJournalSidebar} open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />
+        <JournalDrawer journalSidebar={journalSidebar} open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />
       </Box>
     </StyledRequireAuth>
   );

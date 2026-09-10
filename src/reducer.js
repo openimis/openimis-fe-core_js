@@ -9,6 +9,7 @@ import {
   dispatchMutationErr,
 } from "./helpers/api";
 import _ from "lodash";
+import { loadMutationResults } from "./helpers/mutationAlert";
 
 function reducer(
   state = {
@@ -18,6 +19,7 @@ function reducer(
     fetchedHistoricalMutations: false,
     fetchingMutations: false,
     mutations: [],
+    mutationResults: loadMutationResults(),
     filtersCache: {},
     fetchingRoles: false,
     fetchedRoles: false,
@@ -154,6 +156,14 @@ function reducer(
         filtersCache: filtersCacheCopy,
       };
 
+    case "CORE_MUTATION_RESULT":
+      return {
+        ...state,
+        mutationResults: {
+          ...state.mutationResults,
+          [action.payload.clientMutationId]: action.payload,
+        },
+      };
     case "CORE_MUTATION_ADD":
       return {
         ...state,
@@ -458,7 +468,9 @@ function reducer(
       return {
         ...state,
         user: null,
+        fetchedHistoricalMutations: false,
         mutations: [],
+        mutationResults: {},
         filtersCache: {},
         roles: [],
         rolesPageInfo: {},

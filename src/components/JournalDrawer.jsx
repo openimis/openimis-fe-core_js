@@ -38,10 +38,12 @@ const ExpandLessIcon = GetIconComponent("ExpandLess");
 const ExpandMoreIcon = GetIconComponent("ExpandMore");
 const CloseIcon = GetIconComponent("Close");
 const HistoryIcon = GetIconComponent("History");
-import { fetchMutation, fetchHistoricalMutations } from "../actions";
+const InfoIcon = GetIconComponent("InfoOutlined");
+import { fetchMutation, fetchHistoricalMutations, coreAlert } from "../actions";
 import withModulesManager from "../helpers/modules";
 import { getLocalStorage, setLocalStorage } from "../helpers/useLocalStorage";
 import { useTranslations } from "../helpers/i18n";
+import { buildMutationAlert } from "../helpers/mutationAlert";
 import moment from "moment";
 import _ from "lodash";
 import { CLAIM_STATS_ORDER, GLOBAL_UNDERSCORE, REQUEST_LIMIT, WHITE_SPACE } from "../constants";
@@ -306,7 +308,9 @@ const MutationList = ({
   expanded,
   hasNextPage,
   messagesClickable,
+  detailsLabel,
   onShowMessages,
+  onShowDetails,
   onToggleDetail,
   onLoadMore,
 }) => (
@@ -330,6 +334,13 @@ const MutationList = ({
             primary={m.clientMutationLabel}
             secondary={moment(m.requestDateTime).format("YYYY-MM-DD HH:mm")}
           />
+          {m.status !== 0 && (
+            <Tooltip title={detailsLabel}>
+              <IconButton onClick={(e) => onShowDetails(e, m)} aria-label={detailsLabel} size="small">
+                <InfoIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
           {!!m.clientMutationDetails && expanded === `detail-${idx}` && (
             <IconButton onClick={(e) => onToggleDetail(e, false)}>
               <ExpandLessIcon />
@@ -415,11 +426,13 @@ class JournalDrawer extends Component {
     this.autoHideMessagesTimeoutId = null;
     // mutations already final when first seen must not raise a stale popup on page reload
     this.announcedMutations = new Set((props.mutations ?? []).filter(isMutationFinal).map((m) => m.clientMutationId));
+    // every route mounts its own RequireAuth, hence its own drawer: pick the journal back up from
+    // the store instead of showing an empty list until the next mutation
     this.state = {
       pageSize: props.modulesManager.getConf("fe-core", "journalDrawer.pageSize", 5),
-      afterCursor: null,
-      hasNextPage: false,
-      displayedMutations: [],
+      afterCursor: props.mutationsPageInfo?.endCursor ?? null,
+      hasNextPage: props.mutationsPageInfo?.hasNextPage ?? false,
+      displayedMutations: props.mutations ?? [],
       messagesAnchor: null,
       expanded: false,
       resultPopup: null,
@@ -619,16 +632,20 @@ class JournalDrawer extends Component {
     this.setState({ resultPopup: null });
   };
 
-  openResultDetails = (event) => {
+  /** Both the journal rows and the snackbar open the very same result dialog. */
+  showDetails = (event, mutation) => {
+    event?.stopPropagation();
+    const { coreAlert, mutationResults, formatMessage } = this.props;
+    coreAlert(buildMutationAlert(mutation, mutationResults?.[mutation?.clientMutationId], formatMessage));
+  };
+
+  showResultPopupDetails = (event) => {
     const { resultPopup } = this.state;
     if (!resultPopup) {
       return;
     }
-    this.setState({
-      resultPopup: null,
-      messagesAnchor: event.currentTarget,
-      messages: resultPopup,
-    });
+    this.setState({ resultPopup: null });
+    this.showDetails(event, resultPopup);
   };
 
   renderMutations = (messagesClickable) => (
@@ -638,7 +655,9 @@ class JournalDrawer extends Component {
       expanded={this.state.expanded}
       hasNextPage={this.state.hasNextPage}
       messagesClickable={messagesClickable}
+      detailsLabel={this.props.formatMessage("journal.details")}
       onShowMessages={this.showMessages}
+      onShowDetails={this.showDetails}
       onToggleDetail={this.handleChange}
       onLoadMore={this.more}
     />
@@ -700,11 +719,26 @@ class JournalDrawer extends Component {
           className="resultSnackbar"
         >
           <Alert
-            onClose={this.hideResultPopup}
             severity={isError ? "error" : "success"}
             variant="filled"
-            sx={{ width: "100%", cursor: isError ? "pointer" : "default" }}
-            onClick={isError ? this.openResultDetails : undefined}
+            sx={{ width: "100%" }}
+            action={
+              <>
+                <Tooltip title={formatMessage("journal.details")}>
+                  <IconButton
+                    color="inherit"
+                    size="small"
+                    onClick={this.showResultPopupDetails}
+                    aria-label={formatMessage("journal.details")}
+                  >
+                    <InfoIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <IconButton color="inherit" size="small" onClick={this.hideResultPopup} aria-label="close">
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </>
+            }
           >
             <Typography variant="subtitle2" component="div">
               {resultPopup?.clientMutationLabel}
@@ -753,10 +787,11 @@ const mapStateToProps = (state) => ({
   fetchedHistoricalMutations: state.core.fetchedHistoricalMutations,
   mutations: state.core.mutations,
   mutationsPageInfo: state.core.mutationsPageInfo,
+  mutationResults: state.core.mutationResults,
 });
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ fetchMutation, fetchHistoricalMutations }, dispatch);
+  return bindActionCreators({ fetchMutation, fetchHistoricalMutations, coreAlert }, dispatch);
 };
 
 const JournalDrawerWithTheme = (props) => {

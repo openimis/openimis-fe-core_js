@@ -8,7 +8,6 @@ import {
   formatGQLString,
   formatMutation,
   formatServerError,
-  decodeId,
 } from "./helpers/api";
 import * as Sentry from "@sentry/react";
 import { getLocalStorage, setLocalStorage } from "./helpers/useLocalStorage";
@@ -784,4 +783,5 @@ export function changeUserLanguage(language, clientMutationLabel) {
 }
 
 // Re-export API helpers
-export { formatPageQuery, formatPageQueryWithCount, formatMutation, decodeId };
+export { formatPageQuery, formatPageQueryWithCount, formatMutation };
+export { decodeId } from "./helpers/api";

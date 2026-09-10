@@ -158,7 +158,7 @@ export function prepareMenuEntries(rights, intl, entries, routes) {
 // { type: "divider" }, { type: "label", text }, or { type: "language" } (built-in
 // language switcher). Rights filtering applies to links; kind-items always pass.
 export function prepareAppBarIcons(rights, intl, entries, routes) {
-  const rightsSet = new Set(ensureArray(rights).map((r) => String(r)));
+  const rightsSet = new Set(ensureArray(rights).map(String));
 
   const prepareItem = (entry) => {
     // kind-items carry no route and are rendered specially by AppBarMenu

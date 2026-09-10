@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import GetIconComponent from "../helpers/icons";
 const MenuIcon = GetIconComponent("Menu");
-import { prepareMenuEntries, prepareAppBarIcons } from "../helpers/utils";
+import { prepareAppBarIcons } from "../helpers/utils";
 import Contributions from "./generics/Contributions";
 import AppBarIconButton from "./AppBarIconButton";
 import AppBarMenu from "./AppBarMenu";

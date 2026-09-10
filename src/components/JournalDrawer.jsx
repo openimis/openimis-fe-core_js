@@ -48,6 +48,78 @@ import moment from "moment";
 import _ from "lodash";
 import { CLAIM_STATS_ORDER, GLOBAL_UNDERSCORE, REQUEST_LIMIT, WHITE_SPACE } from "../constants";
 
+/**
+ * The journal entry rules. They are needed both inside the classic drawer, which renders in place,
+ * and inside the popup drawer, whose paper is portalled out of the styled wrapper -- hence a
+ * function reused as descendant rules on one side and as `sx` on the other.
+ */
+const journalEntryStyles = (theme) => ({
+  "& .jrnlItem": theme.jrnlDrawer?.item,
+  "& .jrnlItemDetail": theme.jrnlDrawer?.itemDetail,
+  "& .jrnlItemDetailsError": {
+    ...theme.jrnlDrawer?.itemDetail,
+    color: theme.palette.error.main,
+    whiteSpace: "normal",
+    overflowWrap: "break-word",
+  },
+  "& .jrnlItemDetailText": theme.jrnlDrawer?.itemDetailText,
+  "& .jrnlIconClickable": {
+    cursor: "pointer",
+  },
+  "& .jrnlIcon": {
+    paddingLeft: theme.spacing(1),
+  },
+  "& .jrnlErrorItem": {
+    color: theme.palette.error.main,
+  },
+  "& .jrnlErrorIcon": {
+    paddingLeft: theme.spacing(1),
+    color: theme.palette.error.main,
+  },
+});
+
+/** the messages popover is portalled too, in both journal variants */
+const messagesPopoverStyles = (theme) => ({
+  width: 350,
+  maxWidth: "calc(100vw - 32px)",
+  "& .groupMessagePanel": {
+    width: "100%",
+    margin: 0,
+    padding: 0,
+  },
+  "& .errorPanel": {
+    width: "100%",
+    color: theme.palette.error.main,
+  },
+  "& .messagePanel": {
+    width: "100%",
+    margin: theme.spacing(1),
+  },
+  "& .centerText": {
+    textAlign: "center",
+  },
+  "& .boldCenterText": {
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+});
+
+const popupDrawerPaperStyles = (isMobile) => (theme) => ({
+  ...journalEntryStyles(theme),
+  ...(isMobile
+    ? {
+        width: "100%",
+        height: "100vh",
+        maxHeight: "100vh",
+        borderRadius: 0,
+        "@supports (height: 100dvh)": {
+          height: "100dvh",
+          maxHeight: "100dvh",
+        },
+      }
+    : { width: theme.jrnlDrawer?.open?.width || 500 }),
+});
+
 const StyledJournalDrawer = styled("div")(({ theme }) => ({
   // --- classic sidebar (showJournalSidebar = true) ---
   "& .toolbar": {
@@ -89,77 +161,7 @@ const StyledJournalDrawer = styled("div")(({ theme }) => ({
       width: theme.spacing(9) + 1,
     },
   },
-  // --- shared journal entry styling ---
-  "& .jrnlItem": theme.jrnlDrawer?.item,
-  "& .jrnlItemDetail": theme.jrnlDrawer?.itemDetail,
-  "& .jrnlItemDetailsError": {
-    ...theme.jrnlDrawer?.itemDetail,
-    color: theme.palette.error.main,
-    whiteSpace: "normal",
-    overflowWrap: "break-word",
-  },
-  "& .jrnlItemDetailText": theme.jrnlDrawer?.itemDetailText,
-  "& .jrnlIconClickable": {
-    cursor: "pointer",
-  },
-  "& .jrnlIcon": {
-    paddingLeft: theme.spacing(1),
-  },
-  "& .jrnlErrorItem": {
-    color: theme.palette.error.main,
-  },
-  "& .jrnlErrorIcon": {
-    paddingLeft: theme.spacing(1),
-    color: theme.palette.error.main,
-  },
-  "& .messagePopover": {
-    width: 350,
-    maxWidth: "calc(100vw - 32px)",
-  },
-  "& .groupMessagePanel": {
-    width: "100%",
-    margin: 0,
-    padding: 0,
-  },
-  "& .errorPanel": {
-    width: "100%",
-    color: theme.palette.error.main,
-  },
-  "& .messagePanel": {
-    width: "100%",
-    margin: theme.spacing(1),
-  },
-  "& .centerText": {
-    textAlign: "center",
-  },
-  "& .boldCenterText": {
-    textAlign: "center",
-    fontWeight: "bold",
-  },
-  // --- popup journal (showJournalSidebar = false) ---
-  "& .drawerPaperDesktop": {
-    width: theme.jrnlDrawer?.open?.width || 500,
-  },
-  "& .drawerPaperMobile": {
-    width: "100%",
-    height: "100vh",
-    maxHeight: "100vh",
-    borderRadius: 0,
-    "@supports (height: 100dvh)": {
-      height: "100dvh",
-      maxHeight: "100dvh",
-    },
-  },
-  "& .drawerHeader": {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: theme.spacing(1, 1.5),
-    borderBottom: `1px solid ${theme.palette.divider}`,
-  },
-  "& .resultSnackbar": {
-    maxWidth: 420,
-  },
+  ...journalEntryStyles(theme),
 }));
 
 const isMutationFinal = (mutation) => mutation?.status !== 0 && mutation?.status !== undefined && mutation?.status !== null;
@@ -277,7 +279,7 @@ class Messages extends Component {
             horizontal: "right",
           }}
           onClick={onClick}
-          PaperProps={{ className: "messagePopover" }}
+          slotProps={{ paper: { sx: messagesPopoverStyles } }}
         >
           {stats?.claim_stats && (
             <div>
@@ -716,7 +718,7 @@ class JournalDrawer extends Component {
           autoHideDuration={8000}
           onClose={this.hideResultPopup}
           anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          className="resultSnackbar"
+          sx={{ maxWidth: 420 }}
         >
           <Alert
             severity={isError ? "error" : "success"}
@@ -755,11 +757,18 @@ class JournalDrawer extends Component {
           open={open}
           onClose={handleDrawer}
           ModalProps={{ keepMounted: true }}
-          PaperProps={{
-            className: isMobile ? "drawerPaperMobile" : "drawerPaperDesktop",
-          }}
+          slotProps={{ paper: { sx: popupDrawerPaperStyles(isMobile) } }}
         >
-          <Box className="drawerHeader">
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: (theme) => theme.spacing(1, 1.5),
+              borderBottom: 1,
+              borderColor: "divider",
+            }}
+          >
             <Typography variant="subtitle1">{formatMessage("journal.title")}</Typography>
             <IconButton onClick={handleDrawer} aria-label="close">
               {isMobile ? <CloseIcon /> : <ChevronRightIcon />}

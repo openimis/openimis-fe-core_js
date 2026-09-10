@@ -10,8 +10,8 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
+  ListSubheader,
   Divider,
-  Typography,
 } from "@mui/material";
 import { Link } from "../helpers/history";
 import LanguageMenuItems from "./LanguageMenuItems";
@@ -62,13 +62,9 @@ const AppBarMenu = ({ icon, text, entries = [] }) => {
                     }
                     if (item.type === "label") {
                       return (
-                        <Typography
-                          key={`lbl_${idx}`}
-                          variant="caption"
-                          sx={{ px: 2, py: 0.5, display: "block", opacity: 0.7 }}
-                        >
+                        <ListSubheader key={`lbl_${idx}`} disableSticky sx={{ lineHeight: 2, opacity: 0.7 }}>
                           {item.text}
-                        </Typography>
+                        </ListSubheader>
                       );
                     }
                     if (item.type === "language") {

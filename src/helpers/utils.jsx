@@ -169,6 +169,7 @@ export function prepareAppBarIcons(rights, intl, entries, routes) {
 
     // dropdown: has children, no route of its own
     if (Array.isArray(entry.entries) && !entry.route) {
+      if (!matchesRights(entry.rights, rightsSet)) return null;
       const children = ensureArray(entry.entries).map(prepareItem).filter(Boolean).sort(byPosition);
       if (!children.length) return null;
       return {

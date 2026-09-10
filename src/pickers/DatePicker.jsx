@@ -205,7 +205,6 @@ class openIMISDatePicker extends Component {
           ...(otherProps.slotProps?.textField ?? undefined),
           required,
           variant: inputVariant ?? this.inputVariant,
-          InputLabelProps: { className: "label" },
         },
       };
 

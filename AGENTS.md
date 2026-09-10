@@ -62,10 +62,20 @@ This created slight but noticeable color differences:
 
 Removing per-component overrides + preferring dedicated theme sections (paper, menu, table, ...) + falling back to palette colors only when needed ensures that the host app's full color scheme (including its chosen primary/secondary values or entirely custom surfaces) is respected everywhere.
 
+## Testing
+
+Vitest runs from the **assembly** (`openimis-fe_js`), not from this package — see its `AGENTS.md` for the runner, the commands and the conventions shared by all modules. This package is picked up as a Vitest project only when the assembly's `openimis.json` (or `openimis-dev.json`) declares `@openimis/fe-core` with an `@file:` spec; a `node_modules` symlink alone is not enough.
+
+Specific to this package:
+
+- The shared test helpers live here, in `src/testing` — `renderWithProviders`, `makeStore`, `mockModulesManager`. Tests in this package import them relatively (`../../testing`); other modules use the `@openimis/fe-core/testing` subpath. Keep them out of `src/index.jsx`: re-exporting would pull `@testing-library` into the production bundle.
+- Components here import their helpers relatively, so they need no mocking. A component that imports the `@openimis/fe-core` barrel self-imports the package under test — mock it with `vi.mock` and load the subject with top-level `await import()` (see `NumberInput.test.jsx`).
+
 ## General
 
 - This is the `@openimis/fe-core` package. Changes here affect all openIMIS frontend modules.
 - Use MUI v7+ components and `@mui/material/styles` `styled()`.
 - Input variant (standard/outlined/filled) is configurable via modules manager: `Input.variant`.
 - When adding new inputs or pickers, wrap with `styled()` using the theme callback and inherit MUI TextField where possible.
+- An input's "no value" is `null`/`undefined`, never `""`. `SelectInput` JSON-encodes its value to match option values, so an empty string reaches MUI as the literal `""`, matches no option, and makes MUI log an out-of-range warning on *every* render — one per keystroke in the surrounding form.
 - Update this file when introducing new theming or styling conventions.

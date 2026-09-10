@@ -272,7 +272,8 @@ None
 - `journalDrawer.pageSize`: page size when loading (historical) mutations (Default: `5`)
 - `AutoSuggestion.limitDisplay`: threshold to limit the number of items in the auto suggestions (adding 'more options...' message), default: 10
 - `AmountInput.currencyPosition`: position of the currency for the AmountInput. Choices are `start` and `end` (default: `start`)
-- `menuLeft`: position menu in the Drawer component on the left site of the application
+- `menu.variant`: which main menu a wide screen gets, `"AppBar"` (horizontal menu in the top bar, the default) or `"Drawer"` (permanent sidebar down the left edge); `"top"` and `"left"` are accepted as aliases. Below `theme.layout.menuDrawerBreakpoint` neither fits, so a narrow screen always gets the hamburger + overlay drawer regardless of this setting.
+- `menuLeft`: **deprecated**, superseded by `menu.variant`. Still honoured: `true` is read as `menu.variant: "Drawer"`.
 - `calendarSwitch`: enable calendar switcher toggle on the navbar of the webpage. Currently supports nepali calendar. Default false.
 - `secondCalendarFormatting`: formatting options for second calendar (both picker and display), default: "DD-MM-YYYY"
 - `secondCalendarFormattingLang`: formatting language for second calendar (when displayed as saved data, not in pickers), default: "en"

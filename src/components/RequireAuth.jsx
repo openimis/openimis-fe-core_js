@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import GetIconComponent from "../helpers/icons";
 const MenuIcon = GetIconComponent("Menu");
-import { prepareMenuEntries } from "../helpers/utils";
+import { prepareMenuEntries, resolveMenuVariant } from "../helpers/utils";
 import Contributions from "./generics/Contributions";
 import AppBarIconButton from "./AppBarIconButton";
 import FormattedMessage from "./generics/FormattedMessage";
@@ -406,9 +406,19 @@ const StyledRequireAuth = styled("div", {
     ...theme.mixins.toolbar,
     display: "flex",
     alignItems: "center",
-    paddingLeft: theme.spacing(2),
+    // Same inset as .topToolbar, so the drawer sandwich sits where the AppBar one was.
+    paddingLeft: fluidPaddingX(theme),
     margin: theme.spacing(1, 0, 1, 0),
     backgroundColor: theme.menu.drawer.backgroundColor,
+    color: theme.menu.drawer.textColor,
+  },
+  "& .drawerHeader .appName": {
+    minWidth: 0,
+    paddingLeft: 0,
+  },
+  "& .drawerHeader .logo": {
+    maxHeight: 24,
+    marginRight: theme.spacing(1),
   },
   "& .contentShift": {
     transition: theme.transitions.create("margin", {
@@ -468,8 +478,6 @@ const RequireAuth = (props) => {
   const modulesManager = useModulesManager();
   const auth = useAuthentication();
   const cfg = children.props.modulesManager.cfg;
-  const menuLeft =
-    modulesManager.getConf("openimis-fe-core_js", "menuLeft") || modulesManager.getConf("fe-core", "menuLeft") || false;
   const calendarSwitch = modulesManager.getConf("fe-core", "allowSecondCalendar", false);
   const showJournalSidebar = modulesManager.getConf("fe-core", "showJournalSidebar", DEFAULT.SHOW_JOURNAL_SIDEBAR);
 
@@ -484,10 +492,18 @@ const RequireAuth = (props) => {
   // the classic sidebar layout keeps the historical md breakpoint, the popup one is configurable
   const isMenuBarUp = journalSidebar ? isMdUp : isMenuDrawerUp;
 
-  const isAppBarMenu = useMemo(() => {
-    const variant = theme.menu?.variant || "AppBar";
-    return typeof variant === "string" && variant.trim().toUpperCase() === "APPBAR";
-  }, [theme.menu?.variant]);
+  // Deprecated: superseded by theme.menu.variant, still honoured for configs that predate it.
+  const legacyMenuLeft =
+    modulesManager.getConf("openimis-fe-core_js", "menuLeft") || modulesManager.getConf("fe-core", "menuLeft") || false;
+  const mainMenuLayout = useMemo(
+    () => resolveMenuVariant(theme.menu?.variant, legacyMenuLeft),
+    [theme.menu?.variant, legacyMenuLeft],
+  );
+  // The variant picks between the two wide layouts only. Narrower than the menu breakpoint there
+  // is room for neither, so the hamburger + overlay drawer takes over whatever the config says.
+  const isLeftSidebar = mainMenuLayout === "drawer" && (journalSidebar || isMenuBarUp);
+
+  const { formatMessage } = useTranslations("core", modulesManager);
 
   const dispatch = useDispatch();
   const impersonatedUser = useSelector((state) => state.core.impersonatedUser);
@@ -518,7 +534,7 @@ const RequireAuth = (props) => {
   const leftMenuDrawer = (
     <>
       <Button className="appName" onClick={() => (window.location.href = "/front")}>
-        {isAppBarMenu && isSmUp && <img className="logo" src={logo} alt="Logo" />}
+        {isSmUp && logo && <img className="logo" src={logo} alt="Logo" />}
         {!disableTextLogo && (
           <FormattedMessage module="core" id="appName" defaultMessage={<FormattedMessage id="root.appName" />} />
         )}
@@ -538,16 +554,11 @@ const RequireAuth = (props) => {
     </>
   );
 
-  if (menuLeft) {
+  if (isLeftSidebar) {
     return (
       <StyledRequireAuth journalSidebar={journalSidebar}>
         <AppBar className="appBarDrawer">
           <Toolbar className={clsx("toolbarDrawer", { journalOpen: journalSidebar && isDrawerOpen })}>
-            {!journalSidebar && !isMenuBarUp && (
-              <IconButton color="inherit" onClick={setOpen.toggle} className="menuButton">
-                <MenuIcon />
-              </IconButton>
-            )}
             <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
               <div className="grow" />
             </Contributions>
@@ -573,29 +584,16 @@ const RequireAuth = (props) => {
           </Toolbar>
         </AppBar>
         <Box className="layoutWrapper">
-          {journalSidebar || isMenuBarUp ? (
-            <Drawer
-              className="drawerRoot"
-              variant="permanent"
-              anchor="left"
-              slotProps={{
-                paper: { sx: (theme) => ({ ...menuDrawerPaperStyles(theme), position: "fixed", inset: "0 auto 0 0" }) },
-              }}
-            >
-              {leftMenuDrawer}
-            </Drawer>
-          ) : (
-            <Drawer
-              className="drawerRoot"
-              variant="temporary"
-              anchor="left"
-              open={isOpen}
-              onClose={setOpen.off}
-              slotProps={{ paper: { sx: menuDrawerPaperStyles } }}
-            >
-              {leftMenuDrawer}
-            </Drawer>
-          )}
+          <Drawer
+            className="drawerRoot"
+            variant="permanent"
+            anchor="left"
+            slotProps={{
+              paper: { sx: (theme) => ({ ...menuDrawerPaperStyles(theme), position: "fixed", inset: "0 auto 0 0" }) },
+            }}
+          >
+            {leftMenuDrawer}
+          </Drawer>
           <main className="contentShiftLeftSideMenu">{children}</main>
           <JournalDrawer
             journalSidebar={journalSidebar}
@@ -607,7 +605,6 @@ const RequireAuth = (props) => {
     );
   }
 
-  const { formatMessage } = useTranslations("core", modulesManager);
   return (
     <StyledRequireAuth journalSidebar={journalSidebar}>
       <AppBar
@@ -620,12 +617,12 @@ const RequireAuth = (props) => {
             <IconButton
               color="inherit"
               onClick={setOpen.toggle}
-              className={clsx("menuButton", (isOpen || (isMenuBarUp && isAppBarMenu)) && "hide")}
+              className={clsx("menuButton", (isOpen || isMenuBarUp) && "hide")}
             >
               <MenuIcon />
             </IconButton>
             <Button className="appName" onClick={() => history.push("/")}>
-              {isAppBarMenu && isSmUp && logo && <img className="logo" src={logo} alt="Logo" />}
+              {isSmUp && logo && <img className="logo" src={logo} alt="Logo" />}
               {!disableTextLogo && (
                 <Box component="span" className="appNameText">
                   <FormattedMessage
@@ -693,7 +690,7 @@ const RequireAuth = (props) => {
           </Box>
         </Toolbar>
 
-        {isAppBarMenu && isMenuBarUp && (
+        {isMenuBarUp && (
           <Toolbar className={clsx("menuToolbar", { journalOpen: journalSidebar && isDrawerOpen })} variant="dense">
             <MainMenuBar {...others} menuVariant="AppBar" contributionKey={MAIN_MENU_CONTRIBUTION_KEY}>
               <div onClick={setOpen.off} />
@@ -714,6 +711,9 @@ const RequireAuth = (props) => {
                 PaperProps={{ className: "drawerPaper" }}
               >
                 <div className="drawerHeader">
+                  <IconButton color="inherit" onClick={setOpen.off} className="menuButton" aria-label="menu">
+                    <MenuIcon />
+                  </IconButton>
                   <Button className="appName" onClick={() => history.push("/")}>
                     {logo && <img className="logo" src={logo} alt="Logo" />}
                     <FormattedMessage

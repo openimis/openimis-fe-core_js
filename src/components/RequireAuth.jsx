@@ -616,7 +616,7 @@ const RequireAuth = (props) => {
         })}
       >
         <Toolbar className={clsx("topToolbar", { journalOpen: journalSidebar && isDrawerOpen })}>
-          <Box display="flex" alignItems="center">
+          <Box display="flex" alignItems="center" minWidth={0} overflow="hidden">
             <IconButton
               color="inherit"
               onClick={setOpen.toggle}
@@ -645,7 +645,7 @@ const RequireAuth = (props) => {
             </Button>
           </Box>
 
-          <Box display="flex" alignItems="center" className="grow">
+          <Box display="flex" alignItems="center" className="grow" minWidth={0} overflow="hidden">
             {
               <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
                 <div className="grow" />
@@ -656,7 +656,7 @@ const RequireAuth = (props) => {
             ))}
           </Box>
 
-          <Box display="flex" alignItems="center" gap={1}>
+          <Box display="flex" alignItems="center" gap={1} flexShrink={0}>
             {!!calendarSwitch && (
               <FormControlLabel
                 control={

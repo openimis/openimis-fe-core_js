@@ -399,15 +399,7 @@ const JournalButton = ({ mutations = [], onClick, formatMessage }) => {
 
   return (
     <Tooltip title={formatMessage("journal.tooltip")}>
-      <IconButton
-        color="inherit"
-        onClick={onClick}
-        aria-label={formatMessage("journal.tooltip")}
-        sx={{
-          mr: 2.5,
-          ml: 0.5,
-        }}
-      >
+      <IconButton color="inherit" onClick={onClick} aria-label={formatMessage("journal.tooltip")}>
         <Badge
           badgeContent={processingCount}
           color={hasErrors ? "error" : "secondary"}

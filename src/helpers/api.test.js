@@ -16,7 +16,6 @@ import {
   formatServerError,
   getOperationName,
   hasStoredAuthSession,
-  isImpersonationError,
   isSessionError,
   normalizeGraphqlErrorMessage,
   pageInfo,
@@ -256,17 +255,6 @@ describe("isSessionError", () => {
 
   it("tolerates malformed error entries", () => {
     expect(isSessionError(200, [null, {}, { message: null }])).toBe(false);
-  });
-});
-
-describe("isImpersonationError", () => {
-  it("detects the impersonation message", () => {
-    expect(isImpersonationError([{ message: "Invalid impersonation target" }])).toBe(true);
-  });
-
-  it("returns false otherwise", () => {
-    expect(isImpersonationError([{ message: "Unauthorized" }])).toBe(false);
-    expect(isImpersonationError()).toBe(false);
   });
 });
 

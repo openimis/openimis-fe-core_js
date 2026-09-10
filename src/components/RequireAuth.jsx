@@ -20,9 +20,12 @@ import {
 } from "@mui/material";
 import GetIconComponent from "../helpers/icons";
 const MenuIcon = GetIconComponent("Menu");
-import { prepareMenuEntries } from "../helpers/utils";
+import { prepareAppBarIcons } from "../helpers/utils";
 import Contributions from "./generics/Contributions";
 import AppBarIconButton from "./AppBarIconButton";
+import AppBarMenu from "./AppBarMenu";
+import { LanguageSwitcherContext } from "./LanguageMenuItems";
+import useLanguageSwitcher from "../helpers/useLanguageSwitcher";
 import FormattedMessage from "./generics/FormattedMessage";
 import MainMenuBar from "./MainMenuBar";
 import JournalDrawer from "./JournalDrawer";
@@ -32,9 +35,6 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import { Switch } from "@mui/material";
 import { useTranslations } from "../helpers/i18n";
 import { DEFAULT, RIGHT_USERS } from "../admin/constants";
-import { useDispatch, useSelector } from "react-redux";
-import UserPicker from "../admin/components/pickers/UserPicker";
-import { impersonateUser, stopImpersonation } from "../actions";
 import { injectIntl } from "react-intl";
 
 export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
@@ -318,6 +318,9 @@ const RequireAuth = (props) => {
   const history = useHistory();
   const modulesManager = useModulesManager();
   const auth = useAuthentication();
+  // One switcher instance shared with the app-bar dropdown's LanguageMenuItems via
+  // context; its confirm dialog is mounted below, outside the dropdown popper.
+  const languageSwitcher = useLanguageSwitcher();
   const cfg = children.props.modulesManager.cfg;
   const menuLeft =
     modulesManager.getConf("openimis-fe-core_js", "menuLeft") || modulesManager.getConf("fe-core", "menuLeft") || false;
@@ -332,27 +335,23 @@ const RequireAuth = (props) => {
     return typeof variant === "string" && variant.trim().toUpperCase() === "APPBAR";
   }, [theme.menu?.variant]);
 
-  const dispatch = useDispatch();
-  const impersonatedUser = useSelector((state) => state.core.impersonatedUser);
-  const showImpersonationPicker = auth.user?.is_superuser || Boolean(impersonatedUser);
-
   const preparedIcons = useMemo(() => {
-    const rightsSet = new Set(rights.map((r) => String(r)));
     const routes = modulesManager.getRoutes();
+    // A backend config replaces the contributed default only if it declares
+    // core.AppBarIcons; a menus config that omits it keeps the default profile dropdown.
     let iconsEntries = modulesManager.getContribs("core.AppBarIcons");
-    const backendAppBarIconsConfig = modulesManager.getConf("fe-core", "menus", []);
-    if (backendAppBarIconsConfig.length > 0) {
-      // Merge backend entries with module contribs, backend overrides by id
-      iconsEntries = (backendAppBarIconsConfig.find((config) => config.id === "core.AppBarIcons") || {})?.entries || [];
+    const configAppBar = modulesManager.getConf("fe-core", "menus", []).find((c) => c.id === "core.AppBarIcons");
+    if (configAppBar) {
+      iconsEntries = configAppBar.entries || [];
     }
-    // Sort by position
-    return prepareMenuEntries(
-      rights,
-      intl,
-      iconsEntries.sort((a, b) => (a.position || 99) - (b.position || 99)),
-      routes,
-    );
+    return prepareAppBarIcons(rights, intl, iconsEntries, routes);
   });
+
+  // Hide the standalone LanguageQuickPicker when a dropdown already provides language.
+  const configDeclaresLanguage = useMemo(
+    () => preparedIcons.some((i) => i.type === "language" || i.entries?.some((e) => e.type === "language")),
+    [preparedIcons],
+  );
 
   if (!auth.isAuthenticated) {
     return <Redirect to={redirectTo} />;
@@ -360,27 +359,20 @@ const RequireAuth = (props) => {
 
   if (menuLeft) {
     return (
-      <StyledRequireAuth>
+      <LanguageSwitcherContext.Provider value={languageSwitcher}>
+        {languageSwitcher.confirmDialog}
+        <StyledRequireAuth>
         <AppBar className="appBarDrawer">
           <Toolbar className="toolbarDrawer">
             <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
               <div className="grow" />
             </Contributions>
-            {showImpersonationPicker && (
-              <UserPicker
-                readOnly={Boolean(impersonatedUser)}
-                onChange={(user) => {
-                  if (!user) {
-                    dispatch(stopImpersonation());
-                  } else if (!impersonatedUser) {
-                    dispatch(impersonateUser(user));
-                  }
-                }}
-                value={impersonatedUser}
-                withLabel={false}
-                placeholder="Impersonate user"
-                multiple={false}
-              />
+            {preparedIcons.map((iconProps, idx) =>
+              iconProps.type === "menu" ? (
+                <AppBarMenu key={`appbar_icon_${idx}`} {...iconProps} />
+              ) : (
+                <AppBarIconButton key={`appbar_icon_${idx}`} {...iconProps} />
+              ),
             )}
             <LogoutButton className="toolbarDrawerLogout" />
             <Help />
@@ -410,13 +402,16 @@ const RequireAuth = (props) => {
           <main className="contentShiftLeftSideMenu">{children}</main>
           {showJournalSidebar && <JournalDrawer open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />}
         </Box>
-      </StyledRequireAuth>
+        </StyledRequireAuth>
+      </LanguageSwitcherContext.Provider>
     );
   }
 
   const { formatMessage } = useTranslations("core", modulesManager);
   return (
-    <StyledRequireAuth>
+    <LanguageSwitcherContext.Provider value={languageSwitcher}>
+      {languageSwitcher.confirmDialog}
+      <StyledRequireAuth>
       <AppBar
         className={clsx("appBar", {
           appBarShift: isOpen && isMdUp,
@@ -458,9 +453,13 @@ const RequireAuth = (props) => {
                 <div className="grow" />
               </Contributions>
             }
-            {preparedIcons.map((iconProps, idx) => (
-              <AppBarIconButton key={`appbar_icon_${idx}`} {...iconProps} />
-            ))}
+            {preparedIcons.map((iconProps, idx) =>
+              iconProps.type === "menu" ? (
+                <AppBarMenu key={`appbar_icon_${idx}`} {...iconProps} />
+              ) : (
+                <AppBarIconButton key={`appbar_icon_${idx}`} {...iconProps} />
+              ),
+            )}
           </Box>
 
           <Box display="flex" alignItems="center" gap={1}>
@@ -473,27 +472,11 @@ const RequireAuth = (props) => {
                 labelPlacement="start"
               />
             )}
-            <LanguageQuickPicker />
+            {!configDeclaresLanguage && <LanguageQuickPicker />}
             <Contributions
               contributionKey={ECONOMIC_UNIT_BUTTON_CONTRIBUTION_KEY}
               onEconomicDialogOpen={onEconomicDialogOpen}
             />
-            {showImpersonationPicker && (
-              <UserPicker
-                readOnly={Boolean(impersonatedUser)}
-                onChange={(user) => {
-                  if (!user) {
-                    dispatch(stopImpersonation());
-                  } else if (!impersonatedUser) {
-                    dispatch(impersonateUser(user));
-                  }
-                }}
-                value={impersonatedUser}
-                withLabel={false}
-                placeholder="Impersonate user"
-                multiple={false}
-              />
-            )}
             <LogoutButton />
             <Help />
           </Box>
@@ -545,7 +528,8 @@ const RequireAuth = (props) => {
         </main>
         {showJournalSidebar && <JournalDrawer open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />}
       </Box>
-    </StyledRequireAuth>
+      </StyledRequireAuth>
+    </LanguageSwitcherContext.Provider>
   );
 };
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import SelectDialog from "../components/dialogs/SelectDialog";
 import { changeUserLanguage, fetchLanguages } from "../actions";
-import { getLanguageNameByCode } from "../helpers/utils";
+import { getLanguageNameByCode } from "./utils";
 
 // Shared language-switching logic for LanguageQuickPicker and LanguageMenuItems:
 // available/current language, lazy fetch, and the confirm-then-reload flow (incl.

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Button, Typography, MenuList, MenuItem, Popper, Paper, Grow, ClickAwayListener } from "@mui/material";
 import GetIconComponent from "../helpers/icons";
 import { getLanguageNameByCode } from "../helpers/utils";
-import useLanguageSwitcher from "./useLanguageSwitcher";
+import useLanguageSwitcher from "../helpers/useLanguageSwitcher";
 
 const Globe = GetIconComponent("Public");
 const ExpandMore = GetIconComponent("ExpandMore");

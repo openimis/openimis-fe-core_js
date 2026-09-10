@@ -68,7 +68,7 @@ const AppBarMenu = ({ icon, text, entries = [] }) => {
                       );
                     }
                     if (item.type === "language") {
-                      return <LanguageMenuItems key={`lang_${idx}`} />;
+                      return <LanguageMenuItems key={`lang_${idx}`} onClose={close} />;
                     }
                     // default: a navigating link
                     return (

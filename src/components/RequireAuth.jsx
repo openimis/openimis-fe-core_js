@@ -24,6 +24,8 @@ import { prepareAppBarIcons } from "../helpers/utils";
 import Contributions from "./generics/Contributions";
 import AppBarIconButton from "./AppBarIconButton";
 import AppBarMenu from "./AppBarMenu";
+import { LanguageSwitcherContext } from "./LanguageMenuItems";
+import useLanguageSwitcher from "../helpers/useLanguageSwitcher";
 import FormattedMessage from "./generics/FormattedMessage";
 import MainMenuBar from "./MainMenuBar";
 import JournalDrawer from "./JournalDrawer";
@@ -316,6 +318,9 @@ const RequireAuth = (props) => {
   const history = useHistory();
   const modulesManager = useModulesManager();
   const auth = useAuthentication();
+  // One switcher instance shared with the app-bar dropdown's LanguageMenuItems via
+  // context; its confirm dialog is mounted below, outside the dropdown popper.
+  const languageSwitcher = useLanguageSwitcher();
   const cfg = children.props.modulesManager.cfg;
   const menuLeft =
     modulesManager.getConf("openimis-fe-core_js", "menuLeft") || modulesManager.getConf("fe-core", "menuLeft") || false;
@@ -354,7 +359,9 @@ const RequireAuth = (props) => {
 
   if (menuLeft) {
     return (
-      <StyledRequireAuth>
+      <LanguageSwitcherContext.Provider value={languageSwitcher}>
+        {languageSwitcher.confirmDialog}
+        <StyledRequireAuth>
         <AppBar className="appBarDrawer">
           <Toolbar className="toolbarDrawer">
             <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
@@ -395,13 +402,16 @@ const RequireAuth = (props) => {
           <main className="contentShiftLeftSideMenu">{children}</main>
           {showJournalSidebar && <JournalDrawer open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />}
         </Box>
-      </StyledRequireAuth>
+        </StyledRequireAuth>
+      </LanguageSwitcherContext.Provider>
     );
   }
 
   const { formatMessage } = useTranslations("core", modulesManager);
   return (
-    <StyledRequireAuth>
+    <LanguageSwitcherContext.Provider value={languageSwitcher}>
+      {languageSwitcher.confirmDialog}
+      <StyledRequireAuth>
       <AppBar
         className={clsx("appBar", {
           appBarShift: isOpen && isMdUp,
@@ -518,7 +528,8 @@ const RequireAuth = (props) => {
         </main>
         {showJournalSidebar && <JournalDrawer open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />}
       </Box>
-    </StyledRequireAuth>
+      </StyledRequireAuth>
+    </LanguageSwitcherContext.Provider>
   );
 };
 

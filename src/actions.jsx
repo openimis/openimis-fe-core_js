@@ -2,16 +2,17 @@ import { RSAA } from "redux-api-middleware";
 import uuid from "lodash-uuid";
 import _ from "lodash";
 import {
+  clearExpiredSession,
   formatQuery,
   formatPageQuery,
   formatPageQueryWithCount,
   formatGQLString,
   formatMutation,
   formatServerError,
+  isSessionError,
 } from "./helpers/api";
 import * as Sentry from "@sentry/react";
 import { getLocalStorage, setLocalStorage } from "./helpers/useLocalStorage";
-import { isSessionError, clearExpiredSession } from "./helpers/api";
 import { isUnauthenticatedRoute } from "./helpers/utils";
 
 const REQUESTED_WITH = "webapp";

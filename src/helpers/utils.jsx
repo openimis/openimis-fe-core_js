@@ -156,7 +156,8 @@ export function prepareMenuEntries(rights, intl, entries, routes) {
 //   - a dropdown:                       { icon, text, entries: [...] }  (rendered as AppBarMenu)
 // and a dropdown's sub-items may be a link ({ route|id, icon, text }),
 // { type: "divider" }, { type: "label", text }, or { type: "language" } (built-in
-// language switcher). Rights filtering applies to links; kind-items always pass.
+// language switcher). Rights filtering applies to links and to a dropdown's own
+// rights; divider/label/language always pass.
 export function prepareAppBarIcons(rights, intl, entries, routes) {
   const rightsSet = new Set(ensureArray(rights).map(String));
 

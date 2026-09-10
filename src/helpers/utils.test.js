@@ -27,6 +27,7 @@ import {
   isUnauthenticatedRoute,
   menuEntryMatchesLocationPath,
   parseLocalizedNumber,
+  prepareAppBarIcons,
   prepareForComparison,
   prepareMenuEntries,
   redirectToLogin,
@@ -168,6 +169,106 @@ describe("prepareMenuEntries", () => {
     expect(prepareMenuEntries([], intl, [{ id: "a", route: "/insurees", icon: "People" }], {})[0].route).toBe(
       "/insurees",
     );
+  });
+});
+
+describe("prepareAppBarIcons", () => {
+  const routes = { "insuree.route": { path: "insurees", rights: ["101"], icon: "People" } };
+
+  it("keeps a leaf link the user has a matching right for and drops one they don't", () => {
+    const entries = [
+      { id: "a", route: "allowed", rights: ["101"], icon: "People" },
+      { id: "b", route: "denied", rights: ["999"], icon: "People" },
+    ];
+
+    const result = prepareAppBarIcons(["101"], intl, entries, routes);
+
+    expect(result.map((e) => e.id)).toEqual(["a"]);
+    expect(result[0].type).toBe("link");
+  });
+
+  it("resolves a leaf link's route, rights and icon from the route table when only an id is given", () => {
+    expect(prepareAppBarIcons(["101"], intl, [{ id: "insuree.route" }], routes)[0].route).toBe("/insurees");
+    // route-table rights still gate the entry
+    expect(prepareAppBarIcons(["999"], intl, [{ id: "insuree.route" }], routes)).toEqual([]);
+  });
+
+  it("prefixes a leaf link route with a slash and resolves its text and icon", () => {
+    const [entry] = prepareAppBarIcons(
+      [],
+      intl,
+      [{ id: "a", route: "profile", icon: "AccountCircle", text: "core.profile" }],
+      {},
+    );
+
+    expect(entry.route).toBe("/profile");
+    expect(entry.icon).toBeDefined();
+    expect(entry.text).toContain("core.profile");
+  });
+
+  it("passes divider, label and language kind-items through", () => {
+    const entries = [
+      { position: 1, type: "divider" },
+      { position: 2, type: "label", text: "core.section" },
+      { position: 3, type: "language", text: "core.LanguagePicker.label" },
+    ];
+
+    const result = prepareAppBarIcons([], intl, entries, {});
+
+    expect(result.map((e) => e.type)).toEqual(["divider", "label", "language"]);
+    expect(result[1].text).toBeDefined();
+  });
+
+  it("builds a dropdown from nested entries and filters its children by rights", () => {
+    const entries = [
+      {
+        id: "menu",
+        icon: "AccountCircle",
+        text: "core.account",
+        entries: [
+          { id: "a", route: "allowed", rights: ["101"], icon: "People" },
+          { id: "b", route: "denied", rights: ["999"], icon: "People" },
+        ],
+      },
+    ];
+
+    const [dropdown] = prepareAppBarIcons(["101"], intl, entries, {});
+
+    expect(dropdown.type).toBe("menu");
+    expect(dropdown.entries.map((e) => e.id)).toEqual(["a"]);
+  });
+
+  it("drops a dropdown whose children are all filtered out", () => {
+    const entries = [
+      { id: "menu", icon: "AccountCircle", text: "core.account", entries: [{ id: "b", route: "x", rights: ["999"] }] },
+    ];
+
+    expect(prepareAppBarIcons(["101"], intl, entries, {})).toEqual([]);
+  });
+
+  it("hides a dropdown when the user lacks the dropdown's own rights", () => {
+    const entries = [
+      {
+        id: "menu",
+        rights: ["999"],
+        icon: "AccountCircle",
+        text: "core.account",
+        entries: [{ id: "a", route: "public", icon: "People" }],
+      },
+    ];
+
+    expect(prepareAppBarIcons(["101"], intl, entries, {})).toEqual([]);
+    expect(prepareAppBarIcons(["999"], intl, entries, {})).toHaveLength(1);
+  });
+
+  it("sorts by position, defaulting a missing position to 99", () => {
+    const entries = [
+      { id: "last", route: "c", position: 100, icon: "People" },
+      { id: "unpositioned", route: "b", icon: "People" },
+      { id: "first", route: "a", position: 1, icon: "People" },
+    ];
+
+    expect(prepareAppBarIcons([], intl, entries, {}).map((e) => e.id)).toEqual(["first", "unpositioned", "last"]);
   });
 });
 

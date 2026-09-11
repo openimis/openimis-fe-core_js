@@ -14,6 +14,7 @@ import * as Sentry from "@sentry/react";
 import { getLocalStorage, setLocalStorage } from "./helpers/useLocalStorage";
 import { isSessionError, clearExpiredSession, isImpersonationError } from "./helpers/api";
 import { isUnauthenticatedRoute } from "./helpers/utils";
+import { extractMutationResult, storeMutationResult } from "./helpers/mutationAlert";
 
 const REQUESTED_WITH = "webapp";
 
@@ -92,6 +93,18 @@ export function journalize(mutation, meta) {
   };
 }
 
+/**
+ * Keeps the mutation payload (status, message, metadata) around so the journal and the completion
+ * snackbar can show the full picture on demand; the mutation log alone does not carry the metadata.
+ */
+function recordMutationResponse(dispatch, response) {
+  const result = extractMutationResult(response?.payload?.data);
+  if (result) {
+    storeMutationResult(result);
+    dispatch({ type: "CORE_MUTATION_RESULT", payload: result });
+  }
+}
+
 export function fetchMaxLengthConstraints() {
   const payload = formatQuery("maxLengthConstraints", {}, ["constraints"]);
   return graphql(payload, "FETCH_MAX_LENGTH_CONSTRAINTS");
@@ -130,6 +143,8 @@ export function graphql(payload, type = "GRAPHQL_QUERY", params = {}) {
       if (response?.error) {
         dispatch(coreAlert(formatServerError(response.payload)));
       }
+
+      recordMutationResponse(dispatch, response);
 
       // Impersonation and session errors are handled in fetch(); surface the response.
       return response;
@@ -175,6 +190,7 @@ export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY
         ],
       }),
     );
+    recordMutationResponse(dispatch, response);
     return response;
   };
 }
@@ -249,6 +265,18 @@ export function graphqlMutation(
   return async (dispatch) => {
     const response = await dispatch(graphqlWithVariables(mutation, variables, type, params, customHeaders));
     if (clientMutationId) {
+      // The journal, and the completion snackbar it raises, only report mutations they first saw
+      // as processing. Record the pending entry before polling for the outcome: without it a
+      // mutation the backend already finished lands in the store final and goes unnoticed.
+      if (!response?.error && !response?.payload?.errors?.length) {
+        dispatch(
+          journalize({
+            clientMutationId,
+            clientMutationLabel: variables.input.clientMutationLabel,
+            requestDateTime: new Date().toISOString(),
+          }),
+        );
+      }
       dispatch(fetchMutation(clientMutationId));
       if (wait) {
         return dispatch(waitForMutation(clientMutationId));
@@ -594,6 +622,7 @@ export function fetchMutation(clientMutationId) {
     [
       "id",
       "status",
+      "success",
       "error",
       "clientMutationId",
       "clientMutationLabel",
@@ -625,16 +654,20 @@ export function fetchHistoricalMutations(pageSize, afterCursor) {
   return graphql(payload, "CORE_HISTORICAL_MUTATIONS");
 }
 
-export function coreAlert(titleOrObject, message, detail) {
+export function coreAlert(titleOrObject, message, detail, type = "error") {
   let payload;
 
   if (_.isObject(titleOrObject)) {
-    payload = titleOrObject;
+    payload = {
+      type: titleOrObject.type || "error",
+      ...titleOrObject,
+    };
   } else {
     payload = {
       title: titleOrObject,
       message,
       detail,
+      type: type || "error",
     };
   }
 

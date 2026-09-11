@@ -48,6 +48,14 @@ const EnrolmentOfficerFormPanel = (props) => {
     toggleSwitchButton(edited, hasOfficerRole, hasOfficerUserType, setIsEnabled);
   }, [hasOfficerRole, hasOfficerUserType]);
 
+  // the panel is also enabled by the enrolment officer role alone, but the backend only
+  // creates or updates the officer - and hence its villages - when the user type is set
+  useEffect(() => {
+    if (isEnabled && !hasOfficerUserType) {
+      onEditedChanged(setUserTypeEnabled(edited, ENROLMENT_OFFICER_USER_TYPE, true));
+    }
+  }, [isEnabled, hasOfficerUserType]);
+
   const handleToggle = () => {
     const nextEnabled = !isEnabled;
     setIsEnabled(nextEnabled);

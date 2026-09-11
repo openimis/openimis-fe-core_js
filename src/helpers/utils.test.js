@@ -30,6 +30,7 @@ import {
   prepareForComparison,
   prepareMenuEntries,
   redirectToLogin,
+  resolveMenuVariant,
   handleBootLogout,
   onLogout,
   redirectToSamlLogout,
@@ -316,6 +317,38 @@ describe("parseLocalizedNumber", () => {
 
   it("handles a plain integer", () => {
     expect(parseLocalizedNumber("42", "en")).toBe(42);
+  });
+});
+
+describe("resolveMenuVariant", () => {
+  it("defaults to the AppBar menu", () => {
+    expect(resolveMenuVariant(undefined)).toBe("appbar");
+    expect(resolveMenuVariant(null)).toBe("appbar");
+  });
+
+  it("accepts either variant, case- and space-insensitively, plus the top/left aliases", () => {
+    expect(resolveMenuVariant("AppBar")).toBe("appbar");
+    expect(resolveMenuVariant(" Drawer ")).toBe("drawer");
+    expect(resolveMenuVariant("TOP")).toBe("appbar");
+    expect(resolveMenuVariant("left")).toBe("drawer");
+  });
+
+  it("warns and falls back on an unknown variant", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    expect(resolveMenuVariant("sidebar")).toBe("appbar");
+
+    expect(warn).toHaveBeenCalledOnce();
+    warn.mockRestore();
+  });
+
+  it("keeps the sidebar for a config that still sets the deprecated menuLeft", () => {
+    expect(resolveMenuVariant(undefined, true)).toBe("drawer");
+    expect(resolveMenuVariant("AppBar", true)).toBe("drawer");
+  });
+
+  it("lets an explicit variant other than the default outrank menuLeft", () => {
+    expect(resolveMenuVariant("Drawer", false)).toBe("drawer");
   });
 });
 

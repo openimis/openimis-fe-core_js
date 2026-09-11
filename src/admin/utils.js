@@ -66,6 +66,11 @@ export const mapUserValuesToInput = (values) => {
     villageIds: values.officerVillages?.map((location) => decodeId(location.id)),
     defaultRowsPerPage: Number.isInteger(values.defaultRowsPerPage) ? values.defaultRowsPerPage : null,
   };
+  // only a superuser or an IMIS administrator may grant or revoke the flag, the backend
+  // rejects it from anybody else, so it is only submitted once explicitly edited
+  if (values.isSuperuser !== undefined) {
+    input.isSuperuser = values.isSuperuser;
+  }
   return input;
 };
 

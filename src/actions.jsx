@@ -265,6 +265,18 @@ export function graphqlMutation(
   return async (dispatch) => {
     const response = await dispatch(graphqlWithVariables(mutation, variables, type, params, customHeaders));
     if (clientMutationId) {
+      // The journal, and the completion snackbar it raises, only report mutations they first saw
+      // as processing. Record the pending entry before polling for the outcome: without it a
+      // mutation the backend already finished lands in the store final and goes unnoticed.
+      if (!response?.error && !response?.payload?.errors?.length) {
+        dispatch(
+          journalize({
+            clientMutationId,
+            clientMutationLabel: variables.input.clientMutationLabel,
+            requestDateTime: new Date().toISOString(),
+          }),
+        );
+      }
       dispatch(fetchMutation(clientMutationId));
       if (wait) {
         return dispatch(waitForMutation(clientMutationId));

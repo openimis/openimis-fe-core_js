@@ -203,7 +203,10 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 }));
 
 function fetchSubmenuConfig(modulesManager, allEntries, entries, menuId, rights) {
-  const menuConfig = modulesManager.getConf("fe-core", "menus", []);
+  let menuConfig = modulesManager.getConf("fe-core", "menus", []);
+  if (!menuConfig || menuConfig.length === 0) {
+    menuConfig = modulesManager.getContribs("fe-core.menus");
+  }
   if (!Array.isArray(menuConfig)) {
     console.error("Malformed fe-core menus config: expected array, got", menuConfig);
     return []; // Fallback to empty
@@ -228,13 +231,14 @@ function fetchSubmenuConfig(modulesManager, allEntries, entries, menuId, rights)
     let updatedEntries = allEntries
       .map((entry) => {
         const customIcon = menuIcons[entry.id];
+        const pos = submenuMapping[entry.id] !== undefined ? submenuMapping[entry.id] : entry.position;
         return {
           ...entry,
-          position: submenuMapping[entry.id] || null,
-          icon: customIcon ? GetIconComponent(customIcon) : entry.icon || GetIconComponent(null),
+          position: pos,
+          icon: customIcon ? GetIconComponent(customIcon) : (entry.icon || GetIconComponent(null)),
         };
       })
-      .filter((entry) => entry.position !== null)
+      .filter((entry) => submenuMapping[entry.id] !== undefined || Object.keys(submenuMapping).length === 0)
       .sort((a, b) => (a.position || 99) - (b.position || 99));
 
     // If no submenus processed, check for direct entries in the menu config

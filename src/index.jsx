@@ -3,6 +3,7 @@ import AppBarIconButton from "./components/AppBarIconButton";
 import React from "react";
 import messages_en from "./translations/en.json";
 import messages_admin_en from "./admin/translations/en.json";
+import { defaultMenus } from "./defaultMenus";
 
 // Admin imports
 import UsersPage from "./admin/pages/UsersPage";
@@ -282,7 +283,7 @@ const DEFAULT_CONFIG = {
     { path: "logout", component: LogoutPage, exact: true },
   ],
   "core.MainMenu": [{ name: "AdminMainMenu", id: "admin.MainMenu", text: "admin.mainMenu", icon: "LocationCity" }],
-  "fe-core.menus": [],
+  "fe-core.menus": defaultMenus,
   "fe-core.menu_strategy": "default",
   "invoice.SubjectAndThirdpartyPicker": [
     {

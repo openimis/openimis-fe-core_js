@@ -183,8 +183,11 @@ describe("prepareMenuEntries", () => {
       expect(prepared.map((e) => e.route)).toEqual(["/payments"]);
     });
 
-    it("drops function entries when no modulesManager is provided", () => {
+    it("warns and drops function entries when no modulesManager is provided", () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
       expect(prepareMenuEntries([], intl, [entriesFor], {})).toEqual([]);
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining("modulesManager"));
     });
 
     it("keeps the entries a function returns alongside plain entries", () => {

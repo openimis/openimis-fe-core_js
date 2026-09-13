@@ -76,9 +76,18 @@ function matchesRights(entryRights, rightsSet) {
 // (so a module can make entries conditional on config, e.g. the hide flag used
 // by feature 37855). Resolve such functions before filtering/preparing.
 function resolveMenuEntries(entries, modulesManager = null) {
-  return ensureArray(entries).flatMap((entry) =>
-    typeof entry === "function" ? (modulesManager ? ensureArray(entry(modulesManager)) : []) : [entry],
-  );
+  return ensureArray(entries).flatMap((entry) => {
+    if (typeof entry !== "function") {
+      return [entry];
+    }
+    // Without modulesManager a function entry cannot be resolved: warn instead
+    // of dropping the corresponding menu silently.
+    if (!modulesManager) {
+      console.warn("ignoring a function menu entry: prepareMenuEntries needs modulesManager to resolve it");
+      return [];
+    }
+    return ensureArray(entry(modulesManager));
+  });
 }
 
 function prepareMenuLevel(rightsSet, intl, entries, routes, allowGroups, modulesManager = null) {

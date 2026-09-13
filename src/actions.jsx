@@ -308,18 +308,15 @@ export function fetch(config) {
         // Silent requests (boot probe/refresh) surface the error so the caller
         // can decide — it may still refresh — instead of clearing cookies now.
         if (!silent) {
-          if (isUnauthenticatedRoute()) {
-            await clearExpiredSession();
-            dispatch({ type: "CORE_AUTH_LOGOUT" });
-          } else {
-            dispatch(
-              coreConfirm(
-                "Session Expired",
-                "Your session has expired, You will be redirected to the login page.",
-                "csrf_logout",
-              ),
-            );
+          // Authenticated routes: notify the user before dropping them (the alert
+          // survives the re-render — AlertDialog sits above the auth gate). Public
+          // routes are already at/near login, so clean up silently. Either way, log
+          // out via CORE_AUTH_LOGOUT (graceful SPA re-render), not a full-page reload.
+          if (!isUnauthenticatedRoute()) {
+            dispatch(coreAlert("Session Expired", "Your session has expired. Please log in again."));
           }
+          await clearExpiredSession();
+          dispatch({ type: "CORE_AUTH_LOGOUT" });
         }
         return action;
       }

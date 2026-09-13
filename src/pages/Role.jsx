@@ -22,6 +22,7 @@ import { RIGHT_ROLE_SEARCH, RIGHT_ROLE_CREATE, RIGHT_ROLE_UPDATE, QUERY_STRING_D
 import { prepareForComparison } from "../helpers/utils";
 import RoleHeadPanel from "../components/RoleHeadPanel";
 import RoleRightsPanel from "../components/RoleRightsPanel";
+import RoleChangeLogPanel from "../components/RoleChangeLogPanel";
 
 const StyledRole = styled("div")(({ theme }) => ({
   "& .page": theme.page ?? {},
@@ -185,7 +186,7 @@ class Role extends Component {
               save={this.save}
               onEditedChanged={this.onEditedChanged}
               HeadPanel={RoleHeadPanel}
-              Panels={[RoleRightsPanel]}
+              Panels={[RoleRightsPanel, RoleChangeLogPanel]}
               isRequiredFieldsEmpty={this.isRequiredFieldsEmpty()}
               saveTooltip={formatMessage(
                 intl,
@@ -195,6 +196,7 @@ class Role extends Component {
               isReadOnly={!!this.state.isSystemRole || !rights.includes(RIGHT_ROLE_UPDATE) || this.state.isLocked}
               reset={this.state.reset}
               roleUuid={roleUuid}
+              isDuplicate={this.state.isDuplicate}
               openDirty={rights.includes(RIGHT_ROLE_UPDATE) ? this.save : null}
             />
           </div>

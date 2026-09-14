@@ -42,7 +42,7 @@ function getMenus(modulesManager, key, rights, menuVariant, history, intl) {
     .filter((m) => m.text !== undefined)
     .map((config) => {
       const rawEntries = config.entries || config.submenus || [];
-      const filteredEntries = prepareMenuEntries(rights, intl, rawEntries, routes);
+      const filteredEntries = prepareMenuEntries(rights, intl, rawEntries, routes, modulesManager);
 
       // Skip empty menus
       if (!filteredEntries.length) return null;

@@ -149,7 +149,11 @@ class TextInput extends Component {
     const maxLength = this.getMaxLength();
     const effectiveInputProps = maxLength ? { ...inputProps, maxLength } : inputProps;
     const err = error || this.state.maxLengthReached;
-    const msg = this.state.maxLengthReached ? formatMessageWithValues(this.props.intl, "core", "input.maxLengthReached", { max: this.state.maxLength }) : helperText;
+    // `error` may carry the validation message itself (NumberInput/FormattedNumberInput
+    // pass min/max messages this way); surface it instead of only reddening the field
+    const msg = this.state.maxLengthReached
+      ? formatMessageWithValues(this.props.intl, "core", "input.maxLengthReached", { max: this.state.maxLength })
+      : (typeof error === "string" ? error : helperText);
     return (
       <StyledTextInput>
         <TextField

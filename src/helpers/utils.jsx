@@ -43,6 +43,32 @@ export function GetIconFromId(conf, routes, id) {
   return conf || routes[id]?.icon;
 }
 
+// Which main menu a wide screen gets, read from `theme.menu.variant` (which the app theme fills
+// from the backend `fe-core` config):
+//   appbar (alias "top")  - horizontal menu in the AppBar
+//   drawer (alias "left") - permanent sidebar down the left edge
+// A narrow screen gets neither: below `theme.layout.menuDrawerBreakpoint` the layout is always the
+// hamburger + overlay drawer, whatever the variant says, because neither wide layout fits there.
+export const MENU_VARIANTS = ["appbar", "drawer"];
+export const MENU_VARIANT_ALIASES = { top: "appbar", left: "drawer" };
+export const DEFAULT_MENU_VARIANT = "appbar";
+
+// `menuLeft` was the boolean that predated the variant. A deployment that still sets it in its
+// backend config keeps its sidebar: it wins over a theme left at the default, which is what an
+// app theme older than the variant reports.
+export function resolveMenuVariant(themeVariant, legacyMenuLeft = false) {
+  const normalized = typeof themeVariant === "string" ? themeVariant.trim().toLowerCase() : undefined;
+  const aliased = MENU_VARIANT_ALIASES[normalized] || normalized;
+  if (normalized && !MENU_VARIANTS.includes(aliased)) {
+    console.warn(
+      `Unknown theme.menu.variant "${themeVariant}", falling back to "${DEFAULT_MENU_VARIANT}". ` +
+        `Expected one of: ${MENU_VARIANTS.concat(Object.keys(MENU_VARIANT_ALIASES)).join(", ")}.`,
+    );
+  }
+  const variant = MENU_VARIANTS.includes(aliased) ? aliased : DEFAULT_MENU_VARIANT;
+  return legacyMenuLeft && variant === DEFAULT_MENU_VARIANT ? "drawer" : variant;
+}
+
 export const MENU_GROUP_TYPE = "group";
 
 // A group is an intermediate level between a main menu and its leaves: it has

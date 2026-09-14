@@ -271,7 +271,9 @@ class AutoSuggestion extends Component {
         module={module}
         strLabel={label}
         options={options}
-        value={selected}
+        // NOTE: `selected` is "" when nothing is picked; SelectInput expects null for "no value",
+        // otherwise it forwards the JSON-encoded `""` to MUI, which warns about an out-of-range value.
+        value={selected === "" ? null : selected}
         onChange={this.onOptionSelected}
         required={required}
         title={title}

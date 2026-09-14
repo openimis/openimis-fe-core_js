@@ -96,7 +96,11 @@ class SelectInput extends Component {
     }
     const labelText = strLabel ?? (label ? formatMessage(intl, module, label) : null);
     const moduleProp = intl?.messages?.[`${module}.pickerNoOptionsLabel`] ? module : "core";
-    const selectValue = value === null || value === undefined ? "" : JSON.stringify(value);
+    const optionValues = options.map((o) => (o.value === null ? "" : JSON.stringify(o.value)));
+    const currentValue = value === null || value === undefined ? "" : JSON.stringify(value);
+    // Fall back to the empty value when the current one is not among the options (e.g. options still
+    // loading): MUI otherwise logs an out-of-range warning on every render of the select.
+    const selectValue = optionValues.includes(currentValue) ? currentValue : "";
     return (
       <StyledSelectInput>
         <Fragment>
@@ -137,10 +141,7 @@ class SelectInput extends Component {
               )}
 
               {options.map((option, idx) => (
-                <MenuItem
-                  key={`${module}-${name}-option-${idx}`}
-                  value={option.value === null ? "" : JSON.stringify(option.value)}
-                >
+                <MenuItem key={`${module}-${name}-option-${idx}`} value={optionValues[idx]}>
                   {option.label}
                 </MenuItem>
               ))}

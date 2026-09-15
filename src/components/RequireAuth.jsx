@@ -35,6 +35,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import { Switch } from "@mui/material";
 import { useTranslations } from "../helpers/i18n";
 import { DEFAULT, RIGHT_USERS } from "../admin/constants";
+import ImpersonationDialog from "./ImpersonationDialog";
 import { injectIntl } from "react-intl";
 
 export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
@@ -362,6 +363,7 @@ const RequireAuth = (props) => {
       <LanguageSwitcherContext.Provider value={languageSwitcher}>
         {languageSwitcher.confirmDialog}
         <StyledRequireAuth>
+        <ImpersonationDialog />
         <AppBar className="appBarDrawer">
           <Toolbar className="toolbarDrawer">
             <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
@@ -412,6 +414,7 @@ const RequireAuth = (props) => {
     <LanguageSwitcherContext.Provider value={languageSwitcher}>
       {languageSwitcher.confirmDialog}
       <StyledRequireAuth>
+      <ImpersonationDialog />
       <AppBar
         className={clsx("appBar", {
           appBarShift: isOpen && isMdUp,

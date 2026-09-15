@@ -10,6 +10,8 @@ import {
   formatMutation,
   formatServerError,
   isSessionError,
+  isImpersonationError,
+  decodeId,
 } from "./helpers/api";
 import * as Sentry from "@sentry/react";
 import { getLocalStorage, setLocalStorage } from "./helpers/useLocalStorage";
@@ -131,7 +133,7 @@ export function graphql(payload, type = "GRAPHQL_QUERY", params = {}) {
         dispatch(coreAlert(formatServerError(response.payload)));
       }
 
-      // Session errors are handled in fetch(); surface the response.
+      // Impersonation and session errors are handled in fetch(); surface the response.
       return response;
     } catch (err) {
       console.error(err);
@@ -269,7 +271,9 @@ export function fetch(config) {
   // CSRF); fall back to storage when there is no cookie (prod session-based CSRF).
   const csrfToken = getCsrfToken() ?? getLocalStorage("csrfToken");
 
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const impersonatedUser = state.core?.impersonatedUser;
     let action;
 
     try {
@@ -280,6 +284,7 @@ export function fetch(config) {
             "Content-Type": "application/json",
             "X-Requested-With": "XMLHttpRequest",
             "X-CSRFToken": csrfToken,
+            ...(impersonatedUser && { "X-Impersonate-User": decodeId(impersonatedUser.id) }),
             ...rsaaConfig.headers,
           },
         },
@@ -293,7 +298,15 @@ export function fetch(config) {
       const status = payload?.status ?? response?.status;
       const gqlErrors = payload?.errors || response?.errors || [];
 
+      if (isImpersonationError(gqlErrors)) {
+        dispatch({ type: "CORE_STOP_IMPERSONATION" });
+        dispatch(coreAlert("Impersonation ended", "Invalid impersonation target. Impersonation has been stopped."));
+        dispatch(loadUser());
+        return action;
+      }
+
       if (isSessionError(status, gqlErrors)) {
+        dispatch({ type: "CORE_STOP_IMPERSONATION" });
         // Silent requests (boot probe/refresh) surface the error so the caller
         // can decide — it may still refresh — instead of clearing cookies now.
         if (!silent) {
@@ -783,6 +796,23 @@ export function changeUserLanguage(language, clientMutationLabel) {
   });
 }
 
+export function impersonateUser(user) {
+  return async (dispatch) => {
+    dispatch({ type: "CORE_IMPERSONATE_USER", payload: user });
+    await dispatch(loadUser());
+  };
+}
+
+export function setImpersonationDialogOpen(open) {
+  return (dispatch) => dispatch({ type: "CORE_SET_IMPERSONATION_DIALOG", payload: open });
+}
+
+export function stopImpersonation() {
+  return async (dispatch) => {
+    dispatch({ type: "CORE_STOP_IMPERSONATION" });
+    await dispatch(loadUser());
+  };
+}
+
 // Re-export API helpers
-export { formatPageQuery, formatPageQueryWithCount, formatMutation };
-export { decodeId } from "./helpers/api";
+export { formatPageQuery, formatPageQueryWithCount, formatMutation, decodeId };

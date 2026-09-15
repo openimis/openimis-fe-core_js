@@ -24,7 +24,15 @@ class RoleHeadPanel extends FormPanel {
     return inputValue !== savedRoleName;
   };
   render() {
-    const { intl, edited, isRequiredFieldsEmpty, isReadOnly, isRoleNameValid, roleNameValidationError } = this.props;
+    const {
+      intl,
+      edited,
+      isRequiredFieldsEmpty,
+      isReadOnly,
+      isRoleNameValid,
+      isRoleNameValidating,
+      roleNameValidationError,
+    } = this.props;
     return (
       <StyledRoleHeadPanel>
         <Fragment>
@@ -44,6 +52,7 @@ class RoleHeadPanel extends FormPanel {
                 codeTakenLabel={"core.roleManagement.duplicateButton.tooltip"}
                 shouldValidate={this.shouldValidate}
                 isValid={isRoleNameValid}
+                isValidating={isRoleNameValidating}
                 validationError={roleNameValidationError}
                 action={roleNameValidationCheck}
                 clearAction={roleNameValidationClear}

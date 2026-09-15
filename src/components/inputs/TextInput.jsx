@@ -36,6 +36,8 @@ const StyledTextInput = styled('div')(({ theme }) => ({
   },
 }));
 
+const MAX_PENDING_ECHOES = 50;
+
 const getNestedValue = (object, path) =>
   path?.split(".").reduce((current, key) => current?.[key], object);
 
@@ -59,25 +61,37 @@ class TextInput extends Component {
     maxLengthReached: false,
     maxLength: null,
   };
+
+  // Values handed to `onChange` whose echo has not come back yet. The input keeps its own
+  // state, so the value prop returns asynchronously (store round trip, a caller debouncing
+  // onChange, ...) and an echo is stale by the time it lands: without this it would
+  // overwrite the characters typed in the meantime.
+  pendingEchoes = [];
+
+  formattedValue = () => {
+    const value = this.props.value ?? "";
+    return this.props.formatInput ? this.props.formatInput(value) : value;
+  };
+
   componentDidMount() {
-    let value = this.props.value ?? "";
-    if (!!this.props.formatInput) {
-      value = this.props.formatInput(value);
-    }
+    const value = this.formattedValue();
     if (value !== this.state.value) {
       this.setState({ value });
     }
   }
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (prevProps.reset !== this.props.reset || prevProps.value !== this.props.value) {
-      let value = this.props.value ?? "";
-      if (!!this.props.formatInput) {
-        value = this.props.formatInput(value);
-      }
-      if (value !== this.state.value) {
-        this.setState({ value });
-      }
+    const isReset = prevProps.reset !== this.props.reset;
+    if (!isReset && prevProps.value === this.props.value) return;
+    const value = this.formattedValue();
+    const echoIndex = isReset ? -1 : this.pendingEchoes.indexOf(value);
+    if (echoIndex !== -1) {
+      // This input's own value, coming back: whatever was typed since is newer.
+      this.pendingEchoes.splice(0, echoIndex + 1);
+      return;
     }
+    // A value the input never emitted is a genuine change from the outside.
+    this.pendingEchoes = [];
+    if (value !== this.state.value) this.setState({ value });
   }
 
   getMaxLength = () => {
@@ -124,6 +138,9 @@ class TextInput extends Component {
         maxLength,
       },
       () => {
+        this.pendingEchoes.push(this.state.value);
+        // A caller that never feeds the value back must not grow this without bound.
+        if (this.pendingEchoes.length > MAX_PENDING_ECHOES) this.pendingEchoes.shift();
         this.props.onChange?.(this.state.value);
       }
     );

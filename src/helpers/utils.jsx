@@ -220,13 +220,27 @@ export const handleBootLogout = () => {
   return false;
 };
 
+/**
+ * Logs out, then wipes the local storage.
+ *
+ * The order matters: the request headers fall back on the stored csrfToken when
+ * the csrftoken cookie is unreadable, so clearing storage first would strip the
+ * logout request of its own CSRF token. Storage is wiped in `finally` so a
+ * failing request still leaves nothing behind.
+ *
+ * Resolves to true when the server confirmed the logout.
+ */
 export const onLogout = async (dispatch) => {
-  clearLocalStorage();
-  await dispatch(logout());
+  try {
+    return await dispatch(logout());
+  } finally {
+    clearLocalStorage();
+  }
 };
 
 export const redirectToSamlLogout = (e) => {
-  e.preventDefault();
+  // Called both as a link handler and directly from the logout route.
+  e?.preventDefault();
   clearLocalStorage();
   const redirectToURL = new URL(`${window.location.origin}${baseApiUrl}${SAML_LOGOUT_PATH}`);
 

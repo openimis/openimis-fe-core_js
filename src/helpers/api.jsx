@@ -212,13 +212,13 @@ export const isImpersonationError = (gqlErrors = []) => {
   });
 };
 
+// Ends the session server side (Django session + refresh token) as well as
+// deleting the cookies; the deleteTokenCookie/deleteRefreshTokenCookie pair this
+// replaces only did the latter. Requires a backend exposing `logout`.
 const LOGOUT_MUTATION = `
   mutation {
-    deleteTokenCookie {
-      deleted
-    }
-    deleteRefreshTokenCookie {
-      deleted
+    logout {
+      success
     }
   }
 `;

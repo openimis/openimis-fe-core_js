@@ -563,20 +563,39 @@ export function authError(error) {
   };
 }
 
+/**
+ * Ends the session on the server and in the browser.
+ *
+ * `logout` replaces the former deleteTokenCookie/deleteRefreshTokenCookie pair:
+ * those only asked the browser to drop the cookies, leaving the Django session
+ * that a staff login creates alive and still able to authenticate the REST API.
+ * Requires a backend exposing the `logout` mutation.
+ *
+ * Resolves to true when the server confirmed the logout, false otherwise.
+ */
 export function logout() {
-  return async (dispatch, getState) => {
+  return async (dispatch) => {
     const mutation = `
       mutation logout {
-        deleteTokenCookie {
-          deleted
-        }
-        deleteRefreshTokenCookie {
-          deleted
+        logout {
+          success
         }
       }
     `;
-    await dispatch(graphqlMutation(mutation, {}));
-    return dispatch({ type: "CORE_AUTH_LOGOUT" });
+    // Silent: a 401 or CSRF failure here must not raise the session-expired
+    // dialog, whose "csrf_logout" confirmation calls straight back into logout.
+    const response = await dispatch(
+      graphqlWithVariables(mutation, {}, "CORE_AUTH_LOGOUT_MUTATION", {}, {}, { silent: true }),
+    );
+    const succeeded = Boolean(
+      !response?.error && !response?.payload?.errors?.length && response?.payload?.data?.logout?.success,
+    );
+
+    // The local state is cleared either way: leaving the app looking signed in
+    // after a failed logout is worse than clearing it. Callers get the flag so
+    // they can warn that the session may still be open on the server.
+    dispatch({ type: "CORE_AUTH_LOGOUT" });
+    return succeeded;
   };
 }
 

@@ -448,6 +448,32 @@ describe("session and navigation helpers", () => {
 
       expect(settled).toBe(true);
     });
+
+    it("logs out before wiping storage, so the request keeps its stored csrf token", async () => {
+      const order = [];
+      clearLocalStorage.mockImplementation(() => order.push("clearLocalStorage"));
+      const dispatch = vi.fn(() => {
+        order.push("dispatch");
+        return Promise.resolve(true);
+      });
+
+      await onLogout(dispatch);
+
+      expect(order).toEqual(["dispatch", "clearLocalStorage"]);
+    });
+
+    it("wipes storage even when the logout request throws", async () => {
+      const dispatch = vi.fn().mockRejectedValue(new Error("offline"));
+
+      await expect(onLogout(dispatch)).rejects.toThrow("offline");
+
+      expect(clearLocalStorage).toHaveBeenCalled();
+    });
+
+    it("hands the server's confirmation back to the caller", async () => {
+      await expect(onLogout(vi.fn().mockResolvedValue(true))).resolves.toBe(true);
+      await expect(onLogout(vi.fn().mockResolvedValue(false))).resolves.toBe(false);
+    });
   });
 
   describe("redirectToSamlLogout", () => {
@@ -459,6 +485,14 @@ describe("session and navigation helpers", () => {
 
       expect(event.preventDefault).toHaveBeenCalled();
       expect(clearLocalStorage).toHaveBeenCalled();
+      expect(window.location.href).toBe(`https://openimis.test${BASE_API_URL}${SAML_LOGOUT_PATH}`);
+    });
+
+    it("also works without an event, as the logout route calls it", () => {
+      stubLocation({ origin: "https://openimis.test" });
+
+      expect(() => redirectToSamlLogout()).not.toThrow();
+
       expect(window.location.href).toBe(`https://openimis.test${BASE_API_URL}${SAML_LOGOUT_PATH}`);
     });
   });

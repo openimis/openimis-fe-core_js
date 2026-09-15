@@ -378,15 +378,16 @@ describe("clearExpiredSession", () => {
     expect(window.localStorage.length).toBe(0);
   });
 
-  it("posts the cookie-deleting mutation with credentials", async () => {
+  it("posts the logout mutation with credentials", async () => {
     await clearExpiredSession();
 
     const [url, options] = fetchMock.mock.calls[0];
     expect(url).toBe("/api/graphql");
     expect(options.method).toBe("POST");
     expect(options.credentials).toBe("include");
-    expect(JSON.parse(options.body).query).toContain("deleteTokenCookie");
-    expect(JSON.parse(options.body).query).toContain("deleteRefreshTokenCookie");
+    // `logout`, not the deleteTokenCookie pair it replaced: only this one also
+    // tears down the Django session behind the cookies.
+    expect(JSON.parse(options.body).query).toContain("logout");
   });
 
   it("honours REACT_APP_API_URL", async () => {

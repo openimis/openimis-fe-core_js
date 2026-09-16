@@ -53,6 +53,7 @@ function reducer(
     languages: [],
     errorLanguages: null,
     impersonatedUser: null,
+    impersonationDialogOpen: false,
   },
   action,
 ) {
@@ -497,11 +498,18 @@ function reducer(
       return {
         ...state,
         impersonatedUser: action.payload,
+        impersonationDialogOpen: false,
       };
     case "CORE_STOP_IMPERSONATION":
       return {
         ...state,
         impersonatedUser: null,
+        impersonationDialogOpen: false,
+      };
+    case "CORE_SET_IMPERSONATION_DIALOG":
+      return {
+        ...state,
+        impersonationDialogOpen: action.payload,
       };
     default:
       return state;

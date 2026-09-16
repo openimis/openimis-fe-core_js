@@ -282,6 +282,23 @@ const DEFAULT_CONFIG = {
     { path: "logout", component: LogoutPage, exact: true },
   ],
   "core.MainMenu": [{ name: "AdminMainMenu", id: "admin.MainMenu", text: "admin.mainMenu", icon: "LocationCity" }],
+  // Default profile dropdown, used when no backend config declares core.AppBarIcons.
+  // `impersonation` self-hides for non-superusers; an overriding config may omit it.
+  "core.AppBarIcons": [
+    {
+      id: "core.profileMenu",
+      position: 100,
+      icon: "AccountCircle",
+      text: "core.profileMenu",
+      entries: [
+        { id: "core.profileMenu.myProfile", position: 1, route: "profile/myProfile", icon: "AccountCircle", text: "core.profileMenu.myProfile" },
+        { id: "core.profileMenu.changePassword", position: 2, route: "profile/changePassword", icon: "Password", text: "core.profileMenu.changePassword" },
+        { position: 3, type: "impersonation" },
+        { position: 4, type: "divider" },
+        { position: 5, type: "language", text: "core.LanguagePicker.label" },
+      ],
+    },
+  ],
   "fe-core.menus": [],
   "fe-core.menu_strategy": "default",
   "invoice.SubjectAndThirdpartyPicker": [

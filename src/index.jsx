@@ -165,7 +165,13 @@ import { passwordGenerator } from "./helpers/passwordGenerator";
 import { createFieldsBasedOnJSON, renderInputComponent } from "./helpers/json-handler-utils";
 import withModulesManager, { useModulesManager, modulesManagerCtx } from "./helpers/modules";
 import { formatJsonField } from "./helpers/jsonExt";
-import { RIGHT_ROLE_SEARCH, CLEARED_STATE_FILTER, EXPORT_FILE_FORMATS, ROWS_PER_PAGE_OPTIONS } from "./constants";
+import {
+  RIGHT_ROLE_SEARCH,
+  CLEARED_STATE_FILTER,
+  DEFAULT,
+  EXPORT_FILE_FORMATS,
+  ROWS_PER_PAGE_OPTIONS,
+} from "./constants";
 import {
   GRID_RESPONSIVE_STANDARD,
   GRID_RESPONSIVE_SMALL,
@@ -192,6 +198,8 @@ const ROUTE_ADMIN_USER_NEW = "admin/users/new";
 
 const DEFAULT_CONFIG = {
   "showJournalSidebar": true,
+  // "auto" | true | false — see DEFAULT.LANGUAGE_QUICK_PICKER.
+  "languageQuickPicker": DEFAULT.LANGUAGE_QUICK_PICKER,
   "translations": [
     { key: "en", messages: messages_en },
     { key: "en", messages: messages_admin_en },

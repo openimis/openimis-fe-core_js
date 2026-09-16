@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import GetIconComponent from "../helpers/icons";
 const MenuIcon = GetIconComponent("Menu");
-import { prepareAppBarIcons } from "../helpers/utils";
+import { prepareAppBarIcons, shouldShowLanguageQuickPicker } from "../helpers/utils";
 import Contributions from "./generics/Contributions";
 import AppBarIconButton from "./AppBarIconButton";
 import AppBarMenu from "./AppBarMenu";
@@ -35,6 +35,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import { Switch } from "@mui/material";
 import { useTranslations } from "../helpers/i18n";
 import { DEFAULT, RIGHT_USERS } from "../admin/constants";
+import { DEFAULT as CORE_DEFAULT } from "../constants";
 import ImpersonationDialog from "./ImpersonationDialog";
 import { injectIntl } from "react-intl";
 
@@ -348,10 +349,20 @@ const RequireAuth = (props) => {
     return prepareAppBarIcons(rights, intl, iconsEntries, routes);
   });
 
-  // Hide the standalone LanguageQuickPicker when a dropdown already provides language.
-  const configDeclaresLanguage = useMemo(
-    () => preparedIcons.some((i) => i.type === "language" || i.entries?.some((e) => e.type === "language")),
-    [preparedIcons],
+  // Standalone LanguageQuickPicker visibility, configurable because the app-bar
+  // dropdown superseding it is a visible change for deployments that never
+  // configured core.AppBarIcons:
+  //   "auto" (default) – show it unless a dropdown already offers language
+  //   true             – always show it, dropdown or not
+  //   false            – never show it
+  const languageQuickPicker = modulesManager.getConf(
+    "fe-core",
+    "languageQuickPicker",
+    CORE_DEFAULT.LANGUAGE_QUICK_PICKER,
+  );
+  const showLanguageQuickPicker = useMemo(
+    () => shouldShowLanguageQuickPicker(languageQuickPicker, preparedIcons),
+    [languageQuickPicker, preparedIcons],
   );
 
   if (!auth.isAuthenticated) {
@@ -475,7 +486,7 @@ const RequireAuth = (props) => {
                 labelPlacement="start"
               />
             )}
-            {!configDeclaresLanguage && <LanguageQuickPicker />}
+            {showLanguageQuickPicker && <LanguageQuickPicker />}
             <Contributions
               contributionKey={ECONOMIC_UNIT_BUTTON_CONTRIBUTION_KEY}
               onEconomicDialogOpen={onEconomicDialogOpen}

@@ -192,6 +192,18 @@ export function prepareAppBarIcons(rights, intl, entries, routes) {
   return ensureArray(entries).map(prepareItem).filter(Boolean).sort(byPosition);
 }
 
+// Whether the standalone LanguageQuickPicker should render, given the
+// `languageQuickPicker` config and the already-prepared app-bar entries.
+// "auto" (or any non-boolean) defers to the app bar: the picker is dropped only
+// when a dropdown already offers language, so the switcher is never duplicated.
+// A boolean forces the picker on or off regardless.
+export function shouldShowLanguageQuickPicker(setting, preparedIcons = []) {
+  if (typeof setting === "boolean") return setting;
+  return !ensureArray(preparedIcons).some(
+    (icon) => icon?.type === "language" || ensureArray(icon?.entries).some((e) => e?.type === "language"),
+  );
+}
+
 export const prepareForComparison = (stateRole, propsRole, roleRights) => {
   const tempStateRole = { ...stateRole };
   delete tempStateRole.roleRights;

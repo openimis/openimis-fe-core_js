@@ -31,6 +31,7 @@ import {
   prepareForComparison,
   prepareMenuEntries,
   redirectToLogin,
+  shouldShowLanguageQuickPicker,
   handleBootLogout,
   onLogout,
   redirectToSamlLogout,
@@ -269,6 +270,38 @@ describe("prepareAppBarIcons", () => {
     ];
 
     expect(prepareAppBarIcons([], intl, entries, {}).map((e) => e.id)).toEqual(["first", "unpositioned", "last"]);
+  });
+});
+
+describe("shouldShowLanguageQuickPicker", () => {
+  const dropdownWithLanguage = [{ type: "menu", entries: [{ type: "link" }, { type: "language" }] }];
+
+  it('hides the picker under "auto" when a dropdown already offers language', () => {
+    expect(shouldShowLanguageQuickPicker("auto", dropdownWithLanguage)).toBe(false);
+  });
+
+  it('keeps the picker under "auto" when no entry offers language', () => {
+    expect(shouldShowLanguageQuickPicker("auto", [{ type: "menu", entries: [{ type: "link" }] }])).toBe(true);
+    expect(shouldShowLanguageQuickPicker("auto", [{ type: "link" }])).toBe(true);
+    expect(shouldShowLanguageQuickPicker("auto", [])).toBe(true);
+  });
+
+  it('honours a top-level language entry under "auto"', () => {
+    expect(shouldShowLanguageQuickPicker("auto", [{ type: "language" }])).toBe(false);
+  });
+
+  it("lets true force the picker on even alongside a language dropdown", () => {
+    expect(shouldShowLanguageQuickPicker(true, dropdownWithLanguage)).toBe(true);
+  });
+
+  it("lets false force the picker off even with nothing else offering language", () => {
+    expect(shouldShowLanguageQuickPicker(false, [])).toBe(false);
+  });
+
+  it("treats an unknown setting as auto and tolerates missing entries", () => {
+    expect(shouldShowLanguageQuickPicker("nonsense", dropdownWithLanguage)).toBe(false);
+    expect(shouldShowLanguageQuickPicker(undefined)).toBe(true);
+    expect(shouldShowLanguageQuickPicker("auto", [null, undefined])).toBe(true);
   });
 });
 

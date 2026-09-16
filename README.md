@@ -283,6 +283,7 @@ None
 - `LoginPage.showMPassProvider`: redirects users to the saml login page, facilitating access to mPass-protected resources
 - `secondCalendarType`: type of secondary calendar picker (if enabled), default "nepali"
 - `secondCalendarLocale`: locale for secondary calendar picker (if enabled), default "nepali_en",
+- `languageQuickPicker`: controls the standalone language switcher in the top-right app bar. `"auto"` (default) shows it unless a `core.AppBarIcons` dropdown already offers language (via a `{ "type": "language" }` sub-item), so the switcher is never duplicated; `true` always shows it, even alongside such a dropdown; `false` never shows it. Set it to `true` to keep the pre-existing standalone picker while still using the profile dropdown. Note this only governs the top-bar layout — the drawer layout (`menuLeft: true`) has never rendered the standalone picker and offers language through the dropdown instead.
 - `Input.disabledVisibilityBoost`: This setting enhances the visibility of disabled input fields (e.g., text/number inputs, date pickers). When set to **true**, the label color changes to `#181716`, and the input value color to `#5E5B50`. The default is **false**.
 - `limitMutationLogsQuery`: This config to enalble or disable fetchMutationLogs query mutation in core,
 - 'shouldFetchInitially' : (bool: true or false ) This config will enable or disable default search (onload in Searcher component) to avoid unnecessary loading until user clicks on filter. Disables if it is set to false.

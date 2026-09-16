@@ -139,6 +139,9 @@ export const DEFAULT = {
   SHOW_JOURNAL_SIDEBAR: true,
   DISABLED_VISIBILITY_BOOST: false,
   INPUT_VARIANT: "standard",
+  // "auto" hides the standalone LanguageQuickPicker only when an app-bar
+  // dropdown already offers language; true/false force it on or off.
+  LANGUAGE_QUICK_PICKER: "auto",
 }
 
 export const EXPORT_FILE_FORMATS = {

@@ -28,6 +28,7 @@ const messages = {
   "core.SecondFactorEnrolment.error.SECOND_FACTOR_ALREADY_ENROLLED": "Already enrolled",
   "core.SecondFactorEnrolment.error.INVALID_SECOND_FACTOR": "Wrong code",
   "core.SecondFactorEnrolment.error.SECOND_FACTOR_THROTTLED": "Try again after {until}",
+  "core.SecondFactorEnrolment.error.SECOND_FACTOR_THROTTLED_NO_TIME": "Too many attempts. Wait a little.",
   "core.SecondFactorEnrolment.error.SECOND_FACTOR_ENROLMENT_REQUIRED": "Interrupted",
   "core.RecoveryCodes.saved": "I have saved my recovery codes",
   "core.RecoveryCodes.continueBtn": "Continue",
@@ -194,6 +195,31 @@ describe("SecondFactorEnrolment", () => {
 
     expect(sentOperations).toHaveLength(2);
     expect(sentOperations.some((op) => op.includes("mutationLogs"))).toBe(false);
+  });
+
+  it("says to wait, without a placeholder, when the server reports no lifting time", async () => {
+    answers.confirmSecondFactor = vi.fn(async () => refusedConfirm("SECOND_FACTOR_THROTTLED", null));
+    const user = userEvent.setup();
+    render();
+
+    await begin(user);
+    await confirmWith(user, "000000");
+
+    expect(await screen.findByText("Too many attempts. Wait a little.")).toBeInTheDocument();
+    expect(screen.queryByText(/\{until\}/)).toBeNull();
+  });
+
+  it("keeps the footer off the recovery-codes step, so the acknowledgement cannot be skipped", async () => {
+    const user = userEvent.setup();
+    render({ footer: <button type="button">Back to login</button> });
+
+    expect(screen.getByRole("button", { name: "Back to login" })).toBeInTheDocument();
+
+    await begin(user);
+    expect(screen.getByRole("button", { name: "Back to login" })).toBeInTheDocument();
+
+    await confirmWith(user, "123456");
+    expect(screen.queryByRole("button", { name: "Back to login" })).toBeNull();
   });
 
   it("prefills and locks the username when told to", () => {

@@ -7,9 +7,11 @@ import ProgressOrError from "../components/generics/ProgressOrError";
 import SecondFactorEnrolment from "../components/SecondFactorEnrolment";
 import RecoveryCodes from "../components/RecoveryCodes";
 import Helmet from "../helpers/Helmet";
+import { Redirect } from "../helpers/history";
 import { useTranslations } from "../helpers/i18n";
 import { useModulesManager } from "../helpers/modules";
 import { useGraphqlMutation, useGraphqlQuery } from "../helpers/hooks";
+import { DEFAULT } from "../constants";
 
 // Page-local rather than a field added to useUserQuery: other modules render
 // that hook, and a backend without hasSecondFactor would take their pages down.
@@ -83,6 +85,11 @@ const SecondFactorPage = () => {
     }
   };
 
+  // The route is registered unconditionally, so the flag is what keeps the
+  // page off a deployment whose backend has no second factor to talk to.
+  if (!modulesManager.getConf("fe-core", "App.secondFactor", DEFAULT.SECOND_FACTOR)) {
+    return <Redirect to="/" />;
+  }
   if (isLoading || error) {
     return <ProgressOrError progress={isLoading} error={error} />;
   }

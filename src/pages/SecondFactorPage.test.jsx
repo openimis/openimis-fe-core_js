@@ -12,7 +12,8 @@ vi.mock("../helpers/hooks", async () => ({
 }));
 
 import SecondFactorPage from "./SecondFactorPage";
-import { makeStore, renderWithProviders, screen, userEvent } from "../testing";
+import { makeStore, mockModulesManager, renderWithProviders, screen, userEvent } from "../testing";
+import { Route } from "react-router-dom";
 
 const messages = {
   "core.SecondFactorEnrolment.username.label": "Username",
@@ -36,10 +37,21 @@ const CODES = [
   "JJJJ0000",
 ];
 
-const render = (hasSecondFactor) => {
+const withFlag = (secondFactor) =>
+  mockModulesManager({
+    getConf: (module, key, defaultValue) => (key === "App.secondFactor" ? secondFactor : defaultValue),
+  });
+
+const render = (hasSecondFactor, { secondFactor = true } = {}) => {
   status.current = { user: { id: "VXNlcjox", hasSecondFactor } };
   const store = makeStore({ preloadedState: { core: { user: { username: "alice" } } } });
-  return renderWithProviders(<SecondFactorPage />, { store, messages });
+  return renderWithProviders(
+    <>
+      <SecondFactorPage />
+      <Route exact path="/" render={() => <div>home page</div>} />
+    </>,
+    { store, messages, modulesManager: withFlag(secondFactor), route: "/profile/secondFactor" },
+  );
 };
 
 beforeEach(() => {
@@ -50,6 +62,13 @@ beforeEach(() => {
 });
 
 describe("SecondFactorPage", () => {
+  it("is not reachable by URL while the second factor is disabled", () => {
+    render(true, { secondFactor: false });
+
+    expect(screen.getByText("home page")).toBeInTheDocument();
+    expect(screen.queryByText("An authenticator app is set up for your account")).toBeNull();
+  });
+
   it("offers enrolment to a user without a device, with their username fixed", () => {
     render(false);
 

@@ -42,14 +42,19 @@ const EnrolSecondFactorPage = () => {
         <Helmet title={formatMessage("pageTitle")} />
         <Paper className="paper" elevation={2}>
           <Box p={3} width={500}>
-            <SecondFactorEnrolment initialUsername={username} onFinished={backToLogin}>
+            <SecondFactorEnrolment
+              initialUsername={username}
+              onFinished={backToLogin}
+              footer={
+                <Box mt={2}>
+                  <Button onClick={backToLogin}>{formatMessage("backToLogin")}</Button>
+                </Box>
+              }
+            >
               <Grid>
                 <Typography>{formatMessage("nextCodeHint")}</Typography>
               </Grid>
             </SecondFactorEnrolment>
-            <Box mt={2}>
-              <Button onClick={backToLogin}>{formatMessage("backToLogin")}</Button>
-            </Box>
           </Box>
         </Paper>
       </div>

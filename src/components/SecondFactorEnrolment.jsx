@@ -85,7 +85,13 @@ const StyledEnrolment = styled("div")(({ theme }) => ({
 // authenticated mutations. Used before a session exists (a bound user refused
 // at login) and from the profile (opting in), which is why it takes no user
 // from the store: the server wants the password either way.
-const SecondFactorEnrolment = ({ initialUsername = "", usernameReadOnly = false, onFinished, children = null }) => {
+const SecondFactorEnrolment = ({
+  initialUsername = "",
+  usernameReadOnly = false,
+  onFinished,
+  children = null,
+  footer = null,
+}) => {
   const modulesManager = useModulesManager();
   const { formatMessage, formatMessageWithValues, formatDateTimeFromISO } = useTranslations(
     "core.SecondFactorEnrolment",
@@ -102,8 +108,13 @@ const SecondFactorEnrolment = ({ initialUsername = "", usernameReadOnly = false,
   const isLoading = enrol.isLoading || confirm.isLoading;
 
   const refusal = (code, lockedUntil) => {
-    if (code === "SECOND_FACTOR_THROTTLED" && lockedUntil) {
-      return formatMessageWithValues("error.SECOND_FACTOR_THROTTLED", { until: formatDateTimeFromISO(lockedUntil) });
+    if (code === "SECOND_FACTOR_THROTTLED") {
+      // The server sends no lifting time when the device does not report one,
+      // and the dated wording carries an {until} placeholder that would
+      // otherwise reach the user verbatim.
+      return lockedUntil
+        ? formatMessageWithValues("error.SECOND_FACTOR_THROTTLED", { until: formatDateTimeFromISO(lockedUntil) })
+        : formatMessage("error.SECOND_FACTOR_THROTTLED_NO_TIME");
     }
     return KNOWN_REFUSALS.includes(code) ? formatMessage(`error.${code}`) : code;
   };
@@ -258,6 +269,9 @@ const SecondFactorEnrolment = ({ initialUsername = "", usernameReadOnly = false,
           {children}
         </RecoveryCodes>
       )}
+      {/* Never beside the codes: they are shown once, and a way off the page
+          that skips the acknowledgement loses them. */}
+      {step !== STEP.CODES && footer}
     </StyledEnrolment>
   );
 };

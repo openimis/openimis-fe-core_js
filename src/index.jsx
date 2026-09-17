@@ -322,7 +322,10 @@ export const CoreModule = (cfg) => {
   // parent menu (id "profile.MainMenu"); the ModulesManager folds any module's
   // entries under that key into it, the way admin.MainMenu above is folded in.
   if (cfg?.["App.secondFactor"]) {
-    def["profile.MainMenu"] = [{ route: ROUTE_SECOND_FACTOR }];
+    // position sorts within the menu (prepareMenuLevel, default 99, stable);
+    // without it core loads before fe-profile and this lands above the
+    // profile entries that were there first.
+    def["profile.MainMenu"] = [{ route: ROUTE_SECOND_FACTOR, position: 100 }];
   }
   return { ...def, ...cfg };
 };

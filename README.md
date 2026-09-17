@@ -227,6 +227,7 @@ Monetary amount decimal places can be controlled using the global `fe-core.numbe
 ## Contributions
 
 - `core.Router`: registering `roles`, `roles/role` routes in openIMIS client-side router
+- `profile.MainMenu`: **Two-factor authentication** (`core.menu.secondFactor`), only when `App.secondFactor` is on
 - `admin.MainMenu`:
 
   **Roles Management** (`roleManagement.label` translation key)

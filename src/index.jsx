@@ -183,7 +183,10 @@ import LoginPage from "./pages/LoginPage";
 import EnrolSecondFactorPage from "./pages/EnrolSecondFactorPage";
 import SecondFactorEnrolment from "./components/SecondFactorEnrolment";
 import RecoveryCodes from "./components/RecoveryCodes";
+import SecondFactorPage from "./pages/SecondFactorPage";
 import LogoutPage from "./pages/LogoutPage";
+
+const ROUTE_SECOND_FACTOR = "profile/secondFactor";
 
 const ROUTE_ROLES = "roles";
 const ROUTE_ROLE = "roles/role";
@@ -283,6 +286,13 @@ const DEFAULT_CONFIG = {
     { path: ROUTE_ADMIN_USER_NEW, component: UserPage, rights: [RIGHT_USERS], icon: "Person" },
     { path: `${ROUTE_ADMIN_USER_OVERVIEW}/:user_id`, component: UserPage, rights: [RIGHT_USERS], icon: "Person" },
     { path: "logout", component: LogoutPage, exact: true },
+    {
+      path: ROUTE_SECOND_FACTOR,
+      component: SecondFactorPage,
+      text: "core.menu.secondFactor",
+      icon: "Fingerprint",
+      id: "core.secondFactor",
+    },
   ],
   "core.MainMenu": [{ name: "AdminMainMenu", id: "admin.MainMenu", text: "admin.mainMenu", icon: "LocationCity" }],
   "fe-core.menus": [],
@@ -308,6 +318,12 @@ const DEFAULT_CONFIG = {
 export const CoreModule = (cfg) => {
   let def = { ...DEFAULT_CONFIG };
   def.refs.push({ key: "core.DatePicker", ref: openIMISDatePicker });
+  // The menu entry exists only while the feature does. fe-profile owns the
+  // parent menu (id "profile.MainMenu"); the ModulesManager folds any module's
+  // entries under that key into it, the way admin.MainMenu above is folded in.
+  if (cfg?.["App.secondFactor"]) {
+    def["profile.MainMenu"] = [{ route: ROUTE_SECOND_FACTOR }];
+  }
   return { ...def, ...cfg };
 };
 

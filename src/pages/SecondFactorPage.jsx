@@ -62,8 +62,13 @@ const SecondFactorPage = () => {
   const [issueError, setIssueError] = useState(null);
 
   const refusal = (code, lockedUntil) => {
-    if (code === "SECOND_FACTOR_THROTTLED" && lockedUntil) {
-      return formatMessageWithValues("error.SECOND_FACTOR_THROTTLED", { until: formatDateTimeFromISO(lockedUntil) });
+    if (code === "SECOND_FACTOR_THROTTLED") {
+      // The server sends no lifting time when the device does not report one,
+      // and the dated wording carries an {until} placeholder that would
+      // otherwise reach the user verbatim.
+      return lockedUntil
+        ? formatMessageWithValues("error.SECOND_FACTOR_THROTTLED", { until: formatDateTimeFromISO(lockedUntil) })
+        : formatMessage("error.SECOND_FACTOR_THROTTLED_NO_TIME");
     }
     return KNOWN_REFUSALS.includes(code) ? formatMessage(`error.${code}`) : code;
   };

@@ -21,6 +21,8 @@ const messages = {
   "core.SecondFactorPage.code.label": "Code from the app",
   "core.SecondFactorPage.issueBtn": "Get new recovery codes",
   "core.SecondFactorPage.error.INVALID_SECOND_FACTOR": "Wrong code",
+  "core.SecondFactorPage.error.SECOND_FACTOR_THROTTLED": "Try again after {until}",
+  "core.SecondFactorPage.error.SECOND_FACTOR_THROTTLED_NO_TIME": "Too many attempts. Wait a little.",
   "core.RecoveryCodes.saved": "I have saved my recovery codes",
 };
 
@@ -98,6 +100,20 @@ describe("SecondFactorPage", () => {
       expect(await screen.findByText(code)).toBeInTheDocument();
     }
     expect(screen.getByRole("checkbox")).toBeInTheDocument();
+  });
+
+  it("says to wait, without a placeholder, when the server reports no lifting time", async () => {
+    answers.issueRecoveryCodes = vi.fn(async () => ({
+      issueRecoveryCodes: { success: false, codes: null, error: "SECOND_FACTOR_THROTTLED", lockedUntil: null },
+    }));
+    const user = userEvent.setup();
+    render(true);
+
+    await user.type(screen.getByLabelText(/code from the app/i), "000000");
+    await user.click(screen.getByRole("button", { name: "Get new recovery codes" }));
+
+    expect(await screen.findByText("Too many attempts. Wait a little.")).toBeInTheDocument();
+    expect(screen.queryByText(/\{until\}/)).toBeNull();
   });
 
   it("reports a wrong code and keeps the form", async () => {

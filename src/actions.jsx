@@ -437,8 +437,14 @@ export function saveCurrentUserDefaultRowsPerPage(defaultRowsPerPage, clientMuta
 export function login(credentials) {
   return async (dispatch) => {
     if (credentials) {
-      const mutation = `mutation authenticate($username: String!, $password: String!) {
-            tokenAuth(username: $username, password: $password) {
+      // otp is declared only when a code is being sent, so a client running
+      // against a backend without the argument keeps sending the mutation it
+      // always has - an unused declared argument is a validation error.
+      const withOtp = credentials.otp !== undefined;
+      const mutation = `mutation authenticate($username: String!, $password: String!${
+        withOtp ? ", $otp: String" : ""
+      }) {
+            tokenAuth(username: $username, password: $password${withOtp ? ", otp: $otp" : ""}) {
               refreshExpiresIn
             }
           }`;
@@ -455,9 +461,9 @@ export function login(credentials) {
           ),
         );
         if (response.payload?.errors?.length > 0) {
-          const errorMessage = response.payload.errors[0].message;
+          const [{ message: errorMessage, extensions }] = response.payload.errors;
           dispatch(authError({ message: errorMessage }));
-          return { loginStatus: "CORE_AUTH_ERR", message: errorMessage };
+          return { loginStatus: "CORE_AUTH_ERR", message: errorMessage, extensions };
         }
 
         const jwtToken = response.payload.data.tokenAuth.token;

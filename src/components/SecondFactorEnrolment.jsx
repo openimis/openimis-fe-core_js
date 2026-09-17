@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import uuid from "lodash-uuid";
 import { styled } from "@mui/material/styles";
 import { Box, Button, Grid, Typography } from "@mui/material";
 import { QRCodeSVG } from "qrcode.react";
@@ -6,7 +8,7 @@ import TextInput from "./inputs/TextInput";
 import RecoveryCodes from "./RecoveryCodes";
 import { useTranslations } from "../helpers/i18n";
 import { useModulesManager } from "../helpers/modules";
-import { useGraphqlMutation } from "../helpers/hooks";
+import { graphqlWithVariables } from "../actions";
 
 const ENROL = `
   mutation enrolSecondFactor($input: EnrolSecondFactorMutationInput!) {
@@ -51,6 +53,29 @@ const KNOWN_REFUSALS = [
 // A base32 key reads better in groups of four when typed into an app by hand.
 export const groupSecret = (secret) => secret.match(/.{1,4}/g).join(" ");
 
+// Not useGraphqlMutation: that helper follows every mutation with a
+// mutationLogs query, which requires a session and so answers 401 on this
+// page - the app reads that as an expired session and offers to log out a
+// visitor who was never logged in. Neither mutation writes a log row anyway.
+const useEnrolmentMutation = (operation) => {
+  const dispatch = useDispatch();
+  const [isLoading, setLoading] = useState(false);
+
+  const mutate = async (input) => {
+    setLoading(true);
+    try {
+      const action = await dispatch(
+        graphqlWithVariables(operation, { input: { ...input, clientMutationId: uuid.uuid() } }, "CORE_SECOND_FACTOR"),
+      );
+      return action?.payload?.data;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { isLoading, mutate };
+};
+
 const StyledEnrolment = styled("div")(({ theme }) => ({
   "& .qr": { display: "flex", justifyContent: "center", padding: theme.spacing(2) },
   "& .secret": { fontFamily: "monospace", letterSpacing: "0.1em", color: theme.palette.text.primary },
@@ -72,8 +97,8 @@ const SecondFactorEnrolment = ({ initialUsername = "", usernameReadOnly = false,
   const [totp, setTotp] = useState(null);
   const [codes, setCodes] = useState([]);
   const [error, setError] = useState(null);
-  const enrol = useGraphqlMutation(ENROL, { wait: false });
-  const confirm = useGraphqlMutation(CONFIRM, { wait: false });
+  const enrol = useEnrolmentMutation(ENROL);
+  const confirm = useEnrolmentMutation(CONFIRM);
   const isLoading = enrol.isLoading || confirm.isLoading;
 
   const refusal = (code, lockedUntil) => {

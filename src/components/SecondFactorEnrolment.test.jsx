@@ -2,13 +2,15 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Each mutation is scripted by name: the component sees the payload the server
-// would return and nothing below the hook is exercised.
-const { answers } = vi.hoisted(() => ({ answers: {} }));
-vi.mock("../helpers/hooks", async () => ({
-  ...(await vi.importActual("../helpers/hooks")),
-  useGraphqlMutation: (operation) => {
+// would return and nothing below the redux action is exercised.
+const { answers, sentOperations } = vi.hoisted(() => ({ answers: {}, sentOperations: [] }));
+vi.mock("../actions", async () => ({
+  ...(await vi.importActual("../actions")),
+  graphqlWithVariables: (operation, variables) => async () => {
+    sentOperations.push(operation);
     const name = operation.match(/mutation (\w+)/)[1];
-    return { isLoading: false, mutate: (input) => answers[name](input) };
+    const { clientMutationId, ...input } = variables.input;
+    return { payload: { data: await answers[name](input) } };
   },
 }));
 
@@ -69,6 +71,7 @@ const confirmWith = async (user, code) => {
 };
 
 beforeEach(() => {
+  sentOperations.length = 0;
   answers.enrolSecondFactor = vi.fn(async () => enrolled());
   answers.confirmSecondFactor = vi.fn(async () => confirmed());
   // TextInput leaks props onto the DOM, so React warns on every render.
@@ -180,6 +183,17 @@ describe("SecondFactorEnrolment", () => {
     expect(await screen.findByText("Interrupted")).toBeInTheDocument();
     expect(screen.getByLabelText(/^password/i)).toHaveValue("");
     expect(screen.queryByTestId("secret")).toBeNull();
+  });
+
+  it("never asks for the mutation log, which needs a session this page does not have", async () => {
+    const user = userEvent.setup();
+    render();
+
+    await begin(user);
+    await confirmWith(user, "123456");
+
+    expect(sentOperations).toHaveLength(2);
+    expect(sentOperations.some((op) => op.includes("mutationLogs"))).toBe(false);
   });
 
   it("prefills and locks the username when told to", () => {

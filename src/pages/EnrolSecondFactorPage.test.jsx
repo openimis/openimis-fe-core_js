@@ -2,9 +2,9 @@ import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { Route } from "react-router-dom";
 
-vi.mock("../helpers/hooks", async () => ({
-  ...(await vi.importActual("../helpers/hooks")),
-  useGraphqlMutation: () => ({ isLoading: false, mutate: async () => ({}) }),
+vi.mock("../actions", async () => ({
+  ...(await vi.importActual("../actions")),
+  graphqlWithVariables: () => async () => ({ payload: { data: {} } }),
 }));
 
 import EnrolSecondFactorPage from "./EnrolSecondFactorPage";

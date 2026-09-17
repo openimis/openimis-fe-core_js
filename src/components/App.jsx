@@ -18,6 +18,7 @@ import { useAuthentication, useBoolean } from "../helpers/hooks";
 import { useLocalStorage, setLocalStorage } from "../helpers/useLocalStorage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import SetPasswordPage from "../pages/SetPasswordPage";
+import EnrolSecondFactorPage from "../pages/EnrolSecondFactorPage";
 import { onLogout } from "../helpers/utils";
 import { RIGHT_VIEW_EU_MODAL } from "../constants";
 import NotFoundPage from "./NotFoundPage";
@@ -197,6 +198,7 @@ const App = (props) => {
                     <Route path={"/login"} render={() => <LoginPage {...others} />} />
                     <Route path={"/forgot_password"} render={() => <ForgotPasswordPage {...others} />} />
                     <Route path={"/set_password"} render={() => <SetPasswordPage {...others} />} />
+                    <Route path={"/second_factor/enrol"} render={() => <EnrolSecondFactorPage {...others} />} />
                     {unauthenticatedRoutes.map((route) => (
                       <Route
                         exact

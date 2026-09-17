@@ -180,6 +180,9 @@ import RegistersStatusReport from "./reports/RegistersStatusReport";
 import SearcherActionButton from "./components/generics/SearcherActionButton";
 import InfoButton from "./components/generics/InfoButton";
 import LoginPage from "./pages/LoginPage";
+import EnrolSecondFactorPage from "./pages/EnrolSecondFactorPage";
+import SecondFactorEnrolment from "./components/SecondFactorEnrolment";
+import RecoveryCodes from "./components/RecoveryCodes";
 import LogoutPage from "./pages/LogoutPage";
 
 const ROUTE_ROLES = "roles";
@@ -447,6 +450,9 @@ export {
   usePublicPageLanguage,
   AppBarIconButton,
   LoginPage,
+  EnrolSecondFactorPage,
+  SecondFactorEnrolment,
+  RecoveryCodes,
   GRID_RESPONSIVE_STANDARD,
   GRID_RESPONSIVE_SMALL,
   GRID_RESPONSIVE_LARGE,

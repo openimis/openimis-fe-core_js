@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useHistory } from "../helpers/history";
+import { useHistory, useLocation } from "../helpers/history";
 import { styled } from "@mui/material/styles";
 import { Button, Box, Grid, Paper, LinearProgress, Divider, Link, Typography } from "@mui/material";
 import TextInput from "../components/inputs/TextInput";
@@ -38,15 +38,23 @@ const LOGIN_PAGE_MPASS_CONTRIBUTION_KEY = "workerVoucher.MPassLoginButton";
 
 const LoginPage = ({ logo }) => {
   const history = useHistory();
+  const location = useLocation();
   const modulesManager = useModulesManager();
-  const { formatMessage } = useTranslations("core.LoginPage", modulesManager);
-  const [credentials, setCredentials] = useState({});
+  const { formatMessage, formatMessageWithValues, formatDateTimeFromISO } = useTranslations(
+    "core.LoginPage",
+    modulesManager,
+  );
+  // The enrolment page hands the username back the same way the login hands it over.
+  const [credentials, setCredentials] = useState({ username: location.state?.username });
   const [serverResponse, setServerResponse] = useState({ loginStatus: "", message: null });
+  // null | "code" | "enrol" - only ever set while App.secondFactor is on.
+  const [secondFactorStep, setSecondFactorStep] = useState(null);
   const auth = useAuthentication();
   const [isAuthenticating, setAuthenticating] = useState(false);
   const showMPassProvider = modulesManager.getConf("fe-core", "LoginPage.showMPassProvider", false);
   const linkToUserGuide = modulesManager.getConf("fe-core", "LoginPage.linkToUserGuide", "https://docs.openimis.org/");
   const enablePublicPage = modulesManager.getConf("fe-core", "App.enablePublicPage", DEFAULT.ENABLE_PUBLIC_PAGE);
+  const secondFactor = modulesManager.getConf("fe-core", "App.secondFactor", DEFAULT.SECOND_FACTOR);
 
   useEffect(() => {
     if (auth.isAuthenticated && auth.isInitialized) {
@@ -54,8 +62,18 @@ const LoginPage = ({ logo }) => {
     }
   }, [auth.isAuthenticated, auth.isInitialized, history]);
 
-  const handleLoginError = (errorMessage) => {
-    setServerResponse({ loginStatus: "CORE_AUTH_ERR", message: errorMessage });
+  const handleLoginError = (errorMessage, extensions) => {
+    // Behind the flag only: with it off these two codes fall through to the raw
+    // string the page has always shown for a refusal it does not know.
+    if (secondFactor && errorMessage === "SECOND_FACTOR_REQUIRED") {
+      setSecondFactorStep("code");
+      setServerResponse({ loginStatus: "", message: null });
+    } else if (secondFactor && errorMessage === "SECOND_FACTOR_ENROLMENT_REQUIRED") {
+      setSecondFactorStep("enrol");
+      setServerResponse({ loginStatus: "", message: null });
+    } else {
+      setServerResponse({ loginStatus: "CORE_AUTH_ERR", message: errorMessage, extensions });
+    }
     setAuthenticating(false);
   };
 
@@ -66,22 +84,32 @@ const LoginPage = ({ logo }) => {
     try {
       const response = await auth.login(credentials);
       if (response.payload?.errors?.length) {
-        handleLoginError(response.payload.errors[0].message);
+        handleLoginError(response.payload.errors[0].message, response.payload.errors[0].extensions);
         return;
       }
 
-      const { loginStatus, message } = response;
-      setServerResponse({ loginStatus, message });
+      const { loginStatus, message, extensions } = response;
 
       if (loginStatus === "CORE_AUTH_ERR") {
-        setAuthenticating(false);
+        handleLoginError(message, extensions);
       } else {
+        setServerResponse({ loginStatus, message });
         history.push("/");
       }
     } catch (error) {
       setAuthenticating(false);
     }
   };
+
+  const startOver = () => {
+    const { otp, ...rest } = credentials;
+    setCredentials(rest);
+    setSecondFactorStep(null);
+    setServerResponse({ loginStatus: "", message: null });
+  };
+
+  const goToEnrolment = () =>
+    history.push({ pathname: "/second_factor/enrol", state: { username: credentials.username } });
 
   const redirectToForgotPassword = (e) => {
     e.preventDefault();
@@ -92,9 +120,15 @@ const LoginPage = ({ logo }) => {
     INCORRECT_CREDENTIALS: formatMessage("core.LoginPage.authError"),
     HF_CONTRACT_INVALID: formatMessage("core.LoginPage.authErrorHealthFacilityContractInvalid"),
     GENERAL: formatMessage("core.LoginPage.authErrorGeneral"),
+    INVALID_SECOND_FACTOR: formatMessage("core.LoginPage.secondFactor.invalid"),
   };
 
-  const getErrorMessage = (messageKey) => {
+  const getErrorMessage = (messageKey, extensions) => {
+    if (messageKey === "SECOND_FACTOR_THROTTLED" && extensions?.lockedUntil) {
+      return formatMessageWithValues("core.LoginPage.secondFactor.throttled", {
+        until: formatDateTimeFromISO(extensions.lockedUntil),
+      });
+    }
     return errorMessages[messageKey] || messageKey;
   };
 
@@ -167,18 +201,18 @@ const LoginPage = ({ logo }) => {
                     <Grid>
                       <TextInput
                         required
-                        readOnly={isAuthenticating}
+                        readOnly={isAuthenticating || secondFactorStep !== null}
                         module={"core.LoginPage"}
                         label={"username.label"}
                         fullWidth
-                        defaultValue={credentials.username}
+                        value={credentials.username}
                         onChange={(username) => setCredentials({ ...credentials, username })}
                       />
                     </Grid>
                     <Grid>
                       <TextInput
                         required
-                        readOnly={isAuthenticating}
+                        readOnly={isAuthenticating || secondFactorStep !== null}
                         type="password"
                         module={"core.LoginPage"}
                         label={"password.label"}
@@ -186,24 +220,59 @@ const LoginPage = ({ logo }) => {
                         onChange={(password) => setCredentials({ ...credentials, password })}
                       />
                     </Grid>
+                    {secondFactorStep === "code" && (
+                      <Grid>
+                        <Typography variant="body2">{formatMessage("secondFactor.hint")}</Typography>
+                        <TextInput
+                          required
+                          autoFocus
+                          readOnly={isAuthenticating}
+                          module={"core.LoginPage"}
+                          label={"secondFactor.code.label"}
+                          fullWidth
+                          inputProps={{ autoComplete: "one-time-code" }}
+                          onChange={(otp) => setCredentials({ ...credentials, otp })}
+                        />
+                      </Grid>
+                    )}
+                    {secondFactorStep === "enrol" && (
+                      <Grid>
+                        <Typography variant="body2">{formatMessage("secondFactor.enrolmentRequired")}</Typography>
+                        <Button fullWidth color="primary" variant="contained" onClick={goToEnrolment}>
+                          {formatMessage("secondFactor.enrolBtn")}
+                        </Button>
+                      </Grid>
+                    )}
                     {serverResponse?.message && (
                       <Grid>
-                        <Box color="error.main">{getErrorMessage(serverResponse.message)}</Box>
+                        <Box color="error.main">
+                          {getErrorMessage(serverResponse.message, serverResponse.extensions)}
+                        </Box>
+                      </Grid>
+                    )}
+                    {secondFactorStep !== "enrol" && (
+                      <Grid>
+                        <Button
+                          fullWidth
+                          type="submit"
+                          disabled={
+                            isAuthenticating ||
+                            !(credentials.username && credentials.password) ||
+                            (secondFactorStep === "code" && !credentials.otp)
+                          }
+                          color="primary"
+                          variant="contained"
+                        >
+                          {formatMessage("loginBtn")}
+                        </Button>
                       </Grid>
                     )}
                     <Grid>
-                      <Button
-                        fullWidth
-                        type="submit"
-                        disabled={isAuthenticating || !(credentials.username && credentials.password)}
-                        color="primary"
-                        variant="contained"
-                      >
-                        {formatMessage("loginBtn")}
-                      </Button>
-                    </Grid>
-                    <Grid>
-                      <Button onClick={redirectToForgotPassword}>{formatMessage("forgotPassword")}</Button>
+                      {secondFactorStep === null ? (
+                        <Button onClick={redirectToForgotPassword}>{formatMessage("forgotPassword")}</Button>
+                      ) : (
+                        <Button onClick={startOver}>{formatMessage("secondFactor.otherAccount")}</Button>
+                      )}
                       <Contributions contributionKey={LOGIN_PAGE_CONTRIBUTION_KEY} />
                     </Grid>
                   </>

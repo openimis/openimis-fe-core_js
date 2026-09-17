@@ -139,7 +139,8 @@ export const DEFAULT = {
   SHOW_JOURNAL_SIDEBAR: true,
   DISABLED_VISIBILITY_BOOST: false,
   INPUT_VARIANT: "standard",
-}
+  SECOND_FACTOR: false,
+};
 
 export const EXPORT_FILE_FORMATS = {
   // By default, the export file format is CSV

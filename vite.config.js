@@ -65,6 +65,7 @@ export default defineConfig({
         '@date-io/core',
         '@date-io/moment',
         'zxcvbn',
+        'qrcode.react',
         /^@babel-.*/,
         /^@openimis/
       ],

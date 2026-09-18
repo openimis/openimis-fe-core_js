@@ -179,7 +179,7 @@ export const getPublicUrl = () => {
   return publicUrl.startsWith("/") ? publicUrl : `/${publicUrl}`;
 };
 
-const UNAUTHENTICATED_ROUTES = ["login", "forgot_password", "set_password", "logout"];
+const UNAUTHENTICATED_ROUTES = ["login", "forgot_password", "set_password", "second_factor/enrol", "logout"];
 
 export const isUnauthenticatedRoute = () => {
   if (typeof window === "undefined") {

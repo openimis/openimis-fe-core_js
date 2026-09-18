@@ -98,5 +98,13 @@
   "admin.password.medium": "Medium",
   "admin.password.strong": "Password is strong.",
   "admin.password.veryStrong": "Password is very strong.",
-  "admin.password.unknownScore": "Unknown score."
+  "admin.password.unknownScore": "Unknown score.",
+  "admin.UserSecondFactorPanel.title": "Two-factor authentication",
+  "admin.UserSecondFactorPanel.enrolled": "An authenticator app is set up for this user. Every login asks for a code from it, or for one of their recovery codes.",
+  "admin.UserSecondFactorPanel.notEnrolled": "No authenticator app is set up for this user.",
+  "admin.UserSecondFactorPanel.resetBtn": "Reset second factor",
+  "admin.UserSecondFactorPanel.resetDialog.title": "Reset this user's second factor?",
+  "admin.UserSecondFactorPanel.resetDialog.message": "Their authenticator app and recovery codes stop working, and they are signed out everywhere. If two-factor authentication is optional for them, they log in with their password alone and can set up an authenticator again. If their role requires it, they are refused until they set one up.",
+  "admin.UserSecondFactorPanel.reset.mutationLabel": "Reset second factor of {username}",
+  "admin.UserSecondFactorPanel.error": "The reset did not go through. The journal shows why."
 }

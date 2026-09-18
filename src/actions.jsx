@@ -437,9 +437,8 @@ export function saveCurrentUserDefaultRowsPerPage(defaultRowsPerPage, clientMuta
 export function login(credentials) {
   return async (dispatch) => {
     if (credentials) {
-      // otp is declared only when a code is being sent, so a client running
-      // against a backend without the argument keeps sending the mutation it
-      // always has - an unused declared argument is a validation error.
+      // An unused declared argument is a validation error, so a client on a
+      // backend without otp must keep sending the mutation unchanged.
       const withOtp = credentials.otp !== undefined;
       const mutation = `mutation authenticate($username: String!, $password: String!${
         withOtp ? ", $otp: String" : ""

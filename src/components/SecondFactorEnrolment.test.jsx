@@ -1,8 +1,7 @@
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Each mutation is scripted by name: the component sees the payload the server
-// would return and nothing below the redux action is exercised.
+// Each mutation is scripted by name.
 const { answers, sentOperations } = vi.hoisted(() => ({ answers: {}, sentOperations: [] }));
 vi.mock("../actions", async () => ({
   ...(await vi.importActual("../actions")),

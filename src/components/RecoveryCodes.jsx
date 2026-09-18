@@ -24,9 +24,8 @@ const RecoveryCodes = ({ codes, onAcknowledged, children = null }) => {
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
-    // navigator.clipboard is undefined over plain http, which most local and
-    // some deployed instances are. Claiming "Copied" for a set of codes shown
-    // once, that the user then cannot paste, is the worst of the failures.
+    // navigator.clipboard is undefined over plain http, which most local
+    // instances are; a failed write must not claim "Copied".
     try {
       await navigator.clipboard.writeText(codes.join("\n"));
       setCopied(true);

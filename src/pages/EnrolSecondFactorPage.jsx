@@ -21,8 +21,7 @@ const StyledEnrolSecondFactorPage = styled("div")(({ theme }) => ({
   "& .paper": theme.paper?.paper ?? {},
 }));
 
-// The half of enrolment that needs no session: a user the policy binds is
-// refused at login until they have a device, and lands here from that refusal.
+// Reached without a session, from the login's SECOND_FACTOR_ENROLMENT_REQUIRED.
 const EnrolSecondFactorPage = () => {
   const history = useHistory();
   const location = useLocation();

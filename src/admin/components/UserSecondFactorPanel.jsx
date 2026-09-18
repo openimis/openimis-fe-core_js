@@ -20,6 +20,9 @@ const RESET = `
   }
 `;
 
+// core_Mutation_Log.status: 0 received, 1 error, 2 success.
+const MUTATION_SUCCESS = 2;
+
 const StyledPaper = styled(Paper)(({ theme }) => ({
   ...(theme.paper?.paper ?? {}),
   "& .title": theme.paper?.title ?? {},
@@ -39,9 +42,15 @@ const UserSecondFactorPanel = (props) => {
   const secondFactor = modulesManager.getConf("fe-core", "App.secondFactor", false);
   if (!secondFactor || !edited?.id) return null;
 
-  // Not gated on readOnly: that prop carries the update right, and getting past a
-  // second factor is the one thing a password reset cannot do, so it has its own.
-  const canReset = !!edited.hasSecondFactor && rights.includes(RIGHT_USER_RESET_SECOND_FACTOR);
+  // The form's readOnly carries three things: the update right, a mutation still
+  // in flight and a deleted user. Only the first is ignored here - getting past a
+  // second factor is the one thing a password reset cannot do, so it has a right
+  // of its own. The other two lock the form, and they lock this with it.
+  const canReset =
+    !!edited.hasSecondFactor &&
+    !edited.validityTo &&
+    !edited.clientMutationId &&
+    rights.includes(RIGHT_USER_RESET_SECOND_FACTOR);
 
   const onConfirm = async (confirmed) => {
     setConfirming(false);

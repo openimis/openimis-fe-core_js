@@ -50,9 +50,16 @@ const render = ({
   hasSecondFactor = true,
   rights = [RIGHT_USERS, RIGHT_USER_RESET_SECOND_FACTOR],
   secondFactor = true,
+  ...rest
 } = {}) => {
   const store = makeStore({ preloadedState: { core: { user: { i_user: { rights } } } } });
-  const edited = { id: USER_ID, username: "alice", iUser: { id: "SW50ZXJhY3RpdmVVc2VyR1FMVHlwZTox" }, hasSecondFactor };
+  const edited = {
+    id: USER_ID,
+    username: "alice",
+    iUser: { id: "SW50ZXJhY3RpdmVVc2VyR1FMVHlwZTox" },
+    hasSecondFactor,
+    ...rest,
+  };
   return renderWithProviders(<UserSecondFactorPanel edited={edited} />, {
     store,
     messages,
@@ -83,6 +90,20 @@ describe("UserSecondFactorPanel", () => {
 
   it("shows the status but no reset to a caller without the right", () => {
     render({ rights: [RIGHT_USERS] });
+
+    expect(screen.getByText("An authenticator app is set up for this user")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Reset second factor" })).toBeNull();
+  });
+
+  it("offers no reset on a deleted user, whose form is locked", () => {
+    render({ validityTo: "2026-09-01T00:00:00" });
+
+    expect(screen.getByText("An authenticator app is set up for this user")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Reset second factor" })).toBeNull();
+  });
+
+  it("offers no reset while another mutation on the user is still in flight", () => {
+    render({ clientMutationId: "7f1c0a2e-0000-4000-8000-000000000000" });
 
     expect(screen.getByText("An authenticator app is set up for this user")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Reset second factor" })).toBeNull();

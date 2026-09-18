@@ -228,6 +228,7 @@ export function fetchUser(mm, userId, clientMutationId) {
                   )} }`
                 : ``
             }
+            ${mm.getConf("fe-core", "App.secondFactor", false) ? `hasSecondFactor` : ``}
           }
         }
       }

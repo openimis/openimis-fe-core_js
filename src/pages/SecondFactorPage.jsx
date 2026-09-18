@@ -54,7 +54,8 @@ const SecondFactorPage = () => {
   const translations = useTranslations("core.SecondFactorPage", modulesManager);
   const { formatMessage } = translations;
   const username = useSelector((state) => state.core.user?.username);
-  const { data, isLoading, error, refetch } = useGraphqlQuery(STATUS);
+  const secondFactor = modulesManager.getConf("fe-core", "App.secondFactor", DEFAULT.SECOND_FACTOR);
+  const { data, isLoading, error, refetch } = useGraphqlQuery(STATUS, {}, { skip: !secondFactor });
   const issue = useGraphqlMutation(ISSUE, { wait: false });
   const [otp, setOtp] = useState("");
   const [codes, setCodes] = useState(null);
@@ -81,7 +82,7 @@ const SecondFactorPage = () => {
 
   // The route is registered unconditionally, so only the flag keeps this page
   // off a deployment whose backend has no second factor.
-  if (!modulesManager.getConf("fe-core", "App.secondFactor", DEFAULT.SECOND_FACTOR)) {
+  if (!secondFactor) {
     return <Redirect to="/" />;
   }
   if (isLoading || error) {

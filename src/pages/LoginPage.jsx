@@ -11,6 +11,7 @@ import Contributions from "./../components/generics/Contributions";
 import { baseApiUrl } from "../actions";
 import { DEFAULT, SAML_LOGIN_PATH } from "../constants";
 import GetIconComponent from "../helpers/icons";
+import { throttledMessage } from "../helpers/secondFactor";
 
 const ArrowBackIcon = GetIconComponent("ArrowBack");
 
@@ -33,6 +34,12 @@ const StyledLoginPage = styled("div")(({ theme }) => ({
   },
 }));
 
+const SECOND_FACTOR_STEP = { CODE: "code", ENROL: "enrol" };
+const THROTTLE_KEYS = {
+  dated: "core.LoginPage.secondFactor.throttled",
+  undated: "core.LoginPage.secondFactor.throttledNoTime",
+};
+
 const LOGIN_PAGE_CONTRIBUTION_KEY = "core.LoginPage";
 const LOGIN_PAGE_MPASS_CONTRIBUTION_KEY = "workerVoucher.MPassLoginButton";
 
@@ -40,14 +47,10 @@ const LoginPage = ({ logo }) => {
   const history = useHistory();
   const location = useLocation();
   const modulesManager = useModulesManager();
-  const { formatMessage, formatMessageWithValues, formatDateTimeFromISO } = useTranslations(
-    "core.LoginPage",
-    modulesManager,
-  );
-  // The enrolment page hands the username back the same way the login hands it over.
+  const translations = useTranslations("core.LoginPage", modulesManager);
+  const { formatMessage } = translations;
   const [credentials, setCredentials] = useState({ username: location.state?.username });
   const [serverResponse, setServerResponse] = useState({ loginStatus: "", message: null });
-  // null | "code" | "enrol" - only ever set while App.secondFactor is on.
   const [secondFactorStep, setSecondFactorStep] = useState(null);
   const auth = useAuthentication();
   const [isAuthenticating, setAuthenticating] = useState(false);
@@ -63,13 +66,11 @@ const LoginPage = ({ logo }) => {
   }, [auth.isAuthenticated, auth.isInitialized, history]);
 
   const handleLoginError = (errorMessage, extensions) => {
-    // Behind the flag only: with it off these two codes fall through to the raw
-    // string the page has always shown for a refusal it does not know.
     if (secondFactor && errorMessage === "SECOND_FACTOR_REQUIRED") {
-      setSecondFactorStep("code");
+      setSecondFactorStep(SECOND_FACTOR_STEP.CODE);
       setServerResponse({ loginStatus: "", message: null });
     } else if (secondFactor && errorMessage === "SECOND_FACTOR_ENROLMENT_REQUIRED") {
-      setSecondFactorStep("enrol");
+      setSecondFactorStep(SECOND_FACTOR_STEP.ENROL);
       setServerResponse({ loginStatus: "", message: null });
     } else {
       setServerResponse({ loginStatus: "CORE_AUTH_ERR", message: errorMessage, extensions });
@@ -124,10 +125,8 @@ const LoginPage = ({ logo }) => {
   };
 
   const getErrorMessage = (messageKey, extensions) => {
-    if (messageKey === "SECOND_FACTOR_THROTTLED" && extensions?.lockedUntil) {
-      return formatMessageWithValues("core.LoginPage.secondFactor.throttled", {
-        until: formatDateTimeFromISO(extensions.lockedUntil),
-      });
+    if (messageKey === "SECOND_FACTOR_THROTTLED") {
+      return throttledMessage(translations, THROTTLE_KEYS, extensions?.lockedUntil);
     }
     return errorMessages[messageKey] || messageKey;
   };
@@ -220,7 +219,7 @@ const LoginPage = ({ logo }) => {
                         onChange={(password) => setCredentials({ ...credentials, password })}
                       />
                     </Grid>
-                    {secondFactorStep === "code" && (
+                    {secondFactorStep === SECOND_FACTOR_STEP.CODE && (
                       <Grid>
                         <Typography variant="body2">{formatMessage("secondFactor.hint")}</Typography>
                         <TextInput
@@ -235,7 +234,7 @@ const LoginPage = ({ logo }) => {
                         />
                       </Grid>
                     )}
-                    {secondFactorStep === "enrol" && (
+                    {secondFactorStep === SECOND_FACTOR_STEP.ENROL && (
                       <Grid>
                         <Typography variant="body2">{formatMessage("secondFactor.enrolmentRequired")}</Typography>
                         <Button fullWidth color="primary" variant="contained" onClick={goToEnrolment}>
@@ -250,7 +249,7 @@ const LoginPage = ({ logo }) => {
                         </Box>
                       </Grid>
                     )}
-                    {secondFactorStep !== "enrol" && (
+                    {secondFactorStep !== SECOND_FACTOR_STEP.ENROL && (
                       <Grid>
                         <Button
                           fullWidth
@@ -258,7 +257,7 @@ const LoginPage = ({ logo }) => {
                           disabled={
                             isAuthenticating ||
                             !(credentials.username && credentials.password) ||
-                            (secondFactorStep === "code" && !credentials.otp)
+                            (secondFactorStep === SECOND_FACTOR_STEP.CODE && !credentials.otp)
                           }
                           color="primary"
                           variant="contained"

@@ -11,10 +11,11 @@ import { Redirect } from "../helpers/history";
 import { useTranslations } from "../helpers/i18n";
 import { useModulesManager } from "../helpers/modules";
 import { useGraphqlMutation, useGraphqlQuery } from "../helpers/hooks";
+import { refusalMessage } from "../helpers/secondFactor";
 import { DEFAULT } from "../constants";
 
-// Page-local rather than a field added to useUserQuery: other modules render
-// that hook, and a backend without hasSecondFactor would take their pages down.
+// Page-local, not a field on useUserQuery: other modules render that hook,
+// and a backend without hasSecondFactor would take their pages down.
 const STATUS = `
   query secondFactorStatus {
     user {
@@ -50,10 +51,8 @@ const StyledSecondFactorPage = styled("div")(({ theme }) => ({
 
 const SecondFactorPage = () => {
   const modulesManager = useModulesManager();
-  const { formatMessage, formatMessageWithValues, formatDateTimeFromISO } = useTranslations(
-    "core.SecondFactorPage",
-    modulesManager,
-  );
+  const translations = useTranslations("core.SecondFactorPage", modulesManager);
+  const { formatMessage } = translations;
   const username = useSelector((state) => state.core.user?.username);
   const { data, isLoading, error, refetch } = useGraphqlQuery(STATUS);
   const issue = useGraphqlMutation(ISSUE, { wait: false });
@@ -61,17 +60,7 @@ const SecondFactorPage = () => {
   const [codes, setCodes] = useState(null);
   const [issueError, setIssueError] = useState(null);
 
-  const refusal = (code, lockedUntil) => {
-    if (code === "SECOND_FACTOR_THROTTLED") {
-      // The server sends no lifting time when the device does not report one,
-      // and the dated wording carries an {until} placeholder that would
-      // otherwise reach the user verbatim.
-      return lockedUntil
-        ? formatMessageWithValues("error.SECOND_FACTOR_THROTTLED", { until: formatDateTimeFromISO(lockedUntil) })
-        : formatMessage("error.SECOND_FACTOR_THROTTLED_NO_TIME");
-    }
-    return KNOWN_REFUSALS.includes(code) ? formatMessage(`error.${code}`) : code;
-  };
+  const refusal = (code, lockedUntil) => refusalMessage(translations, KNOWN_REFUSALS, code, lockedUntil);
 
   const requestCodes = async (e) => {
     e.preventDefault();
@@ -90,8 +79,8 @@ const SecondFactorPage = () => {
     }
   };
 
-  // The route is registered unconditionally, so the flag is what keeps the
-  // page off a deployment whose backend has no second factor to talk to.
+  // The route is registered unconditionally, so only the flag keeps this page
+  // off a deployment whose backend has no second factor.
   if (!modulesManager.getConf("fe-core", "App.secondFactor", DEFAULT.SECOND_FACTOR)) {
     return <Redirect to="/" />;
   }

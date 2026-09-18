@@ -9,6 +9,7 @@ import RecoveryCodes from "./RecoveryCodes";
 import { useTranslations } from "../helpers/i18n";
 import { useModulesManager } from "../helpers/modules";
 import { graphqlWithVariables } from "../actions";
+import { refusalMessage } from "../helpers/secondFactor";
 
 const ENROL = `
   mutation enrolSecondFactor($input: EnrolSecondFactorMutationInput!) {
@@ -39,8 +40,7 @@ const CONFIRM = `
 
 const STEP = { CREDENTIALS: "credentials", CONFIRM: "confirm", CODES: "codes" };
 
-// The codes the server names; anything else in `error` is its own wording
-// (an empty field, the address lockout) and is shown as sent.
+// Anything else in `error` is the server's own wording and is shown as sent.
 const KNOWN_REFUSALS = [
   "INCORRECT_CREDENTIALS",
   "SECOND_FACTOR_ALREADY_ENROLLED",
@@ -50,7 +50,6 @@ const KNOWN_REFUSALS = [
   "SECOND_FACTOR_ENROLMENT_REQUIRED",
 ];
 
-// A base32 key reads better in groups of four when typed into an app by hand.
 export const groupSecret = (secret) => secret.match(/.{1,4}/g).join(" ");
 
 // Not useGraphqlMutation: that helper follows every mutation with a
@@ -81,22 +80,18 @@ const StyledEnrolment = styled("div")(({ theme }) => ({
   "& .secret": { fontFamily: "monospace", letterSpacing: "0.1em", color: theme.palette.text.primary },
 }));
 
-// Password -> scan -> confirm -> recovery codes, over the two password-
-// authenticated mutations. Used before a session exists (a bound user refused
-// at login) and from the profile (opting in), which is why it takes no user
-// from the store: the server wants the password either way.
+// Takes no user from the store: the server wants the password either way,
+// session or not.
 const SecondFactorEnrolment = ({
   initialUsername = "",
   usernameReadOnly = false,
   onFinished,
-  children = null,
+  codesNote = null,
   footer = null,
 }) => {
   const modulesManager = useModulesManager();
-  const { formatMessage, formatMessageWithValues, formatDateTimeFromISO } = useTranslations(
-    "core.SecondFactorEnrolment",
-    modulesManager,
-  );
+  const translations = useTranslations("core.SecondFactorEnrolment", modulesManager);
+  const { formatMessage } = translations;
   const [step, setStep] = useState(STEP.CREDENTIALS);
   const [credentials, setCredentials] = useState({ username: initialUsername, password: "" });
   const [otp, setOtp] = useState("");
@@ -107,17 +102,7 @@ const SecondFactorEnrolment = ({
   const confirm = useEnrolmentMutation(CONFIRM);
   const isLoading = enrol.isLoading || confirm.isLoading;
 
-  const refusal = (code, lockedUntil) => {
-    if (code === "SECOND_FACTOR_THROTTLED") {
-      // The server sends no lifting time when the device does not report one,
-      // and the dated wording carries an {until} placeholder that would
-      // otherwise reach the user verbatim.
-      return lockedUntil
-        ? formatMessageWithValues("error.SECOND_FACTOR_THROTTLED", { until: formatDateTimeFromISO(lockedUntil) })
-        : formatMessage("error.SECOND_FACTOR_THROTTLED_NO_TIME");
-    }
-    return KNOWN_REFUSALS.includes(code) ? formatMessage(`error.${code}`) : code;
-  };
+  const refusal = (code, lockedUntil) => refusalMessage(translations, KNOWN_REFUSALS, code, lockedUntil);
 
   const startOver = (message = null) => {
     setStep(STEP.CREDENTIALS);
@@ -266,11 +251,11 @@ const SecondFactorEnrolment = ({
       )}
       {step === STEP.CODES && (
         <RecoveryCodes codes={codes} onAcknowledged={onFinished}>
-          {children}
+          {codesNote}
         </RecoveryCodes>
       )}
-      {/* Never beside the codes: they are shown once, and a way off the page
-          that skips the acknowledgement loses them. */}
+      {/* Never beside the codes: they are shown once, and leaving here skips
+          the acknowledgement. */}
       {step !== STEP.CODES && footer}
     </StyledEnrolment>
   );

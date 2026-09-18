@@ -2,8 +2,6 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Route } from "react-router-dom";
 
-// The page logs in through useAuthentication, which dispatches this thunk;
-// scripting its answer stands in for the whole backend.
 const { loginResult } = vi.hoisted(() => ({ loginResult: vi.fn() }));
 vi.mock("../actions", async () => ({
   ...(await vi.importActual("../actions")),
@@ -21,6 +19,7 @@ const messages = {
   "core.LoginPage.secondFactor.otherAccount": "Use a different account",
   "core.LoginPage.secondFactor.invalid": "The code is not valid.",
   "core.LoginPage.secondFactor.throttled": "Too many attempts. Try again after {until}.",
+  "core.LoginPage.secondFactor.throttledNoTime": "Too many attempts. Wait a little.",
   "core.LoginPage.secondFactor.enrolmentRequired": "Your account requires two-factor authentication.",
   "core.LoginPage.secondFactor.enrolBtn": "Set up an authenticator",
 };
@@ -53,9 +52,9 @@ const typeCredentials = async (user) => {
 const submit = (user) => user.click(screen.getByRole("button", { name: "Log In" }));
 const codeField = () => screen.queryByLabelText(/verification code/i);
 
-// TextInput leaks props onto the DOM, so React warns on every render.
 beforeEach(() => {
   loginResult.mockReset();
+  // TextInput leaks props onto the DOM, so React warns on every render.
   vi.spyOn(console, "error").mockImplementation(() => {});
 });
 
@@ -144,6 +143,23 @@ describe("LoginPage with the second factor enabled", () => {
     await submit(user);
 
     expect(await screen.findByText(/Try again after/)).toBeInTheDocument();
+  });
+
+  it("says to wait, without a placeholder, when the refusal carries no lifting time", async () => {
+    loginResult
+      .mockResolvedValueOnce(refused("SECOND_FACTOR_REQUIRED"))
+      .mockResolvedValueOnce(refused("SECOND_FACTOR_THROTTLED"));
+    const user = userEvent.setup();
+    renderLogin({ secondFactor: true });
+
+    await typeCredentials(user);
+    await submit(user);
+    await user.type(await screen.findByLabelText(/verification code/i), "000000");
+    await submit(user);
+
+    expect(await screen.findByText("Too many attempts. Wait a little.")).toBeInTheDocument();
+    expect(screen.queryByText(/\{until\}/)).toBeNull();
+    expect(screen.queryByText("SECOND_FACTOR_THROTTLED")).toBeNull();
   });
 
   it("lets the user start over with another account", async () => {

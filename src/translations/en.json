@@ -52,6 +52,7 @@
   "core.LoginPage.secondFactor.otherAccount": "Use a different account",
   "core.LoginPage.secondFactor.invalid": "The code is not valid. Wait for your app to show the next one and try again.",
   "core.LoginPage.secondFactor.throttled": "Too many attempts. Try again after {until}.",
+  "core.LoginPage.secondFactor.throttledNoTime": "Too many attempts. Wait a little and try again.",
   "core.LoginPage.secondFactor.enrolmentRequired": "Your account requires two-factor authentication. Set up an authenticator app to continue.",
   "core.LoginPage.secondFactor.enrolBtn": "Set up an authenticator",
   "core.SecondFactorEnrolment.title": "Set up an authenticator app",

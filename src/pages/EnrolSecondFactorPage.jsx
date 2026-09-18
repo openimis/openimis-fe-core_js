@@ -45,16 +45,17 @@ const EnrolSecondFactorPage = () => {
             <SecondFactorEnrolment
               initialUsername={username}
               onFinished={backToLogin}
+              codesNote={
+                <Grid>
+                  <Typography>{formatMessage("nextCodeHint")}</Typography>
+                </Grid>
+              }
               footer={
                 <Box mt={2}>
                   <Button onClick={backToLogin}>{formatMessage("backToLogin")}</Button>
                 </Box>
               }
-            >
-              <Grid>
-                <Typography>{formatMessage("nextCodeHint")}</Typography>
-              </Grid>
-            </SecondFactorEnrolment>
+            />
           </Box>
         </Paper>
       </div>

@@ -62,7 +62,7 @@ const render = (props = {}) =>
 
 const begin = async (user) => {
   await user.type(screen.getByLabelText(/username/i), "alice");
-  await user.type(screen.getByLabelText(/^password/i), "s3cret");
+  await user.type(screen.getByLabelText(/^password/i), "password");
   await user.click(screen.getByRole("button", { name: "Continue" }));
 };
 const confirmWith = async (user, code) => {
@@ -91,7 +91,7 @@ describe("SecondFactorEnrolment", () => {
 
     await begin(user);
 
-    expect(answers.enrolSecondFactor).toHaveBeenCalledWith({ username: "alice", password: "s3cret" });
+    expect(answers.enrolSecondFactor).toHaveBeenCalledWith({ username: "alice", password: "password" });
     expect(await screen.findByTestId("secret")).toHaveTextContent("JBSW Y3DP EHPK 3PXP");
     expect(document.querySelector("svg")).not.toBeNull();
   });
@@ -104,7 +104,11 @@ describe("SecondFactorEnrolment", () => {
     await begin(user);
     await confirmWith(user, "123456");
 
-    expect(answers.confirmSecondFactor).toHaveBeenCalledWith({ username: "alice", password: "s3cret", otp: "123456" });
+    expect(answers.confirmSecondFactor).toHaveBeenCalledWith({
+      username: "alice",
+      password: "password",
+      otp: "123456",
+    });
     for (const code of CODES) {
       expect(await screen.findByText(code)).toBeInTheDocument();
     }

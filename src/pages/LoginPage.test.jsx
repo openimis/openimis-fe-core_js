@@ -47,7 +47,7 @@ const loggedIn = { loginStatus: "CORE_USERS_CURRENT_USER_RESP", message: "" };
 
 const typeCredentials = async (user) => {
   await user.type(screen.getByLabelText(/username/i), "alice");
-  await user.type(screen.getByLabelText(/^password/i), "s3cret");
+  await user.type(screen.getByLabelText(/^password/i), "password");
 };
 const submit = (user) => user.click(screen.getByRole("button", { name: "Log In" }));
 const codeField = () => screen.queryByLabelText(/verification code/i);
@@ -76,7 +76,7 @@ describe("LoginPage with the second factor disabled (the default)", () => {
     expect(await screen.findByText("SECOND_FACTOR_REQUIRED")).toBeInTheDocument();
     expect(codeField()).toBeNull();
     expect(loginResult).toHaveBeenCalledTimes(1);
-    expect(loginResult).toHaveBeenCalledWith({ username: "alice", password: "s3cret" });
+    expect(loginResult).toHaveBeenCalledWith({ username: "alice", password: "password" });
   });
 
   it("shows SECOND_FACTOR_ENROLMENT_REQUIRED the same way, with no enrolment button", async () => {
@@ -110,7 +110,7 @@ describe("LoginPage with the second factor enabled", () => {
     await submit(user);
 
     await waitFor(() =>
-      expect(loginResult).toHaveBeenLastCalledWith({ username: "alice", password: "s3cret", otp: "123456" }),
+      expect(loginResult).toHaveBeenLastCalledWith({ username: "alice", password: "password", otp: "123456" }),
     );
   });
 

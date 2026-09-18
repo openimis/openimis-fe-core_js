@@ -30,17 +30,17 @@ describe("login", () => {
   it("sends the mutation it always has when no code is given", async () => {
     fetchMock.mockResolvedValue(graphqlAnswer(refusal("SECOND_FACTOR_REQUIRED")));
 
-    await makeStore().dispatch(login({ username: "alice", password: "s3cret" }));
+    await makeStore().dispatch(login({ username: "alice", password: "password" }));
 
     const { query, variables } = sent(fetchMock);
     expect(query).not.toContain("otp");
-    expect(variables).toEqual({ username: "alice", password: "s3cret" });
+    expect(variables).toEqual({ username: "alice", password: "password" });
   });
 
   it("declares and sends otp when a code is given", async () => {
     fetchMock.mockResolvedValue(graphqlAnswer(refusal("INVALID_SECOND_FACTOR")));
 
-    await makeStore().dispatch(login({ username: "alice", password: "s3cret", otp: "123456" }));
+    await makeStore().dispatch(login({ username: "alice", password: "password", otp: "123456" }));
 
     const { query, variables } = sent(fetchMock);
     expect(query).toContain("$otp: String");
@@ -53,7 +53,7 @@ describe("login", () => {
       graphqlAnswer(refusal("SECOND_FACTOR_THROTTLED", { lockedUntil: "2026-09-17T10:00:00+00:00" })),
     );
 
-    const result = await makeStore().dispatch(login({ username: "alice", password: "s3cret", otp: "000000" }));
+    const result = await makeStore().dispatch(login({ username: "alice", password: "password", otp: "000000" }));
 
     expect(result).toEqual({
       loginStatus: "CORE_AUTH_ERR",

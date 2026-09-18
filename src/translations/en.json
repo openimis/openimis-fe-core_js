@@ -234,6 +234,7 @@
   "core.gql_mutation_create_users_perms": "Core | Mutation Create Users",
   "core.gql_mutation_update_users_perms": "Core | Mutation Update Users",
   "core.gql_mutation_delete_users_perms": "Core | Mutation Delete Users",
+  "core.gql_mutation_reset_second_factor_perms": "Core | Mutation Reset Second Factor",
   "core.gql_query_roles_perms": "Core | Query Roles",
   "core.gql_mutation_create_roles_perms": "Core | Mutation Create Roles",
   "core.gql_mutation_update_roles_perms": "Core | Mutation Update Roles",

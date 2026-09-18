@@ -32,8 +32,12 @@ const messages = {
   "admin.UserSecondFactorPanel.notEnrolled": "No authenticator app is set up for this user",
   "admin.UserSecondFactorPanel.resetBtn": "Reset second factor",
   "admin.UserSecondFactorPanel.resetDialog.title": "Reset this user's second factor?",
+  "admin.UserSecondFactorPanel.resetDialog.message":
+    "Their authenticator app and recovery codes stop working, and they are signed out everywhere. If two-factor " +
+    "authentication is optional for them, they log in with their password alone and can set up an authenticator " +
+    "again. If their role requires it, they are refused until they set one up.",
   "admin.UserSecondFactorPanel.reset.mutationLabel": "Reset second factor of {username}",
-  "admin.UserSecondFactorPanel.error": "The reset did not go through. The journal shows why.",
+  "admin.UserSecondFactorPanel.error": "The reset could not be confirmed. The journal shows what happened.",
   "core.ok": "OK",
   "core.cancel": "Cancel",
 };
@@ -115,6 +119,12 @@ describe("UserSecondFactorPanel", () => {
 
     await user.click(screen.getByRole("button", { name: "Reset second factor" }));
     expect(screen.getByText("Reset this user's second factor?")).toBeInTheDocument();
+    // The consequences are the whole point of confirming: an administrator who is
+    // not told them cannot weigh the one action a password reset cannot undo.
+    const consequences = screen.getByText(/recovery codes stop working/);
+    expect(consequences).toHaveTextContent("signed out everywhere");
+    expect(consequences).toHaveTextContent("optional for them");
+    expect(consequences).toHaveTextContent("refused until they set one up");
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(answers.resetUserSecondFactor).not.toHaveBeenCalled();
@@ -146,7 +156,26 @@ describe("UserSecondFactorPanel", () => {
     await user.click(screen.getByRole("button", { name: "Reset second factor" }));
     await user.click(screen.getByRole("button", { name: "OK" }));
 
-    expect(await screen.findByText("The reset did not go through. The journal shows why.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("The reset could not be confirmed. The journal shows what happened."),
+    ).toBeInTheDocument();
+    expect(fetchUser).toHaveBeenCalledWith(expect.anything(), USER_ID);
+  });
+
+  it.each([
+    ["the mutation log poll gave up", { status: 0, clientMutationId: "x", error: null }],
+    ["the mutation log could not be read", null],
+  ])("says so rather than nothing when %s", async (_label, outcome) => {
+    answers.resetUserSecondFactor = vi.fn(async () => outcome);
+    const user = userEvent.setup();
+    render();
+
+    await user.click(screen.getByRole("button", { name: "Reset second factor" }));
+    await user.click(screen.getByRole("button", { name: "OK" }));
+
+    expect(
+      await screen.findByText("The reset could not be confirmed. The journal shows what happened."),
+    ).toBeInTheDocument();
     expect(fetchUser).toHaveBeenCalledWith(expect.anything(), USER_ID);
   });
 });

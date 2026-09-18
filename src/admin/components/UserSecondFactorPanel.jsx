@@ -57,10 +57,16 @@ const UserSecondFactorPanel = (props) => {
     if (!confirmed) return;
     setFailed(false);
     try {
-      await reset.mutate({
+      const outcome = await reset.mutate({
         uuid: decodeId(edited.id),
         clientMutationLabel: formatMessageWithValues("reset.mutationLabel", { username: edited.username }),
       });
+      // The mutation resolves with the log row it waited for, and gives up after
+      // ten polls. Anything short of a success row leaves the outcome unknown,
+      // which the administrator has to be told rather than left to infer.
+      if (outcome?.status !== MUTATION_SUCCESS) {
+        setFailed(true);
+      }
     } catch (err) {
       setFailed(true);
     } finally {

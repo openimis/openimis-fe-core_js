@@ -30,6 +30,7 @@ import {
 } from "../constants";
 import EnrolmentOfficerFormPanel from "./EnrolmentOfficerFormPanel";
 import ClaimAdministratorFormPanel from "./ClaimAdministratorFormPanel";
+import UserSecondFactorPanel from "./UserSecondFactorPanel";
 import {
   fetchUser,
   createUser,
@@ -238,6 +239,8 @@ class UserForm extends Component {
 
     if (!rights.includes(RIGHT_USERS)) return null;
 
+    const secondFactor = modulesManager.getConf("fe-core", "App.secondFactor", false);
+
     const isInMutation =
       user?.clientMutationId ||
       modulesManager.getContribs(USER_OVERVIEW_MUTATIONS_KEY).some((mutation) => mutation(state));
@@ -270,6 +273,7 @@ class UserForm extends Component {
             Panels={[
               ...(rights.includes(RIGHT_ENROLMENTOFFICER) ? [EnrolmentOfficerFormPanel] : []),
               ...(rights.includes(RIGHT_CLAIMADMINISTRATOR) ? [ClaimAdministratorFormPanel] : []),
+              ...(secondFactor && user?.iUser ? [UserSecondFactorPanel] : []),
             ]}
             user={user}
             onEditedChanged={this.onEditedChanged}

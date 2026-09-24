@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { connect, useDispatch } from "react-redux";
 
 import { useTheme, styled } from "@mui/material/styles";
-import { Grid, Divider, Typography, Button, InputAdornment, IconButton, Box } from "@mui/material";
+import { Grid, Divider, Typography, Button, InputAdornment, IconButton, Box, Checkbox, FormControlLabel } from "@mui/material";
 import GetIconComponent from "../../helpers/icons";
 
 const VisibilityIcon = GetIconComponent("Visibility");
@@ -18,8 +18,9 @@ import {
   ValidatedTextInput,
   passwordGenerator,
   validatePassword,
-  ROWS_PER_PAGE_OPTIONS
+  ROWS_PER_PAGE_OPTIONS,
 } from "@openimis/fe-core";
+import { DEFAULT as CORE_DEFAULT } from "../../constants";
 import {
   CLAIM_ADMIN_USER_TYPE,
   ENROLMENT_OFFICER_USER_TYPE,
@@ -70,6 +71,7 @@ const UserMasterPanel = (props) => {
     usernameLength,
     passwordPolicy,
     rights,
+    canManageSuperuser,
   } = props;
   const { formatMessage, formatMessageWithValues } = useTranslations("admin", modulesManager);
   const dispatch = useDispatch();
@@ -149,6 +151,17 @@ const UserMasterPanel = (props) => {
       isPasswordValid: IS_PASSWORD_SECURED,
     });
   };
+
+  // savedIsSuperuser is the core user flag as stored, edited.isSuperuser is only set once
+  // the checkbox is touched so that the flag stays out of the mutation input otherwise
+  const isSuperuser = edited?.isSuperuser ?? edited?.savedIsSuperuser ?? false;
+
+  // A user with no preference of their own follows the system-wide default, which is what
+  // the Searcher falls back to as well, so the field shows it rather than an empty select.
+  const configuredRowsPerPage = modulesManager.getConf("fe-core", "defaultRowsPerPage", CORE_DEFAULT.ROWS_PER_PAGE);
+  const systemDefaultRowsPerPage = ROWS_PER_PAGE_OPTIONS.includes(configuredRowsPerPage)
+    ? configuredRowsPerPage
+    : CORE_DEFAULT.ROWS_PER_PAGE;
 
   const renderLastNameField = (edited, readOnly) => (
     <Grid size={4} className="item">
@@ -312,6 +325,23 @@ const UserMasterPanel = (props) => {
         />
       </Grid>
 
+      {canManageSuperuser && (
+        <Grid size={12} className="item">
+          <FormControlLabel
+            control={
+              <Checkbox
+                id="user.isSuperuser"
+                color="primary"
+                disabled={readOnly}
+                checked={isSuperuser}
+                onChange={(e) => onEditedChanged({ ...edited, isSuperuser: e.target.checked })}
+              />
+            }
+            label={formatMessage("user.isSuperuser")}
+          />
+        </Grid>
+      )}
+
       <Grid size={12} className="sectionHeader">
         <Typography className="sectionTitle">{formatMessage("UserMasterPanel.preferencesTitle")}</Typography>
         <Divider variant="fullWidth" />
@@ -336,7 +366,7 @@ const UserMasterPanel = (props) => {
           readOnly={readOnly}
           required
           options={ROWS_PER_PAGE_OPTIONS.map((option) => ({ value: option, label: option }))}
-          value={edited?.defaultRowsPerPage ?? ""}
+          value={edited?.defaultRowsPerPage ?? systemDefaultRowsPerPage}
           onChange={(defaultRowsPerPage) => onEditedChanged({ ...edited, defaultRowsPerPage })}
         />
       </Grid>
@@ -407,6 +437,8 @@ const UserMasterPanel = (props) => {
 
 const mapStateToProps = (state) => ({
   rights: state.core?.user?.i_user?.rights ?? [],
+  // the backend lets any IMIS administrator grant the flag, not only an actual superuser
+  canManageSuperuser: (state.core?.user?.is_superuser || state.core?.user?.is_imis_admin) ?? false,
   isUsernameValid: state.admin.validationFields?.username?.isValid,
   isUsernameValidating: state.admin.validationFields?.username?.isValidating,
   usernameValidationError: state.admin.validationFields?.username?.validationError,

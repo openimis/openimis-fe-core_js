@@ -42,6 +42,7 @@
   "admin.user.lastName": "Last name",
   "admin.user.openNewTab.buttonText": "Open",
   "admin.user.language": "Interface Language",
+  "admin.user.isSuperuser": "Super admin (full access)",
   "admin.user.openNewTab": "Open in new tab",
   "admin.user.otherNames": "Other names",
   "admin.user.givenNames": "Given names",

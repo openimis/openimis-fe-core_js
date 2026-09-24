@@ -21,6 +21,7 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Tooltip,
 } from "@mui/material";
 import GetIconComponent from "../helpers/icons";
 const ChevronLeftIcon = GetIconComponent("ChevronLeft");
@@ -30,12 +31,42 @@ const CheckIcon = GetIconComponent("CheckCircleOutline");
 const ErrorIcon = GetIconComponent("ErrorOutline");
 const ExpandLessIcon = GetIconComponent("ExpandLess");
 const ExpandMoreIcon = GetIconComponent("ExpandMore");
+const JournalIcon = GetIconComponent("History");
 import { fetchMutation, fetchHistoricalMutations } from "../actions";
-import withModulesManager from "../helpers/modules";
+import withModulesManager, { useModulesManager } from "../helpers/modules";
+import { useTranslations } from "../helpers/i18n";
 import { getLocalStorage, setLocalStorage } from "../helpers/useLocalStorage";
 import moment from "moment";
 import _ from "lodash";
 import { CLAIM_STATS_ORDER, GLOBAL_UNDERSCORE, REQUEST_LIMIT, WHITE_SPACE } from "../constants";
+
+const StyledJournalButtonTrigger = styled("div")(({ theme }) => ({
+  "& .button": {
+    color: theme.palette.secondary.main,
+  },
+}));
+
+// The journal's app-bar handle. Rendered straight into the toolbar next to Logout and Help,
+// so which menu the deployment configured never decides whether the journal can be reached.
+export const JournalButtonTrigger = ({ onClick, className }) => {
+  const modulesManager = useModulesManager();
+  const { formatMessage } = useTranslations("core", modulesManager);
+
+  return (
+    <StyledJournalButtonTrigger>
+      <Tooltip title={formatMessage("core.journal.tooltip")}>
+        <IconButton
+          className={clsx("button", className)}
+          onClick={onClick}
+          aria-label="journal"
+          data-journal-trigger
+        >
+          <JournalIcon />
+        </IconButton>
+      </Tooltip>
+    </StyledJournalButtonTrigger>
+  );
+};
 
 const StyledJournalDrawer = styled("div")(({ theme }) => ({
   "& .toolbar": {
@@ -60,6 +91,19 @@ const StyledJournalDrawer = styled("div")(({ theme }) => ({
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
+    }),
+  },
+  "& .drawerHidden": {
+    position: "fixed",
+    right: 0,
+    top: 0,
+    height: "100vh",
+    width: 0,
+    overflowX: "hidden",
+    borderLeft: "none",
+    transition: theme.transitions.create("width", {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
     }),
   },
   "& .drawerClose": {
@@ -442,10 +486,15 @@ class JournalDrawer extends Component {
   };
 
   render() {
-    const { theme, open, handleDrawer } = this.props;
+    // sidebar: the journal is docked as an always-visible rail. Without it the journal rests
+    // at zero width and is opened from the app bar's JournalButtonTrigger instead.
+    const { theme, open, handleDrawer, sidebar = true } = this.props;
+    const restingClass = sidebar ? "drawerClose" : "drawerHidden";
     return (
       <StyledJournalDrawer>
-        <ClickAwayListener onClickAway={(e) => open && handleDrawer()}>
+        <ClickAwayListener
+          onClickAway={(e) => open && !e.target?.closest?.("[data-journal-trigger]") && handleDrawer()}
+        >
           <nav className="drawer">
             <span
               ref={this.autoMessagesAnchorRef}
@@ -462,12 +511,12 @@ class JournalDrawer extends Component {
               anchor="right"
               className={clsx("drawer", {
                 "drawerOpen": open,
-                "drawerClose": !open,
+                [restingClass]: !open,
               })}
               classes={{
                 paper: clsx({
                   "drawerOpen": open,
-                  "drawerClose": !open,
+                  [restingClass]: !open,
                 }),
               }}
               open={open}

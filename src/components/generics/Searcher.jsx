@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react";
+import React, { Component, Fragment, useContext, useEffect } from "react";
 import { injectIntl } from "react-intl";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
@@ -28,6 +28,7 @@ import withModulesManager from "../../helpers/modules";
 import Contributions from "./Contributions";
 import FormattedMessage from "./FormattedMessage";
 import ProgressOrError from "./ProgressOrError";
+import { ToastContext } from "../../helpers/ToastContext";
 import SearcherExport from "./SearcherExport";
 import SearcherPane from "./SearcherPane";
 import Table from "./Table";
@@ -279,7 +280,23 @@ class SelectionMenu extends Component {
 
 const StyledSelectionMenu = injectIntl(withModulesManager(SelectionMenu));
 
+// A GraphQL error often arrives alongside perfectly usable rows: a field the user may
+// not read is nulled on the rows concerned and reported in `errors`, while every other
+// row comes back intact. Raising it as a toast keeps those rows on screen.
+const ErrorToast = ({ error }) => {
+  const toast = useContext(ToastContext);
+  const detail = error?.detail || error?.message;
+  useEffect(() => {
+    if (detail) {
+      toast?.showError(detail);
+    }
+  }, [detail, toast]);
+  return null;
+};
+
 class Searcher extends Component {
+  // User preference first, then the Searcher's own prop, then the system-wide
+  // `fe-core.defaultRowsPerPage` configuration.
   resolveInitialPageSize = (props = this.props) => {
     const userDefaultRowsPerPage = props?.user?.i_user?.default_rows_per_page;
     if (ROWS_PER_PAGE_OPTIONS.includes(userDefaultRowsPerPage)) {
@@ -288,7 +305,12 @@ class Searcher extends Component {
     if (ROWS_PER_PAGE_OPTIONS.includes(props.defaultPageSize)) {
       return props.defaultPageSize;
     }
-    return 10;
+    const configuredRowsPerPage = props.modulesManager.getConf(
+      "fe-core",
+      "defaultRowsPerPage",
+      DEFAULT.ROWS_PER_PAGE,
+    );
+    return ROWS_PER_PAGE_OPTIONS.includes(configuredRowsPerPage) ? configuredRowsPerPage : DEFAULT.ROWS_PER_PAGE;
   };
 
   state = {
@@ -648,10 +670,11 @@ class Searcher extends Component {
             </Grid>
           )}
           <Box className="tableContainer">
-            {errorItems ? (
+            {errorItems && !items?.length ? (
               <ProgressOrError error={errorItems} />
             ) : (
               <Fragment>
+                {!!errorItems && <ErrorToast error={errorItems} />}
                 <Grid container alignItems="center" className="paperHeader" wrap="nowrap">
                   <Grid size={GRID_RESPONSIVE_FULL} className="paperHeaderTitle" display="flex" alignItems="center">
                     <div className="infoSection">

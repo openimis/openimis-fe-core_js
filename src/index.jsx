@@ -198,6 +198,9 @@ const ROUTE_ADMIN_USER_NEW = "admin/users/new";
 
 const DEFAULT_CONFIG = {
   "showJournalSidebar": true,
+  // System-wide default number of rows per page, used when the user has no
+  // `defaultRowsPerPage` preference of their own. Must be one of ROWS_PER_PAGE_OPTIONS.
+  "defaultRowsPerPage": DEFAULT.ROWS_PER_PAGE,
   // "auto" | true | false — see DEFAULT.LANGUAGE_QUICK_PICKER.
   "languageQuickPicker": DEFAULT.LANGUAGE_QUICK_PICKER,
   "translations": [

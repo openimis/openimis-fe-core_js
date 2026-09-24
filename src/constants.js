@@ -135,6 +135,9 @@ export const PUBLIC_PAGE_LANGUAGE_COOKIE_KEY = "publicPageLanguage";
 
 export const DEFAULT = {
   IS_WORKER: false,
+  // System-wide fallback for the table page size, overridable with the
+  // `fe-core.defaultRowsPerPage` configuration and by each user's own preference.
+  ROWS_PER_PAGE: DEFAULT_PAGE_SIZE,
   ENABLE_PUBLIC_PAGE: false,
   SHOW_JOURNAL_SIDEBAR: true,
   DISABLED_VISIBILITY_BOOST: false,

@@ -28,7 +28,7 @@ import { LanguageSwitcherContext } from "./LanguageMenuItems";
 import useLanguageSwitcher from "../helpers/useLanguageSwitcher";
 import FormattedMessage from "./generics/FormattedMessage";
 import MainMenuBar from "./MainMenuBar";
-import JournalDrawer from "./JournalDrawer";
+import JournalDrawer, { JournalButtonTrigger } from "./JournalDrawer";
 import { useBoolean, useAuthentication } from "../helpers/hooks";
 import LanguageQuickPicker from "../pickers/LanguageQuickPicker";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -387,6 +387,7 @@ const RequireAuth = (props) => {
                 <AppBarIconButton key={`appbar_icon_${idx}`} {...iconProps} />
               ),
             )}
+            {!showJournalSidebar && <JournalButtonTrigger onClick={setDrawerOpen.toggle} />}
             <LogoutButton className="toolbarDrawerLogout" />
             <Help />
           </Toolbar>
@@ -413,7 +414,7 @@ const RequireAuth = (props) => {
             <div />
           </Drawer>
           <main className="contentShiftLeftSideMenu">{children}</main>
-          {showJournalSidebar && <JournalDrawer open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />}
+          <JournalDrawer open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} sidebar={showJournalSidebar} />
         </Box>
         </StyledRequireAuth>
       </LanguageSwitcherContext.Provider>
@@ -491,6 +492,7 @@ const RequireAuth = (props) => {
               contributionKey={ECONOMIC_UNIT_BUTTON_CONTRIBUTION_KEY}
               onEconomicDialogOpen={onEconomicDialogOpen}
             />
+            {!showJournalSidebar && <JournalButtonTrigger onClick={setDrawerOpen.toggle} />}
             <LogoutButton />
             <Help />
           </Box>
@@ -534,13 +536,14 @@ const RequireAuth = (props) => {
         )}
         <main
           className={clsx({
-            jrnlContentShift: isDrawerOpen,
+            // The popup journal floats over the page, so only the docked rail reflows it.
+            jrnlContentShift: isDrawerOpen && showJournalSidebar,
             content: showJournalSidebar,
           })}
         >
           {children}
         </main>
-        {showJournalSidebar && <JournalDrawer open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />}
+        <JournalDrawer open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} sidebar={showJournalSidebar} />
       </Box>
       </StyledRequireAuth>
     </LanguageSwitcherContext.Provider>

@@ -265,7 +265,7 @@ None
 ## Configurations Options
 
 - `core.PublicPage`: This contributions point serves as the Public Page for the OpenIMIS App. To enable its use, it must be exposed as a **core.PublicPage** contribution point. Additionally, the database configuration variable **App.enablePublicPage** must be set to `true`.
-- `showJournalSidebar`: This determines whether to render the Journal sidebar or not. **IMPORTANT**: The Journal provides crucial information about the state of mutations, including whether they succeeded or failed. If you choose to hide it, you must ensure the user is informed of the mutation outcome - consider using toast notifications. **This configuration only hides the Journal. It does not automatically add toast notifications out of the box.**.
+- `showJournalSidebar`: how the Journal is presented, not whether it exists. `true` (default) docks it as an always-visible rail on the right edge, expanded and collapsed with its own chevron. `false` lets it rest at zero width and puts a Journal button in the app bar, next to Logout and Help, that opens it over the page; the button is deliberately not driven by the menu configuration, so `core.AppBarIcons` and `fe-core.menus` cannot remove it. **IMPORTANT**: The Journal provides crucial information about the state of mutations, including whether they succeeded or failed - it stays reachable under either setting for that reason.
 - `datePicker`: the concrete date picker to publish as `core.DatePicker` component ("ad"= Gregorian DatePicker, "ne"= Nepali calendar date picker )
 - `useDynPermalinks`: use ?dyn=<Base64-URL> when opening in new tab (prevent sending client-side routes to server while) (Default: false)
 - `core.JournalDrawer.pollInterval`: poll interval (in ms) to check for mutation status once submitted (Default: 2000)
@@ -287,6 +287,7 @@ None
 - `Input.disabledVisibilityBoost`: This setting enhances the visibility of disabled input fields (e.g., text/number inputs, date pickers). When set to **true**, the label color changes to `#181716`, and the input value color to `#5E5B50`. The default is **false**.
 - `limitMutationLogsQuery`: This config to enalble or disable fetchMutationLogs query mutation in core,
 - 'shouldFetchInitially' : (bool: true or false ) This config will enable or disable default search (onload in Searcher component) to avoid unnecessary loading until user clicks on filter. Disables if it is set to false.
+- `defaultRowsPerPage`: system-wide number of rows per page used by searchers when the user has no preference of their own. Default **10**; the value must be one of `ROWS_PER_PAGE_OPTIONS` (`10`, `20`, `50`, `100`), otherwise it is ignored and 10 is used. The resolution order is: the user's own *Default Rows Per Page* preference (set on the user form, `Administration > Users`) → the `defaultPageSize` prop of the individual `Searcher` → this configuration. Because the preference is stored as `null` until a user explicitly changes it, raising this value moves every such user onto the new default without touching their record.
 
 ## Main Menu and Submenu Configuration
 

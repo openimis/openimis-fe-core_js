@@ -213,6 +213,10 @@ describe("formatGraphQLError", () => {
       detail: "a; b",
     });
   });
+
+  it("reports a message repeated across rows only once", () => {
+    expect(formatGraphQLError(graphqlErrors("denied", "denied", "other")).detail).toBe("denied; other");
+  });
 });
 
 describe("normalizeGraphqlErrorMessage", () => {

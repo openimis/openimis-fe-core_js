@@ -180,13 +180,15 @@ export function formatServerError(payload) {
 }
 
 export function formatGraphQLError(payload) {
-  return !payload.errors
-    ? null
-    : {
-        code: "Data error",
-        message: "Server returned data error status",
-        detail: payload.errors.map((e) => e.message).join("; "),
-      };
+  if (!payload.errors) return null;
+  // One denied field repeated over every row of a page yields the same message many
+  // times over, which says nothing more than one copy of it does.
+  const messages = [...new Set(payload.errors.map((e) => e.message))];
+  return {
+    code: "Data error",
+    message: "Server returned data error status",
+    detail: messages.join("; "),
+  };
 }
 
 export const normalizeGraphqlErrorMessage = (message) =>

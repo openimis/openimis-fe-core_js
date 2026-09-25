@@ -246,6 +246,79 @@ describe("prepareMenuEntries", () => {
       expect(prepareMenuEntries([], intl, [entries], {}, modulesManager).map((e) => e.id)).toEqual(["contributions"]);
     });
   });
+
+  describe("nested groups", () => {
+    it("keeps groups nested at any depth and prepares their children", () => {
+      const entries = [
+        {
+          id: "legal",
+          type: "group",
+          text: "Legal and Finance",
+          entries: [
+            {
+              id: "ledger",
+              type: "group",
+              text: "Ledger",
+              entries: [{ id: "ledger.entries", route: "ledger/entries", icon: "People" }],
+            },
+          ],
+        },
+      ];
+
+      const [parent] = prepareMenuEntries([], intl, entries, {});
+
+      expect(parent.type).toBe("group");
+      expect(parent.entries).toHaveLength(1);
+      expect(parent.entries[0].type).toBe("group");
+      expect(parent.entries[0].entries.map((e) => e.route)).toEqual(["/ledger/entries"]);
+    });
+
+    it("accepts the `children` alias and normalises it to `entries`", () => {
+      const entries = [
+        { id: "g", type: "group", text: "G", children: [{ id: "leaf", route: "leaf", icon: "People" }] },
+      ];
+
+      const [group] = prepareMenuEntries([], intl, entries, {});
+
+      expect(group.children).toBeUndefined();
+      expect(group.entries.map((e) => e.id)).toEqual(["leaf"]);
+    });
+
+    it("treats a function-valued entries as a group even without an explicit type", () => {
+      const entries = [{ id: "g", text: "G", entries: () => [{ id: "leaf", route: "leaf", icon: "People" }] }];
+
+      const [group] = prepareMenuEntries([], intl, entries, {}, { getConf: () => false });
+
+      expect(group.type).toBe("group");
+      expect(group.entries.map((e) => e.id)).toEqual(["leaf"]);
+    });
+
+    it("applies function entries and the hide flag inside nested groups", () => {
+      const modulesManager = { getConf: () => false };
+      const entries = [
+        {
+          id: "legal",
+          type: "group",
+          text: "Legal and Finance",
+          entries: [
+            {
+              id: "ledger",
+              type: "group",
+              text: "Ledger",
+              entries: () => [
+                { id: "ledger.entries", route: "ledger/entries", icon: "People" },
+                { id: "ledger.hidden", route: "ledger/hidden", icon: "People", hide: true },
+              ],
+            },
+          ],
+        },
+      ];
+
+      const [parent] = prepareMenuEntries([], intl, entries, {}, modulesManager);
+
+      expect(parent.entries[0].entries.map((e) => e.id)).toEqual(["ledger.entries"]);
+    });
+  });
 });
 
 describe("prepareForComparison", () => {

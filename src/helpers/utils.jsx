@@ -47,11 +47,15 @@ export const MENU_GROUP_TYPE = "group";
 
 // Children of a group entry. `entries` is the canonical shape; `children` is
 // accepted as a compatibility alias so consumers (e.g. fe-ledger) can nest a
-// submenu without migrating to the group shape.
+// submenu without migrating to the group shape. Children may also be given as a
+// function of modulesManager, like a top-level menu entry, so a module can hide
+// a whole submenu by configuration (feature 37855).
+const isMenuGroupChildren = (value) => Array.isArray(value) || typeof value === "function";
+
 export function getMenuGroupChildren(entry) {
   if (typeof entry !== "object" || entry === null) return undefined;
-  if (Array.isArray(entry.entries)) return entry.entries;
-  if (Array.isArray(entry.children)) return entry.children;
+  if (isMenuGroupChildren(entry.entries)) return entry.entries;
+  if (isMenuGroupChildren(entry.children)) return entry.children;
   return undefined;
 }
 
@@ -67,10 +71,13 @@ export function isMenuGroup(entry) {
   );
 }
 
-// Walks groups to collect the leaves only (route-bearing entries).
-export function flattenMenuLeaves(entries) {
-  return ensureArray(entries).reduce(
-    (leaves, entry) => leaves.concat(isMenuGroup(entry) ? flattenMenuLeaves(getMenuGroupChildren(entry)) : [entry]),
+// Walks groups to collect the leaves only (route-bearing entries). When a
+// modulesManager is given, groups whose children are defined as a function are
+// resolved first, so the active menu detection still sees their leaves.
+export function flattenMenuLeaves(entries, modulesManager = null) {
+  return resolveMenuEntries(entries, modulesManager).reduce(
+    (leaves, entry) =>
+      leaves.concat(isMenuGroup(entry) ? flattenMenuLeaves(getMenuGroupChildren(entry), modulesManager) : [entry]),
     [],
   );
 }

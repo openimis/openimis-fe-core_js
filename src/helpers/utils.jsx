@@ -81,12 +81,33 @@ function matchesRights(entryRights, rightsSet) {
 
 // Prepares a menu level. Groups are kept as { type, entries } nodes and may be
 // nested at any depth; their children are filtered/prepared recursively.
-function prepareMenuLevel(rightsSet, intl, entries, routes) {
+// Menu entries may be provided directly or as a function of modulesManager
+// (so a module can make entries conditional on config, e.g. the hide flag used
+// by feature 37855). Resolve such functions before filtering/preparing.
+function resolveMenuEntries(entries, modulesManager = null) {
+  return ensureArray(entries).flatMap((entry) => {
+    if (typeof entry !== "function") {
+      return [entry];
+    }
+    // Without modulesManager a function entry cannot be resolved: warn instead
+    // of dropping the corresponding menu silently.
+    if (!modulesManager) {
+      console.warn("ignoring a function menu entry: prepareMenuEntries needs modulesManager to resolve it");
+      return [];
+    }
+    return ensureArray(entry(modulesManager));
+  });
+}
+
+function prepareMenuLevel(rightsSet, intl, entries, routes, modulesManager = null) {
   const prepared = [];
 
-  ensureArray(entries).forEach((entry) => {
+  resolveMenuEntries(entries, modulesManager).forEach((entry) => {
+    // Generic hide flag: entries can opt out at render time (feature 37855).
+    if (entry.hide === true) return;
+
     if (isMenuGroup(entry)) {
-      const children = prepareMenuLevel(rightsSet, intl, getMenuGroupChildren(entry), routes);
+      const children = prepareMenuLevel(rightsSet, intl, getMenuGroupChildren(entry), routes, modulesManager);
       if (!children.length) return;
       if (!matchesRights(entry.rights, rightsSet)) return;
       // Unlike leaves, a group without icon must not fall back to the default
@@ -151,9 +172,9 @@ export function buildMenuItems(entries, keyPrefix = "") {
   return items;
 }
 
-export function prepareMenuEntries(rights, intl, entries, routes) {
+export function prepareMenuEntries(rights, intl, entries, routes, modulesManager = null) {
   const rightsSet = new Set(ensureArray(rights).map((r) => String(r)));
-  return prepareMenuLevel(rightsSet, intl, entries, routes);
+  return prepareMenuLevel(rightsSet, intl, entries, routes, modulesManager);
 }
 
 export const prepareForComparison = (stateRole, propsRole, roleRights) => {

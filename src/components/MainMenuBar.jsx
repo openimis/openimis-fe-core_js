@@ -35,14 +35,14 @@ function getMenus(modulesManager, key, rights, menuVariant, history, intl) {
   const sortedMenuConfigs = unsortedMenuEntries.sort((a, b) => (a.position || 99) - (b.position || 99));
   const mainMenuVariant = "icon_text";
   // Detect which top-level menu should be auto-expanded in drawer (matches current route against leaves)
-  const activeMenuId = findActiveMenuId(sortedMenuConfigs, routes);
+  const activeMenuId = findActiveMenuId(sortedMenuConfigs, routes, modulesManager);
 
   // Process each menu config into a MainMenuContribution component
   const menuComponents = sortedMenuConfigs
     .filter((m) => m.text !== undefined)
     .map((config) => {
       const rawEntries = config.entries || config.submenus || [];
-      const filteredEntries = prepareMenuEntries(rights, intl, rawEntries, routes);
+      const filteredEntries = prepareMenuEntries(rights, intl, rawEntries, routes, modulesManager);
 
       // Skip empty menus
       if (!filteredEntries.length) return null;
@@ -71,11 +71,12 @@ function getMenus(modulesManager, key, rights, menuVariant, history, intl) {
   return menuComponents;
 }
 
-const findActiveMenuId = (menuConfigs, routes = null) => {
+const findActiveMenuId = (menuConfigs, routes = null, modulesManager = null) => {
   if (!Array.isArray(menuConfigs)) return null;
   for (const menuConfig of menuConfigs) {
     const rawLeaves = flattenMenuLeaves(
       ensureArray(menuConfig.entries).concat(ensureArray(menuConfig.submenus)),
+      modulesManager,
     );
     if (rawLeaves.some((leaf) => menuEntryMatchesLocationPath(leaf, routes))) {
       return menuConfig.id;

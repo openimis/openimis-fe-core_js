@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react";
+import React, { Component, Fragment, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { injectIntl } from "react-intl";
 import PropTypes from "prop-types";
@@ -11,6 +11,7 @@ const ExpandMoreIcon = GetIconComponent("ExpandMore");
 import Typography from "@mui/material/Typography";
 import { styled, alpha } from "@mui/material/styles";
 import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import {
@@ -26,7 +27,7 @@ import {
   Box,
 } from "@mui/material";
 import withModulesManager from "../../helpers/modules";
-import { menuEntryMatchesLocationPath, isMenuGroup, buildMenuItems } from "../../helpers/utils";
+import { menuEntryMatchesLocationPath, isMenuGroup, getMenuGroupChildren } from "../../helpers/utils";
 
 // Renders a menu icon that may be a component reference or an already-built element.
 const renderMenuIcon = (icon) => {
@@ -35,22 +36,187 @@ const renderMenuIcon = (icon) => {
   return <Icon />;
 };
 
-// Group boundaries render as dividers: a titled one opens a group, a plain one
-// closes it. Returns the divider element for a groupHeader/groupFooter item, or
-// null for a normal entry (which each menu variant renders itself).
-const renderGroupDivider = (item, key) => {
-  if (item.kind === "groupHeader") {
+// Stable React key for a prepared entry: its id, else its route, else its label;
+// the index only disambiguates duplicated entries, so reordering a list cannot
+// rebind a submenu's local state.
+const menuEntryKey = (entry, idx) =>
+  `${entry.id || entry.route || (typeof entry.text === "string" ? entry.text : "item")}_${idx}`;
+
+// AppBar rendering: entries are plain links, groups open a lateral flyout with
+// their children (recursive). Keyboard: Enter/Space toggle a group, ArrowRight
+// opens it and focuses its first child, ArrowLeft/Escape close it and return the
+// focus to the group, while the up/down arrows are handled by the MenuList.
+function SubmenuFlyout({ entry, depth, onNavigate }) {
+  const [open, setOpen] = useState(false);
+  const anchorRef = useRef(null);
+  // Set when the flyout has to be focused as soon as it is mounted, i.e. when
+  // ArrowRight opens a closed submenu.
+  const pendingFocusRef = useRef(false);
+  const isGroup = isMenuGroup(entry);
+
+  useEffect(() => {
+    if (open && pendingFocusRef.current) {
+      pendingFocusRef.current = false;
+      anchorRef.current?.querySelector('[role="menuitem"]')?.focus();
+    }
+  }, [open]);
+
+  const closeFlyout = (event) => {
+    event?.preventDefault();
+    event?.stopPropagation();
+    setOpen(false);
+    anchorRef.current?.focus();
+  };
+
+  if (!isGroup) {
     return (
-      <Divider key={key} component="li" textAlign="left" className="menuGroupDivider">
-        {item.text}
-      </Divider>
+      <Fragment>
+        <MenuItem
+          component={Link}
+          to={entry.route}
+          onClick={(event) => onNavigate(event, entry.route)}
+          sx={{ pl: 2 + depth * 2 }}
+        >
+          <ListItemIcon>{renderMenuIcon(entry.icon)}</ListItemIcon>
+          <ListItemText primary={entry.text} />
+        </MenuItem>
+        {entry.withDivider && <Divider className="drawerDivider" />}
+      </Fragment>
     );
   }
-  if (item.kind === "groupFooter") {
-    return <Divider key={key} component="li" className="menuGroupDivider" />;
+
+  // Enter/Space already toggle the group (MUI's ButtonBase turns them into a
+  // click) and the surrounding MenuList already moves the focus between items
+  // with the up/down arrows, so only the lateral navigation is handled here.
+  const handleTriggerKeyDown = (event) => {
+    switch (event.key) {
+      case "ArrowRight": {
+        event.preventDefault();
+        event.stopPropagation();
+        // Focus right away when the flyout is already mounted, otherwise let the
+        // effect above do it once it is.
+        const firstChild = anchorRef.current?.querySelector('[role="menuitem"]');
+        if (firstChild) {
+          firstChild.focus();
+        } else if (!open) {
+          // Only a closed flyout is going to be mounted by this call, so the
+          // pending flag can never survive while the flyout is already open.
+          pendingFocusRef.current = true;
+        }
+        setOpen(true);
+        break;
+      }
+      case "ArrowLeft":
+      case "Escape":
+        if (open) {
+          closeFlyout(event);
+        }
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleFlyoutKeyDown = (event) => {
+    if (event.key === "Escape" || event.key === "ArrowLeft") {
+      closeFlyout(event);
+    }
+  };
+
+  return (
+    <MenuItem
+      ref={anchorRef}
+      onClick={() => setOpen((previous) => !previous)}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      onKeyDown={handleTriggerKeyDown}
+      selected={open}
+      aria-haspopup="menu"
+      aria-expanded={open}
+      sx={{ pl: 2 + depth * 2 }}
+    >
+      <ListItemIcon>{renderMenuIcon(entry.icon)}</ListItemIcon>
+      <ListItemText primary={entry.text} />
+      <ExpandMoreIcon style={{ transform: "rotate(-90deg)", fontSize: 16 }} />
+      <Popper
+        open={open}
+        anchorEl={anchorRef.current}
+        placement="right-start"
+        disablePortal
+        style={{ zIndex: 2100 + depth }}
+      >
+        <Paper className="appBarMenuPaper">
+          <MenuList onKeyDown={handleFlyoutKeyDown}>
+            {getMenuGroupChildren(entry).map((child, childIdx) => (
+              <SubmenuFlyout
+                key={menuEntryKey(child, childIdx)}
+                entry={child}
+                depth={depth + 1}
+                onNavigate={onNavigate}
+              />
+            ))}
+          </MenuList>
+        </Paper>
+      </Popper>
+    </MenuItem>
+  );
+}
+
+// Drawer rendering: groups expand in place with their children (recursive),
+// leaves navigate. Group triggers are buttons, so Enter/Space work natively, and
+// the `withDivider` flag of every leaf (whatever its depth) still renders its
+// divider.
+function SubmenuDrawer({ entry, depth, onNavigate }) {
+  const [open, setOpen] = useState(false);
+  const isGroup = isMenuGroup(entry);
+
+  if (!isGroup) {
+    const isActive = menuEntryMatchesLocationPath(entry);
+    return (
+      <Fragment>
+        <ListItem
+          component={Link}
+          to={entry.route}
+          onClick={onNavigate}
+          selected={isActive}
+          className={isActive ? "menuItemActive" : undefined}
+          sx={{ pl: 2 + depth * 2 }}
+        >
+          {entry.icon && <ListItemIcon>{renderMenuIcon(entry.icon)}</ListItemIcon>}
+          <ListItemText primary={entry.text} />
+        </ListItem>
+        {entry.withDivider && <Divider className="drawerDivider" />}
+      </Fragment>
+    );
   }
-  return null;
-};
+
+  return (
+    <Fragment>
+      <ListItemButton
+        onClick={() => setOpen((previous) => !previous)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        sx={{ pl: 2 + depth * 2 }}
+      >
+        {entry.icon && <ListItemIcon>{renderMenuIcon(entry.icon)}</ListItemIcon>}
+        <ListItemText primary={entry.text} />
+        <ExpandMoreIcon style={{ transform: open ? "rotate(180deg)" : undefined }} />
+      </ListItemButton>
+      {open && (
+        <List component="div" disablePadding>
+          {getMenuGroupChildren(entry).map((child, childIdx) => (
+            <SubmenuDrawer
+              key={menuEntryKey(child, childIdx)}
+              entry={child}
+              depth={depth + 1}
+              onNavigate={onNavigate}
+            />
+          ))}
+        </List>
+      )}
+    </Fragment>
+  );
+}
 
 const StyledMainMenu = styled("div")(({ theme }) => ({
   "& .panel": {
@@ -89,6 +255,12 @@ const StyledMainMenu = styled("div")(({ theme }) => ({
         },
       },
     },
+    "& .MuiListItemButton-root": {
+      color: theme.palette.text.secondary,
+      "&:hover": {
+        backgroundColor: alpha(theme.palette.primary.main, 0.08),
+      },
+    },
     "& .MuiListItemIcon-root": {
       color: theme.palette.text.secondary,
       minWidth: 40,
@@ -102,29 +274,6 @@ const StyledMainMenu = styled("div")(({ theme }) => ({
   },
   "& .drawerDivider": {
     // width: 100
-  },
-  "& .menuGroupDivider": {
-    margin: theme.spacing(1, 0),
-    overflow: "hidden",
-    "&::before, &::after": {
-      borderColor: "currentColor",
-      opacity: 0.3,
-    },
-    "& .MuiDivider-wrapper": {
-      fontSize: (theme.menu?.appBar?.fontSize || 14) - 2,
-      fontWeight: 600,
-      textTransform: "uppercase",
-      letterSpacing: "0.08em",
-      opacity: 0.8,
-      padding: theme.spacing(0, 1),
-      flexShrink: 0,
-    },
-  },
-  "& .MuiAccordionDetails-root .menuGroupDivider": {
-    color: theme.palette.text.secondary,
-  },
-  "& .appBarMenuPaper .menuGroupDivider": {
-    color: theme.palette.text.primary,
   },
   "& .menuHeading": {
     fontSize: (theme.menu?.appBar?.fontSize || 14) + 1,
@@ -287,6 +436,12 @@ class MainMenuContribution extends Component {
     this.toggleExpanded(event);
   };
 
+  handleMenuKeyDown = (event) => {
+    if (event.key === "Escape") {
+      this.toggleExpanded(event);
+    }
+  };
+
   handleMenuSelect = (e, route) => {
     if (e.type === "click") {
       e.stopPropagation();
@@ -317,22 +472,15 @@ class MainMenuContribution extends Component {
         >
           <Paper className="appBarMenuPaper" id={`${this.props.header}-menu-list`}>
             <ClickAwayListener onClickAway={this.handleMenuClose}>
-              <MenuList>
-                {buildMenuItems(entries).map((item) => {
-                  const itemKey = `${this.props.header}_${item.key}`;
-                  const divider = renderGroupDivider(item, itemKey);
-                  if (divider) return divider;
-                  const { entry } = item;
-                  return (
-                    <div key={`${itemKey}_menuItem`}>
-                      <MenuItem component={Link} to={entry.route} onClick={(e) => this.handleMenuSelect(e, entry.route)}>
-                        <ListItemIcon>{renderMenuIcon(entry.icon)}</ListItemIcon>
-                        <ListItemText primary={entry.text} />
-                      </MenuItem>
-                      {entry.withDivider && <Divider key={`${itemKey}_divider`} className="drawerDivider" />}
-                    </div>
-                  );
-                })}
+              <MenuList onKeyDown={this.handleMenuKeyDown}>
+                {entries.map((entry, idx) => (
+                  <SubmenuFlyout
+                    key={`${this.props.header}_${menuEntryKey(entry, idx)}`}
+                    entry={entry}
+                    depth={0}
+                    onNavigate={(event, route) => this.handleMenuSelect(event, route)}
+                  />
+                ))}
               </MenuList>
             </ClickAwayListener>
           </Paper>
@@ -355,28 +503,14 @@ class MainMenuContribution extends Component {
           </AccordionSummary>
           <AccordionDetails>
             <List component="nav">
-              {buildMenuItems(entries).map((item) => {
-                const itemKey = `${this.props.header}_${item.key}`;
-                const divider = renderGroupDivider(item, itemKey);
-                if (divider) return divider;
-                const { entry } = item;
-                return (
-                  <Fragment key={itemKey}>
-                    <ListItem
-                      key={`${itemKey}_item`}
-                      component={Link}
-                      to={entry.route}
-                      onClick={this.toggleExpanded}
-                      selected={menuEntryMatchesLocationPath(entry)}
-                      className={menuEntryMatchesLocationPath(entry) ? "menuItemActive" : undefined}
-                    >
-                      {entry.icon && <ListItemIcon>{renderMenuIcon(entry.icon)}</ListItemIcon>}
-                      <ListItemText primary={entry.text} />
-                    </ListItem>
-                    {entry.withDivider && <Divider key={`${itemKey}_divider`} className="drawerDivider" />}
-                  </Fragment>
-                );
-              })}
+              {entries.map((entry, idx) => (
+                <SubmenuDrawer
+                  key={`${this.props.header}_${menuEntryKey(entry, idx)}`}
+                  entry={entry}
+                  depth={0}
+                  onNavigate={this.toggleExpanded}
+                />
+              ))}
             </List>
           </AccordionDetails>
         </Accordion>

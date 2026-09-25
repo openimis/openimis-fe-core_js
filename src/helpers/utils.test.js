@@ -169,6 +169,156 @@ describe("prepareMenuEntries", () => {
       "/insurees",
     );
   });
+
+  // Feature 37855: entries may be a function of modulesManager so a module can
+  // make them conditional on config (hide flag).
+  describe("function entries", () => {
+    const modulesManager = { getConf: () => false };
+    const entriesFor = (modulesManager) => [{ id: "payments", route: "payments", icon: "People" }];
+
+    it("resolves entries provided as a function of modulesManager", () => {
+      const prepared = prepareMenuEntries([], intl, [entriesFor], {}, modulesManager);
+
+      expect(prepared.map((e) => e.id)).toEqual(["payments"]);
+      expect(prepared.map((e) => e.route)).toEqual(["/payments"]);
+    });
+
+    it("warns and drops function entries when no modulesManager is provided", () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+      expect(prepareMenuEntries([], intl, [entriesFor], {})).toEqual([]);
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining("modulesManager"));
+    });
+
+    it("keeps the entries a function returns alongside plain entries", () => {
+      const entries = [entriesFor, { id: "other", route: "other", icon: "People" }];
+
+      expect(prepareMenuEntries([], intl, entries, {}, modulesManager).map((e) => e.id)).toEqual(["payments", "other"]);
+    });
+
+    it("resolves function entries nested in a group", () => {
+      const entries = [{ id: "g", type: "group", text: "group", entries: [entriesFor] }];
+
+      const [group] = prepareMenuEntries([], intl, entries, {}, modulesManager);
+
+      expect(group.entries.map((e) => e.id)).toEqual(["payments"]);
+    });
+  });
+
+  describe("hide flag", () => {
+    const modulesManager = { getConf: () => false };
+
+    it("skips entries flagged with hide", () => {
+      const entries = [
+        { id: "visible", route: "visible", icon: "People" },
+        { id: "hidden", route: "hidden", icon: "People", hide: true },
+      ];
+
+      expect(prepareMenuEntries([], intl, entries, {}).map((e) => e.id)).toEqual(["visible"]);
+    });
+
+    it("drops a group whose children are all hidden", () => {
+      const entries = [
+        {
+          id: "g",
+          type: "group",
+          text: "group",
+          entries: [{ id: "child", route: "child", icon: "People", hide: true }],
+        },
+        { id: "leaf", route: "leaf", icon: "People" },
+      ];
+
+      expect(prepareMenuEntries([], intl, entries, {}).map((e) => e.id)).toEqual(["leaf"]);
+    });
+
+    it("hides an entry when the invoice payment mode config is enabled", () => {
+      const entries = (modulesManager) => [
+        {
+          id: "contributions",
+          route: "contributions",
+          icon: "People",
+          hide: modulesManager.getConf("fe-policy", "enableInvoicePaymentMode", false),
+        },
+      ];
+      const enabled = { getConf: (module, key, defaultValue) => !defaultValue };
+
+      expect(prepareMenuEntries([], intl, [entries], {}, enabled)).toEqual([]);
+      expect(prepareMenuEntries([], intl, [entries], {}, modulesManager).map((e) => e.id)).toEqual(["contributions"]);
+    });
+  });
+
+  describe("nested groups", () => {
+    it("keeps groups nested at any depth and prepares their children", () => {
+      const entries = [
+        {
+          id: "legal",
+          type: "group",
+          text: "Legal and Finance",
+          entries: [
+            {
+              id: "ledger",
+              type: "group",
+              text: "Ledger",
+              entries: [{ id: "ledger.entries", route: "ledger/entries", icon: "People" }],
+            },
+          ],
+        },
+      ];
+
+      const [parent] = prepareMenuEntries([], intl, entries, {});
+
+      expect(parent.type).toBe("group");
+      expect(parent.entries).toHaveLength(1);
+      expect(parent.entries[0].type).toBe("group");
+      expect(parent.entries[0].entries.map((e) => e.route)).toEqual(["/ledger/entries"]);
+    });
+
+    it("accepts the `children` alias and normalises it to `entries`", () => {
+      const entries = [
+        { id: "g", type: "group", text: "G", children: [{ id: "leaf", route: "leaf", icon: "People" }] },
+      ];
+
+      const [group] = prepareMenuEntries([], intl, entries, {});
+
+      expect(group.children).toBeUndefined();
+      expect(group.entries.map((e) => e.id)).toEqual(["leaf"]);
+    });
+
+    it("treats a function-valued entries as a group even without an explicit type", () => {
+      const entries = [{ id: "g", text: "G", entries: () => [{ id: "leaf", route: "leaf", icon: "People" }] }];
+
+      const [group] = prepareMenuEntries([], intl, entries, {}, { getConf: () => false });
+
+      expect(group.type).toBe("group");
+      expect(group.entries.map((e) => e.id)).toEqual(["leaf"]);
+    });
+
+    it("applies function entries and the hide flag inside nested groups", () => {
+      const modulesManager = { getConf: () => false };
+      const entries = [
+        {
+          id: "legal",
+          type: "group",
+          text: "Legal and Finance",
+          entries: [
+            {
+              id: "ledger",
+              type: "group",
+              text: "Ledger",
+              entries: () => [
+                { id: "ledger.entries", route: "ledger/entries", icon: "People" },
+                { id: "ledger.hidden", route: "ledger/hidden", icon: "People", hide: true },
+              ],
+            },
+          ],
+        },
+      ];
+
+      const [parent] = prepareMenuEntries([], intl, entries, {}, modulesManager);
+
+      expect(parent.entries[0].entries.map((e) => e.id)).toEqual(["ledger.entries"]);
+    });
+  });
 });
 
 describe("prepareForComparison", () => {

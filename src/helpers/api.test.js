@@ -15,7 +15,7 @@ import {
   formatQuery,
   formatServerError,
   getOperationName,
-  hasStoredAuthSession,
+  isCsrfError,
   isImpersonationError,
   isSessionError,
   normalizeGraphqlErrorMessage,
@@ -233,18 +233,14 @@ describe("isSessionError", () => {
     expect(isSessionError(401)).toBe(true);
   });
 
-  it.each([
-    "Unauthorized",
-    "Invalid token",
-    "Not authenticated",
-    "CSRF token missing or incorrect",
-    "Authentication credentials were not provided",
-    "Error decoding signature",
-  ])("recognises %s", (message) => {
-    expect(isSessionError(200, [{ message }])).toBe(true);
-  });
+  it.each(["Unauthorized", "Invalid token", "Not authenticated", "Error decoding signature"])(
+    "leaves %s to the HTTP status",
+    (message) => {
+      expect(isSessionError(200, [{ message }])).toBe(false);
+    },
+  );
 
-  it("recognises a known message embedded in a longer string", () => {
+  it("recognises the CSRF message embedded in a longer string", () => {
     expect(isSessionError(200, [{ message: "GraphQL error: CSRF token missing or incorrect (code 42)" }])).toBe(true);
   });
 
@@ -270,15 +266,13 @@ describe("isImpersonationError", () => {
   });
 });
 
-describe("hasStoredAuthSession", () => {
-  it("is true when a csrfToken is stored", () => {
-    window.localStorage.setItem("csrfToken", JSON.stringify("abc"));
-
-    expect(hasStoredAuthSession()).toBe(true);
+describe("isCsrfError", () => {
+  it("matches the CSRF failure message case- and quote-insensitively", () => {
+    expect(isCsrfError({ message: "'CSRF Token Missing Or Incorrect'" })).toBe(true);
   });
 
-  it("is false when nothing is stored", () => {
-    expect(hasStoredAuthSession()).toBe(false);
+  it("does not match a bare mention of csrf", () => {
+    expect(isCsrfError({ message: "csrf cookie refreshed" })).toBe(false);
   });
 });
 

@@ -25,6 +25,7 @@ import {
 import withModulesManager from "../../helpers/modules";
 import { _historyPush } from "../../helpers/history";
 import { menuEntryMatchesLocationPath } from "../../helpers/utils";
+import { configuredMenuEntries, isMenuShown } from "../../helpers/menu";
 
 
 const styles = (theme) => ({
@@ -111,44 +112,10 @@ const getIconComponent = (iconName) => {
 function fetchSubmenuConfig(modulesManager, allEntries, entries, menuId, rights) {
   const menuConfig = modulesManager.getConf("fe-core", "menus", []);
   const isMenuConfigEmpty = !(menuConfig?.length);
-  const submenuMapping = {};
-  const menuIcons = {}; 
   const copyOfEntries = entries;
 
   if (!isMenuConfigEmpty) {
-    menuConfig
-      .filter(menu => menu.id == menuId)
-      .forEach(menu => {
-        (menu.submenus || []).forEach(submenu => {
-          submenuMapping[submenu.id] = submenu.position;
-          if (submenu.icon) {
-            menuIcons[submenu.id] = submenu.icon;
-          }
-        });
-      });
-
-    const updatedEntries = allEntries
-      .map(entry => {
-        const customIcon = menuIcons[entry.id];
-        return {
-          ...entry,
-          position: submenuMapping[entry.id] || null,
-          icon: customIcon ? getIconComponent(customIcon) : entry.icon,
-        };
-      })
-      .filter(entry => entry.position !== null)
-      .sort((a, b) => a.position - b.position);
-
-    const uniqueEntries = new Map();
-    updatedEntries.forEach(entry => {
-      if (!uniqueEntries.has(entry.id)) {
-        uniqueEntries.set(entry.id, entry);
-      }
-    });
-
-    return Array.from(uniqueEntries.values()).filter(entry => {
-      return !entry.filter || entry.filter(rights);
-    });
+    return configuredMenuEntries(menuConfig, allEntries, menuId, rights, getIconComponent);
   }
 
   const uniqueEntriesFallback = new Map();
@@ -283,6 +250,9 @@ class MainMenuContribution extends Component {
     const updatedEntries = fetchSubmenuConfig(
       modulesManager, allEntries, this.props.entries, this.props.menuId, this.props.rights
     );
+    if (!isMenuShown(updatedEntries)) {
+      return null;
+    }
     if (menuVariant === "AppBar") {
       return this.appBarMenu(updatedEntries);
     } else {

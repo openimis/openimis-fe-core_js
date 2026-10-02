@@ -9,6 +9,7 @@ import {
   formatMutation,
   formatServerError,
 } from "./helpers/api";
+import { isSessionError, needsSessionCheck, isSessionLost, shareInFlight } from "./helpers/session";
 
 const REQUESTED_WITH = 'webapp'
 
@@ -253,10 +254,34 @@ export function graphqlMutation(mutation, variables, type = "CORE_TRIGGER_MUTATI
 
 import * as Sentry from "@sentry/react";
 
+function sessionExpiredConfirm() {
+  return coreConfirm(
+    "Session Expired",
+    "Your session has expired, You will be redirected to the login page.",
+    "csrf_logout",
+  );
+}
+
+// Asks the current-user endpoint whether the session behind an authorization
+// refusal is still valid; a 401 there clears the user (CORE_AUTH_ERR) and
+// opens the session-expired confirm.
+const checkSession = shareInFlight(async (dispatch) => {
+  const probe = await dispatch(
+    fetch({
+      endpoint: `${baseApiUrl}/core/users/current_user/`,
+      method: "GET",
+      types: ["CORE_SESSION_CHECK_REQ", "CORE_SESSION_CHECK_RESP", "CORE_SESSION_CHECK_ERR"],
+    }),
+  );
+  if (isSessionLost(probe)) {
+    dispatch(sessionExpiredConfirm());
+  }
+});
+
 export function fetch(config) {
   const csrfToken = localStorage.getItem("csrfToken");
 
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
     let action;
 
     try {
@@ -329,23 +354,15 @@ export function fetch(config) {
         });
       }
 
-      const norm = (m) => String(m || "").toLowerCase().replace(/['"]/g, "").trim();
-      const csrfError = gqlErrors.some((e) => {
-        const msg = norm(e?.message);
-        return msg === "csrftoken" 
-        || msg === "user not authorized for this operation" 
-        || msg === "unauthorized";
-      });
-
-      if (csrfError) {
-        dispatch(
-          coreConfirm(
-            "Session Expired",
-            "Your session has expired, You will be redirected to the login page.",
-            "csrf_logout"
-          )
-        );
+      if (isSessionError(gqlErrors)) {
+        dispatch(sessionExpiredConfirm());
         return action;
+      }
+
+      // Without a signed-in user (login and public pages) there is no session
+      // to check. fetch() already reports a failed probe to Sentry.
+      if (getState?.()?.core?.user && needsSessionCheck(gqlErrors)) {
+        checkSession(dispatch).catch(() => {});
       }
 
     } catch (err) {

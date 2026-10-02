@@ -279,7 +279,7 @@ const RequireAuth = (props) => {
               </MainMenuBar>
             <div/>
             </Drawer>  
-          <JournalDrawer open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />
+          {showJournalSidebar && <JournalDrawer open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />}
       <main
         className={classes.contentShiftLeftSideMenu}
       >

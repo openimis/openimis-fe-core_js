@@ -164,6 +164,7 @@ import { validatePassword } from "./helpers/passwordValidator";
 import { passwordGenerator } from "./helpers/passwordGenerator";
 import { createFieldsBasedOnJSON, renderInputComponent } from "./helpers/json-handler-utils";
 import withModulesManager, { useModulesManager, modulesManagerCtx } from "./helpers/modules";
+import { overridable, COMPONENT_OVERRIDES_CONTRIBUTION_KEY } from "./helpers/overrides";
 import { formatJsonField } from "./helpers/jsonExt";
 import { RIGHT_ROLE_SEARCH, CLEARED_STATE_FILTER, EXPORT_FILE_FORMATS, ROWS_PER_PAGE_OPTIONS } from "./constants";
 import {
@@ -352,6 +353,8 @@ export {
   encodeId,
   withModulesManager,
   useModulesManager,
+  overridable,
+  COMPONENT_OVERRIDES_CONTRIBUTION_KEY,
   modulesManagerCtx,
   formatQuery,
   formatPageQuery,

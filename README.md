@@ -215,6 +215,7 @@ Whenever the **individual** global schema changes (you add or remove a filter fi
 - `core.Router`: ability to register routes in client-side routing (known usage: claim, insuree,...)
 - `core.UnauthenticatedRouter`: ability to register routes in client-side routing for pages that don't require user authentication
 - `core.LoginPage`: ability to add components to the menu login page
+- `core.ComponentOverrides`: ability to replace a page or a published component of another module (see [Component overrides](#component-overrides))
 
 ## Contributions
 
@@ -231,6 +232,40 @@ Whenever the **individual** global schema changes (you add or remove a filter fi
 - `core.MonthPicker`, contant-based month picker. Translation keys `month.null`, `month.1`,...
 - `core.LanguagePicker`, pick from available languages
 - `core.WarningBox`, simple alert component to show warnings or messages, with options to customize its look and size.
+
+## Component overrides
+
+A module replaces another module's page or published component through the
+`core.ComponentOverrides` contribution point. Each entry is one of:
+
+- `{ key: "payroll.PayrollPage", component: MyPayrollPage }`: replaces the component
+  made overridable under that key, wherever it is rendered (route, tab, task view),
+  or the component published under that ref key (`PublishedComponent`);
+- `{ path: "payrolls", component: MyPayrollsPage }`: replaces the component of the
+  `core.Router` routes whose `path` is exactly that string.
+
+A module makes a component overridable by wrapping its export once:
+
+```js
+import { overridable } from "@openimis/fe-core";
+
+export default overridable("payroll.PayrollPage")(PayrollPage);
+```
+
+Rules:
+
+- A declared override wins over the default and over any ref of the same key,
+  whatever the module order in `openimis.json`. Without a declared override, a ref
+  of the same key (other than the wrapper itself) still replaces the default.
+- Only the component changes: the route object (`requiredRights`, path) and the
+  menu entries stay those of the module that declared them.
+- The replacement receives the original as the `DefaultComponent` prop. Inside the
+  replacement, the key resolves to the original, so it never renders itself.
+- Values (route strings, projections, `*.MaxLevels`) stay plain refs.
+- At start-up, an override that matches no key or path, two overrides of one target
+  and duplicate `core.Router` paths are logged in the browser console. A string
+  `core.Router` component is a ref key; when nothing is published under it, the
+  route renders the not-found page.
 
 ## Dispatched Redux Actions
 

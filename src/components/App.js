@@ -27,6 +27,7 @@ import PublicPageMiddleware from "./PublicPageMiddleware";
 import { ToastProvider } from "../helpers/ToastContext";
 import { PublicPageLanguageProvider } from "../helpers/PublicPageLanguageContext";
 import { getCookie } from "../helpers/cookies";
+import { routeComponent, validateOverrides } from "../helpers/overrides";
 
 export const ROUTER_CONTRIBUTION_KEY = "core.Router";
 export const UNAUTHENTICATED_ROUTER_CONTRIBUTION_KEY = "core.UnauthenticatedRouter";
@@ -74,6 +75,10 @@ const App = (props) => {
   const routes = useMemo(() => {
     return modulesManager.getContribs(ROUTER_CONTRIBUTION_KEY);
   }, []);
+
+  const routeComponents = useMemo(() => routes.map((route) => routeComponent(modulesManager, route)), [routes]);
+
+  useEffect(() => validateOverrides(modulesManager, routes), [routes]);
 
   const unauthenticatedRoutes = useMemo(() => {
     return modulesManager.getContribs(UNAUTHENTICATED_ROUTER_CONTRIBUTION_KEY);
@@ -199,7 +204,9 @@ const App = (props) => {
                         )}
                       />
                     ))}
-                    {routes.map((route) => (
+                    {routes.map((route, routeIndex) => {
+                      const RouteComponent = routeComponents[routeIndex] || NotFoundPage;
+                      return (
                       <Route
                         exact
                         key={route.path}
@@ -220,13 +227,14 @@ const App = (props) => {
                                 requiredRights={route.requiredRights}
                                 {...others}
                               >
-                                <route.component modulesManager={modulesManager} {...props} {...others} />
+                                <RouteComponent modulesManager={modulesManager} {...props} {...others} />
                               </PermissionCheck>
                             </RequireAuth>
                           </ErrorBoundary>
                         )}
                       />
-                    ))}
+                      );
+                    })}
                     <Route render={() => <NotFoundPage {...others} />} />
                   </Switch>
                 </BrowserRouter>

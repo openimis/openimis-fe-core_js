@@ -29,6 +29,7 @@ import SearcherExport from "./SearcherExport";
 import SearcherPane from "./SearcherPane";
 import Table from "./Table";
 import InfoButton from "./InfoButton";
+import { mergeContributedColumns, mergeContributedExport } from "../../helpers/searcherColumns";
 
 const styles = (theme) => ({
   root: {
@@ -434,24 +435,43 @@ class Searcher extends Component {
     );
   };
 
+  sortAction = (s) =>
+    !!s
+      ? [
+          () =>
+            this.setState(
+              (state, props) => ({ orderBy: sort(state.orderBy, s[0], s[1]) }),
+              (e) => this.props.fetch(this.filtersToQueryParams())
+            ),
+          () => formatSorter(this.state.orderBy, s[0], s[1]),
+        ]
+      : [null, () => null];
+
   headerActions = (filters) => {
     if (!!this.props.headerActions) return this.props.headerActions(filters);
     if (!!this.props.sorts) {
-      return this.props.sorts(filters).map((s) =>
-        !!s
-          ? [
-              () =>
-                this.setState(
-                  (state, props) => ({ orderBy: sort(state.orderBy, s[0], s[1]) }),
-                  (e) => this.props.fetch(this.filtersToQueryParams())
-                ),
-              () => formatSorter(this.state.orderBy, s[0], s[1]),
-            ]
-          : [null, () => null]
-      );
+      return this.props.sorts(filters).map(this.sortAction);
     }
     return [];
   };
+
+  columnContributions = () => {
+    const { columnsContributionKey, modulesManager } = this.props;
+    if (!columnsContributionKey) return [];
+    return modulesManager.getContribs(columnsContributionKey) || [];
+  };
+
+  tableColumns = (filters) =>
+    mergeContributedColumns(
+      {
+        headers: this.props.headers(filters),
+        formatters: this.props.itemFormatters(filters),
+        headerActions: this.headerActions(filters),
+        aligns: !!this.props.aligns && this.props.aligns(),
+      },
+      this.columnContributions(),
+      this.sortAction,
+    );
 
   renderSearcherActions = () => {
     const { searcherActions, classes } = this.props;
@@ -538,6 +558,8 @@ class Searcher extends Component {
       infoButtonContent = '',
       searcherActionsPosition = 'top-right',
     } = this.props;
+    const contributedExport = mergeContributedExport(exportFields, exportFieldsColumns, this.columnContributions());
+    const columns = errorItems ? null : this.tableColumns(this.state.filters);
     return (
       <Fragment>
 
@@ -619,8 +641,8 @@ class Searcher extends Component {
                           filters={this.state.filters}
                           exportable={exportable}
                           exportFetch={exportFetch}
-                          exportFields={exportFields}
-                          exportFieldsColumns={exportFieldsColumns}
+                          exportFields={contributedExport.exportFields}
+                          exportFieldsColumns={contributedExport.exportFieldsColumns}
                           exportFieldLabel={exportFieldLabel}
                           chooseExportableColumns={chooseExportableColumns}
                           additionalExportFields={additionalExportFields}
@@ -643,10 +665,10 @@ class Searcher extends Component {
                     selectWithCheckbox={selectWithCheckbox}
                     fetching={fetchingItems}
                     preHeaders={!!preHeaders && preHeaders(this.state.selection)}
-                    headers={headers(this.state.filters)}
-                    headerActions={this.headerActions(this.state.filters)}
-                    aligns={!!aligns && aligns()}
-                    itemFormatters={itemFormatters(this.state.filters)}
+                    headers={columns.headers}
+                    headerActions={columns.headerActions}
+                    aligns={columns.aligns}
+                    itemFormatters={columns.formatters}
                     rowLocked={(i) => rowLocked(this.state.selection, i)}
                     rowHighlighted={(i) => rowHighlighted(this.state.selection, i)}
                     rowHighlightedAlt={(i) => rowHighlightedAlt(this.state.selection, i)}

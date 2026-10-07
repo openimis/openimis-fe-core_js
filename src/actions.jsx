@@ -196,12 +196,25 @@ export function prepareMutation(operation, input, params = {}) {
   return { operation, variables, clientMutationId: params.clientMutationId };
 }
 
+/**
+ * Readable text of a failed mutation's error as waitForMutation returns it: a service
+ * error {message, detail}, a list of them, or plain text.
+ */
+export function mutationErrorText(error) {
+  const describe = (e) => {
+    if (!e || typeof e !== "object") return e ? String(e) : "";
+    return [e.message, e.detail].filter(Boolean).join(": ");
+  };
+  return (Array.isArray(error) ? error.map(describe) : [describe(error)]).filter(Boolean).join("; ");
+}
+
 export function waitForMutation(clientMutationId) {
   return async (dispatch) => {
     let attempts = 0;
     let res;
     do {
-      if (res) {
+      // Each poll after the first waits a little longer, whether or not the log exists yet.
+      if (attempts > 0) {
         await new Promise((resolve) => setTimeout(resolve, 100 * attempts));
       }
       const response = await dispatch(
@@ -223,13 +236,20 @@ export function waitForMutation(clientMutationId) {
           { clientMutationId },
         ),
       );
-      if (response.error) {
+      // A failed or unanswered poll says nothing about the mutation: the outcome is unknown.
+      if (response.error || response.payload?.errors || !response.payload?.data?.mutationLogs) {
         return null;
       }
-      res = response.payload.data.mutationLogs?.edges[0]?.node;
+      res = response.payload.data.mutationLogs.edges[0]?.node;
     } while ((!res || res.status === 0) && attempts++ < 10);
     if (res && res.status === 1 && res.error) {
-      return { ...res, error: JSON.parse(res.error) };
+      // Service errors are stored as JSON; an exception raised while running the
+      // mutation is stored as plain text.
+      try {
+        return { ...res, error: JSON.parse(res.error) };
+      } catch (e) {
+        return res;
+      }
     }
     return res;
   };

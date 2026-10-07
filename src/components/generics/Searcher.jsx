@@ -71,8 +71,8 @@ const StyledSearcher = styled("div")(({ theme }) => ({
     padding: theme.spacing(0.5, 1),
     border: "none",
     flexGrow: 1,
-    flexShrink: 0,
-    minWidth: "auto",
+    flexShrink: 1,
+    minWidth: 0,
     color: "inherit",
     display: "flex",
     alignItems: "center",
@@ -553,7 +553,7 @@ class Searcher extends Component {
               color="primary"
               className="actionButton"
             >
-              <Typography variant="body2">{action.label}</Typography>
+              <Typography variant="body2" color="inherit">{action.label}</Typography>
             </Button>
           </Grid>
         ),
@@ -684,7 +684,7 @@ class Searcher extends Component {
                       </Typography>
                     </div>
                   </Grid>
-                  <Grid display="flex" alignItems="center" justifyContent="flex-end">
+                  <Grid display="flex" alignItems="center" justifyContent="flex-end" sx={{ flexShrink: 0 }}>
                     <Box className="paperHeaderMessage" px={1}>
                       <SelectionPane
                         module={module}
@@ -692,6 +692,7 @@ class Searcher extends Component {
                         selection={this.state.selection}
                       />
                     </Box>
+                    {fetchedItems && searcherActionsPosition === "header-right" && this.renderSearcherActions()}
                     {fetchedItems && (
                       <Box className="paperHeaderAction" px={1}>
                         <StyledSelectionMenu

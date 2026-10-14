@@ -155,11 +155,19 @@ function reducer(
         filtersCache: filtersCacheCopy,
       };
 
-    case "CORE_MUTATION_ADD":
+    case "CORE_MUTATION_ADD": {
+      // Idempotent per clientMutationId: journalling is now also done centrally
+      // by autoJournalize(), so a module still calling journalize() itself must
+      // not produce a second entry for the same mutation.
+      const added = action.payload;
+      if (added?.clientMutationId && state.mutations.some((m) => m.clientMutationId === added.clientMutationId)) {
+        return state;
+      }
       return {
         ...state,
-        mutations: [action.payload, ...state.mutations],
+        mutations: [added, ...state.mutations],
       };
+    }
     case "CORE_MUTATION_REQ":
       return {
         ...state,

@@ -15,6 +15,7 @@ import {
 } from "./helpers/api";
 import * as Sentry from "@sentry/react";
 import { getLocalStorage, setLocalStorage } from "./helpers/useLocalStorage";
+import { scrubSecrets } from "./helpers/secrets";
 import { isUnauthenticatedRoute } from "./helpers/utils";
 
 const REQUESTED_WITH = "webapp";
@@ -87,6 +88,20 @@ export function resetCacheFilters(key) {
   };
 }
 
+// A mutation response is any response whose meta carries a clientMutationId:
+// only `formatMutation` call sites put one there. Queries that *filter* by a
+// client mutation id pass it inside the GraphQL filter string, not in params,
+// so they cannot be mistaken for one.
+//
+// Secrets are masked before the entry is kept: `params` can hold the raw
+// mutation input, which for the password mutations is the plaintext password.
+export function autoJournalize(params) {
+  return (dispatch) => {
+    if (!params?.clientMutationId) return;
+    dispatch(journalize(scrubSecrets(params, params.secretFields ?? [])));
+  };
+}
+
 export function journalize(mutation, meta) {
   return (dispatch) => {
     const toAdd = mutation ? { ...mutation, status: 0 } : { status: 0 };
@@ -133,6 +148,12 @@ export function graphql(payload, type = "GRAPHQL_QUERY", params = {}) {
         dispatch(coreAlert(formatServerError(response.payload)));
       }
 
+      // Journalled centrally: a module no longer has to remember to call
+      // journalize() itself, and forgetting a reducer case can no longer cost
+      // the journal entry. The add is idempotent per clientMutationId, so the
+      // per-module calls still in place do not produce a duplicate.
+      dispatch(autoJournalize(params));
+
       // Impersonation and session errors are handled in fetch(); surface the response.
       return response;
     } catch (err) {
@@ -177,6 +198,7 @@ export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY
         ],
       }),
     );
+    dispatch(autoJournalize(params));
     return response;
   };
 }
@@ -269,7 +291,9 @@ export function graphqlMutation(
     variables.input.clientMutationId = clientMutationId;
   }
   return async (dispatch) => {
-    const response = await dispatch(graphqlWithVariables(mutation, variables, type, params, customHeaders));
+    const response = await dispatch(
+      graphqlWithVariables(mutation, variables, type, { ...params, clientMutationId }, customHeaders),
+    );
     if (clientMutationId) {
       dispatch(fetchMutation(clientMutationId));
       if (wait) {
@@ -827,7 +851,10 @@ export function changeUserLanguage(language, clientMutationLabel) {
   const mutation = formatMutation("changeUserLanguage", `languageId: "${language}"`, clientMutationLabel);
   const requestedDateTime = new Date().toISOString();
 
-  return graphql(mutation.payload, ["CORE_MUTATION_REQ", "CHANGE_USER_LANGUAGE_RESP", "CORE_MUTATION_ERR"], {
+  // Its own types: CORE_MUTATION_* belongs to the mutation-log *fetch*, and
+  // borrowing them left `fetchingMutations` stuck at true - the journal drawer
+  // reads that flag - because CHANGE_USER_LANGUAGE_RESP matched no case.
+  return graphql(mutation.payload, ["CHANGE_USER_LANGUAGE_REQ", "CHANGE_USER_LANGUAGE_RESP", "CHANGE_USER_LANGUAGE_ERR"], {
     actionType: "CHANGE_USER_LANGUAGE_RESP",
     clientMutationId: mutation.clientMutationId,
     clientMutationLabel,

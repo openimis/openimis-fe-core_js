@@ -4,6 +4,24 @@ import { useSelector, useDispatch } from "react-redux";
 import { refreshAuthToken, login, logout, initialize, graphqlWithVariables, graphqlMutation, mutationErrorText } from "../actions";
 import _ from "lodash";
 
+const MUTATION_RESULT_FIELDS = ["internalId", "status", "success", "error", "message", "metadata"];
+
+/**
+ * Adds the mutation result fields the journal needs to a caller-provided operation, right after the
+ * id it already selects. Fields the caller already asked for are left alone, and an operation that
+ * selects no mutation id at all is returned untouched.
+ */
+export const enrichMutationOperation = (operation) => {
+  if (typeof operation !== "string") return operation;
+  const anchor = /\b(?:clientMutationId|internalId)\b/;
+  const match = anchor.exec(operation);
+  if (!match) return operation;
+  const missing = MUTATION_RESULT_FIELDS.filter((field) => !new RegExp(`\\b${field}\\b`).test(operation));
+  if (!missing.length) return operation;
+  const insertAt = match.index + match[0].length;
+  return `${operation.slice(0, insertAt)}\n        ${missing.join("\n        ")}${operation.slice(insertAt)}`;
+};
+
 export const useDebounceCb = (cb, duration = 0) => {
   const [payload, setPayload] = useState();
   const [enabled, setEnabled] = useState(false);
@@ -117,13 +135,14 @@ export const useGraphqlMutation = (operation, config) => {
         const variables = {
           input,
         };
+        const enrichedOperation = enrichMutationOperation(operation);
         const result = await dispatch(
           graphqlMutation(
-            operation,
+            enrichedOperation,
             variables,
             config.type,
             // clientMutationLabel is what the journal shows for the entry.
-            { operation, input, clientMutationLabel: config.clientMutationLabel },
+            { operation: enrichedOperation, input, clientMutationLabel: config.clientMutationLabel },
             config.wait,
           ),
         );
@@ -135,7 +154,7 @@ export const useGraphqlMutation = (operation, config) => {
           throw new Error(error);
         }
 
-        setState({ isLoading: false, error: error });
+        setState({ isLoading: false, error: null });
         if (config.onSuccess) {
           resolve(config.onSuccess(result));
         } else {

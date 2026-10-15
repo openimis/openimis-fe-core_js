@@ -80,6 +80,7 @@ import ConfirmDialog from "./components/dialogs/ConfirmDialog";
 import SelectDialog from "./components/dialogs/SelectDialog";
 import AdvancedFiltersDialog from "./components/dialogs/AdvancedFiltersDialog";
 import WarningBox from "./components/generics/WarningBox";
+import MetadataViewer from "./components/generics/MetadataViewer";
 import {
   baseApiUrl,
   apiHeaders,
@@ -425,6 +426,7 @@ export {
   FatalError,
   AlertForwarder,
   WarningBox,
+  MetadataViewer,
   SelectInput,
   TextInput,
   ValidatedTextInput,

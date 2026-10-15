@@ -32,7 +32,7 @@ const ErrorIcon = GetIconComponent("ErrorOutline");
 const ExpandLessIcon = GetIconComponent("ExpandLess");
 const ExpandMoreIcon = GetIconComponent("ExpandMore");
 const JournalIcon = GetIconComponent("History");
-import { fetchMutation, fetchHistoricalMutations } from "../actions";
+import { fetchMutation, fetchHistoricalMutations, mutationErrorText } from "../actions";
 import withModulesManager, { useModulesManager } from "../helpers/modules";
 import { useTranslations } from "../helpers/i18n";
 import { getLocalStorage, setLocalStorage } from "../helpers/useLocalStorage";
@@ -220,7 +220,15 @@ class Messages extends Component {
         </Grid>
       );
     } else {
-      return <Grid key={`message-${idx}-panel`}>{JSON.stringify(message)}</Grid>;
+      // Anything that is not a structured service error - plain text from an
+      // exception raised while the mutation ran, most often - read the same way
+      // as everywhere else rather than dumped as JSON, quotes and all. The
+      // stringify stays as the last resort: mutationErrorText yields "" for a
+      // shape it does not recognise, and showing nothing would be worse than
+      // showing the raw object.
+      return (
+        <Grid key={`message-${idx}-panel`}>{mutationErrorText(message) || JSON.stringify(message)}</Grid>
+      );
     }
   };
 
@@ -364,8 +372,12 @@ class JournalDrawer extends Component {
       (previousMutations || []).map((mutation) => [mutation.clientMutationId, mutation]),
     );
     const finishedMutations = (currentMutations || []).filter((mutation) => {
+      if (mutation.status === 0) return false;
       const previousMutation = previousMutationsById.get(mutation.clientMutationId);
-      return previousMutation?.status === 0 && mutation.status !== 0;
+      // Either it has just settled, or it arrived already settled: a mutation
+      // the backend ran inline is journalled with its final status and never
+      // passes through 0, and it deserves the same notice as a queued one.
+      return !previousMutation || previousMutation.status === 0;
     });
 
     if (!finishedMutations.length) {

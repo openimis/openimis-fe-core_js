@@ -1,7 +1,7 @@
 import { useModulesManager } from "./modules";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { refreshAuthToken, login, logout, initialize, graphqlWithVariables, graphqlMutation } from "../actions";
+import { refreshAuthToken, login, logout, initialize, graphqlWithVariables, graphqlMutation, mutationErrorText } from "../actions";
 import _ from "lodash";
 
 export const useDebounceCb = (cb, duration = 0) => {
@@ -108,11 +108,18 @@ export const useGraphqlMutation = (operation, config) => {
           input,
         };
         const result = await dispatch(
-          graphqlMutation(operation, variables, config.type, { operation, input }, config.wait),
+          graphqlMutation(
+            operation,
+            variables,
+            config.type,
+            // clientMutationLabel is what the journal shows for the entry.
+            { operation, input, clientMutationLabel: config.clientMutationLabel },
+            config.wait,
+          ),
         );
 
         // Handle graphql errors
-        const error = result?.error?.map((err) => err.detail).join("; ");
+        const error = result?.error ? mutationErrorText(result.error) : "";
 
         if (error) {
           throw new Error(error);

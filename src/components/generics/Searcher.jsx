@@ -21,6 +21,7 @@ import GetIconComponent from "../../helpers/icons";
 const MoreHoriz = GetIconComponent("MoreHoriz");
 
 import { cacheFilters, resetCacheFilters, saveCurrentPaginationPage } from "../../actions";
+import { isRowMutationPending, mutationStatus, MUTATION_RECEIVED, MUTATION_SUCCESS } from "../../helpers/mutations";
 import { DEFAULT, ENTER_KEY, ROWS_PER_PAGE_OPTIONS } from "../../constants";
 import { formatSorter, sort } from "../../helpers/api";
 import { formatMessage } from "../../helpers/i18n";
@@ -331,6 +332,29 @@ class Searcher extends Component {
     this.fetchEnabled = props.modulesManager.getConf("fe-core", "shouldFetchInitially", true);
     this.searchOnResetFilters = props.modulesManager.getConf("fe-core", "shouldSearchOnResetFilters", true);
   }
+  // A row carries the clientMutationId of the mutation that is changing it, and
+  // the journal holds that mutation's status: that pair is the whole link. While
+  // it is pending the row shows as locked; when it reaches SUCCESS the current
+  // page is re-read, which is what makes a deleted row disappear and an updated
+  // one refresh. On ERROR the row simply stops being pending.
+  //
+  // Only rows already loaded here are considered: nothing is fetched to
+  // materialise a row, and a searcher that is not mounted does nothing at all.
+  componentDidUpdate(prevProps) {
+    if (prevProps.mutations === this.props.mutations) return;
+    const landed = (this.props.items ?? []).some((item) => {
+      const id = item?.clientMutationId;
+      if (!id) return false;
+      return (
+        mutationStatus(prevProps.mutations, id) === MUTATION_RECEIVED &&
+        mutationStatus(this.props.mutations, id) === MUTATION_SUCCESS
+      );
+    });
+    // Re-read the page in place rather than applyFilters(), which would reset
+    // pagination and throw the user back to the first page after a delete.
+    if (landed) this.props.fetch(this.filtersToQueryParams());
+  }
+
   componentDidMount() {
     document.addEventListener("keypress", this.handleEnter);
     const cacheKey = this._getCacheKey();
@@ -739,7 +763,7 @@ class Searcher extends Component {
                     headerActions={this.headerActions(this.state.filters)}
                     aligns={!!aligns && aligns()}
                     itemFormatters={itemFormatters(this.state.filters)}
-                    rowLocked={(i) => rowLocked(this.state.selection, i)}
+                    rowLocked={(i) => rowLocked(this.state.selection, i) || isRowMutationPending(this.props.mutations, i)}
                     rowHighlighted={(i) => rowHighlighted(this.state.selection, i)}
                     rowHighlightedAlt={(i) => rowHighlightedAlt(this.state.selection, i)}
                     rowSecondaryHighlighted={(i) => rowSecondaryHighlighted(i)}
@@ -779,6 +803,7 @@ const mapStateToProps = (state) => ({
   beforeCursor: state.core?.savedPagination?.beforeCursor,
   // This is not used directly, but is needed for Searcher component to be rerendered on change of calendar type
   isSecondaryCalendarEnabled: state.core.isSecondaryCalendarEnabled ?? false,
+  mutations: state.core?.mutations ?? [],
 });
 
 const mapDispatchToProps = (dispatch) => {

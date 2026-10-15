@@ -158,6 +158,24 @@ export function dispatchMutationResp(state, service, action) {
   };
 }
 
+/**
+ * Fallback for a module reducer's `default:` branch.
+ *
+ * A mutation response with no `case` of its own used to leave
+ * `submittingMutation` stuck at `true` for the rest of the session, which
+ * silently stopped that module journalling anything further. A forgotten case
+ * should cost the page-specific side effect, never the module's mutation state.
+ */
+export function dispatchMutationDefault(state, action) {
+  if (!state?.submittingMutation) return state;
+  if (!action?.meta?.clientMutationId) return state;
+  if (!/_(RESP|ERR)$/.test(action.type ?? "")) return state;
+  return {
+    ...state,
+    submittingMutation: false,
+  };
+}
+
 export function dispatchMutationErr(state, action) {
   return {
     ...state,

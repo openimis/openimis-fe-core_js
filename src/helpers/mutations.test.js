@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { immediateMutationOutcome } from "../actions";
+import { immediateMutationOutcome, mutationErrorText } from "../actions";
 import { MUTATION_ERROR, MUTATION_SUCCESS } from "./mutations";
 
 describe("immediateMutationOutcome", () => {
@@ -73,5 +73,44 @@ describe("which mutations the journal announces", () => {
     const settled = [{ clientMutationId: "a", status: 2 }];
 
     expect(announces(settled, settled)).toHaveLength(0);
+  });
+});
+
+describe("one reader for a mutation's error, whichever side it came from", () => {
+  // A failed mutation's error reaches the journal two ways: polled off a
+  // MutationLog, or read straight off the response of a mutation that ran
+  // inline. Both now go through mutationErrorText, so an entry reads the same
+  // either way instead of one side being JSON-dumped.
+  const resp = (data) => ({ payload: { data } });
+
+  it("reads a plain-text error from a synchronous mutation", () => {
+    const outcome = immediateMutationOutcome(
+      resp({ changePassword: { success: false, error: "Failed to change user password" } }),
+    );
+
+    expect(outcome).toEqual({ status: MUTATION_ERROR, error: "Failed to change user password" });
+  });
+
+  it("flattens a structured service error the same way a polled log would", () => {
+    const outcome = immediateMutationOutcome(
+      resp({ doThing: { success: false, error: { message: "Failed to create Task", detail: "Task pending" } } }),
+    );
+
+    expect(outcome.error).toBe("Failed to create Task: Task pending");
+    expect(outcome.error).toBe(mutationErrorText({ message: "Failed to create Task", detail: "Task pending" }));
+  });
+
+  it("flattens a list of service errors", () => {
+    const outcome = immediateMutationOutcome(
+      resp({ doThing: { success: false, error: [{ message: "A", detail: "x" }, { message: "B" }] } }),
+    );
+
+    expect(outcome.error).toBe("A: x; B");
+  });
+
+  it("leaves a successful mutation without an error", () => {
+    const outcome = immediateMutationOutcome(resp({ changePassword: { success: true, error: null } }));
+
+    expect(outcome).toEqual({ status: MUTATION_SUCCESS, error: null });
   });
 });

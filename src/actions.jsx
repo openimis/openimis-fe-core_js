@@ -114,7 +114,10 @@ export function immediateMutationOutcome(response) {
     if (result && typeof result.success === "boolean") {
       return {
         status: result.success ? MUTATION_SUCCESS : MUTATION_ERROR,
-        error: result.error ?? null,
+        // Through the same reader the journal uses for a MutationLog error, so
+        // that an entry reads the same whether its outcome came from the
+        // response or from a polled log.
+        error: result.error ? mutationErrorText(result.error) : null,
       };
     }
   }

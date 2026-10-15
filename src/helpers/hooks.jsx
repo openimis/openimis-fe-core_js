@@ -54,6 +54,12 @@ export const useGraphqlQuery = (operation, variables, config = {}) => {
   const [isMounted, setMounted] = useState(false);
   const prevVariables = usePrevious(variables ?? {});
   const prevOperation = usePrevious(operation);
+  // An explicit "fetch again" from the caller. The comparison below is what
+  // keeps a re-render from re-querying, but it also swallows a deliberate
+  // action - pressing Search without editing a filter, or refreshing a list -
+  // because the variables are deep-equal. Searcher passes its fetch token for
+  // this; any caller can pass anything that changes per request.
+  const prevRefreshKey = usePrevious(config.refreshKey);
 
   async function fetchQuery() {
     try {
@@ -71,10 +77,14 @@ export const useGraphqlQuery = (operation, variables, config = {}) => {
 
   useEffect(() => {
     if (!isMounted) return;
-    if (operation !== prevOperation || !_.isEqual(variables, prevVariables)) {
+    if (
+      operation !== prevOperation ||
+      !_.isEqual(variables, prevVariables) ||
+      (config.refreshKey !== undefined && config.refreshKey !== prevRefreshKey)
+    ) {
       fetchQuery();
     }
-  }, [operation, variables]);
+  }, [operation, variables, config.refreshKey]);
 
   useEffect(() => {
     if (!config.skip) {

@@ -108,6 +108,24 @@ export function autoJournalize(params, outcome) {
 // A mutation that runs inline answers with its own outcome - `success`, plus
 // `error` when it failed - instead of only a clientMutationId to be polled.
 // That shape is what tells the two families apart from the client side.
+/**
+ * Outcome of a mutation the server refused outright - a GraphQL error, or a transport
+ * failure - or `undefined` when the response was accepted.
+ *
+ * A refused mutation never reaches the queue, so it has no MutationLog to poll: without
+ * this it would sit in the journal as "processing" for ever, re-polled every two seconds.
+ */
+export function mutationRejection(response) {
+  const errors = response?.payload?.errors;
+  if (errors?.length) {
+    return { status: MUTATION_ERROR, error: mutationErrorText(errors) || JSON.stringify(errors) };
+  }
+  if (response?.error) {
+    return { status: MUTATION_ERROR, error: formatServerError(response.payload) };
+  }
+  return undefined;
+}
+
 export function immediateMutationOutcome(response) {
   const data = response?.payload?.data;
   if (!data || typeof data !== "object") return undefined;
@@ -332,8 +350,28 @@ export function graphqlMutation(
     variables.input.clientMutationId = clientMutationId;
   }
   return async (dispatch) => {
+    // The user asked for this, so it belongs in the journal whatever becomes of it -
+    // including a rejection. Added before the request so the journal sees it processing:
+    // an entry that only ever appears final raises no completion notice.
+    if (clientMutationId) {
+      dispatch(
+        autoJournalize({
+          ...params,
+          clientMutationId,
+          clientMutationLabel: variables.input.clientMutationLabel,
+          requestDateTime: new Date().toISOString(),
+        }),
+      );
+    }
     const response = await dispatch(graphqlWithVariables(mutation, variables, type, params, customHeaders));
     if (clientMutationId) {
+      // Refused outright: no queue, no MutationLog, nothing to poll. Complete the entry
+      // here or it stays "processing" for ever.
+      const rejection = mutationRejection(response);
+      if (rejection) {
+        dispatch(journalize({ clientMutationId, ...rejection }));
+        return response?.payload?.data;
+      }
       // Whether a mutation ran inline or was queued is the backend's business,
       // not the user's: both get a journal entry. A synchronous one already
       // carries its result here, so it is journalled as final rather than added

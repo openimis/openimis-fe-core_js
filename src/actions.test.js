@@ -104,7 +104,7 @@ describe("graphqlMutation", () => {
     expect(seen[0]).toEqual([0]);
   });
 
-  it("does not journal a mutation the server rejected", async () => {
+  it("journals a mutation the server rejected, as failed", async () => {
     const { store } = setup((query) =>
       query.includes("mutationLogs")
         ? { data: { mutationLogs: { totalCount: 0, pageInfo: {}, edges: [] } } }
@@ -113,7 +113,13 @@ describe("graphqlMutation", () => {
 
     await store.dispatch(graphqlMutation(MUTATION, { input: { name: "Foo", clientMutationLabel: "Create Foo" } }));
 
-    expect(store.getState().core.mutations).toEqual([]);
+    // The user asked for it, so it is in the journal - and it reads as failed rather
+    // than sitting at "processing" for ever, since a refused mutation has no log to poll.
+    const { mutations } = store.getState().core;
+    expect(mutations).toHaveLength(1);
+    expect(mutations[0].clientMutationLabel).toBe("Create Foo");
+    expect(mutations[0].status).toBe(1);
+    expect(mutations[0].error).toContain("boom");
   });
 
   it("leaves the journal alone for mutations without a clientMutationId", async () => {

@@ -38,3 +38,40 @@ describe("immediateMutationOutcome", () => {
     expect(immediateMutationOutcome(resp({ thing: { success: "yes" } }))).toBeUndefined();
   });
 });
+
+// Guards the rule the JournalDrawer applies when deciding what to announce.
+// A synchronous mutation is journalled with its final status and never passes
+// through 0, so a transition-only test would silently skip it - which is what
+// made the password change produce a journal entry but no notice.
+const announces = (previous, current) => {
+  const previousById = new Map((previous || []).map((m) => [m.clientMutationId, m]));
+  return (current || []).filter((m) => {
+    if (m.status === 0) return false;
+    const before = previousById.get(m.clientMutationId);
+    return !before || before.status === 0;
+  });
+};
+
+describe("which mutations the journal announces", () => {
+  it("announces one that just settled", () => {
+    const got = announces([{ clientMutationId: "a", status: 0 }], [{ clientMutationId: "a", status: 2 }]);
+
+    expect(got).toHaveLength(1);
+  });
+
+  it("announces one that arrived already settled", () => {
+    const got = announces([], [{ clientMutationId: "sync", status: 2 }]);
+
+    expect(got).toHaveLength(1);
+  });
+
+  it("stays quiet for one still pending", () => {
+    expect(announces([], [{ clientMutationId: "a", status: 0 }])).toHaveLength(0);
+  });
+
+  it("does not announce the same mutation twice", () => {
+    const settled = [{ clientMutationId: "a", status: 2 }];
+
+    expect(announces(settled, settled)).toHaveLength(0);
+  });
+});

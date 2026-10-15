@@ -364,8 +364,12 @@ class JournalDrawer extends Component {
       (previousMutations || []).map((mutation) => [mutation.clientMutationId, mutation]),
     );
     const finishedMutations = (currentMutations || []).filter((mutation) => {
+      if (mutation.status === 0) return false;
       const previousMutation = previousMutationsById.get(mutation.clientMutationId);
-      return previousMutation?.status === 0 && mutation.status !== 0;
+      // Either it has just settled, or it arrived already settled: a mutation
+      // the backend ran inline is journalled with its final status and never
+      // passes through 0, and it deserves the same notice as a queued one.
+      return !previousMutation || previousMutation.status === 0;
     });
 
     if (!finishedMutations.length) {

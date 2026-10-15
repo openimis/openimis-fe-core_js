@@ -291,9 +291,15 @@ export function graphqlMutation(
     variables.input.clientMutationId = clientMutationId;
   }
   return async (dispatch) => {
-    const response = await dispatch(
-      graphqlWithVariables(mutation, variables, type, { ...params, clientMutationId }, customHeaders),
-    );
+    // clientMutationId is deliberately NOT put in params here: that would make
+    // autoJournalize() add a journal entry for mutations that never create a
+    // MutationLog server-side (the password mutations extend ClientIDMutation,
+    // not OpenIMISMutation - see OP-3178). Such an entry would sit at status 0
+    // for ever and be re-polled every couple of seconds. Journalling for this
+    // path already happens through the fetchMutation() below, which only adds
+    // an entry once the backend really has a log. Revisit once OP-3177 (E)
+    // gives those mutations a MutationLog.
+    const response = await dispatch(graphqlWithVariables(mutation, variables, type, params, customHeaders));
     if (clientMutationId) {
       dispatch(fetchMutation(clientMutationId));
       if (wait) {

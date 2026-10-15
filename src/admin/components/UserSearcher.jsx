@@ -220,7 +220,7 @@ class UserSearcher extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  rights: state.core?.i_user?.rights ?? [],
+  rights: state.core?.user?.i_user?.rights ?? [],
   users: state.admin.usersSummaries.items,
   usersPageInfo: state.admin.usersSummaries.pageInfo,
   fetchingUsers: state.admin.usersSummaries.isFetching,

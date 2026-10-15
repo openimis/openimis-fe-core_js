@@ -62,10 +62,138 @@ This created slight but noticeable color differences:
 
 Removing per-component overrides + preferring dedicated theme sections (paper, menu, table, ...) + falling back to palette colors only when needed ensures that the host app's full color scheme (including its chosen primary/secondary values or entirely custom surfaces) is respected everywhere.
 
+## Mutations, the journal and list feedback
+
+### Journalling is central — do not re-implement it per module
+
+`graphql()` and `graphqlWithVariables()` journal any response whose `meta`
+carries a `clientMutationId`. Only `formatMutation` call sites put one there, so
+a query that *filters* by a client mutation id (it goes in the GraphQL filter
+string, not in `params`) is never mistaken for a mutation.
+
+What not to write in new code:
+
+- a `journalize(this.props.mutation)` call,
+- a `componentDidUpdate` watching `prevProps.submittingMutation && !this.props.submittingMutation`.
+
+Both are now redundant. They are still present in ~48 components and are left in
+place deliberately: `CORE_MUTATION_ADD` is idempotent per `clientMutationId`, so
+a module that still calls `journalize()` itself produces no duplicate entry.
+
+### Every reducer needs `dispatchMutationDefault` in its `default:` branch
+
+```js
+default:
+  return dispatchMutationDefault(state, action);
+```
+
+A mutation response with no `case` of its own used to leave `submittingMutation`
+stuck at `true`, which silently stopped that module journalling **anything** for
+the rest of the session. A forgotten `case` must cost the page-specific side
+effect, never the module's mutation state.
+
+When adding a mutation, still add its `*_RESP` case — the default is a safety
+net, not a substitute. Note that reducers in this codebase use both `case "X":`
+and `case 'X':`, so a sweep for unhandled responses must be quote-agnostic.
+
+### A mutation response means *queued*, not *done*
+
+`core.async_mutations` is on by default in `PROD`, so an `OpenIMISMutation` is
+handed to Celery and the GraphQL response returns as soon as the `MutationLog`
+row exists. Never do this:
+
+```js
+await this.props.deleteThing(...);
+this.fetch(this.state.params);   // races the worker, reads stale rows
+```
+
+Key the refresh off the mutation reaching `SUCCESS` instead. `Searcher` does
+this already, so a searcher normally needs no refetch of its own.
+
+A mutation that runs inline is different: it answers with its own `success`
+field, and `immediateMutationOutcome()` uses exactly that to tell the two
+families apart. Such a mutation is journalled with its final status rather than
+added as pending, because it has no `MutationLog` to poll and a pending entry
+would be re-polled for ever.
+
+### Row lifecycle: the link is the `clientMutationId`
+
+A module stamps the row it is changing (`thing.clientMutationId = mutation.clientMutationId`)
+and the journal holds the status for that same id. That pair is the whole link —
+nothing needs the row's uuid in `meta`. `Searcher` reads `state.core.mutations`,
+keeps a pending row locked, and re-reads the page once its mutation reaches
+`SUCCESS`, which is what makes a deleted row disappear.
+
+Scope, deliberately: **update and delete only**, and **only for rows already
+loaded**. Create has no row to mark, and whether a new record belongs on the
+current filtered/sorted page is a page decision. Nothing is ever fetched merely
+to materialise a row.
+
+**This only works for a searcher whose rows carry that stamp**, which in practice
+means one driven through Redux. A searcher built on `useGraphqlQuery` +
+`useGraphqlMutation` never touches Redux rows, so it gets no greying and no
+removal — build list screens on the Redux pattern.
+
+Caveat worth knowing: the stamp is an in-place mutation of a Redux-held object.
+It works only because nothing in the `Searcher` -> `Table` chain memoises. Adding
+a `React.memo` there would break row locking silently.
+
+### A user action must always be able to refetch
+
+`useGraphqlQuery` dedupes on deep-equal variables, which otherwise turns a Search
+on unedited filters - or a plain refresh - into no request at all. `Searcher`
+passes a fetch token as the second argument of its `fetch` prop; a module driving
+a `useGraphqlQuery` list feeds that to `config.refreshKey`. A Redux-driven module
+dispatches on every call and can ignore it.
+
+Never pass `skip: true` to a list query. It is consulted only on mount, so it
+means "never load" permanently. It is right for a picker that should wait for the
+user to type, and wrong for anything that should show rows when the page opens.
+
+### Do not raise a toast for a mutation from a page
+
+The journal announces every mutation centrally, including one that was already
+finished when journalled. A page raising its own success toast is per-module
+handling of something generic, and no mutation in the application should do it.
+Navigation after success *is* page-specific and belongs in the page.
+
+### Secrets never reach the journal
+
+`helpers/secrets.js` masks before journalling. It is a deliberate port of
+`openimis-be-core_py` `core/mutation_log_secrets.py` — same hint list, same mask,
+same depth bound — so a field masked server-side is masked here too. **Keep the
+two in sync.** Masking is on by default; `secretFields` on the mutation config
+adds a name the hints would miss. This matters because `useGraphqlMutation`
+passes the raw mutation input as `params`, which for the password mutations is
+the plaintext password.
+
+### One reader for a failed mutation's error
+
+`mutationErrorText` turns every stored shape — a service error `{message, detail}`,
+a list of them, or plain text from an exception — into readable text. Both the
+polled `MutationLog` error and an inline mutation's own error go through it, so an
+entry reads the same whichever side it came from. It answers `""` for a shape it
+does not recognise, which is why the journal keeps a `JSON.stringify` fallback
+behind it.
+
+### Reading rights
+
+Rights live at `state.core.user.i_user.rights`:
+
+```js
+rights: state.core?.user?.i_user?.rights ?? [],
+```
+
+`state.core.i_user` does not exist. A selector missing the `user` segment
+silently yields `[]` for every user, including super users, so every
+`rights.includes(...)` guard evaluates to `false` and the feature it protects
+disappears with no error anywhere (OP-3175).
+
 ## General
 
 - This is the `@openimis/fe-core` package. Changes here affect all openIMIS frontend modules.
 - Use MUI v7+ components and `@mui/material/styles` `styled()`.
 - Input variant (standard/outlined/filled) is configurable via modules manager: `Input.variant`.
 - When adding new inputs or pickers, wrap with `styled()` using the theme callback and inherit MUI TextField where possible.
-- Update this file when introducing new theming or styling conventions.
+- Update this file when introducing new theming or styling conventions, or new
+  conventions around mutations, journalling and list feedback.

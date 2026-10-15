@@ -352,8 +352,21 @@ class Searcher extends Component {
     });
     // Re-read the page in place rather than applyFilters(), which would reset
     // pagination and throw the user back to the first page after a delete.
-    if (landed) this.props.fetch(this.filtersToQueryParams());
+    if (landed) this.requestFetch(this.filtersToQueryParams());
   }
+
+  // Incremented for every fetch this searcher asks for. Passed as the second
+  // argument to the `fetch` prop so a module can tell "the user asked again"
+  // from "the variables changed": useGraphqlQuery dedupes on deep-equal
+  // variables, which silently turns a Search on unedited filters - or a plain
+  // refresh - into nothing at all. A module driving its query through Redux
+  // dispatches on every call already and can ignore it.
+  fetchToken = 0;
+
+  requestFetch = (filters) => {
+    this.fetchToken += 1;
+    return this.props.fetch(filters, this.fetchToken);
+  };
 
   componentDidMount() {
     document.addEventListener("keypress", this.handleEnter);
@@ -444,9 +457,9 @@ class Searcher extends Component {
     if (!!this.props.cacheFiltersKey) {
       const cacheKey = this._getCacheKey();
       this.props.cacheFilters(cacheKey, this.state.filters);
-      this.props.fetch(filters);
+      this.requestFetch(filters);
     } else {
-      this.props.fetch(filters);
+      this.requestFetch(filters);
     }
 
     this._notifyFiltersApplied();
@@ -498,7 +511,7 @@ class Searcher extends Component {
         afterCursor: null,
         beforeCursor: null,
       },
-      (e) => this.props.fetch(this.filtersToQueryParams()),
+      (e) => this.requestFetch(this.filtersToQueryParams()),
     );
   };
 
@@ -510,7 +523,7 @@ class Searcher extends Component {
           beforeCursor: null,
           afterCursor: props.itemsPageInfo.endCursor,
         }),
-        (e) => this.props.fetch(this.filtersToQueryParams()),
+        (e) => this.requestFetch(this.filtersToQueryParams()),
       );
     } else if (nbr < this.state.page) {
       this.setState(
@@ -519,7 +532,7 @@ class Searcher extends Component {
           beforeCursor: props.itemsPageInfo.startCursor,
           afterCursor: null,
         }),
-        (e) => this.props.fetch(this.filtersToQueryParams()),
+        (e) => this.requestFetch(this.filtersToQueryParams()),
       );
     }
   };
@@ -552,7 +565,7 @@ class Searcher extends Component {
               () =>
                 this.setState(
                   (state, props) => ({ orderBy: sort(state.orderBy, s[0], s[1]) }),
-                  (e) => this.props.fetch(this.filtersToQueryParams()),
+                  (e) => this.requestFetch(this.filtersToQueryParams()),
                 ),
               () => formatSorter(this.state.orderBy, s[0], s[1]),
             ]

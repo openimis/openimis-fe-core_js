@@ -17,7 +17,9 @@ function Alert(props) {
   return <MuiAlert elevation={4} variant="filled" {...props} />;
 }
 
-const ToastContext = createContext();
+// Exported so a class component can read it without useToast(), which throws
+// when no provider is mounted.
+export const ToastContext = createContext();
 
 export function ToastProvider({ children }) {
   const [open, setOpen] = useState(false);

@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react";
+import React, { Component, Fragment, useContext, useEffect } from "react";
 import { injectIntl } from "react-intl";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
@@ -21,6 +21,7 @@ import GetIconComponent from "../../helpers/icons";
 const MoreHoriz = GetIconComponent("MoreHoriz");
 
 import { cacheFilters, resetCacheFilters, saveCurrentPaginationPage } from "../../actions";
+import { isRowMutationPending, mutationStatus, MUTATION_RECEIVED, MUTATION_SUCCESS } from "../../helpers/mutations";
 import { DEFAULT, ENTER_KEY, ROWS_PER_PAGE_OPTIONS } from "../../constants";
 import { formatSorter, sort } from "../../helpers/api";
 import { formatMessage } from "../../helpers/i18n";
@@ -28,6 +29,7 @@ import withModulesManager from "../../helpers/modules";
 import Contributions from "./Contributions";
 import FormattedMessage from "./FormattedMessage";
 import ProgressOrError from "./ProgressOrError";
+import { ToastContext } from "../../helpers/ToastContext";
 import SearcherExport from "./SearcherExport";
 import SearcherPane from "./SearcherPane";
 import Table from "./Table";
@@ -70,8 +72,8 @@ const StyledSearcher = styled("div")(({ theme }) => ({
     padding: theme.spacing(0.5, 1),
     border: "none",
     flexGrow: 1,
-    flexShrink: 0,
-    minWidth: "auto",
+    flexShrink: 1,
+    minWidth: 0,
     color: "inherit",
     display: "flex",
     alignItems: "center",
@@ -279,7 +281,23 @@ class SelectionMenu extends Component {
 
 const StyledSelectionMenu = injectIntl(withModulesManager(SelectionMenu));
 
+// A GraphQL error often arrives alongside perfectly usable rows: a field the user may
+// not read is nulled on the rows concerned and reported in `errors`, while every other
+// row comes back intact. Raising it as a toast keeps those rows on screen.
+const ErrorToast = ({ error }) => {
+  const toast = useContext(ToastContext);
+  const detail = error?.detail || error?.message;
+  useEffect(() => {
+    if (detail) {
+      toast?.showError(detail);
+    }
+  }, [detail, toast]);
+  return null;
+};
+
 class Searcher extends Component {
+  // User preference first, then the Searcher's own prop, then the system-wide
+  // `fe-core.defaultRowsPerPage` configuration.
   resolveInitialPageSize = (props = this.props) => {
     const userDefaultRowsPerPage = props?.user?.i_user?.default_rows_per_page;
     if (ROWS_PER_PAGE_OPTIONS.includes(userDefaultRowsPerPage)) {
@@ -288,7 +306,12 @@ class Searcher extends Component {
     if (ROWS_PER_PAGE_OPTIONS.includes(props.defaultPageSize)) {
       return props.defaultPageSize;
     }
-    return 10;
+    const configuredRowsPerPage = props.modulesManager.getConf(
+      "fe-core",
+      "defaultRowsPerPage",
+      DEFAULT.ROWS_PER_PAGE,
+    );
+    return ROWS_PER_PAGE_OPTIONS.includes(configuredRowsPerPage) ? configuredRowsPerPage : DEFAULT.ROWS_PER_PAGE;
   };
 
   state = {
@@ -309,6 +332,42 @@ class Searcher extends Component {
     this.fetchEnabled = props.modulesManager.getConf("fe-core", "shouldFetchInitially", true);
     this.searchOnResetFilters = props.modulesManager.getConf("fe-core", "shouldSearchOnResetFilters", true);
   }
+  // A row carries the clientMutationId of the mutation that is changing it, and
+  // the journal holds that mutation's status: that pair is the whole link. While
+  // it is pending the row shows as locked; when it reaches SUCCESS the current
+  // page is re-read, which is what makes a deleted row disappear and an updated
+  // one refresh. On ERROR the row simply stops being pending.
+  //
+  // Only rows already loaded here are considered: nothing is fetched to
+  // materialise a row, and a searcher that is not mounted does nothing at all.
+  componentDidUpdate(prevProps) {
+    if (prevProps.mutations === this.props.mutations) return;
+    const landed = (this.props.items ?? []).some((item) => {
+      const id = item?.clientMutationId;
+      if (!id) return false;
+      return (
+        mutationStatus(prevProps.mutations, id) === MUTATION_RECEIVED &&
+        mutationStatus(this.props.mutations, id) === MUTATION_SUCCESS
+      );
+    });
+    // Re-read the page in place rather than applyFilters(), which would reset
+    // pagination and throw the user back to the first page after a delete.
+    if (landed) this.requestFetch(this.filtersToQueryParams());
+  }
+
+  // Incremented for every fetch this searcher asks for. Passed as the second
+  // argument to the `fetch` prop so a module can tell "the user asked again"
+  // from "the variables changed": useGraphqlQuery dedupes on deep-equal
+  // variables, which silently turns a Search on unedited filters - or a plain
+  // refresh - into nothing at all. A module driving its query through Redux
+  // dispatches on every call already and can ignore it.
+  fetchToken = 0;
+
+  requestFetch = (filters) => {
+    this.fetchToken += 1;
+    return this.props.fetch(filters, this.fetchToken);
+  };
+
   componentDidMount() {
     document.addEventListener("keypress", this.handleEnter);
     const cacheKey = this._getCacheKey();
@@ -398,9 +457,9 @@ class Searcher extends Component {
     if (!!this.props.cacheFiltersKey) {
       const cacheKey = this._getCacheKey();
       this.props.cacheFilters(cacheKey, this.state.filters);
-      this.props.fetch(filters);
+      this.requestFetch(filters);
     } else {
-      this.props.fetch(filters);
+      this.requestFetch(filters);
     }
 
     this._notifyFiltersApplied();
@@ -452,7 +511,7 @@ class Searcher extends Component {
         afterCursor: null,
         beforeCursor: null,
       },
-      (e) => this.props.fetch(this.filtersToQueryParams()),
+      (e) => this.requestFetch(this.filtersToQueryParams()),
     );
   };
 
@@ -464,7 +523,7 @@ class Searcher extends Component {
           beforeCursor: null,
           afterCursor: props.itemsPageInfo.endCursor,
         }),
-        (e) => this.props.fetch(this.filtersToQueryParams()),
+        (e) => this.requestFetch(this.filtersToQueryParams()),
       );
     } else if (nbr < this.state.page) {
       this.setState(
@@ -473,7 +532,7 @@ class Searcher extends Component {
           beforeCursor: props.itemsPageInfo.startCursor,
           afterCursor: null,
         }),
-        (e) => this.props.fetch(this.filtersToQueryParams()),
+        (e) => this.requestFetch(this.filtersToQueryParams()),
       );
     }
   };
@@ -506,7 +565,7 @@ class Searcher extends Component {
               () =>
                 this.setState(
                   (state, props) => ({ orderBy: sort(state.orderBy, s[0], s[1]) }),
-                  (e) => this.props.fetch(this.filtersToQueryParams()),
+                  (e) => this.requestFetch(this.filtersToQueryParams()),
                 ),
               () => formatSorter(this.state.orderBy, s[0], s[1]),
             ]
@@ -531,7 +590,7 @@ class Searcher extends Component {
               color="primary"
               className="actionButton"
             >
-              <Typography variant="body2">{action.label}</Typography>
+              <Typography variant="body2" color="inherit">{action.label}</Typography>
             </Button>
           </Grid>
         ),
@@ -648,10 +707,11 @@ class Searcher extends Component {
             </Grid>
           )}
           <Box className="tableContainer">
-            {errorItems ? (
+            {errorItems && !items?.length ? (
               <ProgressOrError error={errorItems} />
             ) : (
               <Fragment>
+                {!!errorItems && <ErrorToast error={errorItems} />}
                 <Grid container alignItems="center" className="paperHeader" wrap="nowrap">
                   <Grid size={GRID_RESPONSIVE_FULL} className="paperHeaderTitle" display="flex" alignItems="center">
                     <div className="infoSection">
@@ -661,7 +721,7 @@ class Searcher extends Component {
                       </Typography>
                     </div>
                   </Grid>
-                  <Grid display="flex" alignItems="center" justifyContent="flex-end">
+                  <Grid display="flex" alignItems="center" justifyContent="flex-end" sx={{ flexShrink: 0 }}>
                     <Box className="paperHeaderMessage" px={1}>
                       <SelectionPane
                         module={module}
@@ -669,6 +729,7 @@ class Searcher extends Component {
                         selection={this.state.selection}
                       />
                     </Box>
+                    {fetchedItems && searcherActionsPosition === "header-right" && this.renderSearcherActions()}
                     {fetchedItems && (
                       <Box className="paperHeaderAction" px={1}>
                         <StyledSelectionMenu
@@ -715,7 +776,7 @@ class Searcher extends Component {
                     headerActions={this.headerActions(this.state.filters)}
                     aligns={!!aligns && aligns()}
                     itemFormatters={itemFormatters(this.state.filters)}
-                    rowLocked={(i) => rowLocked(this.state.selection, i)}
+                    rowLocked={(i) => rowLocked(this.state.selection, i) || isRowMutationPending(this.props.mutations, i)}
                     rowHighlighted={(i) => rowHighlighted(this.state.selection, i)}
                     rowHighlightedAlt={(i) => rowHighlightedAlt(this.state.selection, i)}
                     rowSecondaryHighlighted={(i) => rowSecondaryHighlighted(i)}
@@ -755,6 +816,7 @@ const mapStateToProps = (state) => ({
   beforeCursor: state.core?.savedPagination?.beforeCursor,
   // This is not used directly, but is needed for Searcher component to be rerendered on change of calendar type
   isSecondaryCalendarEnabled: state.core.isSecondaryCalendarEnabled ?? false,
+  mutations: state.core?.mutations ?? [],
 });
 
 const mapDispatchToProps = (dispatch) => {

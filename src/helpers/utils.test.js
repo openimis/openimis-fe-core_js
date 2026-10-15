@@ -27,10 +27,12 @@ import {
   isUnauthenticatedRoute,
   menuEntryMatchesLocationPath,
   parseLocalizedNumber,
+  prepareAppBarIcons,
   prepareForComparison,
   prepareMenuEntries,
   redirectToLogin,
   resolveMenuVariant,
+  shouldShowLanguageQuickPicker,
   handleBootLogout,
   onLogout,
   redirectToSamlLogout,
@@ -169,6 +171,138 @@ describe("prepareMenuEntries", () => {
     expect(prepareMenuEntries([], intl, [{ id: "a", route: "/insurees", icon: "People" }], {})[0].route).toBe(
       "/insurees",
     );
+  });
+});
+
+describe("prepareAppBarIcons", () => {
+  const routes = { "insuree.route": { path: "insurees", rights: ["101"], icon: "People" } };
+
+  it("keeps a leaf link the user has a matching right for and drops one they don't", () => {
+    const entries = [
+      { id: "a", route: "allowed", rights: ["101"], icon: "People" },
+      { id: "b", route: "denied", rights: ["999"], icon: "People" },
+    ];
+
+    const result = prepareAppBarIcons(["101"], intl, entries, routes);
+
+    expect(result.map((e) => e.id)).toEqual(["a"]);
+    expect(result[0].type).toBe("link");
+  });
+
+  it("resolves a leaf link's route, rights and icon from the route table when only an id is given", () => {
+    expect(prepareAppBarIcons(["101"], intl, [{ id: "insuree.route" }], routes)[0].route).toBe("/insurees");
+    // route-table rights still gate the entry
+    expect(prepareAppBarIcons(["999"], intl, [{ id: "insuree.route" }], routes)).toEqual([]);
+  });
+
+  it("prefixes a leaf link route with a slash and resolves its text and icon", () => {
+    const [entry] = prepareAppBarIcons(
+      [],
+      intl,
+      [{ id: "a", route: "profile", icon: "AccountCircle", text: "core.profile" }],
+      {},
+    );
+
+    expect(entry.route).toBe("/profile");
+    expect(entry.icon).toBeDefined();
+    expect(entry.text).toContain("core.profile");
+  });
+
+  it("passes divider, label and language kind-items through", () => {
+    const entries = [
+      { position: 1, type: "divider" },
+      { position: 2, type: "label", text: "core.section" },
+      { position: 3, type: "language", text: "core.LanguagePicker.label" },
+    ];
+
+    const result = prepareAppBarIcons([], intl, entries, {});
+
+    expect(result.map((e) => e.type)).toEqual(["divider", "label", "language"]);
+    expect(result[1].text).toBeDefined();
+  });
+
+  it("builds a dropdown from nested entries and filters its children by rights", () => {
+    const entries = [
+      {
+        id: "menu",
+        icon: "AccountCircle",
+        text: "core.account",
+        entries: [
+          { id: "a", route: "allowed", rights: ["101"], icon: "People" },
+          { id: "b", route: "denied", rights: ["999"], icon: "People" },
+        ],
+      },
+    ];
+
+    const [dropdown] = prepareAppBarIcons(["101"], intl, entries, {});
+
+    expect(dropdown.type).toBe("menu");
+    expect(dropdown.entries.map((e) => e.id)).toEqual(["a"]);
+  });
+
+  it("drops a dropdown whose children are all filtered out", () => {
+    const entries = [
+      { id: "menu", icon: "AccountCircle", text: "core.account", entries: [{ id: "b", route: "x", rights: ["999"] }] },
+    ];
+
+    expect(prepareAppBarIcons(["101"], intl, entries, {})).toEqual([]);
+  });
+
+  it("hides a dropdown when the user lacks the dropdown's own rights", () => {
+    const entries = [
+      {
+        id: "menu",
+        rights: ["999"],
+        icon: "AccountCircle",
+        text: "core.account",
+        entries: [{ id: "a", route: "public", icon: "People" }],
+      },
+    ];
+
+    expect(prepareAppBarIcons(["101"], intl, entries, {})).toEqual([]);
+    expect(prepareAppBarIcons(["999"], intl, entries, {})).toHaveLength(1);
+  });
+
+  it("sorts by position, defaulting a missing position to 99", () => {
+    const entries = [
+      { id: "last", route: "c", position: 100, icon: "People" },
+      { id: "unpositioned", route: "b", icon: "People" },
+      { id: "first", route: "a", position: 1, icon: "People" },
+    ];
+
+    expect(prepareAppBarIcons([], intl, entries, {}).map((e) => e.id)).toEqual(["first", "unpositioned", "last"]);
+  });
+});
+
+describe("shouldShowLanguageQuickPicker", () => {
+  const dropdownWithLanguage = [{ type: "menu", entries: [{ type: "link" }, { type: "language" }] }];
+
+  it('hides the picker under "auto" when a dropdown already offers language', () => {
+    expect(shouldShowLanguageQuickPicker("auto", dropdownWithLanguage)).toBe(false);
+  });
+
+  it('keeps the picker under "auto" when no entry offers language', () => {
+    expect(shouldShowLanguageQuickPicker("auto", [{ type: "menu", entries: [{ type: "link" }] }])).toBe(true);
+    expect(shouldShowLanguageQuickPicker("auto", [{ type: "link" }])).toBe(true);
+    expect(shouldShowLanguageQuickPicker("auto", [])).toBe(true);
+  });
+
+  it('honours a top-level language entry under "auto"', () => {
+    expect(shouldShowLanguageQuickPicker("auto", [{ type: "language" }])).toBe(false);
+  });
+
+  it("lets true force the picker on even alongside a language dropdown", () => {
+    expect(shouldShowLanguageQuickPicker(true, dropdownWithLanguage)).toBe(true);
+  });
+
+  it("lets false force the picker off even with nothing else offering language", () => {
+    expect(shouldShowLanguageQuickPicker(false, [])).toBe(false);
+  });
+
+  it("treats an unknown setting as auto and tolerates missing entries", () => {
+    expect(shouldShowLanguageQuickPicker("nonsense", dropdownWithLanguage)).toBe(false);
+    expect(shouldShowLanguageQuickPicker(undefined)).toBe(true);
+    expect(shouldShowLanguageQuickPicker("auto", [null, undefined])).toBe(true);
   });
 });
 
@@ -481,6 +615,32 @@ describe("session and navigation helpers", () => {
 
       expect(settled).toBe(true);
     });
+
+    it("logs out before wiping storage, so the request keeps its stored csrf token", async () => {
+      const order = [];
+      clearLocalStorage.mockImplementation(() => order.push("clearLocalStorage"));
+      const dispatch = vi.fn(() => {
+        order.push("dispatch");
+        return Promise.resolve(true);
+      });
+
+      await onLogout(dispatch);
+
+      expect(order).toEqual(["dispatch", "clearLocalStorage"]);
+    });
+
+    it("wipes storage even when the logout request throws", async () => {
+      const dispatch = vi.fn().mockRejectedValue(new Error("offline"));
+
+      await expect(onLogout(dispatch)).rejects.toThrow("offline");
+
+      expect(clearLocalStorage).toHaveBeenCalled();
+    });
+
+    it("hands the server's confirmation back to the caller", async () => {
+      await expect(onLogout(vi.fn().mockResolvedValue(true))).resolves.toBe(true);
+      await expect(onLogout(vi.fn().mockResolvedValue(false))).resolves.toBe(false);
+    });
   });
 
   describe("redirectToSamlLogout", () => {
@@ -492,6 +652,14 @@ describe("session and navigation helpers", () => {
 
       expect(event.preventDefault).toHaveBeenCalled();
       expect(clearLocalStorage).toHaveBeenCalled();
+      expect(window.location.href).toBe(`https://openimis.test${BASE_API_URL}${SAML_LOGOUT_PATH}`);
+    });
+
+    it("also works without an event, as the logout route calls it", () => {
+      stubLocation({ origin: "https://openimis.test" });
+
+      expect(() => redirectToSamlLogout()).not.toThrow();
+
       expect(window.location.href).toBe(`https://openimis.test${BASE_API_URL}${SAML_LOGOUT_PATH}`);
     });
   });

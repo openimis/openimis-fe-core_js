@@ -15,7 +15,6 @@ import {
   formatQuery,
   formatServerError,
   getOperationName,
-  hasStoredAuthSession,
   isImpersonationError,
   isSessionError,
   normalizeGraphqlErrorMessage,
@@ -214,6 +213,10 @@ describe("formatGraphQLError", () => {
       detail: "a; b",
     });
   });
+
+  it("reports a message repeated across rows only once", () => {
+    expect(formatGraphQLError(graphqlErrors("denied", "denied", "other")).detail).toBe("denied; other");
+  });
 });
 
 describe("normalizeGraphqlErrorMessage", () => {
@@ -233,19 +236,27 @@ describe("isSessionError", () => {
     expect(isSessionError(401)).toBe(true);
   });
 
+  it("recognises a CSRF failure, the one such error returned as HTTP 200", () => {
+    expect(isSessionError(200, [{ message: "CSRF token missing or incorrect" }])).toBe(true);
+  });
+
+  it("recognises a CSRF message embedded in a longer string", () => {
+    expect(isSessionError(200, [{ message: "GraphQL error: CSRF token missing or incorrect (code 42)" }])).toBe(true);
+  });
+
+  // The fuzzy SESSION_ERROR_MESSAGES set these used to match was dropped on
+  // purpose: the backend returns 401 for all of them, so matching the body text
+  // only risked false positives. They are session errors via their status, not
+  // their message.
   it.each([
     "Unauthorized",
     "Invalid token",
     "Not authenticated",
-    "CSRF token missing or incorrect",
     "Authentication credentials were not provided",
     "Error decoding signature",
-  ])("recognises %s", (message) => {
-    expect(isSessionError(200, [{ message }])).toBe(true);
-  });
-
-  it("recognises a known message embedded in a longer string", () => {
-    expect(isSessionError(200, [{ message: "GraphQL error: CSRF token missing or incorrect (code 42)" }])).toBe(true);
+  ])("does not match %s on HTTP 200, only via the 401 status", (message) => {
+    expect(isSessionError(200, [{ message }])).toBe(false);
+    expect(isSessionError(401, [{ message }])).toBe(true);
   });
 
   it("ignores unrelated errors", () => {
@@ -267,18 +278,6 @@ describe("isImpersonationError", () => {
   it("returns false otherwise", () => {
     expect(isImpersonationError([{ message: "Unauthorized" }])).toBe(false);
     expect(isImpersonationError()).toBe(false);
-  });
-});
-
-describe("hasStoredAuthSession", () => {
-  it("is true when a csrfToken is stored", () => {
-    window.localStorage.setItem("csrfToken", JSON.stringify("abc"));
-
-    expect(hasStoredAuthSession()).toBe(true);
-  });
-
-  it("is false when nothing is stored", () => {
-    expect(hasStoredAuthSession()).toBe(false);
   });
 });
 
@@ -378,15 +377,16 @@ describe("clearExpiredSession", () => {
     expect(window.localStorage.length).toBe(0);
   });
 
-  it("posts the cookie-deleting mutation with credentials", async () => {
+  it("posts the logout mutation with credentials", async () => {
     await clearExpiredSession();
 
     const [url, options] = fetchMock.mock.calls[0];
     expect(url).toBe("/api/graphql");
     expect(options.method).toBe("POST");
     expect(options.credentials).toBe("include");
-    expect(JSON.parse(options.body).query).toContain("deleteTokenCookie");
-    expect(JSON.parse(options.body).query).toContain("deleteRefreshTokenCookie");
+    // `logout`, not the deleteTokenCookie pair it replaced: only this one also
+    // tears down the Django session behind the cookies.
+    expect(JSON.parse(options.body).query).toContain("logout");
   });
 
   it("honours REACT_APP_API_URL", async () => {

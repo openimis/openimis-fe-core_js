@@ -166,6 +166,24 @@ export function dispatchMutationResp(state, service, action) {
   };
 }
 
+/**
+ * Fallback for a module reducer's `default:` branch.
+ *
+ * A mutation response with no `case` of its own used to leave
+ * `submittingMutation` stuck at `true` for the rest of the session, which
+ * silently stopped that module journalling anything further. A forgotten case
+ * should cost the page-specific side effect, never the module's mutation state.
+ */
+export function dispatchMutationDefault(state, action) {
+  if (!state?.submittingMutation) return state;
+  if (!action?.meta?.clientMutationId) return state;
+  if (!/_(RESP|ERR)$/.test(action.type ?? "")) return state;
+  return {
+    ...state,
+    submittingMutation: false,
+  };
+}
+
 export function dispatchMutationErr(state, action) {
   return {
     ...state,
@@ -188,13 +206,15 @@ export function formatServerError(payload) {
 }
 
 export function formatGraphQLError(payload) {
-  return !payload.errors
-    ? null
-    : {
-        code: "Data error",
-        message: "Server returned data error status",
-        detail: payload.errors.map((e) => e.message).join("; "),
-      };
+  if (!payload.errors) return null;
+  // One denied field repeated over every row of a page yields the same message many
+  // times over, which says nothing more than one copy of it does.
+  const messages = [...new Set(payload.errors.map((e) => e.message))];
+  return {
+    code: "Data error",
+    message: "Server returned data error status",
+    detail: messages.join("; "),
+  };
 }
 
 export const normalizeGraphqlErrorMessage = (message) =>
@@ -220,13 +240,13 @@ export const isImpersonationError = (gqlErrors = []) => {
   });
 };
 
+// Ends the session server side (Django session + refresh token) as well as
+// deleting the cookies; the deleteTokenCookie/deleteRefreshTokenCookie pair this
+// replaces only did the latter. Requires a backend exposing `logout`.
 const LOGOUT_MUTATION = `
   mutation {
-    deleteTokenCookie {
-      deleted
-    }
-    deleteRefreshTokenCookie {
-      deleted
+    logout {
+      success
     }
   }
 `;

@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 import { injectIntl } from "react-intl";
 
 import { styled } from "@mui/material/styles";
-import { FormControl } from "@mui/material";
+import { FormControl, FormLabel } from "@mui/material";
 import { LocalizationProvider, DatePicker as MUIDatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { formatMessage, toISODate } from "../helpers/i18n";
@@ -163,10 +163,8 @@ class openIMISDatePicker extends Component {
 
       return (
         <StyledDatePicker>
-          <FormControl fullWidth={fullWidth}>
-            <label>
-              {!!label ? formatMessage(intl, module, label).concat(required ? " *" : "") : null}
-            </label>
+          <FormControl fullWidth={fullWidth} required={required}>
+            <FormLabel>{label ? formatMessage(intl, module, label) : null}</FormLabel>
             <DatePicker
               format={secondCalendarFormatting}
               disabled={isDisabled}
@@ -206,16 +204,17 @@ class openIMISDatePicker extends Component {
         textField: {
           ...(otherProps.slotProps?.textField ?? undefined),
           required,
-          InputLabelProps: { className: "label" },
+          variant: inputVariant ?? this.inputVariant,
         },
       };
 
       return (
         <StyledDatePicker>
-        <FormControl fullWidth={fullWidth} required={required}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <MUIDatePicker
+          <FormControl fullWidth={fullWidth} required={required}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <MUIDatePicker
                 {...otherProps}
+                slotProps={slotProps}
                 maxDate={maxDate ? dayjs(maxDate) : undefined}
                 minDate={minDate ? dayjs(minDate) : undefined}
                 format={format}
@@ -224,12 +223,11 @@ class openIMISDatePicker extends Component {
                   "disabledStateVisibilityBoost": this.disabledVisibilityBoost && isDisabled,
                 })}
                 value={this.state.value}
-                label={!!label ? formatMessage(intl, module, label).concat(required ? " *" : "") : null}
+                label={label ? formatMessage(intl, module, label) : null}
                 onChange={this.dateChange}
                 disablePast={disablePast}
-                variant={inputVariant}
-                />
-              </LocalizationProvider>
+              />
+            </LocalizationProvider>
           </FormControl>
         </StyledDatePicker>
       );

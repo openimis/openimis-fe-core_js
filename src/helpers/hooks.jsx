@@ -1,7 +1,7 @@
 import { useModulesManager } from "./modules";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { refreshAuthToken, login, logout, initialize, graphqlWithVariables, graphqlMutation } from "../actions";
+import { refreshAuthToken, login, logout, initialize, graphqlWithVariables, graphqlMutation, mutationErrorText } from "../actions";
 import _ from "lodash";
 
 const MUTATION_RESULT_FIELDS = ["internalId", "status", "success", "error", "message", "metadata"];
@@ -72,6 +72,12 @@ export const useGraphqlQuery = (operation, variables, config = {}) => {
   const [isMounted, setMounted] = useState(false);
   const prevVariables = usePrevious(variables ?? {});
   const prevOperation = usePrevious(operation);
+  // An explicit "fetch again" from the caller. The comparison below is what
+  // keeps a re-render from re-querying, but it also swallows a deliberate
+  // action - pressing Search without editing a filter, or refreshing a list -
+  // because the variables are deep-equal. Searcher passes its fetch token for
+  // this; any caller can pass anything that changes per request.
+  const prevRefreshKey = usePrevious(config.refreshKey);
 
   async function fetchQuery() {
     try {
@@ -89,10 +95,14 @@ export const useGraphqlQuery = (operation, variables, config = {}) => {
 
   useEffect(() => {
     if (!isMounted) return;
-    if (operation !== prevOperation || !_.isEqual(variables, prevVariables)) {
+    if (
+      operation !== prevOperation ||
+      !_.isEqual(variables, prevVariables) ||
+      (config.refreshKey !== undefined && config.refreshKey !== prevRefreshKey)
+    ) {
       fetchQuery();
     }
-  }, [operation, variables]);
+  }, [operation, variables, config.refreshKey]);
 
   useEffect(() => {
     if (!config.skip) {
@@ -127,11 +137,18 @@ export const useGraphqlMutation = (operation, config) => {
         };
         const enrichedOperation = enrichMutationOperation(operation);
         const result = await dispatch(
-          graphqlMutation(enrichedOperation, variables, config.type, { operation: enrichedOperation, input }, config.wait),
+          graphqlMutation(
+            enrichedOperation,
+            variables,
+            config.type,
+            // clientMutationLabel is what the journal shows for the entry.
+            { operation: enrichedOperation, input, clientMutationLabel: config.clientMutationLabel },
+            config.wait,
+          ),
         );
 
         // Handle graphql errors
-        const error = result?.error?.map((err) => err.detail).join("; ");
+        const error = result?.error ? mutationErrorText(result.error) : "";
 
         if (error) {
           throw new Error(error);

@@ -18,8 +18,9 @@ import {
   ValidatedTextInput,
   passwordGenerator,
   validatePassword,
-  ROWS_PER_PAGE_OPTIONS
+  ROWS_PER_PAGE_OPTIONS,
 } from "@openimis/fe-core";
+import { DEFAULT as CORE_DEFAULT } from "../../constants";
 import {
   CLAIM_ADMIN_USER_TYPE,
   ENROLMENT_OFFICER_USER_TYPE,
@@ -154,6 +155,13 @@ const UserMasterPanel = (props) => {
   // savedIsSuperuser is the core user flag as stored, edited.isSuperuser is only set once
   // the checkbox is touched so that the flag stays out of the mutation input otherwise
   const isSuperuser = edited?.isSuperuser ?? edited?.savedIsSuperuser ?? false;
+
+  // A user with no preference of their own follows the system-wide default, which is what
+  // the Searcher falls back to as well, so the field shows it rather than an empty select.
+  const configuredRowsPerPage = modulesManager.getConf("fe-core", "defaultRowsPerPage", CORE_DEFAULT.ROWS_PER_PAGE);
+  const systemDefaultRowsPerPage = ROWS_PER_PAGE_OPTIONS.includes(configuredRowsPerPage)
+    ? configuredRowsPerPage
+    : CORE_DEFAULT.ROWS_PER_PAGE;
 
   const renderLastNameField = (edited, readOnly) => (
     <Grid size={4} className="item">
@@ -358,7 +366,7 @@ const UserMasterPanel = (props) => {
           readOnly={readOnly}
           required
           options={ROWS_PER_PAGE_OPTIONS.map((option) => ({ value: option, label: option }))}
-          value={edited?.defaultRowsPerPage ?? ""}
+          value={edited?.defaultRowsPerPage ?? systemDefaultRowsPerPage}
           onChange={(defaultRowsPerPage) => onEditedChanged({ ...edited, defaultRowsPerPage })}
         />
       </Grid>

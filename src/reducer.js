@@ -55,6 +55,7 @@ function reducer(
     languages: [],
     errorLanguages: null,
     impersonatedUser: null,
+    impersonationDialogOpen: false,
   },
   action,
 ) {
@@ -164,11 +165,19 @@ function reducer(
           [action.payload.clientMutationId]: action.payload,
         },
       };
-    case "CORE_MUTATION_ADD":
+    case "CORE_MUTATION_ADD": {
+      // Idempotent per clientMutationId: journalling is now also done centrally
+      // by autoJournalize(), so a module still calling journalize() itself must
+      // not produce a second entry for the same mutation.
+      const added = action.payload;
+      if (added?.clientMutationId && state.mutations.some((m) => m.clientMutationId === added.clientMutationId)) {
+        return state;
+      }
       return {
         ...state,
-        mutations: [action.payload, ...state.mutations],
+        mutations: [added, ...state.mutations],
       };
+    }
     case "CORE_MUTATION_REQ":
       return {
         ...state,
@@ -509,11 +518,18 @@ function reducer(
       return {
         ...state,
         impersonatedUser: action.payload,
+        impersonationDialogOpen: false,
       };
     case "CORE_STOP_IMPERSONATION":
       return {
         ...state,
         impersonatedUser: null,
+        impersonationDialogOpen: false,
+      };
+    case "CORE_SET_IMPERSONATION_DIALOG":
+      return {
+        ...state,
+        impersonationDialogOpen: action.payload,
       };
     default:
       return state;

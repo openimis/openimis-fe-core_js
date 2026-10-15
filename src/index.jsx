@@ -88,10 +88,13 @@ import {
   graphqlMutation,
   graphqlWithVariables,
   journalize,
+  autoJournalize,
   coreAlert,
   coreConfirm,
   clearConfirm,
   fetchMutation,
+  waitForMutation,
+  mutationErrorText,
   prepareMutation,
   clearCurrentPaginationPage,
   fetchCustomFilter,
@@ -126,6 +129,7 @@ import {
   dispatchMutationReq,
   dispatchMutationResp,
   dispatchMutationErr,
+  dispatchMutationDefault,
   openBlob,
   sort,
   formatSorter,
@@ -166,7 +170,13 @@ import { passwordGenerator } from "./helpers/passwordGenerator";
 import { createFieldsBasedOnJSON, renderInputComponent } from "./helpers/json-handler-utils";
 import withModulesManager, { useModulesManager, modulesManagerCtx } from "./helpers/modules";
 import { formatJsonField } from "./helpers/jsonExt";
-import { RIGHT_ROLE_SEARCH, CLEARED_STATE_FILTER, EXPORT_FILE_FORMATS, ROWS_PER_PAGE_OPTIONS } from "./constants";
+import {
+  RIGHT_ROLE_SEARCH,
+  CLEARED_STATE_FILTER,
+  DEFAULT,
+  EXPORT_FILE_FORMATS,
+  ROWS_PER_PAGE_OPTIONS,
+} from "./constants";
 import {
   GRID_RESPONSIVE_STANDARD,
   GRID_RESPONSIVE_SMALL,
@@ -193,6 +203,11 @@ const ROUTE_ADMIN_USER_NEW = "admin/users/new";
 
 const DEFAULT_CONFIG = {
   "showJournalSidebar": true,
+  // System-wide default number of rows per page, used when the user has no
+  // `defaultRowsPerPage` preference of their own. Must be one of ROWS_PER_PAGE_OPTIONS.
+  "defaultRowsPerPage": DEFAULT.ROWS_PER_PAGE,
+  // "auto" | true | false — see DEFAULT.LANGUAGE_QUICK_PICKER.
+  "languageQuickPicker": DEFAULT.LANGUAGE_QUICK_PICKER,
   "translations": [
     { key: "en", messages: messages_en },
     { key: "en", messages: messages_admin_en },
@@ -283,6 +298,23 @@ const DEFAULT_CONFIG = {
     { path: "logout", component: LogoutPage, exact: true },
   ],
   "core.MainMenu": [{ name: "AdminMainMenu", id: "admin.MainMenu", text: "admin.mainMenu", icon: "LocationCity" }],
+  // Default profile dropdown, used when no backend config declares core.AppBarIcons.
+  // `impersonation` self-hides for non-superusers; an overriding config may omit it.
+  "core.AppBarIcons": [
+    {
+      id: "core.profileMenu",
+      position: 100,
+      icon: "AccountCircle",
+      text: "core.profileMenu",
+      entries: [
+        { id: "core.profileMenu.myProfile", position: 1, route: "profile/myProfile", icon: "AccountCircle", text: "core.profileMenu.myProfile" },
+        { id: "core.profileMenu.changePassword", position: 2, route: "profile/changePassword", icon: "Password", text: "core.profileMenu.changePassword" },
+        { position: 3, type: "impersonation" },
+        { position: 4, type: "divider" },
+        { position: 5, type: "language", text: "core.LanguagePicker.label" },
+      ],
+    },
+  ],
   "fe-core.menus": [],
   "fe-core.menu_strategy": "default",
   "invoice.SubjectAndThirdpartyPicker": [
@@ -327,7 +359,10 @@ export {
   graphqlWithVariables,
   graphqlMutation,
   journalize,
+  autoJournalize,
   fetchMutation,
+  waitForMutation,
+  mutationErrorText,
   fetchPasswordPolicy,
   prepareMutation,
   downloadExport,
@@ -362,6 +397,7 @@ export {
   dispatchMutationReq,
   dispatchMutationResp,
   dispatchMutationErr,
+  dispatchMutationDefault,
   parseData,
   pageInfo,
   formatServerError,

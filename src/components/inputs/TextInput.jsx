@@ -160,6 +160,11 @@ class TextInput extends Component {
       helperText,
       type,
       modulesManager,
+      // Injected by connect()/consumed by this component only: must not reach the DOM
+      dispatch,
+      maxLengthConstraints,
+      maxLengthKey,
+      reset,
       ...others
     } = this.props;
 

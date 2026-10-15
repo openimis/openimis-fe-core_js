@@ -16,6 +16,7 @@ import {
 import * as Sentry from "@sentry/react";
 import { getLocalStorage, setLocalStorage } from "./helpers/useLocalStorage";
 import { scrubSecrets } from "./helpers/secrets";
+import { MUTATION_ERROR, MUTATION_SUCCESS } from "./helpers/mutations";
 import { isUnauthenticatedRoute } from "./helpers/utils";
 
 const REQUESTED_WITH = "webapp";
@@ -95,16 +96,36 @@ export function resetCacheFilters(key) {
 //
 // Secrets are masked before the entry is kept: `params` can hold the raw
 // mutation input, which for the password mutations is the plaintext password.
-export function autoJournalize(params) {
+export function autoJournalize(params, outcome) {
   return (dispatch) => {
     if (!params?.clientMutationId) return;
-    dispatch(journalize(scrubSecrets(params, params.secretFields ?? [])));
+    const entry = scrubSecrets(params, params.secretFields ?? []);
+    dispatch(journalize(outcome ? { ...entry, ...outcome } : entry));
   };
 }
 
+// A mutation that runs inline answers with its own outcome - `success`, plus
+// `error` when it failed - instead of only a clientMutationId to be polled.
+// That shape is what tells the two families apart from the client side.
+export function immediateMutationOutcome(response) {
+  const data = response?.payload?.data;
+  if (!data || typeof data !== "object") return undefined;
+  for (const result of Object.values(data)) {
+    if (result && typeof result.success === "boolean") {
+      return {
+        status: result.success ? MUTATION_SUCCESS : MUTATION_ERROR,
+        error: result.error ?? null,
+      };
+    }
+  }
+  return undefined;
+}
+
 export function journalize(mutation, meta) {
+  // status first, so a caller that already knows the outcome keeps it: a
+  // synchronous mutation is finished by the time it is journalled.
   return (dispatch) => {
-    const toAdd = mutation ? { ...mutation, status: 0 } : { status: 0 };
+    const toAdd = mutation ? { status: 0, ...mutation } : { status: 0 };
     dispatch({ type: "CORE_MUTATION_ADD", payload: toAdd, meta });
   };
 }
@@ -291,16 +312,19 @@ export function graphqlMutation(
     variables.input.clientMutationId = clientMutationId;
   }
   return async (dispatch) => {
-    // clientMutationId is deliberately NOT put in params here: that would make
-    // autoJournalize() add a journal entry for mutations that never create a
-    // MutationLog server-side (the password mutations extend ClientIDMutation,
-    // not OpenIMISMutation - see OP-3178). Such an entry would sit at status 0
-    // for ever and be re-polled every couple of seconds. Journalling for this
-    // path already happens through the fetchMutation() below, which only adds
-    // an entry once the backend really has a log. Revisit once OP-3177 (E)
-    // gives those mutations a MutationLog.
     const response = await dispatch(graphqlWithVariables(mutation, variables, type, params, customHeaders));
     if (clientMutationId) {
+      // Whether a mutation ran inline or was queued is the backend's business,
+      // not the user's: both get a journal entry. A synchronous one already
+      // carries its result here, so it is journalled as final rather than added
+      // as pending - it has no MutationLog to poll either, because that family
+      // extends ClientIDMutation rather than OpenIMISMutation (OP-3178), and a
+      // pending entry would be re-polled for ever.
+      const outcome = immediateMutationOutcome(response);
+      if (outcome) {
+        dispatch(autoJournalize({ ...params, clientMutationId }, outcome));
+        return response?.payload?.data;
+      }
       dispatch(fetchMutation(clientMutationId));
       if (wait) {
         return dispatch(waitForMutation(clientMutationId));

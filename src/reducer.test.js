@@ -227,3 +227,17 @@ describe("CORE_MUTATION_ADD idempotency", () => {
     expect(state.mutations).toHaveLength(2);
   });
 });
+
+describe("CORE_MUTATION_ADD status", () => {
+  // A synchronous mutation is already finished when it is journalled, so the
+  // status it arrives with has to survive rather than being reset to pending.
+  it("keeps a terminal status supplied by the caller", () => {
+    const state = on(initial(), "CORE_MUTATION_ADD", {
+      clientMutationId: "sync-1",
+      clientMutationLabel: "Change password",
+      status: 2,
+    });
+
+    expect(state.mutations[0].status).toBe(2);
+  });
+});

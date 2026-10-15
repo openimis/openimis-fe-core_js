@@ -108,7 +108,14 @@ export const useGraphqlMutation = (operation, config) => {
           input,
         };
         const result = await dispatch(
-          graphqlMutation(operation, variables, config.type, { operation, input }, config.wait),
+          graphqlMutation(
+            operation,
+            variables,
+            config.type,
+            // clientMutationLabel is what the journal shows for the entry.
+            { operation, input, clientMutationLabel: config.clientMutationLabel },
+            config.wait,
+          ),
         );
 
         // Handle graphql errors

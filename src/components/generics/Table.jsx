@@ -96,7 +96,6 @@ class Table extends Component {
   state = {
     selection: {},
     isRowsPerPageLocked: false,
-    ordinalNumberFrom: null,
   };
 
   _atom = (a) =>
@@ -464,10 +463,9 @@ class Table extends Component {
                         className="pager"
                         component="div"
                         labelRowsPerPage={formatMessage(intl, "core", "rowsPerPage")}
-                        labelDisplayedRows={({ from, to, count }) => {
-                          if (this.state.ordinalNumberFrom !== from) this.setState({ ordinalNumberFrom: from });
-                          return `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`;
-                        }}
+                        labelDisplayedRows={({ from, to, count }) =>
+                          `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`
+                        }
                         count={count}
                         page={page}
                         rowsPerPage={rowsPerPage}

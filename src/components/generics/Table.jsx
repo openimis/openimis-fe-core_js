@@ -26,6 +26,7 @@ import {
 import FormattedMessage from "./FormattedMessage";
 import ProgressOrError from "./ProgressOrError";
 import withModulesManager from "../../helpers/modules";
+import { DEFAULT } from "../../constants";
 import { formatMessage, formatMessageWithValues } from "../../helpers/i18n";
 import { saveCurrentUserDefaultRowsPerPage } from "../../actions";
 
@@ -139,9 +140,18 @@ class Table extends Component {
     }
   }
 
+  // The one place the effective page size is decided. `pageSize` is the controlled
+  // value, so it wins whenever the caller passes one; without it, fall back the same
+  // way Searcher.resolveInitialPageSize does - the user's own preference, then the
+  // system-wide `fe-core.defaultRowsPerPage` - rather than to the first entry of
+  // whatever options list this table happens to show.
   getCurrentRowsPerPage = () => {
-    const { pageSize, rowsPerPageOptions = [10, 20, 50] } = this.props;
-    return Number(pageSize || rowsPerPageOptions[0]);
+    const { pageSize, rowsPerPageOptions = [10, 20, 50], modulesManager, user } = this.props;
+    if (pageSize) return Number(pageSize);
+    const userDefault = Number(user?.i_user?.default_rows_per_page);
+    if (rowsPerPageOptions.includes(userDefault)) return userDefault;
+    const configured = Number(modulesManager.getConf("fe-core", "defaultRowsPerPage", DEFAULT.ROWS_PER_PAGE));
+    return rowsPerPageOptions.includes(configured) ? configured : rowsPerPageOptions[0];
   };
 
   onToggleRowsPerPageLock = async (e) => {
@@ -211,8 +221,7 @@ class Table extends Component {
     let currentIndex;
     if (isPaginationEnabled) {
       const page = this.props.page || 0;
-      const pageSize = this.props.pageSize || 10;
-      const ordinalNumberFrom = page * pageSize + 1;
+      const ordinalNumberFrom = page * this.getCurrentRowsPerPage() + 1;
       currentIndex = iidx + ordinalNumberFrom;
     } else {
       currentIndex = iidx + 1;
@@ -287,7 +296,7 @@ class Table extends Component {
       });
     }
 
-    const rowsPerPage = pageSize || rowsPerPageOptions[0];
+    const rowsPerPage = this.getCurrentRowsPerPage();
     const numSelected = Object.keys(this.state.selection || {}).length;
 
     if (showOrdinalNumber) {

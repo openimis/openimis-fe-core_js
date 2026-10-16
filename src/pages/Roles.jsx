@@ -172,12 +172,6 @@ class Roles extends Component {
     if (prevProps.submittingMutation && !this.props.submittingMutation) {
       this.props.journalize(this.props.mutation);
       this.setState((state) => ({ deleted: state.deleted.concat(state.toDelete) }));
-    } else if (
-      prevProps.confirmed !== this.props.confirmed &&
-      !!this.props.confirmed &&
-      typeof this.state.confirmedAction === "function"
-    ) {
-      this.state.confirmedAction();
     }
   }
 
@@ -296,20 +290,19 @@ class Roles extends Component {
 
   onDelete = (role) => {
     const { intl, coreConfirm, deleteRole } = this.props;
-    const confirm = () =>
-      coreConfirm(
-        formatMessageWithValues(intl, "core", "roleManagement.deleteRole.confirm.title", { label: role.name }),
-        formatMessage(intl, "core", "roleManagement.deleteRole.confirm.message"),
-      );
-    const confirmedAction = () => {
-      this.setState({ toDelete: role.id }, () =>
-        deleteRole(
-          role,
-          formatMessageWithValues(intl, "core", "roleManagement.DeleteRole.mutationLabel", { label: role.name }),
-        ),
-      );
-    };
-    this.setState({ confirmedAction }, confirm);
+    coreConfirm(
+      formatMessageWithValues(intl, "core", "roleManagement.deleteRole.confirm.title", { label: role.name }),
+      formatMessage(intl, "core", "roleManagement.deleteRole.confirm.message"),
+      {
+        onConfirm: () =>
+          this.setState({ toDelete: role.id }, () =>
+            deleteRole(
+              role,
+              formatMessageWithValues(intl, "core", "roleManagement.DeleteRole.mutationLabel", { label: role.name }),
+            ),
+          ),
+      },
+    );
   };
 
   sorts = (filters) => [

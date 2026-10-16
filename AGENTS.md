@@ -125,6 +125,38 @@ families apart. Such a mutation is journalled with its final status rather than
 added as pending, because it has no `MutationLog` to poll and a pending entry
 would be re-polled for ever.
 
+### A confirmation answers the caller that asked it
+
+`coreConfirm` takes the action with the question:
+
+```js
+this.props.coreConfirm(title, message, {
+  onConfirm: () => this.props.deleteThing(...),
+  onCancel: () => {},                 // optional
+});
+```
+
+What **not** to write, in any new code:
+
+- `this.setState({ confirmedAction }, confirm)` — parking the action in component state,
+- a `componentDidUpdate` / `useEffect` watching `props.confirmed` to run it.
+
+`state.core.confirmed` is one global boolean with no record of who asked. Every
+component watching it reads an OK as the answer to *its* question, so a stored
+action that was never cleared — a delete the user **cancelled**, say — is still
+armed, and the next confirmation accepted anywhere in the app runs it. That is not
+hypothetical: it submitted a `deletePolicy` the user had declined, seven
+milliseconds before the delete they did confirm (OP-3190).
+
+The handlers are held in `actions.jsx` next to `coreConfirm`, not in the store:
+a function is not serialisable state, and nothing else has any business reading
+them. `clearConfirm` calls exactly the one that asked, after the dispatch that
+closes the dialog.
+
+`confirmed` is still published for anything not yet migrated, but it is no longer
+how an answer reaches its asker. A component that passes `onConfirm` must not also
+watch it, or the action runs twice.
+
 ### Row lifecycle: the link is the `clientMutationId`
 
 A module stamps the row it is changing (`thing.clientMutationId = mutation.clientMutationId`)
@@ -143,9 +175,17 @@ means one driven through Redux. A searcher built on `useGraphqlQuery` +
 `useGraphqlMutation` never touches Redux rows, so it gets no greying and no
 removal — build list screens on the Redux pattern.
 
-Caveat worth knowing: the stamp is an in-place mutation of a Redux-held object.
-It works only because nothing in the `Searcher` -> `Table` chain memoises. Adding
-a `React.memo` there would break row locking silently.
+Caveat worth knowing, and bigger than it first looked: the stamp is an in-place
+mutation of a Redux-held object — a write into the store outside any reducer. Two
+consequences. It works only because nothing in the `Searcher` -> `Table` chain
+memoises, so adding a `React.memo` there would break row locking silently. And
+`ImmutableStateInvariantMiddleware`, which runs in **development only**, throws on
+it: the same code that passes on a deployed instance can blank the page locally.
+
+So the pattern is on borrowed time — 31 sites across 10 modules carry it, and
+OP-3193 tracks moving the link into the reducer (or a `clientMutationId -> row id`
+map) so the entities are left alone. Prefer that shape in new code if it has
+landed; do not add new in-place stamps.
 
 ### A user action must always be able to refetch
 

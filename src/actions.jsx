@@ -807,7 +807,28 @@ export function clearAlert() {
   };
 }
 
-export function coreConfirm(title, message, intent = null) {
+// The answer to a confirmation belongs to whoever asked it, and to nobody else.
+// `core.confirmed` is a single global flag with no record of who that was, so every
+// mounted component watching it read an OK as the answer to its own question - and
+// ran whatever action it had stored, including one the user had already cancelled
+// (OP-3190). The handlers are held here instead, so clearConfirm can call exactly
+// the one that asked. They are deliberately not in the store: a function is not
+// serialisable state, and nothing else has any business reading them.
+let pendingConfirmHandlers = null;
+
+/**
+ * Ask the user to confirm something.
+ *
+ * @param {string} title
+ * @param {string} message
+ * @param {object|string|null} options `{ intent, onConfirm, onCancel }`. A bare string
+ *   is the legacy `intent` argument and still works.
+ */
+export function coreConfirm(title, message, options = null) {
+  const { intent = null, onConfirm = null, onCancel = null } =
+    options && typeof options === "object" ? options : { intent: options };
+  // Only one dialog can be open, so a second ask replaces the first.
+  pendingConfirmHandlers = onConfirm || onCancel ? { onConfirm, onCancel } : null;
   return (dispatch) => {
     dispatch({ type: "CORE_CONFIRM", payload: { title, message, intent } });
   };
@@ -815,7 +836,17 @@ export function coreConfirm(title, message, intent = null) {
 
 export function clearConfirm(confirmed) {
   return (dispatch) => {
+    const handlers = pendingConfirmHandlers;
+    pendingConfirmHandlers = null;
+    // `confirmed` is still published for anything that has not moved to the
+    // callbacks yet; it is no longer how an answer reaches its asker.
     dispatch({ type: "CORE_CONFIRM_CLEAR", payload: confirmed });
+    // After the dispatch, so the dialog is closed before the action runs.
+    if (confirmed) {
+      handlers?.onConfirm?.();
+    } else {
+      handlers?.onCancel?.();
+    }
   };
 }
 

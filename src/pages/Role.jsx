@@ -84,30 +84,23 @@ class Role extends Component {
           this.props.fetchRole([`clientMutationId: "${this.props.mutation.clientMutationId}"`]),
         );
       }
-    } else if (
-      prevProps.confirmed !== this.props.confirmed &&
-      !!this.props.confirmed &&
-      typeof this.state.confirmedAction === "function"
-    ) {
-      this.state.confirmedAction();
     }
   }
 
   save = (role) => {
     const { intl, createRole, updateRole, coreConfirm } = this.props;
     if (!!role.id && !this.state.isDuplicate) {
-      const confirm = () =>
-        coreConfirm(
-          formatMessageWithValues(intl, "core", "roleManagement.updateRole.confirm.title", { label: role.name }),
-          formatMessageWithValues(intl, "core", "roleManagement.updateRole.confirm.message", { label: role.name }),
-        );
-      const confirmedAction = () => {
-        updateRole(
-          role,
-          formatMessageWithValues(intl, "core", "roleManagement.UpdateRole.mutationLabel", this.titleParams(role)),
-        );
-      };
-      this.setState({ confirmedAction }, confirm);
+      coreConfirm(
+        formatMessageWithValues(intl, "core", "roleManagement.updateRole.confirm.title", { label: role.name }),
+        formatMessageWithValues(intl, "core", "roleManagement.updateRole.confirm.message", { label: role.name }),
+        {
+          onConfirm: () =>
+            updateRole(
+              role,
+              formatMessageWithValues(intl, "core", "roleManagement.UpdateRole.mutationLabel", this.titleParams(role)),
+            ),
+        },
+      );
     } else if (!!role.id && this.state.isDuplicate) {
       delete role["id"];
       delete role["uuid"];

@@ -120,8 +120,6 @@ class UserForm extends Component {
           clientMutationId: props.mutation.clientMutationId,
         },
       }));
-    } else if (prevProps.confirmed !== this.props.confirmed && !!this.props.confirmed && !!this.state.confirmedAction) {
-      this.state.confirmedAction();
     }
   }
 
@@ -212,8 +210,11 @@ class UserForm extends Component {
     this.setState({ user });
   };
 
-  onActionToConfirm = (title, message, confirmedAction) => {
-    this.setState({ confirmedAction }, this.props.coreConfirm(title, message));
+  // The action goes with the question, so the answer can only reach this caller.
+  // It used to be parked in state and run on any `confirmed` transition, which meant
+  // a cancelled action was still armed for the next dialog anyone else opened (OP-3190).
+  onActionToConfirm = (title, message, onConfirm) => {
+    this.props.coreConfirm(title, message, { onConfirm });
   };
 
   render() {

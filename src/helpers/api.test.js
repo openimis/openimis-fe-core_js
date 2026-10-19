@@ -346,8 +346,7 @@ describe("mutation reducers", () => {
       expect(next.mutation.id).toBe("77");
     });
 
-    // Currently fails: the fallback is computed into a dead const and never returned.
-    it.fails("keeps the previous id when the response carries no internalId", () => {
+    it("keeps the previous id when the response carries no internalId", () => {
       const state = { mutation: { id: "cid" } };
 
       expect(dispatchMutationResp(state, "createInsuree", { payload: {} }).mutation.id).toBe("cid");

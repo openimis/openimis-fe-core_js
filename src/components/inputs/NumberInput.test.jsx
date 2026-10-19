@@ -97,9 +97,7 @@ describe("NumberInput", () => {
       expect(isFlaggedInvalid()).toBe(false);
     });
 
-    // Currently fails: the message is passed as `error`, which TextInput collapses
-    // to Boolean(err); the user gets a red border and no reason.
-    it.fails("tells the user why the value is rejected", () => {
+    it("tells the user why the value is rejected", () => {
       renderInput({ value: 3, min: 5 }, { messages });
 
       expect(screen.getByText("Must be at least 5")).toBeInTheDocument();

@@ -23,6 +23,10 @@ import UserFilter from "./UserFilter";
 
 const USER_SEARCHER_CONTRIBUTION_KEY = "user.UserSearcher";
 
+// Deletion is recorded on the user's InteractiveUser, not on User, and that is the
+// record `showDeleted` filters on; `active` is the marker its model family reads.
+const isDeletedUser = (user) => user?.iUser?.active === false;
+
 const styles = (theme) => ({
   horizontalButtonContainer: theme.buttonContainer?.horizontal ?? {},
 });
@@ -159,7 +163,7 @@ class UserSearcher extends Component {
                 tooltip: formatMessage(this.props.intl, "admin.user", "openNewTab"),
                 onClick: () => this.props.onDoubleClick(u, true)
               },
-              this.props.rights.includes(RIGHT_USER_DELETE) && !u.validityTo && {
+              this.props.rights.includes(RIGHT_USER_DELETE) && !isDeletedUser(u) && {
                 divider: true,
                 icon: <DeleteIcon />,
                 label: formatMessage(this.props.intl, "admin.user", "deleteUser.buttonText"),
@@ -210,7 +214,7 @@ class UserSearcher extends Component {
           aligns={this.getAligns}
           itemFormatters={this.itemFormatters}
           sorts={this.getSorts}
-          rowDisabled={(_, i) => i.validityTo || i.clientMutationId}
+          rowDisabled={(_, i) => isDeletedUser(i) || i.clientMutationId}
           rowLocked={(_, i) => i.clientMutationId}
           onDoubleClick={onDoubleClick}
         />

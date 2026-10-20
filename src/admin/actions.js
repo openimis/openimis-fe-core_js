@@ -14,7 +14,8 @@ const USER_SUMMARY_PROJECTION_BASE = [
   "id",
   "username",
   "officer{id,dob,phone,lastName,otherNames,email}",
-  "iUser{id,phone,lastName,otherNames,email,roles{id,name}}",
+  // `active` is how a deleted InteractiveUser is marked; the searcher greys those out.
+  "iUser{id,phone,lastName,otherNames,email,active,roles{id,name}}",
   "clientMutationId",
 ];
 const USER_SUMMARY_PROJECTION = (mm) => {

@@ -55,12 +55,31 @@ describe("JournalDrawer", () => {
     expect(screen.getByRole("alert").className).toMatch(/Error/);
   });
 
-  it("stays quiet for a mutation that lands already final, which a reload would replay", () => {
+  // A mutation the backend ran inline is journalled with its final status and
+  // never passes through 0; it gets the same notice as a queued one (OP-3179).
+  it("announces a mutation that lands already final", () => {
     const store = readyStore();
     renderWithProviders(<JournalDrawer />, { store });
 
     act(() => {
       store.dispatch(completed());
+    });
+
+    expect(screen.getByRole("alert")).toHaveTextContent(LABEL);
+  });
+
+  it("stays quiet for finished mutations replayed by the history load after a reload", () => {
+    const store = makeStore();
+    store.dispatch({ type: "CORE_HISTORICAL_MUTATIONS_REQ" });
+    renderWithProviders(<JournalDrawer />, { store });
+
+    act(() => {
+      store.dispatch({
+        type: "CORE_HISTORICAL_MUTATIONS_RESP",
+        ...mutationLogs([
+          { id: btoa("MutationLogGQLType:1"), status: 2, clientMutationId: CLIENT_MUTATION_ID, clientMutationLabel: LABEL },
+        ]),
+      });
     });
 
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();

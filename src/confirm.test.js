@@ -67,6 +67,28 @@ describe("coreConfirm", () => {
     expect(first).not.toHaveBeenCalled();
   });
 
+  it.each([true, false])("keeps no answer in state.core after it is given (%s) (OP-3229)", (answer) => {
+    const store = setup();
+
+    store.dispatch(coreConfirm("t", "m", { onConfirm: vi.fn(), onCancel: vi.fn() }));
+    expect(store.getState().core).not.toHaveProperty("confirmed");
+    store.dispatch(clearConfirm(answer));
+
+    expect(store.getState().core).not.toHaveProperty("confirmed");
+    expect(store.getState().core).not.toHaveProperty("confirm");
+  });
+
+  it("runs a bare callback passed as the third argument on confirm (OP-3229)", () => {
+    const store = setup();
+    const callback = vi.fn();
+
+    store.dispatch(coreConfirm("t", "m", callback));
+    store.dispatch(clearConfirm(true));
+
+    expect(callback).toHaveBeenCalledTimes(1);
+    expect(store.getState().core.confirm).toBeUndefined();
+  });
+
   it("still accepts the legacy intent string as the third argument", () => {
     const store = setup();
     store.dispatch(coreConfirm("Session Expired", "m", "csrf_logout"));

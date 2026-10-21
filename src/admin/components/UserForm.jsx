@@ -297,7 +297,6 @@ const mapStateToProps = (state) => ({
   mutation: state.admin.mutation,
   user: state.admin.user,
   region_districts: state.admin.reg_dst,
-  confirmed: state.core.confirmed,
   obligatoryUserFields: state.admin.obligatory_user_fields,
   obligatoryEoFields: state.admin.obligatory_eo_fields,
   isUserNameValid: state.admin.validationFields?.username?.isValid,

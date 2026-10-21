@@ -379,7 +379,6 @@ const mapStateToProps = (state) => ({
   roles: state.core.roles,
   rolesPageInfo: state.core.rolesPageInfo,
   rolesTotalCount: state.core.rolesTotalCount,
-  confirmed: state.core.confirmed,
   submittingMutation: state.core.submittingMutation,
   mutation: state.core.mutation,
   module: state.core?.savedPagination?.module,

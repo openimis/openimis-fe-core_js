@@ -17,7 +17,7 @@ import * as Sentry from "@sentry/react";
 import { getLocalStorage, setLocalStorage } from "./helpers/useLocalStorage";
 import { scrubSecrets } from "./helpers/secrets";
 import { MUTATION_ERROR, MUTATION_SUCCESS } from "./helpers/mutations";
-import { isUnauthenticatedRoute } from "./helpers/utils";
+import { isUnauthenticatedRoute, onLogout } from "./helpers/utils";
 import { extractMutationResult, storeMutationResult } from "./helpers/mutationAlert";
 
 const REQUESTED_WITH = "webapp";
@@ -447,11 +447,9 @@ export function fetch(config) {
             dispatch({ type: "CORE_AUTH_LOGOUT" });
           } else {
             dispatch(
-              coreConfirm(
-                "Session Expired",
-                "Your session has expired, You will be redirected to the login page.",
-                "csrf_logout",
-              ),
+              coreConfirm("Session Expired", "Your session has expired, You will be redirected to the login page.", {
+                onConfirm: () => onLogout(dispatch),
+              }),
             );
           }
         }
@@ -717,7 +715,7 @@ export function logout() {
       }
     `;
     // Silent: a 401 or CSRF failure here must not raise the session-expired
-    // dialog, whose "csrf_logout" confirmation calls straight back into logout.
+    // dialog, whose confirmation calls straight back into logout.
     const response = await dispatch(
       graphqlWithVariables(mutation, {}, "CORE_AUTH_LOGOUT_MUTATION", {}, {}, { silent: true }),
     );
@@ -808,11 +806,11 @@ export function clearAlert() {
 }
 
 // The answer to a confirmation belongs to whoever asked it, and to nobody else.
-// `core.confirmed` is a single global flag with no record of who that was, so every
-// mounted component watching it read an OK as the answer to its own question - and
-// ran whatever action it had stored, including one the user had already cancelled
-// (OP-3190). The handlers are held here instead, so clearConfirm can call exactly
-// the one that asked. They are deliberately not in the store: a function is not
+// The former `core.confirmed` flag had no record of who that was, so every mounted
+// component watching it read an OK as the answer to its own question - and ran
+// whatever action it had stored, including one the user had already cancelled
+// (OP-3190); it is gone (OP-3229). The handlers are held here instead, so
+// clearConfirm can call exactly the one that asked. They are deliberately not in the store: a function is not
 // serialisable state, and nothing else has any business reading them.
 let pendingConfirmHandlers = null;
 
@@ -821,12 +819,18 @@ let pendingConfirmHandlers = null;
  *
  * @param {string} title
  * @param {string} message
- * @param {object|string|null} options `{ intent, onConfirm, onCancel }`. A bare string
- *   is the legacy `intent` argument and still works.
+ * @param {object|function|string|null} options `{ intent, onConfirm, onCancel }`. A bare
+ *   function is taken as `onConfirm`; a bare string is the legacy `intent` argument.
  */
 export function coreConfirm(title, message, options = null) {
-  const { intent = null, onConfirm = null, onCancel = null } =
-    options && typeof options === "object" ? options : { intent: options };
+  // A bare callback used to be stored as the intent and never called (OP-3229).
+  const normalized =
+    typeof options === "function"
+      ? { onConfirm: options }
+      : options && typeof options === "object"
+        ? options
+        : { intent: options };
+  const { intent = null, onConfirm = null, onCancel = null } = normalized;
   // Only one dialog can be open, so a second ask replaces the first.
   pendingConfirmHandlers = onConfirm || onCancel ? { onConfirm, onCancel } : null;
   return (dispatch) => {
@@ -838,9 +842,7 @@ export function clearConfirm(confirmed) {
   return (dispatch) => {
     const handlers = pendingConfirmHandlers;
     pendingConfirmHandlers = null;
-    // `confirmed` is still published for anything that has not moved to the
-    // callbacks yet; it is no longer how an answer reaches its asker.
-    dispatch({ type: "CORE_CONFIRM_CLEAR", payload: confirmed });
+    dispatch({ type: "CORE_CONFIRM_CLEAR" });
     // After the dispatch, so the dialog is closed before the action runs.
     if (confirmed) {
       handlers?.onConfirm?.();

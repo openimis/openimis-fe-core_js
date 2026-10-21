@@ -206,7 +206,6 @@ const mapStateToProps = (state, props) => ({
   roleRights: state.core.roleRights,
   submittingMutation: state.core.submittingMutation,
   mutation: state.core.mutation,
-  confirmed: state.core.confirmed,
   isRoleNameValid: state.core.validationFields?.roleName?.isValid,
   isRoleNameValidating: state.core.validationFields?.roleName?.isValidating,
 });

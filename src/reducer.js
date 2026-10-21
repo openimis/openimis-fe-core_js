@@ -73,13 +73,10 @@ function reducer(
       return {
         ...state,
         confirm: action.payload,
-        confirmed: null,
       };
     case "CORE_CONFIRM_CLEAR":
-      var s = {
-        ...state,
-        confirmed: action.payload,
-      };
+      // The answer goes to the asker's onConfirm/onCancel, never into the store (OP-3229).
+      var s = { ...state };
       delete s.confirm;
       return s;
     case "CORE_OPEN_EXPORT_CONFIG_DIALOG":

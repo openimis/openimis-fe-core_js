@@ -139,12 +139,12 @@ this.props.coreConfirm(title, message, {
 What **not** to write, in any new code:
 
 - `this.setState({ confirmedAction }, confirm)` — parking the action in component state,
-- a `componentDidUpdate` / `useEffect` watching `props.confirmed` to run it.
+- a `componentDidUpdate` / `useEffect` watching `props.confirmed` to run it (the flag no longer exists).
 
-`state.core.confirmed` is one global boolean with no record of who asked. Every
-component watching it reads an OK as the answer to *its* question, so a stored
-action that was never cleared — a delete the user **cancelled**, say — is still
-armed, and the next confirmation accepted anywhere in the app runs it. That is not
+`state.core.confirmed` was one global boolean with no record of who asked. Every
+component watching it read an OK as the answer to *its* question, so a stored
+action that was never cleared — a delete the user **cancelled**, say — stayed
+armed, and the next confirmation accepted anywhere in the app ran it. That was not
 hypothetical: it submitted a `deletePolicy` the user had declined, seven
 milliseconds before the delete they did confirm (OP-3190).
 
@@ -153,9 +153,11 @@ a function is not serialisable state, and nothing else has any business reading
 them. `clearConfirm` calls exactly the one that asked, after the dispatch that
 closes the dialog.
 
-`confirmed` is still published for anything not yet migrated, but it is no longer
-how an answer reaches its asker. A component that passes `onConfirm` must not also
-watch it, or the action runs twice.
+The flag is gone (OP-3229): `CORE_CONFIRM_CLEAR` no longer stores the answer, so
+`onConfirm` / `onCancel` is the only way it reaches its asker. A component that needs
+to remember it confirmed something (to lock a form, say) keeps that in its own state.
+The third argument still accepts a bare `intent` string for compatibility, but
+nothing in fe-core reads it any more.
 
 ### Row lifecycle: the link is the `clientMutationId`
 

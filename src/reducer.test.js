@@ -45,19 +45,19 @@ describe("core reducer", () => {
   });
 
   describe("confirmations", () => {
-    it("resets any prior answer when a new confirmation opens", () => {
-      const answered = { ...initial(), confirmed: true };
-      const next = on(answered, "CORE_CONFIRM", { title: "Delete?" });
+    // The answer goes to the asker's onConfirm/onCancel, never into the store (OP-3229).
+    it("opens the dialog without storing an answer", () => {
+      const next = on(initial(), "CORE_CONFIRM", { title: "Delete?" });
 
       expect(next.confirm).toEqual({ title: "Delete?" });
-      expect(next.confirmed).toBeNull();
+      expect(next).not.toHaveProperty("confirmed");
     });
 
-    it("records the answer and drops the dialog on clear", () => {
+    it("drops the dialog on clear without storing the answer", () => {
       const asked = on(initial(), "CORE_CONFIRM", { title: "Delete?" });
       const answered = on(asked, "CORE_CONFIRM_CLEAR", true);
 
-      expect(answered.confirmed).toBe(true);
+      expect(answered).not.toHaveProperty("confirmed");
       expect(answered).not.toHaveProperty("confirm");
     });
   });

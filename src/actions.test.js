@@ -122,6 +122,43 @@ describe("graphqlMutation", () => {
     expect(mutations[0].error).toContain("boom");
   });
 
+  it("keeps the label from the input when the response already carries the outcome", async () => {
+    // What useGraphqlMutation sends: the label in the input, none in its config, and an
+    // operation enriched with `success`, so the outcome is read off the response.
+    const input = { name: "Foo", clientMutationLabel: "Create product Foo" };
+    const { store } = setup(() => ({
+      data: { createItemsPricelist: { internalId: "17", success: true, error: null } },
+    }));
+
+    await store.dispatch(
+      graphqlMutation(MUTATION, { input }, "CORE_TRIGGER_MUTATION", {
+        operation: MUTATION,
+        input,
+        clientMutationLabel: undefined,
+      }),
+    );
+
+    const { mutations } = store.getState().core;
+    expect(mutations).toHaveLength(1);
+    expect(mutations[0].status).toBe(2);
+    expect(mutations[0].clientMutationLabel).toBe("Create product Foo");
+  });
+
+  it("keeps a label given only through the params when the response carries the outcome", async () => {
+    // The change-password page names its entry through the hook config: no label in the input.
+    const { store } = setup(() => ({ data: { createItemsPricelist: { success: true, error: null } } }));
+
+    await store.dispatch(
+      graphqlMutation(MUTATION, { input: { name: "Foo" } }, "CORE_TRIGGER_MUTATION", {
+        clientMutationLabel: "Change password",
+      }),
+    );
+
+    const { mutations } = store.getState().core;
+    expect(mutations).toHaveLength(1);
+    expect(mutations[0].clientMutationLabel).toBe("Change password");
+  });
+
   it("leaves the journal alone for mutations without a clientMutationId", async () => {
     const { store } = setup(() => ({ data: { tokenAuth: { refreshExpiresIn: 1 } } }));
 

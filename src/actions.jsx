@@ -349,6 +349,10 @@ export function graphqlMutation(
     clientMutationId = uuid.uuid();
     variables.input.clientMutationId = clientMutationId;
   }
+  // Modules name the entry in the input, useGraphqlMutation callers may name it in the
+  // params instead. Resolved once: every journalling of this mutation must carry it, since
+  // a later one merges over the entry and an undefined label would erase the first.
+  const clientMutationLabel = variables?.input?.clientMutationLabel ?? params.clientMutationLabel;
   return async (dispatch) => {
     // The user asked for this, so it belongs in the journal whatever becomes of it -
     // including a rejection. Added before the request so the journal sees it processing:
@@ -358,7 +362,7 @@ export function graphqlMutation(
         autoJournalize({
           ...params,
           clientMutationId,
-          clientMutationLabel: variables.input.clientMutationLabel,
+          clientMutationLabel,
           requestDateTime: new Date().toISOString(),
         }),
       );
@@ -380,7 +384,7 @@ export function graphqlMutation(
       // pending entry would be re-polled for ever.
       const outcome = immediateMutationOutcome(response);
       if (outcome) {
-        dispatch(autoJournalize({ ...params, clientMutationId }, outcome));
+        dispatch(autoJournalize({ ...params, clientMutationId, clientMutationLabel }, outcome));
         return response?.payload?.data;
       }
       dispatch(fetchMutation(clientMutationId));

@@ -183,7 +183,8 @@ class AutoSuggestion extends Component {
     return this._truncate(this._allItems().filter((i) => regex.test(lookup(i))));
   };
 
-  renderInputComponent = ({ inputRef, ...inputProps }) => {
+  // `required` reaches the field here, as it does in select mode, or a mandatory picker shows no asterisk.
+  renderInputComponent = ({ inputRef, ...inputProps }, required = false) => {
     const { label } = this.props;
     return (
       <FormControl fullWidth variant={this.inputVariant}>
@@ -191,6 +192,7 @@ class AutoSuggestion extends Component {
           {...inputProps}
           variant={this.inputVariant}
           label={label}
+          required={required}
           InputLabelProps={inputProps.InputLabelProps}
           inputRef={inputRef}
           InputProps={{
@@ -298,7 +300,7 @@ class AutoSuggestion extends Component {
         onChange={(event, newValue) => this.onSuggestionSelected(event, { newValue })}
         onInputChange={(event, newValue) => this.onInputChange(event, { newValue })}
         filterOptions={(options) => options} // Custom filtering handled by _getSuggestions
-        renderInput={(params) => this.renderInputComponent(params)}
+        renderInput={(params) => this.renderInputComponent(params, required)}
         renderOption={(props, option, { selected }) => (
           <li {...props} className={selected ? "suggestionHighlighted" : "suggestion"}>
             {this._renderSuggestion(option, { isHighlighted: selected })}

@@ -435,15 +435,19 @@ class Searcher extends Component {
   };
 
   onChangeFilters = (fltrs) => {
-    let filters = { ...this.state.filters };
-    fltrs.forEach((filter) => {
-      if (filter.value === null) {
-        delete filters[filter.id];
-      } else {
-        filters[filter.id] = { value: filter.value, filter: filter.filter };
-      }
+    // Updater form: several calls batched in one event must each start from the
+    // previous call's filters, not from the same stale this.state.
+    this.setState((state) => {
+      const filters = { ...state.filters };
+      fltrs.forEach((filter) => {
+        if (filter.value === null) {
+          delete filters[filter.id];
+        } else {
+          filters[filter.id] = { value: filter.value, filter: filter.filter };
+        }
+      });
+      return { filters };
     });
-    this.setState({ filters });
   };
 
   _notifyFiltersApplied = () => {
@@ -497,7 +501,7 @@ class Searcher extends Component {
   };
 
   selectAll = (e) => {
-    this.setState({ selectAll: this.state.selectAll + 1 });
+    this.setState((state) => ({ selectAll: state.selectAll + 1 }));
   };
 
   onChangeSelection = (selection) => {

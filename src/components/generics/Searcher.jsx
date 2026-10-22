@@ -435,15 +435,19 @@ class Searcher extends Component {
   };
 
   onChangeFilters = (fltrs) => {
-    let filters = { ...this.state.filters };
-    fltrs.forEach((filter) => {
-      if (filter.value === null) {
-        delete filters[filter.id];
-      } else {
-        filters[filter.id] = { value: filter.value, filter: filter.filter };
-      }
+    // Updater form: several calls batched in one event must each start from the
+    // previous call's filters, not from the same stale this.state.
+    this.setState((state) => {
+      const filters = { ...state.filters };
+      fltrs.forEach((filter) => {
+        if (filter.value === null) {
+          delete filters[filter.id];
+        } else {
+          filters[filter.id] = { value: filter.value, filter: filter.filter };
+        }
+      });
+      return { filters };
     });
-    this.setState({ filters });
   };
 
   _notifyFiltersApplied = () => {
@@ -478,17 +482,18 @@ class Searcher extends Component {
   };
 
   deleteFilter = (filter) => {
-    let fltrs = this.state.filters;
-    delete fltrs[filter];
-    this.setState(
-      {
-        filters: fltrs,
+    this.setState((state) => {
+      // Work on a copy: state.filters is the object cached in core.filtersCache,
+      // which must not be written in place.
+      const filters = { ...state.filters };
+      delete filters[filter];
+      return {
+        filters,
         page: 0,
         afterCursor: null,
         beforeCursor: null,
-      },
-      this._cacheAndApply,
-    );
+      };
+    }, this._cacheAndApply);
   };
 
   clearSelected = (e) => {
@@ -496,7 +501,7 @@ class Searcher extends Component {
   };
 
   selectAll = (e) => {
-    this.setState({ selectAll: this.state.selectAll + 1 });
+    this.setState((state) => ({ selectAll: state.selectAll + 1 }));
   };
 
   onChangeSelection = (selection) => {

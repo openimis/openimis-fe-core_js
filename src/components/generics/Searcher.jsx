@@ -478,7 +478,9 @@ class Searcher extends Component {
   };
 
   deleteFilter = (filter) => {
-    let fltrs = this.state.filters;
+    // Work on a copy: state.filters is the object cached in core.filtersCache,
+    // which must not be written in place.
+    let fltrs = { ...this.state.filters };
     delete fltrs[filter];
     this.setState(
       {

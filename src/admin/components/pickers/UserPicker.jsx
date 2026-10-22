@@ -6,6 +6,12 @@ import { withModulesManager, useDebounceCb, useTranslations } from "@openimis/fe
 import { fetchUsers } from "../../actions";
 import { DEFAULT } from "../../constants";
 
+// Sorted on the server so the first page is predictable, not an arbitrary slice.
+const ORDER_BY_USERNAME = 'orderBy: ["username"]';
+// The server does the matching; filtering the loaded page in the browser would
+// empty the list until the search answers.
+const keepServerResults = (options) => options;
+
 const styles = (theme) => ({
   label: {
     color: theme.palette.primary.main,
@@ -86,13 +92,19 @@ const UserPicker = (props) => {
     if (!searchOnInput || !searchString || searchString.length <= minCharLookup) {
       return;
     }
-    dispatch(fetchUsers(modulesManager, [`str: "${searchString}"`, ...filters].filter(Boolean), !healthFacility));
+    dispatch(
+      fetchUsers(
+        modulesManager,
+        [`str: "${searchString}"`, ORDER_BY_USERNAME, ...filters].filter(Boolean),
+        !healthFacility,
+      ),
+    );
   }, [searchString, searchOnInput, minCharLookup, dispatch, modulesManager, filters, healthFacility, readOnly]);
 
   const handleOpen = () => {
     if (readOnly) return;
     setOpen(true);
-    dispatch(fetchUsers(modulesManager, [`first: 10`, ...filters], !healthFacility));
+    dispatch(fetchUsers(modulesManager, [`first: 10`, ORDER_BY_USERNAME, ...filters], !healthFacility));
   };
 
   return (
@@ -112,7 +124,7 @@ const UserPicker = (props) => {
       getOptionLabel={(option) => formatSuggestion(option)}
       isOptionEqualToValue={(option, v) => option?.id === v?.id}
       onChange={handleChange}
-      filterOptions={filterOptions}
+      filterOptions={filterOptions ?? (searchOnInput ? keepServerResults : undefined)}
       filterSelectedOptions={filterSelectedOptions}
       {...(!searchOnInput && {
         inputValue,

@@ -19,7 +19,8 @@ class ConstantBasedPicker extends Component {
   state = INIT_STATE;
 
   componentDidMount() {
-    if (!!this.props.value) {
+    // 0 is a constant like any other (e.g. the Error claim status), not "no value"
+    if (this.props.value !== undefined && this.props.value !== null) {
       this.setState((state, props) => ({ value: props.value }));
     }
   }

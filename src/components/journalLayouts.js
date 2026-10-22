@@ -41,10 +41,14 @@ const journalGutter = (theme) =>
  * edge keeps a gutter wide enough for the collapsed drawer, released while it is open.
  */
 export const classicJournalLayout = (theme) => ({
+  // The content areas are flex items: without minWidth 0 they grow to their content, so a
+  // grid wider than the screen widens the page instead of scrolling, and is clipped (OP-3240).
   "& .layoutWrapper": {
     display: "flex",
     flex: 1,
     position: "relative",
+    minWidth: 0,
+    maxWidth: "100%",
   },
   "& .topToolbar": {
     display: "flex",
@@ -121,6 +125,9 @@ export const classicJournalLayout = (theme) => ({
   },
   "& .content": {
     flexGrow: 1,
+    minWidth: 0,
+    maxWidth: "100%",
+    boxSizing: "border-box",
     paddingTop: theme.spacing(4),
     paddingLeft: theme.spacing(3),
     paddingRight: `calc(${theme.spacing(3)} + ${journalGutter(theme)})`,
@@ -134,11 +141,15 @@ export const classicJournalLayout = (theme) => ({
   },
   "& main": {
     flexGrow: 1,
+    minWidth: 0,
+    maxWidth: "100%",
+    boxSizing: "border-box",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     "& > *": {
       width: "100%",
+      maxWidth: "100%",
       padding: "0 !important",
     },
   },

@@ -478,19 +478,18 @@ class Searcher extends Component {
   };
 
   deleteFilter = (filter) => {
-    // Work on a copy: state.filters is the object cached in core.filtersCache,
-    // which must not be written in place.
-    let fltrs = { ...this.state.filters };
-    delete fltrs[filter];
-    this.setState(
-      {
-        filters: fltrs,
+    this.setState((state) => {
+      // Work on a copy: state.filters is the object cached in core.filtersCache,
+      // which must not be written in place.
+      const filters = { ...state.filters };
+      delete filters[filter];
+      return {
+        filters,
         page: 0,
         afterCursor: null,
         beforeCursor: null,
-      },
-      this._cacheAndApply,
-    );
+      };
+    }, this._cacheAndApply);
   };
 
   clearSelected = (e) => {

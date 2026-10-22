@@ -38,3 +38,35 @@ describe("AutoSuggestion below the select threshold", () => {
     expect(outOfRangeWarnings()).toHaveLength(0);
   });
 });
+
+// A required picker must say so, in both modes: the report dialogs keep Generate disabled
+// until it is set, and without the asterisk nothing tells the user why (OP-3241).
+describe("AutoSuggestion marked required", () => {
+  const renderRequired = (props = {}) =>
+    renderWithProviders(
+      <AutoSuggestion
+        module="location"
+        label="Region"
+        items={[1, 2, 3, 4, 5, 6, 7]}
+        getSuggestionValue={(i) => `Region ${i}`}
+        onSuggestionSelected={() => {}}
+        required
+        {...props}
+      />,
+    );
+
+  const requiredAsterisk = (container) => container.querySelector("label .MuiFormLabel-asterisk");
+
+  it("shows the asterisk as a select, below the threshold", () => {
+    const { container } = renderRequired({ selectThreshold: 10 });
+
+    expect(requiredAsterisk(container)).toBeInTheDocument();
+  });
+
+  it("shows the asterisk as an autocomplete, at or above the threshold", () => {
+    const { container } = renderRequired({ selectThreshold: 5 });
+
+    expect(screen.getByRole("combobox")).toHaveAttribute("aria-autocomplete");
+    expect(requiredAsterisk(container)).toBeInTheDocument();
+  });
+});

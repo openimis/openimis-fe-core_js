@@ -41,13 +41,14 @@ const EnrolmentOfficerPicker = (props) => {
     );
 
     if (!p) return "?";
-    return [
-      p.username,
+    const name = [
       renderLastNameFirst ? p.lastName : p.otherNames,
       !renderLastNameFirst ? p.lastName : p.otherNames,
     ]
       .filter(Boolean)
       .join(" ");
+    // The search matches the code too: show it, or a match by code reads as a stranger.
+    return [p.code ?? p.username, name].filter(Boolean).join(" - ");
   };
 
   return (

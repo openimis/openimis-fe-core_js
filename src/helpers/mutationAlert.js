@@ -127,7 +127,10 @@ const claimStats = (mutation) => {
  * @param formatMessage bound on the "core" module
  */
 export function buildMutationAlert(mutation, result, formatMessage) {
-  const isError = mutation?.status === 1 || result?.success === false;
+  // A settled log decides, as it does for the journal list: the response recorded
+  // at submission only stands in while the mutation is still pending (OP-3265).
+  const settled = mutation?.status === 1 || mutation?.status === 2;
+  const isError = settled ? mutation.status === 1 : result?.success === false;
   const rawError = mutation?.error ?? result?.error ?? null;
   const { messages, detail } = isError
     ? parseMutationError(rawError, formatMessage("mutationError"))

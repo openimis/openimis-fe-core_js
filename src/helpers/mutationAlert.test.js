@@ -104,6 +104,14 @@ describe("buildMutationAlert", () => {
     expect(alert.type).toBe("error");
   });
 
+  // OP-3265: the journal list shows a mutation by its log status; the detail dialog
+  // said "Operation failed." for a log at SUCCESS whose submission response had
+  // success: false.
+  it("follows a settled log over the recorded result", () => {
+    expect(buildMutationAlert({ ...mutation, status: 2 }, { success: false }, formatMessage).type).toBe("success");
+    expect(buildMutationAlert({ ...mutation, status: 1 }, { success: true }, formatMessage).type).toBe("error");
+  });
+
   it("falls back to the journal entry when nothing was recorded", () => {
     const alert = buildMutationAlert(
       { ...mutation, clientMutationDetails: '["line one", "line two"]' },

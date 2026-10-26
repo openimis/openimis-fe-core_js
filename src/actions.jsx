@@ -628,9 +628,8 @@ export function fetchCsrfToken(jwtToken) {
         ["CORE_AUTH_CSRTOKEN_REQ", "CORE_AUTH_CSRTOKEN_RESP", "CORE_AUTH_ERR"],
         {},
         false,
-        {
-          "Authorization": `JWT ${jwtToken}`,
-        },
+        // Without a JWT the session cookie authenticates the request.
+        jwtToken ? { "Authorization": `JWT ${jwtToken}` } : {},
       ),
     );
   };
@@ -681,10 +680,12 @@ export function initialize() {
       await clearExpiredSession();
       dispatch({ type: "CORE_AUTH_LOGOUT" });
     } else if (!session?.error && !getLocalStorage("csrfToken")) {
-      // Mirror the csrftoken cookie so later mutations send a matching X-CSRFToken.
-      const cookieCsrf = getCsrfToken();
-      if (cookieCsrf) {
-        setLocalStorage("csrfToken", cookieCsrf);
+      // Mirror the csrftoken cookie so later requests send a matching X-CSRFToken. With
+      // CSRF_USE_SESSIONS (prod) there is no such cookie: a session opened outside /front,
+      // e.g. by a Django admin login, has to ask the server for its token.
+      const csrfToken = getCsrfToken() ?? (await dispatch(fetchCsrfToken()))?.payload?.data?.getCsrfToken?.csrfToken;
+      if (csrfToken) {
+        setLocalStorage("csrfToken", csrfToken);
       }
     }
 

@@ -1,8 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { RSAA } from "redux-api-middleware";
 import { applyMiddleware, createStore } from "redux";
 
-import { graphqlMutation } from "./actions";
+import { graphqlMutation, initialize } from "./actions";
+import { getLocalStorage } from "./helpers/useLocalStorage";
 import reducer from "./reducer";
 
 /** redux-thunk is an assembly dependency; the two lines it contributes are cheaper to inline. */
@@ -165,5 +166,64 @@ describe("graphqlMutation", () => {
     await store.dispatch(graphqlMutation("mutation { tokenAuth { refreshExpiresIn } }", {}));
 
     expect(store.getState().core.mutations).toEqual([]);
+  });
+});
+
+describe("initialize", () => {
+  /**
+   * Answers the boot requests as a backend with a live session would: the current user over
+   * REST, and a CSRF token from getCsrfToken. Records each request's endpoint, body and headers.
+   */
+  const bootMock = (requests) => () => (next) => (action) => {
+    const rsaa = action[RSAA];
+    if (!rsaa) return next(action);
+    const query = rsaa.body ? JSON.parse(rsaa.body).query : null;
+    requests.push({ endpoint: rsaa.endpoint, query, headers: rsaa.headers });
+    const [req, resp] = rsaa.types;
+    next({ type: req.type ?? req, meta: req.meta });
+    const payload = query?.includes("getCsrfToken")
+      ? { data: { getCsrfToken: { csrfToken: "session-token" } } }
+      : { id: 1, i_user: { id: 1, rights: [] } };
+    const success = { type: resp.type ?? resp, payload, meta: resp.meta };
+    next(success);
+    return Promise.resolve(success);
+  };
+
+  const boot = async () => {
+    const requests = [];
+    const store = createStore(
+      (state, action) => ({ core: reducer(state?.core, action) }),
+      applyMiddleware(thunk, bootMock(requests)),
+    );
+    await store.dispatch(initialize());
+    return { store, requests };
+  };
+
+  afterEach(() => {
+    window.localStorage.clear();
+    document.cookie = "csrftoken=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+  });
+
+  it("asks the server for a CSRF token when the session left no csrftoken cookie", async () => {
+    // A Django admin login under CSRF_USE_SESSIONS: the session cookie authenticates the
+    // user, but there is no csrftoken cookie to mirror. Without a token every query fails
+    // with "CSRF token missing or incorrect".
+    const { store, requests } = await boot();
+
+    const csrfRequest = requests.find((r) => r.query?.includes("getCsrfToken"));
+    expect(csrfRequest, "getCsrfToken was requested").toBeDefined();
+    // The session authenticates it: there is no JWT to send.
+    expect(csrfRequest.headers.Authorization).toBeUndefined();
+    expect(getLocalStorage("csrfToken")).toBe("session-token");
+    expect(store.getState().core.isInitialized).toBe(true);
+  });
+
+  it("mirrors the csrftoken cookie without asking the server", async () => {
+    document.cookie = "csrftoken=cookie-token";
+
+    const { requests } = await boot();
+
+    expect(requests.some((r) => r.query?.includes("getCsrfToken"))).toBe(false);
+    expect(getLocalStorage("csrfToken")).toBe("cookie-token");
   });
 });

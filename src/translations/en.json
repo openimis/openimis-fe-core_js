@@ -54,6 +54,7 @@
   "core.ForgotPasswordPage.explanationMessage": "Enter your username to be able to recover your account. En e-mail with the instructions will be sent to your e-mail address.",
   "core.ForgotPasswordPage.contactAdministrator": "If you do not receive an e-mail, please check with your administrator.",
   "core.ForgotPasswordPage.done": "Done ! Check your inbox and click on the verification link to reset your password.",
+  "core.ForgotPasswordPage.error": "Your account could not be recovered. Please try again or check with your administrator.",
   "core.SetPasswordPage.pageTitle": "Set a new Password",
   "core.SetPasswordPage.username.label": "Username",
   "core.SetPasswordPage.password.label": "Password",

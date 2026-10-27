@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { passwordGenerator } from "./passwordGenerator";
+import { PASSWORD_CHARACTER_SETS, passwordGenerator } from "./passwordGenerator";
 
-const SPECIAL = /[!@#$%^&*()_+\-=[\]{}|;:,.<>?]/;
 // The "symbols" class of the backend password_validator library (constants.py),
 // which be-core's CustomPasswordValidator applies when PASSWORD_SYMBOLS > 0:
 //   r'[`~\!@#\$%\^\&\*\(\)\-_\=\+\[\{\}\]\\\|;\:\'",<.>\/\?\€\£\¥\₹]+'
@@ -43,7 +42,7 @@ describe("passwordGenerator", () => {
     expect(joined).toMatch(/[a-z]/);
     expect(joined).toMatch(/[A-Z]/);
     expect(joined).toMatch(/\d/);
-    expect(joined).toMatch(SPECIAL);
+    expect(joined).toMatch(BACKEND_SYMBOL);
   });
 
   it("does not repeat itself", () => {
@@ -53,22 +52,21 @@ describe("passwordGenerator", () => {
   });
 
   it("always includes a character from every required set", () => {
-    const passwords = times(300, () => passwordGenerator({ length: 10 }));
+    // Options used by UserMasterPanel when fe-admin.passwordGeneratorOptions is not configured.
+    const passwords = times(1000, () => passwordGenerator({ length: 12 }));
 
-    const missing = passwords.filter((p) => !/[a-z]/.test(p) || !/[A-Z]/.test(p) || !/\d/.test(p) || !SPECIAL.test(p));
+    const missing = passwords.filter(
+      (p) => !/[A-Z]/.test(p) || !/[a-z]/.test(p) || !/\d/.test(p) || !BACKEND_SYMBOL.test(p),
+    );
 
     expect(missing).toEqual([]);
   });
 
-  it("satisfies every character class the backend password validator requires", () => {
-    // Options used by UserMasterPanel when fe-admin.passwordGeneratorOptions is not configured.
-    const passwords = times(1000, () => passwordGenerator({ length: 12 }));
+  it("only uses special characters the backend counts as symbols", () => {
+    const notSymbols = [...PASSWORD_CHARACTER_SETS.specialCharacters].filter((c) => !BACKEND_SYMBOL.test(c));
 
-    const rejected = passwords.filter(
-      (p) => !/[A-Z]/.test(p) || !/[a-z]/.test(p) || !/\d/.test(p) || !BACKEND_SYMBOL.test(p),
-    );
-
-    expect(rejected).toEqual([]);
+    expect(PASSWORD_CHARACTER_SETS.specialCharacters.length).toBeGreaterThan(0);
+    expect(notSymbols).toEqual([]);
   });
 
   it("only uses the enabled sets and still covers each of them", () => {

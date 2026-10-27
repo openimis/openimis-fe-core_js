@@ -3,6 +3,10 @@ import { describe, expect, it } from "vitest";
 import { passwordGenerator } from "./passwordGenerator";
 
 const SPECIAL = /[!@#$%^&*()_+\-=[\]{}|;:,.<>?]/;
+// The "symbols" class of the backend password_validator library (constants.py),
+// which be-core's CustomPasswordValidator applies when PASSWORD_SYMBOLS > 0:
+//   r'[`~\!@#\$%\^\&\*\(\)\-_\=\+\[\{\}\]\\\|;\:\'",<.>\/\?\€\£\¥\₹]+'
+const BACKEND_SYMBOL = /[`~!@#$%^&*()\-_=+[{}\]\\|;:'",<.>/?€£¥₹]/;
 const times = (n, fn) => Array.from({ length: n }, fn);
 
 describe("passwordGenerator", () => {
@@ -33,8 +37,7 @@ describe("passwordGenerator", () => {
   });
 
   it("mixes sets when several are enabled", () => {
-    // Not asserted per-password: with the current implementation any single
-    // password may miss a set (see the pinned test below).
+    // Per-password coverage is asserted separately below.
     const joined = times(50, () => passwordGenerator({ length: 20 })).join("");
 
     expect(joined).toMatch(/[a-z]/);
@@ -49,14 +52,37 @@ describe("passwordGenerator", () => {
     expect(new Set(passwords).size).toBe(passwords.length);
   });
 
-  // Currently fails: each position picks a random category, so nothing
-  // guarantees a required category actually appears. At length 10 with four
-  // sets enabled, ~5.7% of passwords contain no digit.
-  it.fails("always includes a character from every required set", () => {
+  it("always includes a character from every required set", () => {
     const passwords = times(300, () => passwordGenerator({ length: 10 }));
 
     const missing = passwords.filter((p) => !/[a-z]/.test(p) || !/[A-Z]/.test(p) || !/\d/.test(p) || !SPECIAL.test(p));
 
     expect(missing).toEqual([]);
+  });
+
+  it("satisfies every character class the backend password validator requires", () => {
+    // Options used by UserMasterPanel when fe-admin.passwordGeneratorOptions is not configured.
+    const passwords = times(1000, () => passwordGenerator({ length: 12 }));
+
+    const rejected = passwords.filter(
+      (p) => !/[A-Z]/.test(p) || !/[a-z]/.test(p) || !/\d/.test(p) || !BACKEND_SYMBOL.test(p),
+    );
+
+    expect(rejected).toEqual([]);
+  });
+
+  it("only uses the enabled sets and still covers each of them", () => {
+    const passwords = times(200, () =>
+      passwordGenerator({ length: 3, isLowerCaseRequired: false, isSpecialSymbolRequired: false }),
+    );
+
+    expect(passwords.every((p) => /^[A-Z0-9]{3}$/.test(p) && /[A-Z]/.test(p) && /\d/.test(p))).toBe(true);
+  });
+
+  it("uses distinct required sets when shorter than the number of sets", () => {
+    const passwords = times(200, () => passwordGenerator({ length: 2 }));
+    const classOf = (c) => (/[a-z]/.test(c) ? "lower" : /[A-Z]/.test(c) ? "upper" : /\d/.test(c) ? "digit" : "symbol");
+
+    expect(passwords.every((p) => p.length === 2 && classOf(p[0]) !== classOf(p[1]))).toBe(true);
   });
 });

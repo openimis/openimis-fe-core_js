@@ -12,8 +12,6 @@ export const passwordGenerator = (options) => {
   const isUpperCaseRequired = options?.isUpperCaseRequired ?? true;
   const isSpecialSymbolRequired = options?.isSpecialSymbolRequired ?? true;
 
-  let password = "";
-
   const getCategoriesArray = () => {
     const availableCategories = [];
     if (isLowerCaseRequired) availableCategories.push(lowercase);
@@ -24,13 +22,29 @@ export const passwordGenerator = (options) => {
   };
 
   const categoriesArray = getCategoriesArray();
+  const allCharacters = categoriesArray.join("");
 
-  getSafeRandomNumberArray(length, categoriesArray.length).forEach((category) => {
-    password += getRandomOfType(categoriesArray[category]);
-  });
+  // One character from each required category first, so that none can be missing,
+  // then the remaining positions from all enabled categories together.
+  const characters = categoriesArray.map((category) => getRandomOfType(category));
+  while (characters.length < length) {
+    characters.push(getRandomOfType(allCharacters));
+  }
 
-  return password;
+  // Shuffle so the guaranteed characters do not sit at predictable positions. When the
+  // requested length is shorter than the number of categories, the shuffle also decides
+  // which categories are kept, each at most once.
+  return shuffle(characters).slice(0, Math.max(length, 0)).join("");
 };
+
+function shuffle(array) {
+  // Fisher-Yates, using the secure random source below
+  for (let i = array.length - 1; i > 0; i--) {
+    const [j] = getSafeRandomNumberArray(1, i + 1);
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
 
 function getSafeRandomNumberArray(length, modulo) {
   // crypto.getRandomValues is coded in a way that is cryptographically secure

@@ -106,15 +106,20 @@ const SetPasswordPage = ({ fetchPasswordPolicy, passwordPolicy }) => {
   const onSubmit = async (e) => {
     e.preventDefault();
     if (isValid) {
-      const result = await mutate({
-        username: credentials.username,
-        token: credentials.token,
-        newPassword: credentials.password,
-      });
-      if (result?.setPassword.success) {
+      let result;
+      try {
+        result = await mutate({
+          username: credentials.username,
+          token: credentials.token,
+          newPassword: credentials.password,
+        });
+      } catch {
+        // Refused by the server: already journalled, the page only has to say it failed.
+      }
+      if (result?.setPassword?.success) {
         history.push("/");
       } else {
-        handleSetPasswordError(result?.setPassword.error || formatMessage("error"));
+        handleSetPasswordError(result?.setPassword?.error || formatMessage("error"));
       }
     }
   };

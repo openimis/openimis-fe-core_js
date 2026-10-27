@@ -8,12 +8,16 @@ const MUTATION_RESULT_FIELDS = ["internalId", "status", "success", "error", "mes
 
 /**
  * Adds the mutation result fields the journal needs to a caller-provided operation, right after the
- * id it already selects. Fields the caller already asked for are left alone, and an operation that
- * selects no mutation id at all is returned untouched.
+ * internalId it already selects. Fields the caller already asked for are left alone.
+ *
+ * Selecting internalId is the opt-in: only an OpenIMISMutation payload carries these fields, and
+ * every caller of one selects it. A plain ClientIDMutation (changePassword, resetPassword,
+ * setPassword) has none of them, and the server answers 400 to an operation asking for one, so an
+ * operation that does not select internalId is returned untouched.
  */
 export const enrichMutationOperation = (operation) => {
   if (typeof operation !== "string") return operation;
-  const anchor = /\b(?:clientMutationId|internalId)\b/;
+  const anchor = /\binternalId\b/;
   const match = anchor.exec(operation);
   if (!match) return operation;
   const missing = MUTATION_RESULT_FIELDS.filter((field) => !new RegExp(`\\b${field}\\b`).test(operation));
@@ -146,6 +150,14 @@ export const useGraphqlMutation = (operation, config) => {
             config.wait,
           ),
         );
+
+        // A mutation the server refused (GraphQL error, HTTP error) yields no data: graphqlMutation
+        // has journalled the refusal, and the caller must not take it for a success. Only for the
+        // operations without internalId (the ClientIDMutation ones, whose callers read the result):
+        // the OpenIMISMutation callers await mutate() without a catch and still resolve as before.
+        if (result === undefined && !/\binternalId\b/.test(operation)) {
+          throw new Error("The mutation did not return a result");
+        }
 
         // Handle graphql errors
         const error = result?.error ? mutationErrorText(result.error) : "";

@@ -44,6 +44,15 @@ const ClaimAdministratorFormPanel = (props) => {
     toggleSwitchButton(edited, hasClaimRole, hasClaimUserType, setIsEnabled);
   }, [hasClaimRole, hasClaimUserType]);
 
+  // the panel is also enabled by the claim administrator role alone, but the backend only
+  // creates or updates the claim administrator - and the form only requires its health
+  // facility - when the user type is set
+  useEffect(() => {
+    if (isEnabled && !hasClaimUserType) {
+      onEditedChanged(setUserTypeEnabled(edited, CLAIM_ADMIN_USER_TYPE, true));
+    }
+  }, [isEnabled, hasClaimUserType, edited, onEditedChanged]);
+
   const handleToggle = () => {
     const nextEnabled = !isEnabled;
     setIsEnabled(nextEnabled);

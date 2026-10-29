@@ -1,5 +1,5 @@
-# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
-# For more information see: https://help.github.com/actions/language-and-framework-guides/publishing-nodejs-packages
+# This workflow publishes the package to npmjs and GitHub Packages when a release is created
+# The steps live in the shared workflow openimis/openimis-fe_js/.github/workflows/module-npmpublish.yml
 
 name: Publish Node.js Package
 
@@ -11,11 +11,7 @@ on:
       node_version:
         description: 'Node version to use'
         required: true
-        default: '20'
-      registry_url:
-        description: 'NPM registry URL'
-        required: true
-        default: 'https://registry.npmjs.org/'
+        default: '24'
       scope:
         description: 'Scope for npm package'
         required: false
@@ -24,27 +20,28 @@ on:
         description: 'Access level for npm package'
         required: false
         default: 'public'
-      tab:
-        required: true
+      tag:
+        description: 'Optional dist-tag for the published package (e.g., latest, beta)'
+        required: false
 
 jobs:
   call-npm-publish-workflow:
     uses: openimis/openimis-fe_js/.github/workflows/module-npmpublish.yml@develop
     with:
       registry_url: 'https://registry.npmjs.org/'
-      node_version: ${{ github.event.inputs.node_version }}
-      access: ${{ github.event.inputs.access }}
-      scope: ${{ github.event.inputs.scope }}
-      tag:  ${{ github.event.inputs.tag }}
+      node_version: ${{ github.event.inputs.node_version || '24' }}
+      access: ${{ github.event.inputs.access || 'public' }}
+      scope: ${{ github.event.inputs.scope || 'openimis' }}
+      tag: ${{ github.event.inputs.tag }}
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
   call-gpr-publish-workflow:
     uses: openimis/openimis-fe_js/.github/workflows/module-npmpublish.yml@develop
     with:
       registry_url: 'https://npm.pkg.github.com/'
-      node_version: ${{ github.event.inputs.node_version }}
-      access: ${{ github.event.inputs.access }}
-      scope: ${{ github.event.inputs.scope }}
-      tag:  ${{ github.event.inputs.tag }}
+      node_version: ${{ github.event.inputs.node_version || '24' }}
+      access: ${{ github.event.inputs.access || 'public' }}
+      scope: ${{ github.event.inputs.scope || 'openimis' }}
+      tag: ${{ github.event.inputs.tag }}
     secrets:
       NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}

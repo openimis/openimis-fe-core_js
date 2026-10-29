@@ -1,5 +1,7 @@
 # This workflow publishes the package to npmjs and GitHub Packages when a release is created
 # The steps live in the shared workflow openimis/openimis-fe_js/.github/workflows/module-npmpublish.yml
+# npmjs uses trusted publishing: this file (npmpublish.yml) is the trusted publisher configured
+# for the package on npmjs.com, so keep its name.
 
 name: Publish Node.js Package
 
@@ -26,6 +28,9 @@ on:
 
 jobs:
   call-npm-publish-workflow:
+    permissions:
+      contents: read
+      id-token: write
     uses: openimis/openimis-fe_js/.github/workflows/module-npmpublish.yml@develop
     with:
       registry_url: 'https://registry.npmjs.org/'
@@ -33,9 +38,10 @@ jobs:
       access: ${{ github.event.inputs.access || 'public' }}
       scope: ${{ github.event.inputs.scope || 'openimis' }}
       tag: ${{ github.event.inputs.tag }}
-    secrets:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
   call-gpr-publish-workflow:
+    permissions:
+      contents: read
+      packages: write
     uses: openimis/openimis-fe_js/.github/workflows/module-npmpublish.yml@develop
     with:
       registry_url: 'https://npm.pkg.github.com/'

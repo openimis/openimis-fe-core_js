@@ -21,18 +21,21 @@ function getMenus(modulesManager, key, rights, menuVariant, history, intl) {
   // get default entries
   const menuEntries = modulesManager.getMenuEntries();
   const unsortedMenuEntries = backendMenuConfigs.length > 0 ? backendMenuConfigs : menuEntries;
-  // Default contributionKey to id for all configs (backend/module); override if specified
-  unsortedMenuEntries.forEach((config) => {
-    if (!config.contributionKey) {
-      config.contributionKey = config.id; // Use id as key to pull submenus, e.g., "individual.MainMenu"
-    }
-    if (!config.entries && !config.submenus && !config.contributionKey) {
+  // Copy each config: the originals are owned by the modulesManager (module contributions and the
+  // backend `fe-core.menus` config) and are re-read on every render, so translating in place would
+  // burn the resolved label over the i18n key and leave the menu stuck in the first language used.
+  const preparedMenuConfigs = ensureArray(unsortedMenuEntries).map((config) => {
+    // Default contributionKey to id (e.g. "individual.MainMenu"); override if specified
+    const contributionKey = config.contributionKey || config.id;
+    if (!config.entries && !config.submenus && !contributionKey) {
       console.warn(`Menu ${config.id} has no entries or submenus or valid contributionKey.`);
     }
-    config.text = getMenuText(config.name || config.text, intl);
+    // `text` is the i18n key; `name` is only a fallback, since module contributions use it for an
+    // internal identifier ("InsureeMainMenu") that is not a translation key.
+    return { ...config, contributionKey, text: getMenuText(config.text || config.name, intl) };
   });
   // Sort by position (default 99 if missing; stable for duplicates)
-  const sortedMenuConfigs = unsortedMenuEntries.sort((a, b) => (a.position || 99) - (b.position || 99));
+  const sortedMenuConfigs = preparedMenuConfigs.sort((a, b) => (a.position || 99) - (b.position || 99));
   const mainMenuVariant = "icon_text";
   // Detect which top-level menu should be auto-expanded in drawer (matches current route against leaves)
   const activeMenuId = findActiveMenuId(sortedMenuConfigs, routes);

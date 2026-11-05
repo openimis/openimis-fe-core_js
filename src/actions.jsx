@@ -2,18 +2,23 @@ import { RSAA } from "redux-api-middleware";
 import uuid from "lodash-uuid";
 import _ from "lodash";
 import {
+  clearExpiredSession,
   formatQuery,
   formatPageQuery,
   formatPageQueryWithCount,
   formatGQLString,
   formatMutation,
   formatServerError,
+  isSessionError,
+  isImpersonationError,
   decodeId,
 } from "./helpers/api";
 import * as Sentry from "@sentry/react";
 import { getLocalStorage, setLocalStorage } from "./helpers/useLocalStorage";
-import { isSessionError, clearExpiredSession, isImpersonationError } from "./helpers/api";
-import { isUnauthenticatedRoute } from "./helpers/utils";
+import { scrubSecrets } from "./helpers/secrets";
+import { MUTATION_ERROR, MUTATION_SUCCESS } from "./helpers/mutations";
+import { isUnauthenticatedRoute, onLogout } from "./helpers/utils";
+import { extractMutationResult, storeMutationResult } from "./helpers/mutationAlert";
 
 const REQUESTED_WITH = "webapp";
 
@@ -85,11 +90,78 @@ export function resetCacheFilters(key) {
   };
 }
 
-export function journalize(mutation, meta) {
+// A mutation response is any response whose meta carries a clientMutationId:
+// only `formatMutation` call sites put one there. Queries that *filter* by a
+// client mutation id pass it inside the GraphQL filter string, not in params,
+// so they cannot be mistaken for one.
+//
+// Secrets are masked before the entry is kept: `params` can hold the raw
+// mutation input, which for the password mutations is the plaintext password.
+export function autoJournalize(params, outcome) {
   return (dispatch) => {
-    const toAdd = mutation ? { ...mutation, status: 0 } : { status: 0 };
+    if (!params?.clientMutationId) return;
+    const entry = scrubSecrets(params, params.secretFields ?? []);
+    dispatch(journalize(outcome ? { ...entry, ...outcome } : entry));
+  };
+}
+
+// A mutation that runs inline answers with its own outcome - `success`, plus
+// `error` when it failed - instead of only a clientMutationId to be polled.
+// That shape is what tells the two families apart from the client side.
+/**
+ * Outcome of a mutation the server refused outright - a GraphQL error, or a transport
+ * failure - or `undefined` when the response was accepted.
+ *
+ * A refused mutation never reaches the queue, so it has no MutationLog to poll: without
+ * this it would sit in the journal as "processing" for ever, re-polled every two seconds.
+ */
+export function mutationRejection(response) {
+  const errors = response?.payload?.errors;
+  if (errors?.length) {
+    return { status: MUTATION_ERROR, error: mutationErrorText(errors) || JSON.stringify(errors) };
+  }
+  if (response?.error) {
+    return { status: MUTATION_ERROR, error: formatServerError(response.payload) };
+  }
+  return undefined;
+}
+
+export function immediateMutationOutcome(response) {
+  const data = response?.payload?.data;
+  if (!data || typeof data !== "object") return undefined;
+  for (const result of Object.values(data)) {
+    if (result && typeof result.success === "boolean") {
+      return {
+        status: result.success ? MUTATION_SUCCESS : MUTATION_ERROR,
+        // Through the same reader the journal uses for a MutationLog error, so
+        // that an entry reads the same whether its outcome came from the
+        // response or from a polled log.
+        error: result.error ? mutationErrorText(result.error) : null,
+      };
+    }
+  }
+  return undefined;
+}
+
+export function journalize(mutation, meta) {
+  // status first, so a caller that already knows the outcome keeps it: a
+  // synchronous mutation is finished by the time it is journalled.
+  return (dispatch) => {
+    const toAdd = mutation ? { status: 0, ...mutation } : { status: 0 };
     dispatch({ type: "CORE_MUTATION_ADD", payload: toAdd, meta });
   };
+}
+
+/**
+ * Keeps the mutation payload (status, message, metadata) around so the journal and the completion
+ * snackbar can show the full picture on demand; the mutation log alone does not carry the metadata.
+ */
+function recordMutationResponse(dispatch, response) {
+  const result = extractMutationResult(response?.payload?.data);
+  if (result) {
+    storeMutationResult(result);
+    dispatch({ type: "CORE_MUTATION_RESULT", payload: result });
+  }
 }
 
 export function fetchMaxLengthConstraints() {
@@ -130,6 +202,15 @@ export function graphql(payload, type = "GRAPHQL_QUERY", params = {}) {
       if (response?.error) {
         dispatch(coreAlert(formatServerError(response.payload)));
       }
+
+      // Journalled centrally: a module no longer has to remember to call
+      // journalize() itself, and forgetting a reducer case can no longer cost
+      // the journal entry. The add is idempotent per clientMutationId, so the
+      // per-module calls still in place do not produce a duplicate.
+      dispatch(autoJournalize(params));
+      // Then keep the response metadata the completion alert renders. Order
+      // matters: the alert only announces a mutation the journal first saw.
+      recordMutationResponse(dispatch, response);
 
       // Impersonation and session errors are handled in fetch(); surface the response.
       return response;
@@ -175,6 +256,8 @@ export function graphqlWithVariables(operation, variables, type = "GRAPHQL_QUERY
         ],
       }),
     );
+    dispatch(autoJournalize(params));
+    recordMutationResponse(dispatch, response);
     return response;
   };
 }
@@ -194,12 +277,25 @@ export function prepareMutation(operation, input, params = {}) {
   return { operation, variables, clientMutationId: params.clientMutationId };
 }
 
+/**
+ * Readable text of a failed mutation's error as waitForMutation returns it: a service
+ * error {message, detail}, a list of them, or plain text.
+ */
+export function mutationErrorText(error) {
+  const describe = (e) => {
+    if (!e || typeof e !== "object") return e ? String(e) : "";
+    return [e.message, e.detail].filter(Boolean).join(": ");
+  };
+  return (Array.isArray(error) ? error.map(describe) : [describe(error)]).filter(Boolean).join("; ");
+}
+
 export function waitForMutation(clientMutationId) {
   return async (dispatch) => {
     let attempts = 0;
     let res;
     do {
-      if (res) {
+      // Each poll after the first waits a little longer, whether or not the log exists yet.
+      if (attempts > 0) {
         await new Promise((resolve) => setTimeout(resolve, 100 * attempts));
       }
       const response = await dispatch(
@@ -221,13 +317,20 @@ export function waitForMutation(clientMutationId) {
           { clientMutationId },
         ),
       );
-      if (response.error) {
+      // A failed or unanswered poll says nothing about the mutation: the outcome is unknown.
+      if (response.error || response.payload?.errors || !response.payload?.data?.mutationLogs) {
         return null;
       }
-      res = response.payload.data.mutationLogs?.edges[0]?.node;
+      res = response.payload.data.mutationLogs.edges[0]?.node;
     } while ((!res || res.status === 0) && attempts++ < 10);
     if (res && res.status === 1 && res.error) {
-      return { ...res, error: JSON.parse(res.error) };
+      // Service errors are stored as JSON; an exception raised while running the
+      // mutation is stored as plain text.
+      try {
+        return { ...res, error: JSON.parse(res.error) };
+      } catch (e) {
+        return res;
+      }
     }
     return res;
   };
@@ -246,9 +349,44 @@ export function graphqlMutation(
     clientMutationId = uuid.uuid();
     variables.input.clientMutationId = clientMutationId;
   }
+  // Modules name the entry in the input, useGraphqlMutation callers may name it in the
+  // params instead. Resolved once: every journalling of this mutation must carry it, since
+  // a later one merges over the entry and an undefined label would erase the first.
+  const clientMutationLabel = variables?.input?.clientMutationLabel ?? params.clientMutationLabel;
   return async (dispatch) => {
+    // The user asked for this, so it belongs in the journal whatever becomes of it -
+    // including a rejection. Added before the request so the journal sees it processing:
+    // an entry that only ever appears final raises no completion notice.
+    if (clientMutationId) {
+      dispatch(
+        autoJournalize({
+          ...params,
+          clientMutationId,
+          clientMutationLabel,
+          requestDateTime: new Date().toISOString(),
+        }),
+      );
+    }
     const response = await dispatch(graphqlWithVariables(mutation, variables, type, params, customHeaders));
     if (clientMutationId) {
+      // Refused outright: no queue, no MutationLog, nothing to poll. Complete the entry
+      // here or it stays "processing" for ever.
+      const rejection = mutationRejection(response);
+      if (rejection) {
+        dispatch(journalize({ clientMutationId, ...rejection }));
+        return response?.payload?.data;
+      }
+      // Whether a mutation ran inline or was queued is the backend's business,
+      // not the user's: both get a journal entry. A synchronous one already
+      // carries its result here, so it is journalled as final rather than added
+      // as pending - it has no MutationLog to poll either, because that family
+      // extends ClientIDMutation rather than OpenIMISMutation (OP-3178), and a
+      // pending entry would be re-polled for ever.
+      const outcome = immediateMutationOutcome(response);
+      if (outcome) {
+        dispatch(autoJournalize({ ...params, clientMutationId, clientMutationLabel }, outcome));
+        return response?.payload?.data;
+      }
       dispatch(fetchMutation(clientMutationId));
       if (wait) {
         return dispatch(waitForMutation(clientMutationId));
@@ -313,11 +451,9 @@ export function fetch(config) {
             dispatch({ type: "CORE_AUTH_LOGOUT" });
           } else {
             dispatch(
-              coreConfirm(
-                "Session Expired",
-                "Your session has expired, You will be redirected to the login page.",
-                "csrf_logout",
-              ),
+              coreConfirm("Session Expired", "Your session has expired, You will be redirected to the login page.", {
+                onConfirm: () => onLogout(dispatch),
+              }),
             );
           }
         }
@@ -492,9 +628,8 @@ export function fetchCsrfToken(jwtToken) {
         ["CORE_AUTH_CSRTOKEN_REQ", "CORE_AUTH_CSRTOKEN_RESP", "CORE_AUTH_ERR"],
         {},
         false,
-        {
-          "Authorization": `JWT ${jwtToken}`,
-        },
+        // Without a JWT the session cookie authenticates the request.
+        jwtToken ? { "Authorization": `JWT ${jwtToken}` } : {},
       ),
     );
   };
@@ -545,10 +680,12 @@ export function initialize() {
       await clearExpiredSession();
       dispatch({ type: "CORE_AUTH_LOGOUT" });
     } else if (!session?.error && !getLocalStorage("csrfToken")) {
-      // Mirror the csrftoken cookie so later mutations send a matching X-CSRFToken.
-      const cookieCsrf = getCsrfToken();
-      if (cookieCsrf) {
-        setLocalStorage("csrfToken", cookieCsrf);
+      // Mirror the csrftoken cookie so later requests send a matching X-CSRFToken. With
+      // CSRF_USE_SESSIONS (prod) there is no such cookie: a session opened outside /front,
+      // e.g. by a Django admin login, has to ask the server for its token.
+      const csrfToken = getCsrfToken() ?? (await dispatch(fetchCsrfToken()))?.payload?.data?.getCsrfToken?.csrfToken;
+      if (csrfToken) {
+        setLocalStorage("csrfToken", csrfToken);
       }
     }
 
@@ -563,20 +700,39 @@ export function authError(error) {
   };
 }
 
+/**
+ * Ends the session on the server and in the browser.
+ *
+ * `logout` replaces the former deleteTokenCookie/deleteRefreshTokenCookie pair:
+ * those only asked the browser to drop the cookies, leaving the Django session
+ * that a staff login creates alive and still able to authenticate the REST API.
+ * Requires a backend exposing the `logout` mutation.
+ *
+ * Resolves to true when the server confirmed the logout, false otherwise.
+ */
 export function logout() {
-  return async (dispatch, getState) => {
+  return async (dispatch) => {
     const mutation = `
       mutation logout {
-        deleteTokenCookie {
-          deleted
-        }
-        deleteRefreshTokenCookie {
-          deleted
+        logout {
+          success
         }
       }
     `;
-    await dispatch(graphqlMutation(mutation, {}));
-    return dispatch({ type: "CORE_AUTH_LOGOUT" });
+    // Silent: a 401 or CSRF failure here must not raise the session-expired
+    // dialog, whose confirmation calls straight back into logout.
+    const response = await dispatch(
+      graphqlWithVariables(mutation, {}, "CORE_AUTH_LOGOUT_MUTATION", {}, {}, { silent: true }),
+    );
+    const succeeded = Boolean(
+      !response?.error && !response?.payload?.errors?.length && response?.payload?.data?.logout?.success,
+    );
+
+    // The local state is cleared either way: leaving the app looking signed in
+    // after a failed logout is worse than clearing it. Callers get the flag so
+    // they can warn that the session may still be open on the server.
+    dispatch({ type: "CORE_AUTH_LOGOUT" });
+    return succeeded;
   };
 }
 
@@ -594,6 +750,7 @@ export function fetchMutation(clientMutationId) {
     [
       "id",
       "status",
+      "success",
       "error",
       "clientMutationId",
       "clientMutationLabel",
@@ -625,16 +782,20 @@ export function fetchHistoricalMutations(pageSize, afterCursor) {
   return graphql(payload, "CORE_HISTORICAL_MUTATIONS");
 }
 
-export function coreAlert(titleOrObject, message, detail) {
+export function coreAlert(titleOrObject, message, detail, type = "error") {
   let payload;
 
   if (_.isObject(titleOrObject)) {
-    payload = titleOrObject;
+    payload = {
+      type: titleOrObject.type || "error",
+      ...titleOrObject,
+    };
   } else {
     payload = {
       title: titleOrObject,
       message,
       detail,
+      type: type || "error",
     };
   }
 
@@ -649,7 +810,34 @@ export function clearAlert() {
   };
 }
 
-export function coreConfirm(title, message, intent = null) {
+// The answer to a confirmation belongs to whoever asked it, and to nobody else.
+// The former `core.confirmed` flag had no record of who that was, so every mounted
+// component watching it read an OK as the answer to its own question - and ran
+// whatever action it had stored, including one the user had already cancelled
+// (OP-3190); it is gone (OP-3229). The handlers are held here instead, so
+// clearConfirm can call exactly the one that asked. They are deliberately not in the store: a function is not
+// serialisable state, and nothing else has any business reading them.
+let pendingConfirmHandlers = null;
+
+/**
+ * Ask the user to confirm something.
+ *
+ * @param {string} title
+ * @param {string} message
+ * @param {object|function|string|null} options `{ intent, onConfirm, onCancel }`. A bare
+ *   function is taken as `onConfirm`; a bare string is the legacy `intent` argument.
+ */
+export function coreConfirm(title, message, options = null) {
+  // A bare callback used to be stored as the intent and never called (OP-3229).
+  const normalized =
+    typeof options === "function"
+      ? { onConfirm: options }
+      : options && typeof options === "object"
+        ? options
+        : { intent: options };
+  const { intent = null, onConfirm = null, onCancel = null } = normalized;
+  // Only one dialog can be open, so a second ask replaces the first.
+  pendingConfirmHandlers = onConfirm || onCancel ? { onConfirm, onCancel } : null;
   return (dispatch) => {
     dispatch({ type: "CORE_CONFIRM", payload: { title, message, intent } });
   };
@@ -657,7 +845,15 @@ export function coreConfirm(title, message, intent = null) {
 
 export function clearConfirm(confirmed) {
   return (dispatch) => {
-    dispatch({ type: "CORE_CONFIRM_CLEAR", payload: confirmed });
+    const handlers = pendingConfirmHandlers;
+    pendingConfirmHandlers = null;
+    dispatch({ type: "CORE_CONFIRM_CLEAR" });
+    // After the dispatch, so the dialog is closed before the action runs.
+    if (confirmed) {
+      handlers?.onConfirm?.();
+    } else {
+      handlers?.onCancel?.();
+    }
   };
 }
 
@@ -786,7 +982,10 @@ export function changeUserLanguage(language, clientMutationLabel) {
   const mutation = formatMutation("changeUserLanguage", `languageId: "${language}"`, clientMutationLabel);
   const requestedDateTime = new Date().toISOString();
 
-  return graphql(mutation.payload, ["CORE_MUTATION_REQ", "CHANGE_USER_LANGUAGE_RESP", "CORE_MUTATION_ERR"], {
+  // Its own types: CORE_MUTATION_* belongs to the mutation-log *fetch*, and
+  // borrowing them left `fetchingMutations` stuck at true - the journal drawer
+  // reads that flag - because CHANGE_USER_LANGUAGE_RESP matched no case.
+  return graphql(mutation.payload, ["CHANGE_USER_LANGUAGE_REQ", "CHANGE_USER_LANGUAGE_RESP", "CHANGE_USER_LANGUAGE_ERR"], {
     actionType: "CHANGE_USER_LANGUAGE_RESP",
     clientMutationId: mutation.clientMutationId,
     clientMutationLabel,
@@ -799,6 +998,10 @@ export function impersonateUser(user) {
     dispatch({ type: "CORE_IMPERSONATE_USER", payload: user });
     await dispatch(loadUser());
   };
+}
+
+export function setImpersonationDialogOpen(open) {
+  return (dispatch) => dispatch({ type: "CORE_SET_IMPERSONATION_DIALOG", payload: open });
 }
 
 export function stopImpersonation() {

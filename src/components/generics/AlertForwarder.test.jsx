@@ -34,6 +34,7 @@ describe("AlertForwarder", () => {
       title: "Something went wrong",
       message: "Please contact your administrator",
       detail: "Server exploded",
+      type: "error",
     });
   });
 

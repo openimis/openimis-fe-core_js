@@ -1,8 +1,30 @@
 import { useModulesManager } from "./modules";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { refreshAuthToken, login, logout, initialize, graphqlWithVariables, graphqlMutation } from "../actions";
+import { refreshAuthToken, login, logout, initialize, graphqlWithVariables, graphqlMutation, mutationErrorText } from "../actions";
 import _ from "lodash";
+
+const MUTATION_RESULT_FIELDS = ["internalId", "status", "success", "error", "message", "metadata"];
+
+/**
+ * Adds the mutation result fields the journal needs to a caller-provided operation, right after the
+ * internalId it already selects. Fields the caller already asked for are left alone.
+ *
+ * Selecting internalId is the opt-in: only an OpenIMISMutation payload carries these fields, and
+ * every caller of one selects it. A plain ClientIDMutation (changePassword, resetPassword,
+ * setPassword) has none of them, and the server answers 400 to an operation asking for one, so an
+ * operation that does not select internalId is returned untouched.
+ */
+export const enrichMutationOperation = (operation) => {
+  if (typeof operation !== "string") return operation;
+  const anchor = /\binternalId\b/;
+  const match = anchor.exec(operation);
+  if (!match) return operation;
+  const missing = MUTATION_RESULT_FIELDS.filter((field) => !new RegExp(`\\b${field}\\b`).test(operation));
+  if (!missing.length) return operation;
+  const insertAt = match.index + match[0].length;
+  return `${operation.slice(0, insertAt)}\n        ${missing.join("\n        ")}${operation.slice(insertAt)}`;
+};
 
 export const useDebounceCb = (cb, duration = 0) => {
   const [payload, setPayload] = useState();
@@ -54,6 +76,12 @@ export const useGraphqlQuery = (operation, variables, config = {}) => {
   const [isMounted, setMounted] = useState(false);
   const prevVariables = usePrevious(variables ?? {});
   const prevOperation = usePrevious(operation);
+  // An explicit "fetch again" from the caller. The comparison below is what
+  // keeps a re-render from re-querying, but it also swallows a deliberate
+  // action - pressing Search without editing a filter, or refreshing a list -
+  // because the variables are deep-equal. Searcher passes its fetch token for
+  // this; any caller can pass anything that changes per request.
+  const prevRefreshKey = usePrevious(config.refreshKey);
 
   async function fetchQuery() {
     try {
@@ -71,10 +99,14 @@ export const useGraphqlQuery = (operation, variables, config = {}) => {
 
   useEffect(() => {
     if (!isMounted) return;
-    if (operation !== prevOperation || !_.isEqual(variables, prevVariables)) {
+    if (
+      operation !== prevOperation ||
+      !_.isEqual(variables, prevVariables) ||
+      (config.refreshKey !== undefined && config.refreshKey !== prevRefreshKey)
+    ) {
       fetchQuery();
     }
-  }, [operation, variables]);
+  }, [operation, variables, config.refreshKey]);
 
   useEffect(() => {
     if (!config.skip) {
@@ -107,18 +139,34 @@ export const useGraphqlMutation = (operation, config) => {
         const variables = {
           input,
         };
+        const enrichedOperation = enrichMutationOperation(operation);
         const result = await dispatch(
-          graphqlMutation(operation, variables, config.type, { operation, input }, config.wait),
+          graphqlMutation(
+            enrichedOperation,
+            variables,
+            config.type,
+            // clientMutationLabel is what the journal shows for the entry.
+            { operation: enrichedOperation, input, clientMutationLabel: config.clientMutationLabel },
+            config.wait,
+          ),
         );
 
+        // A mutation the server refused (GraphQL error, HTTP error) yields no data: graphqlMutation
+        // has journalled the refusal, and the caller must not take it for a success. Only for the
+        // operations without internalId (the ClientIDMutation ones, whose callers read the result):
+        // the OpenIMISMutation callers await mutate() without a catch and still resolve as before.
+        if (result === undefined && !/\binternalId\b/.test(operation)) {
+          throw new Error("The mutation did not return a result");
+        }
+
         // Handle graphql errors
-        const error = result?.error?.map((err) => err.detail).join("; ");
+        const error = result?.error ? mutationErrorText(result.error) : "";
 
         if (error) {
           throw new Error(error);
         }
 
-        setState({ isLoading: false, error: error });
+        setState({ isLoading: false, error: null });
         if (config.onSuccess) {
           resolve(config.onSuccess(result));
         } else {

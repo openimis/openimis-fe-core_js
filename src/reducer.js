@@ -9,6 +9,7 @@ import {
   dispatchMutationErr,
 } from "./helpers/api";
 import _ from "lodash";
+import { loadMutationResults } from "./helpers/mutationAlert";
 
 function reducer(
   state = {
@@ -18,6 +19,7 @@ function reducer(
     fetchedHistoricalMutations: false,
     fetchingMutations: false,
     mutations: [],
+    mutationResults: loadMutationResults(),
     filtersCache: {},
     fetchingRoles: false,
     fetchedRoles: false,
@@ -53,6 +55,7 @@ function reducer(
     languages: [],
     errorLanguages: null,
     impersonatedUser: null,
+    impersonationDialogOpen: false,
   },
   action,
 ) {
@@ -70,13 +73,10 @@ function reducer(
       return {
         ...state,
         confirm: action.payload,
-        confirmed: null,
       };
     case "CORE_CONFIRM_CLEAR":
-      var s = {
-        ...state,
-        confirmed: action.payload,
-      };
+      // The answer goes to the asker's onConfirm/onCancel, never into the store (OP-3229).
+      var s = { ...state };
       delete s.confirm;
       return s;
     case "CORE_OPEN_EXPORT_CONFIG_DIALOG":
@@ -154,11 +154,40 @@ function reducer(
         filtersCache: filtersCacheCopy,
       };
 
-    case "CORE_MUTATION_ADD":
+    case "CORE_MUTATION_RESULT":
       return {
         ...state,
-        mutations: [action.payload, ...state.mutations],
+        mutationResults: {
+          ...state.mutationResults,
+          [action.payload.clientMutationId]: action.payload,
+        },
       };
+    case "CORE_MUTATION_ADD": {
+      // One entry per clientMutationId: journalling is now also done centrally by
+      // autoJournalize(), so a module still calling journalize() itself must not
+      // produce a second entry for the same mutation.
+      const added = action.payload;
+      const known = added?.clientMutationId
+        ? state.mutations.find((m) => m.clientMutationId === added.clientMutationId)
+        : null;
+      if (known) {
+        // A second journalling carrying an outcome completes the entry instead of
+        // being dropped: a mutation the server refused has no MutationLog to poll,
+        // so this is the only way it ever stops reading as "processing". A later
+        // status 0 is a duplicate add, never an undo of a finished one.
+        if (!added.status) return state;
+        return {
+          ...state,
+          mutations: state.mutations.map((m) =>
+            m.clientMutationId === added.clientMutationId ? { ...m, ...added } : m,
+          ),
+        };
+      }
+      return {
+        ...state,
+        mutations: [added, ...state.mutations],
+      };
+    }
     case "CORE_MUTATION_REQ":
       return {
         ...state,
@@ -458,7 +487,9 @@ function reducer(
       return {
         ...state,
         user: null,
+        fetchedHistoricalMutations: false,
         mutations: [],
+        mutationResults: {},
         filtersCache: {},
         roles: [],
         rolesPageInfo: {},
@@ -497,11 +528,18 @@ function reducer(
       return {
         ...state,
         impersonatedUser: action.payload,
+        impersonationDialogOpen: false,
       };
     case "CORE_STOP_IMPERSONATION":
       return {
         ...state,
         impersonatedUser: null,
+        impersonationDialogOpen: false,
+      };
+    case "CORE_SET_IMPERSONATION_DIALOG":
+      return {
+        ...state,
+        impersonationDialogOpen: action.payload,
       };
     default:
       return state;

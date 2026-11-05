@@ -1,10 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import GetIconComponent from "../../helpers/icons";
 
 import { Box, CircularProgress, InputAdornment } from "@mui/material";
 const CheckOutlinedIcon = GetIconComponent("CheckOutlined");
-import clsx from "clsx";
 import { debounce } from "lodash";
 const ErrorOutlineOutlinedIcon = GetIconComponent("ErrorOutlineOutlined");
 
@@ -40,16 +39,26 @@ const ValidatedTextInput = ({
   invalidValueFormat,
   maxLengthKey,
   showValidationErrorAsHelperText = false,
+  debounceTime = DEFAULT_DEBOUNCE_TIME,
 }) => {
   const modulesManager = useModulesManager();
 
   const dispatch = useDispatch();
   const { formatMessage } = useTranslations(module, modulesManager);
   const shouldBeValidated = shouldValidate(value);
-  const queryVariables = {};
-  const checkValidity = (queryVariables) => dispatch(action(modulesManager, queryVariables));
+
+  // The validation query is debounced so that it is sent once the user stopped typing
+  // instead of on every keystroke. `isValidationPending` covers the gap between the last
+  // keystroke and the request actually being sent, so that neither the previous verdict
+  // nor the "not yet validated" state is displayed while the value is still changing.
+  const [isValidationPending, setValidationPending] = useState(false);
+  const checkValidity = useMemo(
+    () => debounce((queryVariables) => dispatch(action(modulesManager, queryVariables)), debounceTime),
+    [dispatch, action, modulesManager, debounceTime],
+  );
+
   const checkError = () => {
-    if (validationError || (!isValidating && !isValid && value)) {
+    if (validationError || (!isValidationPending && !isValidating && !isValid && value)) {
       return formatMessage(codeTakenLabel);
     }
     if (invalidValueFormat) {
@@ -58,18 +67,32 @@ const ValidatedTextInput = ({
     return null;
   };
   const error = checkError();
+  const isBusy = isValidationPending || isValidating;
 
   useEffect(() => {
-    if (shouldBeValidated) {
-      queryVariables[itemQueryIdentifier] = value;
-      if (additionalQueryArgs) Object.entries(additionalQueryArgs).map((arg) => (queryVariables[arg?.[0]] = arg?.[1]));
-      if (value) checkValidity(queryVariables);
-      return () => (!value || isValid) && dispatch(clearAction());
-    } else {
+    if (!shouldBeValidated) {
+      checkValidity.cancel();
+      setValidationPending(false);
       !!setValidAction && dispatch(setValidAction());
-      return () => (!value || isValid) && dispatch(clearAction());
+      return undefined;
     }
-  }, [value]);
+    if (!value) {
+      checkValidity.cancel();
+      setValidationPending(false);
+      !!clearAction && dispatch(clearAction());
+      return undefined;
+    }
+    const queryVariables = { [itemQueryIdentifier]: value, ...(additionalQueryArgs ?? {}) };
+    setValidationPending(true);
+    checkValidity(queryVariables);
+    return () => checkValidity.cancel();
+  }, [value, shouldBeValidated]);
+
+  // The pending window closes as soon as the store reports back on this field.
+  useEffect(() => setValidationPending(false), [isValid, isValidating, validationError]);
+
+  // Leaving the form must not leave a verdict about a value that is no longer edited.
+  useEffect(() => () => void (!!clearAction && dispatch(clearAction())), []);
 
   return (
     <>
@@ -91,17 +114,17 @@ const ValidatedTextInput = ({
           endAdornment={
             <InputAdornment position="end" component={!error ? ValidIcon : InvalidIcon}>
               <>
-                {isValidating && value && (
+                {isBusy && value && (
                   <Box mr={1}>
                     <CircularProgress size={20} />
                   </Box>
                 )}
-                {value && !error && <CheckOutlinedIcon size={20} />}
-                {value && error && <ErrorOutlineOutlinedIcon size={20} />}
+                {value && !isBusy && !error && <CheckOutlinedIcon size={20} />}
+                {value && !isBusy && error && <ErrorOutlineOutlinedIcon size={20} />}
               </>
             </InputAdornment>
           }
-          onChange={debounce(onChange, DEFAULT_DEBOUNCE_TIME)}
+          onChange={onChange}
         />
       ) : (
         <TextInput
@@ -114,19 +137,19 @@ const ValidatedTextInput = ({
           helperText={showValidationErrorAsHelperText ? error : null}
           required={required}
           type={type}
-          onChange={debounce(onChange, DEFAULT_DEBOUNCE_TIME)}
+          onChange={onChange}
           inputProps={inputProps}
           maxLengthKey={maxLengthKey}
           endAdornment={
             <InputAdornment position="end" component={!error ? ValidIcon : InvalidIcon}>
               <>
-                {isValidating && value && (
+                {isBusy && value && (
                   <Box mr={1}>
                     <CircularProgress size={20} />
                   </Box>
                 )}
-                {value && !error && <CheckOutlinedIcon size={20} />}
-                {value && error && <ErrorOutlineOutlinedIcon size={20} />}
+                {value && !isBusy && !error && <CheckOutlinedIcon size={20} />}
+                {value && !isBusy && error && <ErrorOutlineOutlinedIcon size={20} />}
               </>
             </InputAdornment>
           }

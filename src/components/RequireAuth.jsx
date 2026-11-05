@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { useTheme, alpha, styled } from "@mui/material/styles";
+import { useTheme, styled } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { Redirect, useHistory } from "../helpers/history";
 import { useModulesManager } from "../helpers/modules";
@@ -20,22 +20,30 @@ import {
 } from "@mui/material";
 import GetIconComponent from "../helpers/icons";
 const MenuIcon = GetIconComponent("Menu");
-import { prepareMenuEntries } from "../helpers/utils";
+import {
+  prepareMenuEntries,
+  resolveMenuVariant,
+  prepareAppBarIcons,
+  shouldShowLanguageQuickPicker,
+} from "../helpers/utils";
 import Contributions from "./generics/Contributions";
 import AppBarIconButton from "./AppBarIconButton";
+import AppBarMenu from "./AppBarMenu";
+import { LanguageSwitcherContext } from "./LanguageMenuItems";
+import useLanguageSwitcher from "../helpers/useLanguageSwitcher";
 import FormattedMessage from "./generics/FormattedMessage";
 import MainMenuBar from "./MainMenuBar";
-import JournalDrawer from "./JournalDrawer";
+import JournalDrawer, { JournalButtonTrigger } from "./JournalDrawer";
 import { useBoolean, useAuthentication } from "../helpers/hooks";
 import LanguageQuickPicker from "../pickers/LanguageQuickPicker";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { Switch } from "@mui/material";
 import { useTranslations } from "../helpers/i18n";
 import { DEFAULT, RIGHT_USERS } from "../admin/constants";
-import { useDispatch, useSelector } from "react-redux";
-import UserPicker from "../admin/components/pickers/UserPicker";
-import { impersonateUser, stopImpersonation } from "../actions";
+import { DEFAULT as CORE_DEFAULT } from "../constants";
+import ImpersonationDialog from "./ImpersonationDialog";
 import { injectIntl } from "react-intl";
+import { classicJournalLayout, fluidPaddingX, popupJournalLayout } from "./journalLayouts";
 
 export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
 export const APP_BAR_ICONS_CONTRIBUTION_KEY = "core.AppBarIcons";
@@ -43,15 +51,52 @@ export const MAIN_MENU_CONTRIBUTION_KEY = "core.MainMenu";
 export const MAIN_SEARCHER_CONTRIBUTION_KEY = "core.MainSearcher";
 export const ECONOMIC_UNIT_BUTTON_CONTRIBUTION_KEY = "policyholder.EconomicUnitChangeButton";
 
-const StyledRequireAuth = styled("div")(({ theme }) => ({
+/**
+ * The left menu paper, and the rules its content relies on. A temporary Drawer portals its paper
+ * out of the styled wrapper, so these cannot be plain descendant rules there.
+ */
+const menuDrawerPaperStyles = (theme) => ({
+  width: theme.menu.drawer.width,
+  flexShrink: 0,
+  backgroundColor: theme.menu.drawer.backgroundColor,
+  color: theme.menu.drawer.textColor,
+  zIndex: theme.zIndex.appBar + 1,
+  "& .appName": {
+    ...theme.mixins.toolbar,
+    color: theme.palette.secondary.main,
+    textTransform: "none",
+    fontSize: theme.typography.h6.fontSize,
+    fontWeight: "bold",
+    whiteSpace: "nowrap",
+    display: "flex",
+    alignItems: "center",
+  },
+  "& .appVersions": {
+    color: theme.palette.secondary.main,
+    fontSize: theme.typography.h6.fontSize / 2,
+    verticalAlign: "text-bottom",
+    marginLeft: theme.spacing(1),
+    opacity: 0.8,
+    [theme.breakpoints.down("lg")]: {
+      display: "none",
+    },
+  },
+  "& .logo": {
+    verticalAlign: "middle",
+    marginRight: theme.spacing(2),
+    maxHeight: 32,
+  },
+  "& .drawerContainer": {
+    overflow: "auto",
+  },
+});
+
+const StyledRequireAuth = styled("div", {
+  shouldForwardProp: (prop) => prop !== "journalSidebar",
+})(({ theme, journalSidebar }) => ({
   display: "flex",
   flexDirection: "column",
   minHeight: "100vh",
-  "& .layoutWrapper": {
-    display: "flex",
-    flex: 1,
-    position: "relative",
-  },
   "& .grow": {
     flexGrow: 1,
   },
@@ -67,76 +112,6 @@ const StyledRequireAuth = styled("div")(({ theme }) => ({
     position: "sticky",
     top: 0,
   },
-  "& .topToolbar": {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingLeft: theme.spacing(2),
-    paddingRight: `calc(${theme.spacing(2)} + ${
-      typeof theme.jrnlDrawer?.close?.width === "number"
-        ? `${theme.jrnlDrawer.close.width}px`
-        : theme.jrnlDrawer?.close?.width || "73px"
-    })`,
-    minHeight: "64px !important",
-    flexWrap: "nowrap",
-    gap: theme.spacing(1),
-    position: "relative",
-    zIndex: 2,
-    transition: theme.transitions.create("padding-right", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    "&.journalOpen": {
-      paddingRight: theme.spacing(2),
-      transition: theme.transitions.create("padding-right", {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-    },
-    [theme.breakpoints.down("sm")]: {
-      paddingRight: `calc(${theme.spacing(2)} + ${
-        typeof theme.jrnlDrawer?.close?.width === "number"
-          ? `${theme.jrnlDrawer.close.width}px`
-          : theme.jrnlDrawer?.close?.width || "73px"
-      })`,
-      "&.journalOpen": {
-        paddingRight: theme.spacing(2),
-      },
-    },
-  },
-  "& .menuToolbar": {
-    minHeight: "auto !important",
-    paddingLeft: theme.spacing(2),
-    paddingRight: `calc(${theme.spacing(2)} + ${
-      typeof theme.jrnlDrawer?.close?.width === "number"
-        ? `${theme.jrnlDrawer.close.width}px`
-        : theme.jrnlDrawer?.close?.width || "73px"
-    })`,
-    backgroundColor: theme.palette.primary.main,
-    borderTop: `1px solid ${alpha(theme.palette.common.white, 0.1)}`,
-    display: "flex",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: theme.spacing(1.5),
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(1),
-    position: "relative",
-    zIndex: 1,
-    transition: theme.transitions.create("padding-right", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    "&.journalOpen": {
-      paddingRight: theme.spacing(2),
-      transition: theme.transitions.create("padding-right", {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-    },
-    [theme.breakpoints.down("md")]: {
-      display: "none",
-    },
-  },
   "& .appBarDrawer": {
     margin: 0,
     backgroundColor: theme.palette.primary.main,
@@ -145,30 +120,6 @@ const StyledRequireAuth = styled("div")(({ theme }) => ({
     minHeight: "auto",
     position: "sticky",
     top: 0,
-  },
-
-  "& .toolbarDrawer": {
-    color: theme.palette.secondary.main,
-    paddingRight: `calc(${theme.spacing(2)} + ${
-      typeof theme.jrnlDrawer?.close?.width === "number"
-        ? `${theme.jrnlDrawer.close.width}px`
-        : theme.jrnlDrawer?.close?.width || "73px"
-    })`,
-    transition: theme.transitions.create("padding-right", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    "&.journalOpen": {
-      paddingRight: `calc(${theme.spacing(2)} + ${
-        typeof theme.jrnlDrawer?.close?.width === "number"
-          ? `${theme.jrnlDrawer.close.width}px`
-          : theme.jrnlDrawer?.close?.width || "73px"
-      })`,
-      transition: theme.transitions.create("padding-right", {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-    },
   },
 
   "& .toolbarDrawerLogout": {
@@ -208,26 +159,19 @@ const StyledRequireAuth = styled("div")(({ theme }) => ({
     ...theme.mixins.toolbar,
     display: "flex",
     alignItems: "center",
-    paddingLeft: theme.spacing(2),
+    // Same inset as .topToolbar, so the drawer sandwich sits where the AppBar one was.
+    paddingLeft: fluidPaddingX(theme),
     margin: theme.spacing(1, 0, 1, 0),
     backgroundColor: theme.menu.drawer.backgroundColor,
+    color: theme.menu.drawer.textColor,
   },
-  "& .content": {
-    flexGrow: 1,
-    paddingTop: theme.spacing(4),
-    paddingLeft: theme.spacing(3),
-    paddingRight: `calc(${theme.spacing(3)} + ${
-      typeof theme.jrnlDrawer?.close?.width === "number"
-        ? `${theme.jrnlDrawer.close.width}px`
-        : theme.jrnlDrawer?.close?.width || "73px"
-    })`,
-    transition: theme.transitions.create(["margin", "padding-right"], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    [theme.breakpoints.down("md")]: {
-      paddingTop: theme.spacing(2),
-    },
+  "& .drawerHeader .appName": {
+    minWidth: 0,
+    paddingLeft: 0,
+  },
+  "& .drawerHeader .logo": {
+    maxHeight: 24,
+    marginRight: theme.spacing(1),
   },
   "& .contentShift": {
     transition: theme.transitions.create("margin", {
@@ -235,16 +179,6 @@ const StyledRequireAuth = styled("div")(({ theme }) => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
     marginLeft: theme.menu.drawer.width,
-  },
-  "& main": {
-    flexGrow: 1,
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    "& > *": {
-      width: "100%",
-      padding: "0 !important",
-    },
   },
   "& .appName": {
     ...theme.mixins.toolbar,
@@ -274,29 +208,7 @@ const StyledRequireAuth = styled("div")(({ theme }) => ({
   "& .drawerContainer": {
     overflow: "auto",
   },
-  "& .contentShiftLeftSideMenu": {
-    transition: theme.transitions.create("margin", {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    marginLeft: 0,
-    marginRight: theme.jrnlDrawer?.close?.width || 73,
-    padding: theme.spacing(3),
-  },
-  "& .jrnlContentShift": {
-    position: "relative",
-    zIndex: 1,
-    paddingTop: theme.spacing(4),
-    paddingRight: theme.spacing(3),
-    transition: theme.transitions.create("padding-right", {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    [theme.breakpoints.down("md")]: {
-      paddingTop: theme.spacing(2),
-      paddingRight: theme.spacing(2),
-    },
-  },
+  ...(journalSidebar ? classicJournalLayout(theme) : popupJournalLayout(theme)),
 }));
 
 const RequireAuth = (props) => {
@@ -318,121 +230,159 @@ const RequireAuth = (props) => {
   const history = useHistory();
   const modulesManager = useModulesManager();
   const auth = useAuthentication();
+  // One switcher instance shared with the app-bar dropdown's LanguageMenuItems via
+  // context; its confirm dialog is mounted below, outside the dropdown popper.
+  const languageSwitcher = useLanguageSwitcher();
   const cfg = children.props.modulesManager.cfg;
-  const menuLeft =
-    modulesManager.getConf("openimis-fe-core_js", "menuLeft") || modulesManager.getConf("fe-core", "menuLeft") || false;
   const calendarSwitch = modulesManager.getConf("fe-core", "allowSecondCalendar", false);
   const showJournalSidebar = modulesManager.getConf("fe-core", "showJournalSidebar", DEFAULT.SHOW_JOURNAL_SIDEBAR);
 
   const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
+  const menuDrawerBreakpoint = theme.layout?.menuDrawerBreakpoint ?? "lg";
+  const isMenuDrawerUp = useMediaQuery(theme.breakpoints.up(menuDrawerBreakpoint));
+  const journalSidebarBreakpoint = theme.layout?.journalSidebarBreakpoint ?? "md";
+  const isJournalSidebarUp = useMediaQuery(theme.breakpoints.up(journalSidebarBreakpoint));
+  // the always-there sidebar does not fit a narrow screen: fall back to the popup journal there
+  const journalSidebar = showJournalSidebar && isJournalSidebarUp;
+  // the classic sidebar layout keeps the historical md breakpoint, the popup one is configurable
+  const isMenuBarUp = journalSidebar ? isMdUp : isMenuDrawerUp;
 
-  const isAppBarMenu = useMemo(() => {
-    const variant = theme.menu?.variant || "AppBar";
-    return typeof variant === "string" && variant.trim().toUpperCase() === "APPBAR";
-  }, [theme.menu?.variant]);
+  // Deprecated: superseded by theme.menu.variant, still honoured for configs that predate it.
+  const legacyMenuLeft =
+    modulesManager.getConf("openimis-fe-core_js", "menuLeft") || modulesManager.getConf("fe-core", "menuLeft") || false;
+  const mainMenuLayout = useMemo(
+    () => resolveMenuVariant(theme.menu?.variant, legacyMenuLeft),
+    [theme.menu?.variant, legacyMenuLeft],
+  );
+  // The variant picks between the two wide layouts only. Narrower than the menu breakpoint there
+  // is room for neither, so the hamburger + overlay drawer takes over whatever the config says.
+  const isLeftSidebar = mainMenuLayout === "drawer" && (journalSidebar || isMenuBarUp);
 
-  const dispatch = useDispatch();
-  const impersonatedUser = useSelector((state) => state.core.impersonatedUser);
-  const showImpersonationPicker = auth.user?.is_superuser || Boolean(impersonatedUser);
+  const { formatMessage } = useTranslations("core", modulesManager);
 
   const preparedIcons = useMemo(() => {
-    const rightsSet = new Set(rights.map((r) => String(r)));
     const routes = modulesManager.getRoutes();
+    // A backend config replaces the contributed default only if it declares
+    // core.AppBarIcons; a menus config that omits it keeps the default profile dropdown.
     let iconsEntries = modulesManager.getContribs("core.AppBarIcons");
-    const backendAppBarIconsConfig = modulesManager.getConf("fe-core", "menus", []);
-    if (backendAppBarIconsConfig.length > 0) {
-      // Merge backend entries with module contribs, backend overrides by id
-      iconsEntries = (backendAppBarIconsConfig.find((config) => config.id === "core.AppBarIcons") || {})?.entries || [];
+    const configAppBar = modulesManager.getConf("fe-core", "menus", []).find((c) => c.id === "core.AppBarIcons");
+    if (configAppBar) {
+      iconsEntries = configAppBar.entries || [];
     }
-    // Sort by position
-    return prepareMenuEntries(
-      rights,
-      intl,
-      iconsEntries.sort((a, b) => (a.position || 99) - (b.position || 99)),
-      routes,
-    );
+    return prepareAppBarIcons(rights, intl, iconsEntries, routes);
   });
+
+  // Standalone LanguageQuickPicker visibility, configurable because the app-bar
+  // dropdown superseding it is a visible change for deployments that never
+  // configured core.AppBarIcons:
+  //   "auto" (default) – show it unless a dropdown already offers language
+  //   true             – always show it, dropdown or not
+  //   false            – never show it
+  const languageQuickPicker = modulesManager.getConf(
+    "fe-core",
+    "languageQuickPicker",
+    CORE_DEFAULT.LANGUAGE_QUICK_PICKER,
+  );
+  const showLanguageQuickPicker = useMemo(
+    () => shouldShowLanguageQuickPicker(languageQuickPicker, preparedIcons),
+    [languageQuickPicker, preparedIcons],
+  );
 
   if (!auth.isAuthenticated) {
     return <Redirect to={redirectTo} />;
   }
 
-  if (menuLeft) {
+  const leftMenuDrawer = (
+    <>
+      <Button className="appName" onClick={() => (window.location.href = "/front")}>
+        {isSmUp && logo && <img className="logo" src={logo} alt="Logo" />}
+        {!disableTextLogo && (
+          <FormattedMessage module="core" id="appName" defaultMessage={<FormattedMessage id="root.appName" />} />
+        )}
+        {isSmUp && (
+          <Tooltip title={modulesManager.getModulesVersions().join(", ")}>
+            <Typography variant="caption" className="appVersions">
+              {modulesManager.getOpenIMISVersion()}
+            </Typography>
+          </Tooltip>
+        )}
+      </Button>
+      <div className="drawerContainer"></div>
+      <MainMenuBar {...others} menuVariant="Drawer" contributionKey={MAIN_MENU_CONTRIBUTION_KEY}>
+        <Divider />
+      </MainMenuBar>
+      <div />
+    </>
+  );
+
+  if (isLeftSidebar) {
     return (
-      <StyledRequireAuth>
+      <LanguageSwitcherContext.Provider value={languageSwitcher}>
+        {languageSwitcher.confirmDialog}
+        <StyledRequireAuth journalSidebar={journalSidebar}>
+        <ImpersonationDialog />
         <AppBar className="appBarDrawer">
-          <Toolbar className="toolbarDrawer">
+          <Toolbar className={clsx("toolbarDrawer", { journalOpen: journalSidebar && isDrawerOpen })}>
             <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
               <div className="grow" />
             </Contributions>
-            {showImpersonationPicker && (
-              <UserPicker
-                readOnly={Boolean(impersonatedUser)}
-                onChange={(user) => {
-                  if (!user) {
-                    dispatch(stopImpersonation());
-                  } else if (!impersonatedUser) {
-                    dispatch(impersonateUser(user));
-                  }
-                }}
-                value={impersonatedUser}
-                withLabel={false}
-                placeholder="Impersonate user"
-                multiple={false}
-              />
+            {preparedIcons.map((iconProps, idx) =>
+              iconProps.type === "menu" ? (
+                <AppBarMenu key={`appbar_icon_${idx}`} {...iconProps} />
+              ) : (
+                <AppBarIconButton key={`appbar_icon_${idx}`} {...iconProps} />
+              ),
             )}
+            {!journalSidebar && <JournalButtonTrigger onClick={setDrawerOpen.toggle} />}
             <LogoutButton className="toolbarDrawerLogout" />
             <Help />
           </Toolbar>
         </AppBar>
         <Box className="layoutWrapper">
-          <Drawer className="drawerRoot" variant="permanent" PaperProps={{ className: "drawerPaper" }} anchor="left">
-            <Button className="appName" onClick={() => (window.location.href = "/front")}>
-              {isAppBarMenu && isSmUp && <img className="logo" src={logo} alt="Logo" />}
-              {!disableTextLogo && (
-                <FormattedMessage module="core" id="appName" defaultMessage={<FormattedMessage id="root.appName" />} />
-              )}
-              {isSmUp && (
-                <Tooltip title={modulesManager.getModulesVersions().join(", ")}>
-                  <Typography variant="caption" className="appVersions">
-                    {modulesManager.getOpenIMISVersion()}
-                  </Typography>
-                </Tooltip>
-              )}
-            </Button>
-            <div className="drawerContainer"></div>
-            <MainMenuBar {...others} menuVariant="Drawer" contributionKey={MAIN_MENU_CONTRIBUTION_KEY}>
-              <Divider />
-            </MainMenuBar>
-            <div />
+          <Drawer
+            className="drawerRoot"
+            variant="permanent"
+            anchor="left"
+            slotProps={{
+              paper: { sx: (theme) => ({ ...menuDrawerPaperStyles(theme), position: "fixed", inset: "0 auto 0 0" }) },
+            }}
+          >
+            {leftMenuDrawer}
           </Drawer>
           <main className="contentShiftLeftSideMenu">{children}</main>
-          {showJournalSidebar && <JournalDrawer open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />}
+          <JournalDrawer
+            journalSidebar={journalSidebar}
+            open={isDrawerOpen}
+            handleDrawer={setDrawerOpen.toggle}
+          />
         </Box>
-      </StyledRequireAuth>
+        </StyledRequireAuth>
+      </LanguageSwitcherContext.Provider>
     );
   }
 
-  const { formatMessage } = useTranslations("core", modulesManager);
   return (
-    <StyledRequireAuth>
+    <LanguageSwitcherContext.Provider value={languageSwitcher}>
+      {languageSwitcher.confirmDialog}
+      <StyledRequireAuth journalSidebar={journalSidebar}>
+      <ImpersonationDialog />
       <AppBar
         className={clsx("appBar", {
-          appBarShift: isOpen && isMdUp,
+          appBarShift: isOpen && isMenuBarUp,
         })}
       >
-        <Toolbar className={clsx("topToolbar", { journalOpen: isDrawerOpen })}>
-          <Box display="flex" alignItems="center">
+        <Toolbar className={clsx("topToolbar", { journalOpen: journalSidebar && isDrawerOpen })}>
+          <Box display="flex" alignItems="center" minWidth={0} overflow="hidden">
             <IconButton
               color="inherit"
               onClick={setOpen.toggle}
-              className={clsx("menuButton", (isOpen || (isMdUp && isAppBarMenu)) && "hide")}
+              className={clsx("menuButton", (isOpen || isMenuBarUp) && "hide")}
             >
               <MenuIcon />
             </IconButton>
             <Button className="appName" onClick={() => history.push("/")}>
-              {isAppBarMenu && isSmUp && logo && <img className="logo" src={logo} alt="Logo" />}
+              {isSmUp && logo && <img className="logo" src={logo} alt="Logo" />}
               {!disableTextLogo && (
                 <Box component="span" className="appNameText">
                   <FormattedMessage
@@ -452,18 +402,22 @@ const RequireAuth = (props) => {
             </Button>
           </Box>
 
-          <Box display="flex" alignItems="center" className="grow">
+          <Box display="flex" alignItems="center" className="grow" minWidth={0} overflow="hidden">
             {
               <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
                 <div className="grow" />
               </Contributions>
             }
-            {preparedIcons.map((iconProps, idx) => (
-              <AppBarIconButton key={`appbar_icon_${idx}`} {...iconProps} />
-            ))}
+            {preparedIcons.map((iconProps, idx) =>
+              iconProps.type === "menu" ? (
+                <AppBarMenu key={`appbar_icon_${idx}`} {...iconProps} />
+              ) : (
+                <AppBarIconButton key={`appbar_icon_${idx}`} {...iconProps} />
+              ),
+            )}
           </Box>
 
-          <Box display="flex" alignItems="center" gap={1}>
+          <Box display="flex" alignItems="center" gap={1} flexShrink={0}>
             {!!calendarSwitch && (
               <FormControlLabel
                 control={
@@ -473,34 +427,19 @@ const RequireAuth = (props) => {
                 labelPlacement="start"
               />
             )}
-            <LanguageQuickPicker />
+            {showLanguageQuickPicker && <LanguageQuickPicker />}
             <Contributions
               contributionKey={ECONOMIC_UNIT_BUTTON_CONTRIBUTION_KEY}
               onEconomicDialogOpen={onEconomicDialogOpen}
             />
-            {showImpersonationPicker && (
-              <UserPicker
-                readOnly={Boolean(impersonatedUser)}
-                onChange={(user) => {
-                  if (!user) {
-                    dispatch(stopImpersonation());
-                  } else if (!impersonatedUser) {
-                    dispatch(impersonateUser(user));
-                  }
-                }}
-                value={impersonatedUser}
-                withLabel={false}
-                placeholder="Impersonate user"
-                multiple={false}
-              />
-            )}
+            {!journalSidebar && <JournalButtonTrigger onClick={setDrawerOpen.toggle} />}
             <LogoutButton />
             <Help />
           </Box>
         </Toolbar>
 
-        {isAppBarMenu && isMdUp && (
-          <Toolbar className={clsx("menuToolbar", { journalOpen: isDrawerOpen })} variant="dense">
+        {isMenuBarUp && (
+          <Toolbar className={clsx("menuToolbar", { journalOpen: journalSidebar && isDrawerOpen })} variant="dense">
             <MainMenuBar {...others} menuVariant="AppBar" contributionKey={MAIN_MENU_CONTRIBUTION_KEY}>
               <div onClick={setOpen.off} />
             </MainMenuBar>
@@ -520,6 +459,9 @@ const RequireAuth = (props) => {
                 PaperProps={{ className: "drawerPaper" }}
               >
                 <div className="drawerHeader">
+                  <IconButton color="inherit" onClick={setOpen.off} className="menuButton" aria-label="menu">
+                    <MenuIcon />
+                  </IconButton>
                   <Button className="appName" onClick={() => history.push("/")}>
                     {logo && <img className="logo" src={logo} alt="Logo" />}
                     <FormattedMessage
@@ -537,15 +479,17 @@ const RequireAuth = (props) => {
         )}
         <main
           className={clsx({
-            jrnlContentShift: isDrawerOpen,
-            content: showJournalSidebar,
+            // The popup journal floats over the page, so only the docked rail reflows it.
+            jrnlContentShift: journalSidebar && isDrawerOpen,
+            content: journalSidebar,
           })}
         >
           {children}
         </main>
-        {showJournalSidebar && <JournalDrawer open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />}
+        <JournalDrawer journalSidebar={journalSidebar} open={isDrawerOpen} handleDrawer={setDrawerOpen.toggle} />
       </Box>
-    </StyledRequireAuth>
+      </StyledRequireAuth>
+    </LanguageSwitcherContext.Provider>
   );
 };
 

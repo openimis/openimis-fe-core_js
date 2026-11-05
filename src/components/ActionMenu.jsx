@@ -44,8 +44,8 @@ const ActionMenu = ({ actions }) => {
                     },
                 }}
             >
-                {actions.map((action) => (
-                    <React.Fragment key={action.label}>
+                {actions.filter(Boolean).map((action, idx) => (
+                    <React.Fragment key={action.label ?? idx}>
                         {action.divider && <Divider />}
 
                         <Tooltip title={action.tooltip}>

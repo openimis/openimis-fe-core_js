@@ -29,6 +29,7 @@ const ForgotPasswordPage = (props) => {
   const { formatMessage } = useTranslations("core.ForgotPasswordPage", modulesManager);
   const [username, setUsername] = useState();
   const [isDone, setDone] = useState(false);
+  const [error, setError] = useState();
   const { isLoading, mutate } = useGraphqlMutation(
     `
     mutation resetPassword($input: ResetPasswordMutationInput!) {
@@ -46,8 +47,18 @@ const ForgotPasswordPage = (props) => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    await mutate({ username });
-    await setDone(true);
+    setError(null);
+    let result;
+    try {
+      result = await mutate({ username });
+    } catch {
+      // Refused by the server: already journalled, the page only has to say it failed.
+    }
+    if (result?.resetPassword?.success) {
+      setDone(true);
+    } else {
+      setError(result?.resetPassword?.error || formatMessage("error"));
+    }
   };
 
   return (
@@ -78,6 +89,11 @@ const ForgotPasswordPage = (props) => {
                       onChange={(username) => setUsername(username)}
                     />
                   </Grid>
+                  {error && (
+                    <Grid>
+                      <Box color="error.main">{error}</Box>
+                    </Grid>
+                  )}
                   <Grid>
                     <Button
                       fullWidth

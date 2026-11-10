@@ -27,6 +27,7 @@ import PublicPageMiddleware from "./PublicPageMiddleware";
 import { ToastProvider } from "../helpers/ToastContext";
 import { PublicPageLanguageProvider } from "../helpers/PublicPageLanguageContext";
 import { getCookie } from "../helpers/cookies";
+import { routeComponent, validateOverrides } from "../helpers/overrides";
 
 // Downgrade formatjs MISSING_TRANSLATION errors to warnings instead of errors.
 // Defer logging so React does not append a component stack in development.
@@ -88,6 +89,10 @@ const App = (props) => {
   const routes = useMemo(() => {
     return modulesManager.getContribs(ROUTER_CONTRIBUTION_KEY);
   }, []);
+
+  const routeComponents = useMemo(() => routes.map((route) => routeComponent(modulesManager, route)), [routes]);
+
+  useEffect(() => validateOverrides(modulesManager, routes), [routes]);
 
   const unauthenticatedRoutes = useMemo(() => {
     return modulesManager.getContribs(UNAUTHENTICATED_ROUTER_CONTRIBUTION_KEY);
@@ -190,7 +195,9 @@ const App = (props) => {
                         render={(props) => <route.component modulesManager={modulesManager} {...props} {...others} />}
                       />
                     ))}
-                    {routes.map((route) => (
+                    {routes.map((route, routeIndex) => {
+                      const RouteComponent = routeComponents[routeIndex] || NotFoundPage;
+                      return (
                       <Route
                         exact
                         key={route.path}
@@ -210,12 +217,13 @@ const App = (props) => {
                               requiredRights={route.rights}
                               {...others}
                             >
-                              <route.component modulesManager={modulesManager} {...props} {...others} />
+                              <RouteComponent modulesManager={modulesManager} {...props} {...others} />
                             </PermissionCheck>
                           </RequireAuth>
                         )}
                       />
-                    ))}
+                      );
+                    })}
                     <Route render={() => <NotFoundPage {...others} />} />
                   </Switch>
                 </BrowserRouter>

@@ -266,6 +266,8 @@ None
 
 - `core.PublicPage`: This contributions point serves as the Public Page for the OpenIMIS App. To enable its use, it must be exposed as a **core.PublicPage** contribution point. Additionally, the database configuration variable **App.enablePublicPage** must be set to `true`.
 - `showJournalSidebar`: how the Journal is presented, not whether it exists. `true` (default) docks it as an always-visible rail on the right edge, expanded and collapsed with its own chevron. `false` lets it rest at zero width and puts a Journal button in the app bar, next to Logout and Help, that opens it over the page; the button is deliberately not driven by the menu configuration, so `core.AppBarIcons` and `fe-core.menus` cannot remove it. **IMPORTANT**: The Journal provides crucial information about the state of mutations, including whether they succeeded or failed - it stays reachable under either setting for that reason.
+- `notificationWebSocketEnabled`: enables optional inbox invalidation events over the browser's native WebSocket API. Default **false**. The GraphQL `notifications` connection remains authoritative and polling continues as a fallback.
+- `notificationWebSocketUrl`: optional absolute WebSocket URL. When omitted, the client derives `ws(s)://<current-host>/ws/notifications/`.
 - `datePicker`: the concrete date picker to publish as `core.DatePicker` component ("ad"= Gregorian DatePicker, "ne"= Nepali calendar date picker )
 - `useDynPermalinks`: use ?dyn=<Base64-URL> when opening in new tab (prevent sending client-side routes to server while) (Default: false)
 - `core.JournalDrawer.pollInterval`: poll interval (in ms) to check for mutation status once submitted (Default: 2000)

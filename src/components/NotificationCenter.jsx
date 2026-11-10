@@ -35,13 +35,23 @@ const MARK_READ = `
 
 const MIN_DELAY = 15000;
 const MAX_DELAY = 300000;
+const MIN_RECONNECT_DELAY = 1000;
+const MAX_RECONNECT_DELAY = 30000;
+
+const defaultWebSocketUrl = () => {
+  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  return `${protocol}//${window.location.host}/ws/notifications/`;
+};
 
 const NotificationCenter = () => {
   const dispatch = useDispatch();
   const history = useHistory();
   const modulesManager = useModulesManager();
   const { formatMessage, formatMessageWithValues } = useTranslations("core", modulesManager);
+  const webSocketEnabled = modulesManager.getConf("fe-core", "notificationWebSocketEnabled", false);
+  const webSocketUrl = modulesManager.getConf("fe-core", "notificationWebSocketUrl", null);
   const [open, setOpen] = useState(false);
+  const [webSocketConnected, setWebSocketConnected] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const delay = useRef(MIN_DELAY);
   const timer = useRef();
@@ -55,10 +65,61 @@ const NotificationCenter = () => {
   }, []);
 
   useEffect(() => {
-    delay.current = error ? Math.min(delay.current * 2, MAX_DELAY) : MIN_DELAY;
+    delay.current = error ? Math.min(delay.current * 2, MAX_DELAY) : webSocketConnected ? MAX_DELAY : MIN_DELAY;
     schedule();
     return () => clearTimeout(timer.current);
-  }, [data, error, schedule]);
+  }, [data, error, schedule, webSocketConnected]);
+
+  useEffect(() => {
+    if (!webSocketEnabled) return undefined;
+
+    let stopped = false;
+    let socket;
+    let reconnectTimer;
+    let reconnectDelay = MIN_RECONNECT_DELAY;
+
+    const connect = () => {
+      if (stopped || !navigator.onLine) return;
+      socket = new WebSocket(webSocketUrl || defaultWebSocketUrl());
+      socket.onopen = () => {
+        reconnectDelay = MIN_RECONNECT_DELAY;
+        setWebSocketConnected(true);
+        setRefreshKey((key) => key + 1);
+      };
+      socket.onmessage = ({ data: message }) => {
+        try {
+          const event = JSON.parse(message);
+          if (event.type === "notification.inbox.changed" && event.version === 1) {
+            setRefreshKey((key) => key + 1);
+          }
+        } catch (_error) {
+          // Ignore unknown events. The periodic GraphQL pull remains authoritative.
+        }
+      };
+      socket.onerror = () => socket.close();
+      socket.onclose = () => {
+        setWebSocketConnected(false);
+        if (!stopped && navigator.onLine) {
+          reconnectTimer = setTimeout(connect, reconnectDelay);
+          reconnectDelay = Math.min(reconnectDelay * 2, MAX_RECONNECT_DELAY);
+        }
+      };
+    };
+
+    const reconnectOnline = () => {
+      if (!socket || socket.readyState === WebSocket.CLOSED) connect();
+    };
+
+    connect();
+    window.addEventListener("online", reconnectOnline);
+
+    return () => {
+      stopped = true;
+      clearTimeout(reconnectTimer);
+      window.removeEventListener("online", reconnectOnline);
+      if (socket) socket.close();
+    };
+  }, [webSocketEnabled, webSocketUrl]);
 
   useEffect(() => {
     const catchUp = () => {

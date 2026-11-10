@@ -1,4 +1,9 @@
 {
+  "core.notificationCenter.open": "Open notifications",
+  "core.notificationCenter.title": "Notifications",
+  "core.notificationCenter.new": "New",
+  "core.notificationCenter.seen": "Seen",
+  "core.notificationCenter.empty": "No notifications",
   "core.pickerNoOptionsLabel": "No options available",
   "core.roleManagement.label": "Roles Management",
   "core.roleManagement.searcher.results.title": "{rolesTotalCount} Roles Found",

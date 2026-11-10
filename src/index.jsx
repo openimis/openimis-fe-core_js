@@ -203,6 +203,10 @@ const ROUTE_ADMIN_USER_NEW = "admin/users/new";
 
 const DEFAULT_CONFIG = {
   "showJournalSidebar": true,
+  // Optional GraphQL subscriptions accelerate refreshes. Pulling the durable
+  // inbox remains authoritative and continues when the socket is unavailable.
+  "notificationWebSocketEnabled": false,
+  "notificationWebSocketUrl": null,
   // System-wide default number of rows per page, used when the user has no
   // `defaultRowsPerPage` preference of their own. Must be one of ROWS_PER_PAGE_OPTIONS.
   "defaultRowsPerPage": DEFAULT.ROWS_PER_PAGE,

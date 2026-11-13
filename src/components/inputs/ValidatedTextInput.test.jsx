@@ -1,6 +1,24 @@
 import React, { useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+// In development builds MUI's FormControl re-publishes its context on every render, so a
+// re-rendered TextField schedules low-priority work of its own on every keystroke; the
+// production build does not. The burst test swaps in a plain input to keep that out of
+// what it measures. The other tests keep the real TextField.
+const plainTextField = vi.hoisted(() => ({ on: false }));
+vi.mock("@mui/material", async (importOriginal) => {
+  const actual = await importOriginal();
+  const { forwardRef, createElement } = await import("react");
+  return {
+    ...actual,
+    TextField: forwardRef((props, ref) =>
+      plainTextField.on
+        ? createElement("input", { ref, value: props.value ?? "", onChange: props.onChange })
+        : createElement(actual.TextField, { ref, ...props }),
+    ),
+  };
+});
+
 const { default: ValidatedTextInput } = await import("./ValidatedTextInput");
 const { renderWithProviders, screen, waitFor, userEvent } = await import("../../testing");
 
@@ -11,7 +29,32 @@ const messages = { "core.duplicate": "Name already used" };
 // TextInput leaks props onto the DOM, so React warns on every render.
 beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => {});
+  plainTextField.on = false;
 });
+
+// Sends every keystroke of `text` in one task, as a barcode scanner (or Cypress typing
+// with no delay) does, and returns the errors React threw meanwhile.
+const typeInOneTask = (text) => {
+  const errors = [];
+  const onError = (event) => {
+    errors.push(event.error?.message ?? event.message);
+    event.preventDefault();
+  };
+  window.addEventListener("error", onError);
+  const setNativeValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set;
+  const actEnvironment = globalThis.IS_REACT_ACT_ENVIRONMENT;
+  globalThis.IS_REACT_ACT_ENVIRONMENT = false;
+  try {
+    for (let i = 1; i <= text.length; i++) {
+      setNativeValue.call(input(), text.slice(0, i));
+      input().dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  } finally {
+    globalThis.IS_REACT_ACT_ENVIRONMENT = actEnvironment;
+    window.removeEventListener("error", onError);
+  }
+  return errors;
+};
 
 const renderField = ({ action, isValid, isValidating } = {}) => {
   const onChange = vi.fn();
@@ -113,5 +156,18 @@ describe("ValidatedTextInput", () => {
 
     expect(screen.queryByText("error_outline")).toBeNull();
     expect(document.querySelector(".Mui-error")).toBeNull();
+  });
+
+  // React 19 counts each commit made while low-priority work waits as a nested update and
+  // throws "Maximum update depth exceeded" past 50: a keystroke must not leave work behind.
+  it("takes a burst of keystrokes typed in one task", () => {
+    plainTextField.on = true;
+    renderField();
+    const text = "Program of cash transfers for households, 2026 edition";
+
+    const errors = typeInOneTask(text);
+
+    expect(errors).toEqual([]);
+    expect(input().value).toBe(text);
   });
 });

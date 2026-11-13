@@ -81,7 +81,11 @@ const ValidatedTextAreaInput = ({
       return undefined;
     }
     const queryVariables = { [itemQueryIdentifier]: value, ...(additionalQueryArgs ?? {}) };
-    setValidationPending(true);
+    // Only on the first keystroke: a setState that changes nothing still costs a render and
+    // a commit, and React 19 throws "Maximum update depth exceeded" when a burst of
+    // keystrokes in one task (a barcode scanner, or Cypress typing with no delay) leaves
+    // one behind each time.
+    if (!isValidationPending) setValidationPending(true);
     checkValidity(queryVariables);
     return () => checkValidity.cancel();
   }, [value, shouldBeValidated]);

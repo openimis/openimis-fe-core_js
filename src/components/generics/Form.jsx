@@ -43,8 +43,12 @@ class Form extends Component {
     }
   }
 
+  // The page is told from the panel's event, not from a setState callback: a callback runs
+  // during the commit, so the page's update would cost a nested commit per keystroke, and
+  // React 19 throws "Maximum update depth exceeded" on a burst of them.
   onEditedChanged = (data) => {
-    this.setState({ dirty: true }, (e) => this.props.onEditedChanged(data));
+    this.setState({ dirty: true });
+    this.props.onEditedChanged(data);
   };
 
   save = (data) => {

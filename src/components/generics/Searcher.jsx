@@ -21,7 +21,7 @@ import GetIconComponent from "../../helpers/icons";
 const MoreHoriz = GetIconComponent("MoreHoriz");
 
 import { cacheFilters, resetCacheFilters, saveCurrentPaginationPage } from "../../actions";
-import { isRowMutationPending, mutationStatus, MUTATION_RECEIVED, MUTATION_SUCCESS } from "../../helpers/mutations";
+import { isRowMutationPending, mutationStatus, MUTATION_SUCCESS } from "../../helpers/mutations";
 import { DEFAULT, ENTER_KEY, ROWS_PER_PAGE_OPTIONS } from "../../constants";
 import { formatSorter, sort } from "../../helpers/api";
 import { formatMessage } from "../../helpers/i18n";
@@ -340,13 +340,17 @@ class Searcher extends Component {
   //
   // Only rows already loaded here are considered: nothing is fetched to
   // materialise a row, and a searcher that is not mounted does nothing at all.
+  //
+  // A mutation the backend ran inline is journalled with its final status (the
+  // module journalizes the response) and never shows as RECEIVED: any status
+  // before SUCCESS counts, an unknown one included.
   componentDidUpdate(prevProps) {
     if (prevProps.mutations === this.props.mutations) return;
     const landed = (this.props.items ?? []).some((item) => {
       const id = item?.clientMutationId;
       if (!id) return false;
       return (
-        mutationStatus(prevProps.mutations, id) === MUTATION_RECEIVED &&
+        mutationStatus(prevProps.mutations, id) !== MUTATION_SUCCESS &&
         mutationStatus(this.props.mutations, id) === MUTATION_SUCCESS
       );
     });

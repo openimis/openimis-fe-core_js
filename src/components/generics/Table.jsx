@@ -185,10 +185,11 @@ class Table extends Component {
       } else {
         s = { [id]: i };
       }
-      this.setState(
-        { selection: s },
-        (e) => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection)),
-      );
+      this.setState({ selection: s });
+      // Called from the event, not from a setState callback: React then commits the caller's
+      // update together with this one. From the callback, it is a nested update of the
+      // commit, and React 19 throws after 50 of them when boxes are checked in one burst.
+      this.props.onChangeSelection?.(Object.values(s));
     }
   };
 
@@ -204,9 +205,8 @@ class Table extends Component {
       newSelection = this._atom(items);
     }
 
-    this.setState({ selection: newSelection }, () => {
-      onChangeSelection?.(Object.values(this.state.selection));
-    });
+    this.setState({ selection: newSelection });
+    onChangeSelection?.(Object.values(newSelection));
   };
 
   headerAction = (a) => (

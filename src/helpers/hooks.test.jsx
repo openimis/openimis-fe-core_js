@@ -5,7 +5,7 @@ import { Provider } from "react-redux";
 import { ApiError, RSAA } from "redux-api-middleware";
 import { applyMiddleware, createStore } from "redux";
 
-import { enrichMutationOperation, useGraphqlMutation } from "./hooks";
+import { enrichMutationOperation, useGraphqlMutation, useGraphqlQuery } from "./hooks";
 import reducer from "../reducer";
 
 /** redux-thunk is an assembly dependency; the two lines it contributes are cheaper to inline. */
@@ -142,5 +142,63 @@ describe("useGraphqlMutation", () => {
 
     expect(outcome).toEqual({ resolved: undefined });
     expect(result.current.error).toBeNull();
+  });
+});
+
+/**
+ * Like apiMock, but each request waits until the test answers it: `pending` collects one
+ * { variables, answer(body) } per request, in the order they were sent.
+ */
+const deferredApiMock = (pending) => () => (next) => (action) => {
+  const rsaa = action[RSAA];
+  if (!rsaa) return next(action);
+  const { variables } = JSON.parse(rsaa.body);
+  const [req, resp] = rsaa.types;
+  next({ type: req.type ?? req, meta: req.meta });
+  return new Promise((resolve) => {
+    pending.push({
+      variables,
+      answer: (body) => {
+        const result = { type: resp.type ?? resp, payload: body, meta: resp.meta };
+        next(result);
+        resolve(result);
+      },
+    });
+  });
+};
+
+const PICKER_QUERY = `
+    query Picker($search: String) {
+      paymentCycle(search: $search) { edges { node { code } } }
+    }
+  `;
+
+const cycles = (...codes) => ({ data: { paymentCycle: { edges: codes.map((code) => ({ node: { code } })) } } });
+
+describe("useGraphqlQuery", () => {
+  // A picker queries once when it opens and again for what is typed. The server may answer
+  // the opening query last: its page of options then replaced the searched ones, and the
+  // option typed could not be picked.
+  it("keeps the answer to the latest variables when an earlier request is answered last", async () => {
+    const pending = [];
+    const store = createStore(
+      (state, action) => ({ core: reducer(state?.core, action) }),
+      applyMiddleware(thunk, deferredApiMock(pending)),
+    );
+    const wrapper = ({ children }) => <Provider store={store}>{children}</Provider>;
+    const { result, rerender } = renderHook(({ variables }) => useGraphqlQuery(PICKER_QUERY, variables, { skip: true }), {
+      wrapper,
+      initialProps: { variables: {} },
+    });
+
+    rerender({ variables: { search: null } });
+    rerender({ variables: { search: "PCY2" } });
+    expect(pending.map((p) => p.variables.search)).toEqual([null, "PCY2"]);
+
+    await act(async () => pending[1].answer(cycles("PCY2")));
+    await act(async () => pending[0].answer(cycles("PCY1")));
+
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.data).toEqual(cycles("PCY2").data);
   });
 });

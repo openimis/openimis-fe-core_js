@@ -92,7 +92,13 @@ class SelectInput extends Component {
     if (!options) return null;
     let valueStr = null;
     if (!!readOnly) {
-      valueStr = options.filter((o) => JSON.stringify(o.value) === JSON.stringify(value)).map((o) => o.label);
+      // A string, not the array of matching labels: TextInput compares its value by identity,
+      // and a new array on every render made it call setState during each commit. Joined the
+      // way the input used to stringify the array, so the displayed text is unchanged.
+      valueStr = options
+        .filter((o) => JSON.stringify(o.value) === JSON.stringify(value))
+        .map((o) => o.label)
+        .join(",");
     }
     const labelText = strLabel ?? (label ? formatMessage(intl, module, label) : null);
     const moduleProp = intl?.messages?.[`${module}.pickerNoOptionsLabel`] ? module : "core";

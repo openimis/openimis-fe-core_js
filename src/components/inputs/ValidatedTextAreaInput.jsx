@@ -50,6 +50,13 @@ const ValidatedTextAreaInput = ({
   // keystroke and the request actually being sent, so that neither the previous verdict
   // nor the "not yet validated" state is displayed while the value is still changing.
   const [isValidationPending, setValidationPending] = useState(false);
+  // Only when it changes: on React 19 a setState that changes nothing can still schedule a
+  // render, from these effects at low priority. One per keystroke, never run while keystrokes
+  // keep coming in one task (Cypress typing with no delay, a barcode scanner), made React count
+  // every commit as nested and throw "Maximum update depth exceeded" past 50 characters.
+  const setPending = (pending) => {
+    if (pending !== isValidationPending) setValidationPending(pending);
+  };
   const checkValidity = useMemo(
     () => debounce((queryVariables) => dispatch(action(modulesManager, queryVariables)), debounceTime),
     [dispatch, action, modulesManager, debounceTime],
@@ -70,28 +77,24 @@ const ValidatedTextAreaInput = ({
   useEffect(() => {
     if (!shouldBeValidated) {
       checkValidity.cancel();
-      setValidationPending(false);
+      setPending(false);
       !!setValidAction && dispatch(setValidAction());
       return undefined;
     }
     if (!value) {
       checkValidity.cancel();
-      setValidationPending(false);
+      setPending(false);
       !!clearAction && dispatch(clearAction());
       return undefined;
     }
     const queryVariables = { [itemQueryIdentifier]: value, ...(additionalQueryArgs ?? {}) };
-    // Only on the first keystroke: a setState that changes nothing still costs a render and
-    // a commit, and React 19 throws "Maximum update depth exceeded" when a burst of
-    // keystrokes in one task (a barcode scanner, or Cypress typing with no delay) leaves
-    // one behind each time.
-    if (!isValidationPending) setValidationPending(true);
+    setPending(true);
     checkValidity(queryVariables);
     return () => checkValidity.cancel();
   }, [value, shouldBeValidated]);
 
   // The pending window closes as soon as the store reports back on this field.
-  useEffect(() => setValidationPending(false), [isValid, isValidating, validationError]);
+  useEffect(() => setPending(false), [isValid, isValidating, validationError]);
 
   // Leaving the form must not leave a verdict about a value that is no longer edited.
   useEffect(() => () => void (!!clearAction && dispatch(clearAction())), []);

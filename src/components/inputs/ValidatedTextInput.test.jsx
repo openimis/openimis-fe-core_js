@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // In development builds MUI's FormControl re-publishes its context on every render, so a
@@ -20,20 +21,12 @@ vi.mock("@mui/material", async (importOriginal) => {
 });
 
 const { default: ValidatedTextInput } = await import("./ValidatedTextInput");
-const { renderWithProviders, screen, waitFor, userEvent } = await import("../../testing");
+const { makeStore, renderWithProviders, screen, waitFor, userEvent } = await import("../../testing");
 
 const input = () => document.querySelector("input");
 
-const messages = { "core.duplicate": "Name already used" };
-
-// TextInput leaks props onto the DOM, so React warns on every render.
-beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {});
-  plainTextField.on = false;
-});
-
-// Sends every keystroke of `text` in one task, as a barcode scanner (or Cypress typing
-// with no delay) does, and returns the errors React threw meanwhile.
+// Sends every keystroke of `text` in one task, as Cypress typing with no delay (or a
+// barcode scanner) does, and returns the errors React threw meanwhile.
 const typeInOneTask = (text) => {
   const errors = [];
   const onError = (event) => {
@@ -46,6 +39,8 @@ const typeInOneTask = (text) => {
   globalThis.IS_REACT_ACT_ENVIRONMENT = false;
   try {
     for (let i = 1; i <= text.length; i++) {
+      // React unmounts the tree when it throws: nothing is left to type into.
+      if (!input()) break;
       setNativeValue.call(input(), text.slice(0, i));
       input().dispatchEvent(new Event("input", { bubbles: true }));
     }
@@ -56,7 +51,15 @@ const typeInOneTask = (text) => {
   return errors;
 };
 
-const renderField = ({ action, isValid, isValidating } = {}) => {
+const messages = { "core.duplicate": "Name already used" };
+
+// TextInput leaks props onto the DOM, so React warns on every render.
+beforeEach(() => {
+  vi.spyOn(console, "error").mockImplementation(() => {});
+  plainTextField.on = false;
+});
+
+const renderField = ({ action, isValid, isValidating, shouldValidate = () => true } = {}) => {
   const onChange = vi.fn();
   const check = action ?? vi.fn(() => ({ type: "TEST_VALIDATION_REQ" }));
   const Caller = () => {
@@ -67,7 +70,7 @@ const renderField = ({ action, isValid, isValidating } = {}) => {
         codeTakenLabel="duplicate"
         module="core"
         label="roleName"
-        shouldValidate={() => true}
+        shouldValidate={shouldValidate}
         isValid={isValid}
         isValidating={isValidating}
         action={check}
@@ -169,5 +172,48 @@ describe("ValidatedTextInput", () => {
 
     expect(errors).toEqual([]);
     expect(input().value).toBe(text);
+  });
+
+  // A new entity's name is not checked (nothing saved to compare it with), and every
+  // keystroke reset the pending flag that was already off. React 19 can still schedule a
+  // render for such a setState, at low priority from the effect; during a burst of
+  // keystrokes it never ran, React counted every commit as nested and threw "Maximum update
+  // depth exceeded" past 50 characters (UAT OCM-1205, naming a new project).
+  it("takes a burst of keystrokes when the value needs no check", () => {
+    // MUI's development build gives FormControl a new context on every render, which makes
+    // its input schedule work of its own after each commit: render MUI as in production.
+    vi.stubEnv("NODE_ENV", "production");
+    // As a project page: the verdict is kept in the store, which the field resets on change.
+    const verdict = (state = {}, { type }) => (type === "TEST_VALIDATION_SET_VALID" ? { isValid: true } : state);
+    const Caller = () => {
+      const [value, setValue] = useState("");
+      const { isValid, isValidating, validationError } = useSelector((state) => state.verdict);
+      return (
+        <ValidatedTextInput
+          itemQueryIdentifier="projectName"
+          codeTakenLabel="duplicate"
+          module="core"
+          label="projectName"
+          shouldValidate={() => false}
+          isValid={isValid}
+          isValidating={isValidating}
+          validationError={validationError}
+          action={() => ({ type: "TEST_VALIDATION_REQ" })}
+          clearAction={() => ({ type: "TEST_VALIDATION_CLEAR" })}
+          setValidAction={() => ({ type: "TEST_VALIDATION_SET_VALID" })}
+          value={value}
+          onChange={setValue}
+        />
+      );
+    };
+    renderWithProviders(<Caller />, { messages, store: makeStore({ reducers: { verdict } }) });
+    const text = "E2E Individual Training Project - 2026-11-19T12-30-01-123Z";
+
+    const errors = typeInOneTask(text);
+    const typed = input()?.value;
+    vi.unstubAllEnvs();
+
+    expect(errors).toEqual([]);
+    expect(typed).toBe(text);
   });
 });

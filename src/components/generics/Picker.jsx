@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react";
 import { styled } from "@mui/material/styles";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../../helpers/i18n";
 import {
   Dialog,
   DialogTitle,
@@ -162,19 +162,21 @@ class Picker extends Component {
           label={!!label && formatMessage(intl, module, label)}
           onClick={(e) => this.setState({ open: true })}
           value={suggestionFormatter(value)}
-          InputProps={{
-            startAdornment: !readOnly && (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-            endAdornment: !readOnly && (
-              <InputAdornment position="end">
-                <IconButton onClick={this.onClear}>
-                  <ClearIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: !readOnly && (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+              endAdornment: !readOnly && (
+                <InputAdornment position="end">
+                  <IconButton onClick={this.onClear}>
+                    <ClearIcon />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }
           }}
         />
       </FormControl>

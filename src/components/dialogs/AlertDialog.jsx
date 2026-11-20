@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { bindActionCreators } from "redux";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../../helpers/i18n";
 import { connect } from "react-redux";
 import {
   Box,

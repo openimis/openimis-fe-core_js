@@ -140,8 +140,14 @@ const SetPasswordPage = ({ fetchPasswordPolicy, passwordPolicy }) => {
         <Helmet title={formatMessage("pageTitle")} />
         <Paper className="paper" elevation={2}>
           <form onSubmit={onSubmit}>
-            <Box p={6} width={450}>
-              <Grid container spacing={2} direction="column" alignItems="stretch">
+            <Box
+              sx={{
+                p: 6,
+                width: 450
+              }}>
+              <Grid container spacing={2} direction="column" sx={{
+                alignItems: "stretch"
+              }}>
                 <Grid>
                   <TextInput
                     required
@@ -197,7 +203,9 @@ const SetPasswordPage = ({ fetchPasswordPolicy, passwordPolicy }) => {
                 )}
                 {error && (
                   <Grid>
-                    <Box color="error.main">{error}</Box>
+                    <Box sx={{
+                      color: "error.main"
+                    }}>{error}</Box>
                   </Grid>
                 )}
                 <Grid>

@@ -274,7 +274,6 @@ class Messages extends Component {
         <Popover
           open={!!anchorEl}
           anchorEl={anchorEl}
-          TransitionComponent={Fade}
           transitionDuration={{ enter: 250, exit: 250 }}
           anchorOrigin={{
             vertical: "center",
@@ -286,6 +285,9 @@ class Messages extends Component {
           }}
           onClick={onClick}
           slotProps={{ paper: { sx: messagesPopoverStyles } }}
+          slots={{
+            transition: Fade
+          }}
         >
           {stats?.claim_stats && (
             <div>
@@ -371,15 +373,19 @@ const MutationList = ({
                       className="jrnlItemDetail"
                       key={`mdet-${detailIndex}`}
                       primary={detail}
-                      primaryTypographyProps={{ className: "jrnlItemDetailText" }}
+                      slotProps={{
+                        primary: { className: "jrnlItemDetailText" }
+                      }}
                     />
                   ));
                 } catch (error) {
                   return (
                     <ListItemText
                       className="jrnlItemDetailsError"
-                      primaryTypographyProps={{ className: "jrnlItemDetailText" }}
                       primary={`Mutation details not available. ${error}`}
+                      slotProps={{
+                        primary: { className: "jrnlItemDetailText" }
+                      }}
                     />
                   );
                 }
@@ -694,7 +700,13 @@ class JournalDrawer extends Component {
             }}
             open={open}
           >
-            <Grid container className="toolbar" justifyContent="center" alignItems="center">
+            <Grid
+              container
+              className="toolbar"
+              sx={{
+                justifyContent: "center",
+                alignItems: "center"
+              }}>
               <Grid>
                 <IconButton onClick={handleDrawer}>{open ? <ChevronRightIcon /> : <ChevronLeftIcon />}</IconButton>
               </Grid>

@@ -108,7 +108,13 @@ const LoginPage = ({ logo }) => {
   return (
     <StyledLoginPage>
       {isAuthenticating && (
-        <Box position="absolute" top={0} left={0} right={0}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0
+          }}>
           <LinearProgress className="bootstrap" />
         </Box>
       )}
@@ -116,10 +122,18 @@ const LoginPage = ({ logo }) => {
         <Helmet title={formatMessage("pageTitle")} />
         <Paper className="paper" elevation={2}>
           <form onSubmit={onSubmit}>
-            <Box p={6} width={380}>
-              <Grid container spacing={2} direction="column" alignItems="stretch">
+            <Box
+              sx={{
+                p: 6,
+                width: 380
+              }}>
+              <Grid container spacing={2} direction="column" sx={{
+                alignItems: "stretch"
+              }}>
                 {enablePublicPage && (
-                  <Grid container direction="row" alignItems="center">
+                  <Grid container direction="row" sx={{
+                    alignItems: "center"
+                  }}>
                     <Button
                       onClick={() => history.push("/")}
                       startIcon={<ArrowBackIcon />}
@@ -130,23 +144,42 @@ const LoginPage = ({ logo }) => {
                     </Button>
                   </Grid>
                 )}
-                <Grid container direction="row" alignItems="center">
+                <Grid container direction="row" sx={{
+                  alignItems: "center"
+                }}>
                   <img className="logo" src={logo} />
                   {
-                    <Box pl={2} fontWeight="fontWeightMedium" fontSize="h4.fontSize">
+                    <Box
+                      sx={{
+                        pl: 2,
+                        fontWeight: "fontWeightMedium",
+                        fontSize: "h4.fontSize"
+                      }}>
                       {formatMessage("appName")}
                     </Box>
                   }
                 </Grid>
                 {showMPassProvider ? (
                   <Grid>
-                    <Box display="flex" alignItems="center" justifyContent="center" my={2}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        my: 2
+                      }}>
                       <Typography style={{ textTransform: "uppercase" }} variant="body2">
                         {formatMessage("loginCaption")}
                       </Typography>
                     </Box>
                     <Contributions contributionKey={LOGIN_PAGE_MPASS_CONTRIBUTION_KEY} onClick={redirectToMPassLogin} />
-                    <Box display="flex" alignItems="center" mt={4} mb={2}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        mt: 4,
+                        mb: 2
+                      }}>
                       <Divider style={{ flex: 1 }} />
                       <Link
                         href={linkToUserGuide}
@@ -188,7 +221,9 @@ const LoginPage = ({ logo }) => {
                     </Grid>
                     {serverResponse?.message && (
                       <Grid>
-                        <Box color="error.main">{getErrorMessage(serverResponse.message)}</Box>
+                        <Box sx={{
+                          color: "error.main"
+                        }}>{getErrorMessage(serverResponse.message)}</Box>
                       </Grid>
                     )}
                     <Grid>

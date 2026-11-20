@@ -1,5 +1,5 @@
 import React from "react";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../../helpers/i18n";
 import { Table, TableBody, TableCell, TableRow, Paper, TableContainer, Chip, Typography, Box } from "@mui/material";
 
 const HIDDEN_KEYS = ["mutation_extensions", "jsonExt", "json_ext"];

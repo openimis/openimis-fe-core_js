@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import clsx from "clsx";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../../helpers/i18n";
 import _ from "lodash";
 import { connect } from "react-redux";
 import GetIconComponent from "../../helpers/icons";
@@ -210,8 +210,14 @@ class Table extends Component {
   };
 
   headerAction = (a) => (
-    <Box flexGrow={1}>
-      <Box display="flex" justifyContent="flex-end">
+    <Box sx={{
+      flexGrow: 1
+    }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end"
+        }}>
         {a()}
       </Box>
     </Box>
@@ -305,15 +311,32 @@ class Table extends Component {
 
     return (
       <StyledTable>
-        <Box position="relative" overflow="auto">
+        <Box
+          sx={{
+            position: "relative",
+            overflow: "auto"
+          }}>
           {header && (
-            <Grid container alignItems="center" justifyContent="space-between" className="tableTitle">
+            <Grid
+              container
+              className="tableTitle"
+              sx={{
+                alignItems: "center",
+                justifyContent: "space-between"
+              }}>
               {extendHeader ? (
                 <>
                   <Grid size={6}>
                     <Typography variant="h6">{header}</Typography>
                   </Grid>
-                  <Grid container direction="row" alignItems="center" justifyContent="space-between" size={6}>
+                  <Grid
+                    container
+                    direction="row"
+                    size={6}
+                    sx={{
+                      alignItems: "center",
+                      justifyContent: "space-between"
+                    }}>
                     {extendHeader && extendHeader()}
                   </Grid>
                 </>
@@ -368,11 +391,12 @@ class Table extends Component {
                               cursor: headerActions.length > idx && !!headerActions[idx][0] ? "pointer" : "",
                             }}
                             onClick={headerActions.length > idx ? headerActions[idx][0] : null}
-                            display="flex"
                             className="tableHeader"
-                            alignItems="center"
-                            justifyContent={aligns.length > idx ? aligns[idx] : "left"}
-                          >
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: aligns.length > idx ? aligns[idx] : "left"
+                            }}>
                             <Box>
                               {typeof h === "function" ? (
                                 <Box>{h(this.state, this.props)}</Box>
@@ -479,11 +503,13 @@ class Table extends Component {
                         page={page}
                         rowsPerPage={rowsPerPage}
                         rowsPerPageOptions={rowsPerPageOptions}
-                        SelectProps={{ disabled: this.state.isRowsPerPageLocked }}
                         onRowsPerPageChange={(e) =>
                           !this.state.isRowsPerPageLocked && onChangeRowsPerPage?.(e.target.value)
                         }
                         onPageChange={onChangePage}
+                        slotProps={{
+                          select: { disabled: this.state.isRowsPerPageLocked }
+                        }}
                       />
                     </Box>
                   </TableCell>
@@ -492,7 +518,13 @@ class Table extends Component {
             )}
           </MUITable>
           {(fetching || error) && (
-            <Grid className="loader" container justifyContent="center" alignItems="center">
+            <Grid
+              className="loader"
+              container
+              sx={{
+                justifyContent: "center",
+                alignItems: "center"
+              }}>
               <ProgressOrError progress={items?.length && fetching} error={error} />
             </Grid>
           )}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../../helpers/i18n";
 
 import {
   Button,

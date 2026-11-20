@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../../helpers/i18n";
 import { useDispatch, useSelector } from "react-redux";
 
 import { MenuItem, Tooltip, Button, Typography } from "@mui/material";

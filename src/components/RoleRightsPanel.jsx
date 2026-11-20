@@ -16,7 +16,7 @@ import {
   Tooltip,
   InputAdornment,
 } from "@mui/material";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../helpers/i18n";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { styled } from "@mui/material/styles";
@@ -176,20 +176,27 @@ class RoleRightsPanel extends FormPanel {
                       className="filter"
                       variant="outlined"
                       label={formatMessage(intl, "core", "roleManagement.role.rightsFilter")}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <SearchIcon />
-                          </InputAdornment>
-                        ),
-                      }}
                       onChange={(e) => this.setState({ filterValue: e.target.value })}
+                      slotProps={{
+                        input: {
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <SearchIcon />
+                            </InputAdornment>
+                          ),
+                        }
+                      }}
                     />
                   </Grid>
                 </Paper>
               </Grid>
             </Grid>
-            <Grid container justifyContent="space-between" alignItems="center">
+            <Grid
+              container
+              sx={{
+                justifyContent: "space-between",
+                alignItems: "center"
+              }}>
               <Grid size={6} className="item">
                 <Grid className="item">
                   <Grid className="listTitle">

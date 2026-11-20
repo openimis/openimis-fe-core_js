@@ -2,7 +2,7 @@ import React, { Profiler, useEffect, useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import DatePicker from "./DatePicker";
-import { renderWithProviders } from "../testing";
+import { act, renderWithProviders } from "../testing";
 
 const input = () => document.querySelector("input");
 
@@ -105,7 +105,11 @@ describe("DatePicker", () => {
   // commits is the picker telling the caller from a setState callback (the caller's update
   // is then a commit of its own) and copying the new value prop into its state in
   // componentDidUpdate (one more commit).
-  it("commits a date entered together with the caller's update", () => {
+  //
+  // Counted once the event has settled: with MUI X 9 the Summary effect's update commits
+  // on the next tick instead of inside the event. What React 19 limits is nested updates,
+  // so the test also checks that none of the commits is one.
+  it("commits a date entered together with the caller's update", async () => {
     const commits = [];
     renderWithProviders(<Page onCommit={(id, phase) => commits.push(phase)} />);
     commits.length = 0;
@@ -113,8 +117,10 @@ describe("DatePicker", () => {
 
     setNativeValue.call(input(), shown(2));
     input().dispatchEvent(new Event("input", { bubbles: true }));
+    await act(async () => {});
 
     // The change itself, then the Summary effect.
     expect(commits).toHaveLength(2);
+    expect(commits).not.toContain("nested-update");
   });
 });

@@ -19,6 +19,14 @@ describe("SelectInput", () => {
   const renderInput = (props = {}) =>
     renderWithProviders(<SelectInput module="core" options={OPTIONS} onChange={() => {}} {...props} />);
 
+  // MUI 9 renders a select's label as a <div>; openIMIS keeps a <label>, which pages,
+  // user scripts and the UAT suite locate fields by.
+  it("renders its label as a label element", () => {
+    const { container } = renderInput({ value: 3, strLabel: "Claim Status" });
+
+    expect(container.querySelector("label")).toHaveTextContent("Claim Status");
+  });
+
   it("displays the option matching the value", () => {
     renderInput({ value: 3 });
 

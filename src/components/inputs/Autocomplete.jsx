@@ -144,14 +144,6 @@ const Autocomplete = (props) => {
         filterOptions={filterOptions}
         filterSelectedOptions={filterSelectedOptions}
         onInputChange={(__, query) => handleInputChange(query)}
-        PaperComponent={(paperProps) => (
-          <PaperWithConfirm
-            {...paperProps}
-            multiple={multiple}
-            onConfirm={() => setOpen(false)}
-            confirmLabel={formatMessage("core.confirmSelect")}
-          />
-        )}
         renderInput={
           !!renderInput
             ? renderInput
@@ -160,12 +152,27 @@ const Autocomplete = (props) => {
                   {...inputProps}
                   variant={inputVariant}
                   required={required}
-                  InputLabelProps={{ shrink: value !== undefined }}
                   label={withLabel && (label || formatMessage("label"))}
                   placeholder={!readOnly && !hasValue && withPlaceholder ? placeholder || formatMessage("placeholder") : undefined}
+                  // Merge, not replace: MUI 9 passes the input's ref, adornments and
+                  // handlers in inputProps.slotProps.
+                  slotProps={{
+                    ...inputProps.slotProps,
+                    inputLabel: { ...inputProps.slotProps?.inputLabel, shrink: value !== undefined },
+                  }}
                 />
               )
         }
+        slots={{
+          paper: (paperProps) => (
+            <PaperWithConfirm
+              {...paperProps}
+              multiple={multiple}
+              onConfirm={() => setOpen(false)}
+              confirmLabel={formatMessage("core.confirmSelect")}
+            />
+          )
+        }}
       />
     </StyledAutocomplete>
   );

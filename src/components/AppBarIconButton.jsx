@@ -1,6 +1,6 @@
 import React from "react";
 import { useHistory } from "../helpers/history";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../helpers/i18n";
 import { IconButton, Tooltip } from "@mui/material";
 import GetIconComponent from "../helpers/icons";
 import { formatMessage } from "@openimis/fe-core";

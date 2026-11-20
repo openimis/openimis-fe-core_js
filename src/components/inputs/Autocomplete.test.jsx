@@ -38,10 +38,11 @@ const projects = [
 // A plain input rather than MUI's TextField: in development builds MUI's FormControl
 // schedules low-priority work on every render, which the production build does not, and
 // that would hide what the test measures.
+// MUI 9 hands the input's props over in params.slotProps (input, htmlInput).
 const renderPlainInput = (params) => (
-  <div ref={params.InputProps.ref}>
-    {params.InputProps.startAdornment}
-    <input aria-label="projects" {...params.inputProps} />
+  <div ref={params.slotProps.input.ref}>
+    {params.slotProps.input.startAdornment}
+    <input aria-label="projects" {...params.slotProps.htmlInput} />
   </div>
 );
 

@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import clsx from "clsx";
 import { connect } from "react-redux";
 import { styled } from "@mui/material/styles";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../../helpers/i18n";
 import { TextField } from "@mui/material";
 import { formatMessage, formatMessageWithValues } from "../../helpers/i18n";
 import { DEFAULT } from "../../constants";
@@ -187,12 +187,15 @@ class TextInput extends Component {
           fullWidth
           disabled={readOnly}
           label={!!label && formatMessage(intl, module, label)}
-          InputProps={{ inputProps: effectiveInputProps, startAdornment, endAdornment }}
           onChange={this._onChange}
           value={this.state.value}
           error={Boolean(err)}
           helperText={msg}
           type={type}
+          slotProps={{
+            ...others.slotProps,
+            input: { ...others.slotProps?.input, inputProps: effectiveInputProps, startAdornment, endAdornment },
+          }}
         />
       </StyledTextInput>
     );

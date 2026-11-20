@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { injectIntl } from "react-intl";
 import { InputAdornment } from "@mui/material";
 import NumberInput from "./NumberInput";
@@ -13,10 +13,18 @@ const AmountInput = ({ intl, inputMinValue = 0, numberOfDecimals, ...props }) =>
     throw new Error(`Position ${position} is not accepted. Only 'start' and 'end' are valid options.`);
   }
 
+  const currency = intl.formatMessage({ id: "currency" });
+  // The same element from one render to the next: MUI's input reports a new adornment to its
+  // FormControl from an effect, so a new one on every render leaves low-priority work after
+  // each commit. React 19 counts every commit made while such work waits as a nested update
+  // and throws "Maximum update depth exceeded" on a burst of keystrokes elsewhere in the form.
+  const adornment = useMemo(
+    () => <InputAdornment position={position}>{currency}</InputAdornment>,
+    [position, currency],
+  );
+
   const extraProps = {
-    [`${position}Adornment`]: (
-      <InputAdornment position={position}>{intl.formatMessage({ id: "currency" })}</InputAdornment>
-    ),
+    [`${position}Adornment`]: adornment,
     min: inputMinValue,
     numberOfDecimals: numberOfDecimals ?? defaultNumberOfDecimals,
   };

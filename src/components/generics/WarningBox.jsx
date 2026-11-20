@@ -11,7 +11,8 @@ const DEFAULT_STYLES = {
   borderRadius: "10px",
 };
 
-const WarningBox = ({ title, description, styles, xs }) => {
+// React 19 ignores defaultProps on function components: defaults live in the parameters.
+const WarningBox = ({ title, description, styles = {}, xs = 12 }) => {
   return (
     <Grid size={xs || 12}>
       <Box
@@ -26,11 +27,6 @@ const WarningBox = ({ title, description, styles, xs }) => {
       </Box>
     </Grid>
   );
-};
-
-WarningBox.defaultProps = {
-  styles: {},
-  xs: 12,
 };
 
 WarningBox.propTypes = {

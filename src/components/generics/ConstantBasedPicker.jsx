@@ -15,20 +15,24 @@ const INIT_STATE = {
   value: null,
 };
 
+// The props `value` was last taken from: none yet, so the first render takes them.
+const NO_PROPS_YET = { value: Symbol("no value yet"), reset: Symbol("no reset yet") };
+
 class ConstantBasedPicker extends Component {
-  state = INIT_STATE;
+  state = { ...INIT_STATE, propValue: NO_PROPS_YET.value, propReset: NO_PROPS_YET.reset };
 
-  componentDidMount() {
-    // 0 is a constant like any other (e.g. the Error claim status), not "no value"
-    if (this.props.value !== undefined && this.props.value !== null) {
-      this.setState((state, props) => ({ value: props.value }));
+  // Takes a new `value` prop (or a reset) in the render that receives it. Copying it from
+  // componentDidUpdate cost a second commit per change, which React 19 counts as nested
+  // while other work waits and throws "Maximum update depth exceeded" past 50.
+  static getDerivedStateFromProps(props, state) {
+    if (state.propValue === NO_PROPS_YET.value) {
+      // 0 is a constant like any other (e.g. the Error claim status), not "no value"
+      return { value: props.value ?? null, propValue: props.value, propReset: props.reset };
     }
-  }
-
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    if (prevProps.reset !== this.props.reset || prevProps.value !== this.props.value) {
-      this.setState((state, props) => ({ value: props.value }));
+    if (props.reset !== state.propReset || props.value !== state.propValue) {
+      return { value: props.value, propValue: props.value, propReset: props.reset };
     }
+    return null;
   }
 
   _formatValue = (v) =>
@@ -37,9 +41,10 @@ class ConstantBasedPicker extends Component {
       : formatMessage(this.props.intl, this.props.module, `${this.props.label}.${v}`);
 
   _onChange = (v) => {
-    this.setState({ value: v }, (e) => {
-      this.props.onChange(v, this._formatValue(v));
-    });
+    this.setState({ value: v });
+    // Called from the event, not from a setState callback: React then commits the caller's
+    // update together with this one. From the callback, it is a nested update of the commit.
+    this.props.onChange(v, this._formatValue(v));
   };
 
   render() {

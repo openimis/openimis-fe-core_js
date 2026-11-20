@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import _ from "lodash";
 import { styled } from "@mui/material/styles";
 import MuiAutocomplete from "@mui/material/Autocomplete";
 import { TextField, Paper, Button } from "@mui/material";
@@ -98,7 +99,15 @@ const Autocomplete = (props) => {
     }
   }, [open]);
 
+  // MUI's Autocomplete is remounted (new key) when the value changes, to drop the text
+  // being typed. Many pickers rebuild an equal value on every render, and a remount on each
+  // keystroke typed elsewhere in the form costs several commits: React 19 throws "Maximum
+  // update depth exceeded" on a burst of them (a barcode scanner, or Cypress typing with no
+  // delay). So only a value that actually differs remounts it.
+  const previousValue = useRef(value);
   useEffect(() => {
+    if (_.isEqual(previousValue.current, value)) return;
+    previousValue.current = value;
     setResetKey(Date.now());
   }, [value]);
 

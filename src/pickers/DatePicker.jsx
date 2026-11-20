@@ -48,6 +48,8 @@ function fromISODateToDayjs(s) {
   return dayjs(s);
 }
 
+const NO_VALUE_YET = Symbol("no value yet");
+
 class openIMISDatePicker extends Component {
   constructor(props) {
     super(props);
@@ -65,16 +67,16 @@ class openIMISDatePicker extends Component {
 
   state = {
     value: null,
+    // The `value` prop `value` was last taken from; nothing yet, so the first render takes it.
+    propValue: NO_VALUE_YET,
   };
 
-  componentDidMount() {
-    this.setState((state, props) => ({ value: props.value ? fromISODateToDayjs(props.value) : null }));
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.value !== this.props.value) {
-      this.setState({ value: this.props.value ? fromISODateToDayjs(this.props.value) : null });
-    }
+  // Takes a new `value` prop in the render that receives it. Copying it from
+  // componentDidUpdate cost a second commit per change, which React 19 counts as nested
+  // while other work waits and throws "Maximum update depth exceeded" past 50.
+  static getDerivedStateFromProps(props, state) {
+    if (props.value === state.propValue) return null;
+    return { value: props.value ? fromISODateToDayjs(props.value) : null, propValue: props.value };
   }
 
   dateChange = (d, context) => {
@@ -82,17 +84,16 @@ class openIMISDatePicker extends Component {
       return;
     }
     const jsDate = d ? d.toDate() : null;
-    this.setState({ value: d }, () => {
-      if (this.props.onChange) {
-        this.props.onChange(toISODate(jsDate));
-      }
-    });
+    this.setState({ value: d });
+    // Called from the event, not from a setState callback: React then commits the caller's
+    // update together with this one. From the callback, it is a nested update of the
+    // commit, and React 19 throws after 50 of them when changes come in one burst.
+    this.props.onChange?.(toISODate(jsDate));
   };
 
   secondaryCalendarDateChange = (d) => {
-    this.setState({ value: toISODate(d.toDate()) }, (i) =>
-      this.props.onChange ? this.props.onChange(toISODate(d.toDate())) : null,
-    );
+    this.setState({ value: toISODate(d.toDate()) });
+    this.props.onChange?.(toISODate(d.toDate()));
   };
 
   clearDate = (e) => {

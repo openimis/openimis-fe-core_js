@@ -85,3 +85,41 @@ describe("JournalDrawer", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 });
+
+describe("JournalDrawer classic sidebar", () => {
+  // Collapsed, the sidebar is a narrow column of status icons. It used to rely on the
+  // entry text starting past the column's edge, which MUI 9's narrower list icons broke:
+  // the first letters of every label showed beside the icons.
+  const withHistory = () => {
+    const store = makeStore();
+    store.dispatch({
+      type: "CORE_HISTORICAL_MUTATIONS_RESP",
+      ...mutationLogs([
+        {
+          id: btoa("MutationLogGQLType:1"),
+          status: 2,
+          clientMutationId: CLIENT_MUTATION_ID,
+          clientMutationLabel: LABEL,
+          requestDateTime: "2026-11-20T10:00:00",
+        },
+      ]),
+    });
+    return store;
+  };
+
+  it("shows only the status icons when collapsed", () => {
+    renderWithProviders(<JournalDrawer journalSidebar open={false} handleDrawer={() => {}} />, {
+      store: withHistory(),
+    });
+
+    expect(document.querySelector(".jrnlIcon")).toBeInTheDocument();
+    expect(screen.queryByText(LABEL)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /details/i })).not.toBeInTheDocument();
+  });
+
+  it("shows the entries in full when open", () => {
+    renderWithProviders(<JournalDrawer journalSidebar open handleDrawer={() => {}} />, { store: withHistory() });
+
+    expect(screen.getByText(LABEL)).toBeInTheDocument();
+  });
+});

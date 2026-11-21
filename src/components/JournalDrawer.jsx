@@ -318,6 +318,7 @@ const MutationList = ({
   expanded,
   hasNextPage,
   messagesClickable,
+  collapsed = false,
   detailsLabel,
   onShowMessages,
   onShowDetails,
@@ -339,30 +340,34 @@ const MutationList = ({
           >
             {m.status === 1 ? <ErrorIcon /> : <CheckIcon />}
           </ListItemIcon>
-          <ListItemText
-            className={m.status === 1 ? "jrnlErrorItem" : "jrnlItem"}
-            primary={m.clientMutationLabel}
-            secondary={moment(m.requestDateTime).format("YYYY-MM-DD HH:mm")}
-          />
-          {m.status !== 0 && (
+          {/* Collapsed, the sidebar is a column of status icons: the entry itself shows
+              once it is opened (or in the messages popover a click on the icon opens). */}
+          {!collapsed && (
+            <ListItemText
+              className={m.status === 1 ? "jrnlErrorItem" : "jrnlItem"}
+              primary={m.clientMutationLabel}
+              secondary={moment(m.requestDateTime).format("YYYY-MM-DD HH:mm")}
+            />
+          )}
+          {!collapsed && m.status !== 0 && (
             <Tooltip title={detailsLabel}>
               <IconButton onClick={(e) => onShowDetails(e, m)} aria-label={detailsLabel} size="small">
                 <InfoIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           )}
-          {!!m.clientMutationDetails && expanded === `detail-${idx}` && (
+          {!collapsed && !!m.clientMutationDetails && expanded === `detail-${idx}` && (
             <IconButton onClick={(e) => onToggleDetail(e, false)}>
               <ExpandLessIcon />
             </IconButton>
           )}
-          {!!m.clientMutationDetails && expanded !== `detail-${idx}` && (
+          {!collapsed && !!m.clientMutationDetails && expanded !== `detail-${idx}` && (
             <IconButton onClick={(e) => onToggleDetail(e, `detail-${idx}`)}>
               <ExpandMoreIcon />
             </IconButton>
           )}
         </ListItem>
-        {!!m.clientMutationDetails && (
+        {!collapsed && !!m.clientMutationDetails && (
           <Collapse key={`mutation-detail${idx}`} in={expanded === `detail-${idx}`} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
               {(() => {
@@ -659,13 +664,14 @@ class JournalDrawer extends Component {
     this.showDetails(event, resultPopup);
   };
 
-  renderMutations = (messagesClickable) => (
+  renderMutations = (messagesClickable, collapsed = false) => (
     <MutationList
       theme={this.props.theme}
       displayedMutations={this.state.displayedMutations}
       expanded={this.state.expanded}
       hasNextPage={this.state.hasNextPage}
       messagesClickable={messagesClickable}
+      collapsed={collapsed}
       detailsLabel={this.props.formatMessage("journal.details")}
       onShowMessages={this.showMessages}
       onShowDetails={this.showDetails}
@@ -712,7 +718,7 @@ class JournalDrawer extends Component {
               </Grid>
             </Grid>
             <Divider />
-            {this.renderMutations(!open)}
+            {this.renderMutations(!open, !open)}
           </Drawer>
         </nav>
       </ClickAwayListener>

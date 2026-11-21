@@ -1,5 +1,6 @@
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
+import { MenuItem } from "@mui/material";
 
 // The filter pane and the export button reach the dialogs, which import the package
 // barrel; neither is under test here.
@@ -68,5 +69,39 @@ describe("Searcher", () => {
     journal(store, RECEIVED);
 
     expect(fetch).not.toHaveBeenCalled();
+  });
+});
+
+// Modules contribute searcher actions as MenuItems (an upload, an upload history).
+// In button mode (selectWithCheckbox) they sit in the header row, not in a Menu, and
+// MUI 9's MenuItem throws outside a Menu or MenuList.
+describe("Searcher actions contributed as menu items", () => {
+  const UploadItem = () => <MenuItem>Upload</MenuItem>;
+
+  it("renders them in button mode", async () => {
+    const { mockModulesManager, screen } = await import("../../testing");
+    renderWithProviders(
+      <Searcher
+        module="test"
+        fetch={vi.fn()}
+        items={[]}
+        itemsPageInfo={{ totalCount: 0 }}
+        fetchingItems={false}
+        fetchedItems={true}
+        headers={() => ["code"]}
+        itemFormatters={() => [(i) => i.code]}
+        rowIdentifier={(i) => i.uuid}
+        withSelection="multiple"
+        selectWithCheckbox
+        actionsContributionKey="test.actions"
+      />,
+      {
+        modulesManager: mockModulesManager({
+          getContribs: (key) => (key === "test.actions" ? [UploadItem] : []),
+        }),
+      },
+    );
+
+    expect(screen.getByRole("menuitem", { name: "Upload" })).toBeInTheDocument();
   });
 });

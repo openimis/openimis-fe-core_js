@@ -3,7 +3,7 @@ import _debounce from "lodash/debounce";
 import { connect } from "react-redux";
 
 import { useTheme, styled } from "@mui/material/styles";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../../helpers/i18n";
 import { Grid, Checkbox, FormControlLabel } from "@mui/material";
 
 import {

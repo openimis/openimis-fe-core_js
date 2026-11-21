@@ -8,6 +8,46 @@ import { formatDateFromISO as neFormateDateFromISO } from "../pickers/NeDateForm
 import { STORAGE_KEY_SECONDARY_CALENDAR, DEFAULT_SETTINGS } from "../constants";
 import { getLocalStorage } from "./useLocalStorage";
 
+// React's own statics, which a wrapper must not copy from the wrapped component.
+const REACT_STATICS = new Set([
+  "length",
+  "name",
+  "prototype",
+  "caller",
+  "callee",
+  "arguments",
+  "arity",
+  "displayName",
+  "propTypes",
+  "defaultProps",
+  "contextType",
+  "contextTypes",
+  "childContextTypes",
+  "getDefaultProps",
+  "getDerivedStateFromProps",
+  "getDerivedStateFromError",
+  "$$typeof",
+  "render",
+  "compare",
+  "type",
+]);
+
+/**
+ * react-intl 5-7's injectIntl, removed in react-intl 10: gives the wrapped
+ * component the `intl` object as a prop. New code should call useIntl() instead.
+ */
+export function injectIntl(Component) {
+  const WithIntl = (props) => <Component {...props} intl={useIntl()} />;
+  for (const key of Object.getOwnPropertyNames(Component)) {
+    if (!REACT_STATICS.has(key)) {
+      Object.defineProperty(WithIntl, key, Object.getOwnPropertyDescriptor(Component, key));
+    }
+  }
+  WithIntl.displayName = `injectIntl(${Component.displayName || Component.name || "Component"})`;
+  WithIntl.WrappedComponent = Component;
+  return WithIntl;
+}
+
 //formatting with values is expansive.. so let's have separated methods
 export function formatMessage(intl, module, id) {
   if (!!intl.messages[`${module}.${id}`]) {

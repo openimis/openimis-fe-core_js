@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../../helpers/i18n";
 import { InputAdornment } from "@mui/material";
 import NumberInput from "./NumberInput";
 import { useModulesManager } from "../../helpers/modules";

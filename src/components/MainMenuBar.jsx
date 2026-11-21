@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
-import { injectIntl } from "react-intl";
+import { useHistory } from "../helpers/history";
+import { injectIntl } from "../helpers/i18n";
 import { useModulesManager } from "../helpers/modules";
 import { useToast } from "../helpers/ToastContext";
 import {

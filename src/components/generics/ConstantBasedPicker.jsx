@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../../helpers/i18n";
 import { styled } from "@mui/material/styles";
 import SelectInput from "../inputs/SelectInput";
 import { formatMessage } from "../../helpers/i18n";

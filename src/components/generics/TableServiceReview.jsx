@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react";
 import clsx from "clsx";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../../helpers/i18n";
 import _ from "lodash";
 import GetIconComponent from "../../helpers/icons";
 
@@ -130,8 +130,14 @@ class Table extends Component {
   };
 
   headerAction = (a) => (
-    <Box flexGrow={1}>
-      <Box display="flex" justifyContent="flex-end">
+    <Box sx={{
+      flexGrow: 1
+    }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end"
+        }}>
         {a()}
       </Box>
     </Box>
@@ -200,7 +206,11 @@ class Table extends Component {
     const rowsPerPage = pageSize || rowsPerPageOptions[0];
     return (
       <StyledTableServiceReview>
-        <Box position="relative" overflow="auto">
+        <Box
+          sx={{
+            position: "relative",
+            overflow: "auto"
+          }}>
           {header && (
             <Fragment>
               <Typography className="tableTitle">{header}</Typography>
@@ -368,7 +378,13 @@ class Table extends Component {
             )}
           </MUITable>
           {(fetching || error) && (
-            <Grid className="loader" container justifyContent="center" alignItems="center">
+            <Grid
+              className="loader"
+              container
+              sx={{
+                justifyContent: "center",
+                alignItems: "center"
+              }}>
               <ProgressOrError progress={items?.length && fetching} error={error} />{" "}
               {/* We do not want to display the spinner with the empty table */}
             </Grid>

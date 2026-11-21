@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from "react";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../../helpers/i18n";
 import _debounce from "lodash/debounce";
 
 import { Grid, Paper, Divider, Box } from "@mui/material";

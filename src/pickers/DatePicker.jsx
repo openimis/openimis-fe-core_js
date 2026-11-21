@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import clsx from "clsx";
 import moment from "moment";
 import dayjs from "dayjs";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../helpers/i18n";
 
 import { styled } from "@mui/material/styles";
 import { FormControl, FormLabel } from "@mui/material";

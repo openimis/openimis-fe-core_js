@@ -1,8 +1,8 @@
 import React, { Component, Fragment } from "react";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../../helpers/i18n";
 import _ from "lodash-uuid";
 
-import { MenuItem, IconButton, TextField } from "@mui/material";
+import { MenuItem, IconButton, InputLabel, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import GetIconComponent from "../../helpers/icons";
 
@@ -32,6 +32,10 @@ const StyledSelectInput = styled("div")(({ theme }) => ({
 function EmptyComponent() {
   return <div />;
 }
+
+// MUI 9 renders a select's label as a <div>: keep the <label> that pages, user
+// scripts and the UAT suite locate fields by (TextField passes component "div").
+const SelectLabel = React.forwardRef((props, ref) => <InputLabel {...props} ref={ref} component="label" />);
 
 class SelectInput extends Component {
   constructor(props) {
@@ -122,18 +126,21 @@ class SelectInput extends Component {
               name={name}
               value={selectValue}
               onChange={this._onChange}
-              InputProps={{
-                endAdornment: this.renderEndAdornment(),
-              }}
-              SelectProps={{
-                labelId: `label-${this.uuid}`,
-                label: withLabel ? labelText : undefined,
-                IconComponent: this.renderIconComponent(),
-                displayEmpty: !!placeholder,
-                ...(withLabel ? null : { style: { marginTop: "0px" } }),
-              }}
               title={title}
-            >
+              slots={{ inputLabel: SelectLabel }}
+              slotProps={{
+                input: {
+                  endAdornment: this.renderEndAdornment(),
+                },
+
+                select: {
+                  labelId: `label-${this.uuid}`,
+                  label: withLabel ? labelText : undefined,
+                  IconComponent: this.renderIconComponent(),
+                  displayEmpty: !!placeholder,
+                  ...(withLabel ? null : { style: { marginTop: "0px" } }),
+                }
+              }}>
               {placeholder && (
                 <MenuItem disabled value="">
                   <FormattedMessage module={module} id={placeholder} />

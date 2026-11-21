@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../../helpers/i18n";
 import { styled } from "@mui/material/styles";
 import { Typography } from "@mui/material";
 import FormattedMessage from "./FormattedMessage";

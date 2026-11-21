@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../../helpers/i18n";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -189,11 +189,13 @@ const AdvancedFiltersDialog = ({
       <Dialog
         open={isOpen}
         onClose={handleClose}
-        PaperProps={{
-          style: {
-            width: 900,
-            maxWidth: 900,
-          },
+        slotProps={{
+          paper: {
+            style: {
+              width: 900,
+              maxWidth: 900,
+            },
+          }
         }}
       >
         <DialogTitle

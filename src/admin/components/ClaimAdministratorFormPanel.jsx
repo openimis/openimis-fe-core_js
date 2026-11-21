@@ -62,7 +62,12 @@ const ClaimAdministratorFormPanel = (props) => {
   return (
     <StyledPaper>
       <Grid size={{ xs: 12 }} className="title">
-        <Grid container justifyContent="space-between" alignItems="center">
+        <Grid
+          container
+          sx={{
+            justifyContent: "space-between",
+            alignItems: "center"
+          }}>
           <Typography variant="h6">{formatMessage("title")}</Typography>
           {(edited || !isEnabled) && (
             <Switch color="secondary" disabled={readOnly} checked={isEnabled} onChange={handleToggle} />

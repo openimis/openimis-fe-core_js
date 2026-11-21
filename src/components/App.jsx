@@ -1,7 +1,7 @@
-import React, { useMemo, useEffect, useState } from "react";
+import React, { createContext, useContext, useMemo, useEffect, useState } from "react";
 import { connect, useDispatch } from "react-redux";
 import { IntlProvider } from "react-intl";
-import { Route, BrowserRouter, Switch } from "react-router-dom";
+import { Route, Routes, RouterProvider, createBrowserRouter } from "react-router-dom";
 import { CssBaseline } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import withModulesManager, { ModulesManagerProvider } from "../helpers/modules";
@@ -27,6 +27,18 @@ import PublicPageMiddleware from "./PublicPageMiddleware";
 import { ToastProvider } from "../helpers/ToastContext";
 import { PublicPageLanguageProvider } from "../helpers/PublicPageLanguageContext";
 import { getCookie } from "../helpers/cookies";
+import { HistoryBlocker, RouteProps } from "../helpers/history";
+
+// The router is a data router (needed for history.block, see HistoryBlocker) made
+// once, with a single catch-all route; the routes themselves stay declarative and
+// are re-rendered with App's props through this context.
+const AppRoutesContext = createContext(null);
+const AppRoutes = () => (
+  <>
+    <HistoryBlocker />
+    {useContext(AppRoutesContext)}
+  </>
+);
 
 // Downgrade formatjs MISSING_TRANSLATION errors to warnings instead of errors.
 // Defer logging so React does not append a component stack in development.
@@ -85,6 +97,7 @@ const App = (props) => {
   const [economicUnit] = useLocalStorage(ECONOMIC_UNIT_STORAGE_KEY, null);
 
   const auth = useAuthentication();
+  const router = useMemo(() => createBrowserRouter([{ path: "*", element: <AppRoutes /> }], { basename }), [basename]);
   const routes = useMemo(() => {
     return modulesManager.getContribs(ROUTER_CONTRIBUTION_KEY);
   }, []);
@@ -105,7 +118,7 @@ const App = (props) => {
       lang = localesManager.getFileNameByLang(user.language);
     } else {
       const cookieLang = getCookie(PUBLIC_PAGE_LANGUAGE_STORAGE_KEY);
-      lang = cookieLang ? cookieLang : localesManager.getFileNameByLang(navigator.language) ?? "en";
+      lang = cookieLang ? cookieLang : (localesManager.getFileNameByLang(navigator.language) ?? "en");
     }
     var msgs = modulesManager
       .getContribs(TRANSLATION_CONTRIBUTION_KEY)
@@ -159,67 +172,86 @@ const App = (props) => {
         <PublicPageLanguageProvider>
           <IntlProvider locale={locale || "en"} messages={allMessages} onError={onIntlError}>
             <ToastProvider>
-              <AlertDialog />
-              <ConfirmDialog confirm={confirm} onConfirm={clearConfirm} />
-              {economicUnitConfig ? (
-                <Contributions
-                  contributionKey={ECONOMIC_UNIT_DIALOG_CONTRIBUTION_KEY}
-                  open={economicUnitDialogOpen}
-                  setEconomicUnitDialogOpen={setEconomicUnitDialogOpen}
-                  onLogout={onLogout}
-                />
-              ) : null}
-              <PublishedComponent pubRef="grievanceSocialProtection.GrievanceConfigurationDialog" rights={rights} />
-              <div className="App">
-                {auth.isAuthenticated && <Contributions contributionKey={APP_BOOT_CONTRIBUTION_KEY} />}
-                <BrowserRouter basename={basename}>
-                  <Switch>
-                    <Route
-                      exact
-                      path="/"
-                      render={() => <PublicPageMiddleware isAuthenticated={auth.isAuthenticated} {...others} />}
+              {/* Everything renders inside the router: react-router 7's hooks throw outside one. */}
+              <AppRoutesContext.Provider
+                value={
+                  <>
+                    <AlertDialog />
+                    <ConfirmDialog confirm={confirm} onConfirm={clearConfirm} />
+                    {economicUnitConfig ? (
+                      <Contributions
+                        contributionKey={ECONOMIC_UNIT_DIALOG_CONTRIBUTION_KEY}
+                        open={economicUnitDialogOpen}
+                        setEconomicUnitDialogOpen={setEconomicUnitDialogOpen}
+                        onLogout={onLogout}
+                      />
+                    ) : null}
+                    <PublishedComponent
+                      pubRef="grievanceSocialProtection.GrievanceConfigurationDialog"
+                      rights={rights}
                     />
-                    <Route path={"/login"} render={() => <LoginPage {...others} />} />
-                    <Route path={"/forgot_password"} render={() => <ForgotPasswordPage {...others} />} />
-                    <Route path={"/set_password"} render={() => <SetPasswordPage {...others} />} />
-                    {unauthenticatedRoutes.map((route) => (
-                      <Route
-                        exact
-                        key={route.path}
-                        path={"/" + route.path}
-                        render={(props) => <route.component modulesManager={modulesManager} {...props} {...others} />}
-                      />
-                    ))}
-                    {routes.map((route) => (
-                      <Route
-                        exact
-                        key={route.path}
-                        path={"/" + route.path}
-                        render={(props) => (
-                          <RequireAuth
-                            {...props}
-                            {...others}
-                            redirectTo={"/login"}
-                            onEconomicDialogOpen={() => setEconomicUnitDialogOpen(true)}
-                            isSecondaryCalendar={isSecondaryCalendar}
-                            setSecondaryCalendar={setSecondaryCalendar}
-                          >
-                            <PermissionCheck
-                              modulesManager={modulesManager}
-                              userRights={rights}
-                              requiredRights={route.rights}
-                              {...others}
-                            >
-                              <route.component modulesManager={modulesManager} {...props} {...others} />
-                            </PermissionCheck>
-                          </RequireAuth>
-                        )}
-                      />
-                    ))}
-                    <Route render={() => <NotFoundPage {...others} />} />
-                  </Switch>
-                </BrowserRouter>
-              </div>
+                    <div className="App">
+                      {auth.isAuthenticated && <Contributions contributionKey={APP_BOOT_CONTRIBUTION_KEY} />}
+                      <Routes>
+                        <Route
+                          path="/"
+                          element={<PublicPageMiddleware isAuthenticated={auth.isAuthenticated} {...others} />}
+                        />
+                        <Route path="/login" element={<LoginPage {...others} />} />
+                        <Route path="/forgot_password" element={<ForgotPasswordPage {...others} />} />
+                        <Route path="/set_password" element={<SetPasswordPage {...others} />} />
+                        {unauthenticatedRoutes.map((route) => (
+                          <Route
+                            key={route.path}
+                            path={"/" + route.path}
+                            element={
+                              <RouteProps
+                                path={"/" + route.path}
+                                render={(props) => (
+                                  <route.component modulesManager={modulesManager} {...props} {...others} />
+                                )}
+                              />
+                            }
+                          />
+                        ))}
+                        {routes.map((route) => (
+                          <Route
+                            key={route.path}
+                            path={"/" + route.path}
+                            element={
+                              <RouteProps
+                                path={"/" + route.path}
+                                render={(props) => (
+                                  <RequireAuth
+                                    {...props}
+                                    {...others}
+                                    redirectTo={"/login"}
+                                    onEconomicDialogOpen={() => setEconomicUnitDialogOpen(true)}
+                                    isSecondaryCalendar={isSecondaryCalendar}
+                                    setSecondaryCalendar={setSecondaryCalendar}
+                                  >
+                                    <PermissionCheck
+                                      modulesManager={modulesManager}
+                                      userRights={rights}
+                                      requiredRights={route.rights}
+                                      {...others}
+                                    >
+                                      <route.component modulesManager={modulesManager} {...props} {...others} />
+                                    </PermissionCheck>
+                                  </RequireAuth>
+                                )}
+                              />
+                            }
+                          />
+                        ))}
+                        <Route path="*" element={<NotFoundPage {...others} />} />
+                      </Routes>
+                    </div>
+                  </>
+                }
+              >
+                <RouterProvider router={router} />
+              </AppRoutesContext.Provider>
             </ToastProvider>
           </IntlProvider>
         </PublicPageLanguageProvider>

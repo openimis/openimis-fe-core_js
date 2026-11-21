@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react";
 import { styled } from "@mui/material/styles";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../../helpers/i18n";
 import { Fab, Grid, Paper, IconButton, Typography, Divider, Tooltip } from "@mui/material";
 import GetIconComponent from "../../helpers/icons";
 
@@ -134,9 +134,13 @@ class Form extends Component {
           <Grid container>
             <Grid size={12}>
               <Paper className="paper">
-                <Grid container alignItems="center" direction="row" className="paperHeader">
+                <Grid container direction="row" className="paperHeader" sx={{
+                  alignItems: "center"
+                }}>
                   <Grid size={8}>
-                    <Grid container alignItems="center">
+                    <Grid container sx={{
+                      alignItems: "center"
+                    }}>
                       {!!back && (
                         <Grid>
                           <IconButton onClick={back}>
@@ -155,7 +159,9 @@ class Form extends Component {
                   </Grid>
                   {!!actions && (
                     <Grid size={4}>
-                      <Grid container justifyContent="flex-end">
+                      <Grid container sx={{
+                        justifyContent: "flex-end"
+                      }}>
                         {actions.map((a, idx) => {
                           if (!!a.onlyIfDirty && !this.state.dirty) return null;
                           if (!!a.onlyIfNotDirty && !!this.state.dirty) return null;

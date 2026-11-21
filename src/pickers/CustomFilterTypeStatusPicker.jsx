@@ -1,5 +1,5 @@
 import React from "react";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../helpers/i18n";
 
 import SelectInput from "../components/inputs/SelectInput";
 import { MODULE_NAME } from "../constants";

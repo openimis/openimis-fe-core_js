@@ -5,7 +5,7 @@ import { formatMessage } from "../../helpers/i18n";
 import TextInput from "../inputs/TextInput";
 import PublishedComponent from "./PublishedComponent";
 import _debounce from "lodash/debounce";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../../helpers/i18n";
 import { GRID_RESPONSIVE_STANDARD, GRID_RESPONSIVE_SMALL, GRID_RESPONSIVE_FULL } from "../../constants/responsiveGrid";
 
 const useFilterChangeHandler = (onChangeFilters) => {

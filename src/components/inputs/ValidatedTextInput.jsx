@@ -122,7 +122,9 @@ const ValidatedTextInput = ({
             <InputAdornment position="end" component={!error ? ValidIcon : InvalidIcon}>
               <>
                 {isBusy && value && (
-                  <Box mr={1}>
+                  <Box sx={{
+                    mr: 1
+                  }}>
                     <CircularProgress size={20} />
                   </Box>
                 )}
@@ -151,7 +153,9 @@ const ValidatedTextInput = ({
             <InputAdornment position="end" component={!error ? ValidIcon : InvalidIcon}>
               <>
                 {isBusy && value && (
-                  <Box mr={1}>
+                  <Box sx={{
+                    mr: 1
+                  }}>
                     <CircularProgress size={20} />
                   </Box>
                 )}

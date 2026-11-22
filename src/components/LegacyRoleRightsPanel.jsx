@@ -3,6 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { Box, Button, Card, Checkbox, Chip, FormControlLabel, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { fetchModulesPermissions } from "../actions";
+import ProgressOrError from "./generics/ProgressOrError";
+import { formatMessage } from "../helpers/i18n";
+import { formatRoleLabel } from "../helpers/role-label-formatter";
 
 const StyledPanel = styled("div")(({ theme }) => ({
   "& .paper": {
@@ -51,63 +54,62 @@ const StyledPanel = styled("div")(({ theme }) => ({
       "&.Mui-checked, &.MuiCheckbox-indeterminate": { color: theme.palette.primary.contrastText },
     },
   },
-  "& .scroll": { padding: theme.spacing(1.5), maxHeight: "68vh", overflow: "auto" },
-  "& .group": {
-    marginBottom: theme.spacing(1.5),
-    padding: theme.spacing(1),
-    border: `1px solid ${theme.palette.divider}`,
-    borderRadius: 6,
-    textAlign: "center",
-    backgroundColor: theme.palette.common.white,
-  },
-  "& .groupHeader": { margin: 0, justifyContent: "center", width: "100%" },
-  "& .actions": {
+  "& .permissions": {
     display: "flex",
     flexDirection: "column",
     alignItems: "flex-start",
-    width: "fit-content",
-    margin: "0 auto",
+    padding: theme.spacing(1.5),
+    overflow: "auto",
   },
+  "& .permission": { margin: 0, width: "100%" },
 }));
 
-const SECTION_ORDER = ["Insurees and Policies", "Claims", "Administration", "Tools & Reports"];
-const sectionFor = (moduleName) => {
-  const value = String(moduleName || "").toLowerCase();
-  if (/claim/.test(value)) return "Claims";
-  if (/report|register|extract|utility|fund|tool/.test(value)) return "Tools & Reports";
-  if (/admin|product|facility|user|payer|location|enrol|medical|diagnos|hospital/.test(value)) return "Administration";
-  return "Insurees and Policies";
+const formatModuleName = (moduleName) =>
+  String(moduleName || "")
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
+const permissionLabel = (intl, moduleName, permsName) => {
+  const translationId = `${moduleName}.${permsName}`;
+  const translated = formatMessage(intl, null, translationId);
+  if (translated !== translationId) return translated;
+
+  const fallback = formatRoleLabel(moduleName, permsName, true);
+  return fallback.includes(" | ") ? fallback.split(" | ").slice(1).join(" | ") : fallback;
 };
 
-const LegacyRoleRightsPanel = ({ edited, onEditedChanged, isReadOnly }) => {
+const LegacyRoleRightsPanel = ({ edited, onEditedChanged, isReadOnly, intl }) => {
   const dispatch = useDispatch();
+  const fetchingModulePermissions = useSelector((state) => state.core?.fetchingModulePermissions);
   const fetchedModulePermissions = useSelector((state) => state.core?.fetchedModulePermissions);
   const modulePermissions = useSelector((state) => state.core?.modulePermissions || []);
+  const errorModulePermissions = useSelector((state) => state.core?.errorModulePermissions);
   const selected = useMemo(() => new Set((edited?.roleRights || []).map(Number)), [edited?.roleRights]);
 
   useEffect(() => {
     if (!fetchedModulePermissions) dispatch(fetchModulesPermissions());
   }, [dispatch, fetchedModulePermissions]);
 
-  const sections = useMemo(() => {
-    const result = Object.fromEntries(SECTION_ORDER.map((section) => [section, []]));
-    [...modulePermissions]
-      .sort((a, b) => a.moduleName.localeCompare(b.moduleName))
-      .forEach((module) => {
-        const actions = (module.permissions || []).map((permission) => ({
-          id: Number(permission.permsValue),
-          label: String(permission.permsName || "")
-            .replace(/_/g, " ")
-            .replace(/\b\w/g, (letter) => letter.toUpperCase()),
-        }));
-        if (actions.length) result[sectionFor(module.moduleName)].push({ name: module.moduleName, actions });
-      });
-    return result;
-  }, [modulePermissions]);
-  const allRights = useMemo(
+  const modules = useMemo(
     () =>
-      Object.values(sections).flatMap((groups) => groups.flatMap((group) => group.actions.map((action) => action.id))),
-    [sections],
+      [...modulePermissions]
+        .sort((a, b) => a.moduleName.localeCompare(b.moduleName))
+        .map((module) => ({
+          name: module.moduleName,
+          label: formatModuleName(module.moduleName),
+          permissions: (module.permissions || []).map((permission, index) => ({
+            key: `${module.moduleName}-${permission.permsValue}-${index}`,
+            id: Number(permission.permsValue),
+            label: permissionLabel(intl, module.moduleName, permission.permsName),
+          })),
+        }))
+        .filter((module) => module.permissions.length),
+    [intl, modulePermissions],
+  );
+  const allRights = useMemo(
+    () => [...new Set(modules.flatMap((module) => module.permissions.map((permission) => permission.id)))],
+    [modules],
   );
   const updateRights = (rightIds) => {
     const allSelected = rightIds.every((id) => selected.has(id));
@@ -133,15 +135,15 @@ const LegacyRoleRightsPanel = ({ edited, onEditedChanged, isReadOnly }) => {
               Clear
             </Button>
           </div>
+          <ProgressOrError progress={fetchingModulePermissions} error={errorModulePermissions} />
           <div className="modulesGrid">
-            {SECTION_ORDER.map((section) => {
-              const groups = sections[section];
-              const ids = groups.flatMap((group) => group.actions.map((action) => action.id));
+            {modules.map((module) => {
+              const ids = [...new Set(module.permissions.map((permission) => permission.id))];
               const count = ids.filter((id) => selected.has(id)).length;
               return (
-                <Card className="column" variant="outlined" key={section}>
+                <Card className="column" variant="outlined" key={module.name}>
                   <div className="columnHeader">
-                    <Typography fontWeight={600}>{section}</Typography>
+                    <Typography fontWeight={600}>{module.label}</Typography>
                     <Box display="flex" alignItems="center" justifyContent="center">
                       <Chip size="small" label={`${count}/${ids.length}`} />
                       <Checkbox
@@ -153,51 +155,29 @@ const LegacyRoleRightsPanel = ({ edited, onEditedChanged, isReadOnly }) => {
                       />
                     </Box>
                   </div>
-                  <div className="scroll">
-                    {groups.map((group) => {
-                      const groupIds = group.actions.map((action) => action.id);
-                      const groupCount = groupIds.filter((id) => selected.has(id)).length;
-                      return (
-                        <div className="group" key={group.name}>
-                          <FormControlLabel
-                            className="groupHeader"
-                            label={<Typography fontWeight={600}>{group.name}</Typography>}
-                            control={
-                              <Checkbox
-                                size="small"
-                                checked={!!groupIds.length && groupCount === groupIds.length}
-                                indeterminate={groupCount > 0 && groupCount < groupIds.length}
-                                disabled={isReadOnly}
-                                onChange={() => updateRights(groupIds)}
-                              />
-                            }
+                  <div className="permissions">
+                    {module.permissions.map((permission) => (
+                      <FormControlLabel
+                        className="permission"
+                        key={permission.key}
+                        label={
+                          <Typography
+                            variant="body2"
+                            color={selected.has(permission.id) ? "primary" : "text.secondary"}
+                          >
+                            {permission.label}
+                          </Typography>
+                        }
+                        control={
+                          <Checkbox
+                            size="small"
+                            checked={selected.has(permission.id)}
+                            disabled={isReadOnly}
+                            onChange={() => updateRights([permission.id])}
                           />
-                          <div className="actions">
-                            {group.actions.map((action) => (
-                              <FormControlLabel
-                                key={action.id}
-                                label={
-                                  <Typography
-                                    variant="body2"
-                                    color={selected.has(action.id) ? "primary" : "text.secondary"}
-                                  >
-                                    {action.label}
-                                  </Typography>
-                                }
-                                control={
-                                  <Checkbox
-                                    size="small"
-                                    checked={selected.has(action.id)}
-                                    disabled={isReadOnly}
-                                    onChange={() => updateRights([action.id])}
-                                  />
-                                }
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })}
+                        }
+                      />
+                    ))}
                   </div>
                 </Card>
               );

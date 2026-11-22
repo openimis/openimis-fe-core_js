@@ -227,7 +227,7 @@ class RoleRightsPanel extends FormPanel {
                               this.isFilterMatched(modulePermission.moduleName, permission.permsName),
                           )
                           .map((permission) => (
-                            <ListItem divider>
+                            <ListItem divider key={permission.permsValue}>
                               <ListItemText
                                 className="listItemText"
                                 primary={this.rightLabel(modulePermission.moduleName, permission.permsName)}
@@ -276,7 +276,7 @@ class RoleRightsPanel extends FormPanel {
                               this.isFilterMatched(modulePermission.moduleName, permission.permsName),
                           )
                           .map((permission) => (
-                            <ListItem divider>
+                            <ListItem divider key={permission.permsValue}>
                               <ListItemText
                                 className="listItemText"
                                 primary={this.rightLabel(modulePermission.moduleName, permission.permsName)}

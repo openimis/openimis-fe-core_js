@@ -244,7 +244,7 @@ class Table extends Component {
                   if (i.claimlinkedService != undefined) {
                     console.log(i);
                     return (
-                      <Box style={{ width: "100%" }}>
+                      <Box key={iidx} style={{ width: "100%" }}>
                         <table style={{ width: "100%" }}>
                           {items.length - iidx == items.length && (
                             <tr>
@@ -321,7 +321,7 @@ class Table extends Component {
                     );
                   } else {
                     return (
-                      <Box style={{ width: "100%" }}>
+                      <Box key={iidx} style={{ width: "100%" }}>
                         <table style={{ width: "100%" }}>
                           <tr>
                             {localItemFormatters &&

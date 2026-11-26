@@ -80,6 +80,7 @@ import ConfirmDialog from "./components/dialogs/ConfirmDialog";
 import SelectDialog from "./components/dialogs/SelectDialog";
 import AdvancedFiltersDialog from "./components/dialogs/AdvancedFiltersDialog";
 import WarningBox from "./components/generics/WarningBox";
+import TabPanel from "./components/generics/TabPanel";
 import MetadataViewer from "./components/generics/MetadataViewer";
 import {
   baseApiUrl,
@@ -260,6 +261,7 @@ const DEFAULT_CONFIG = {
     { key: "core.MonthPicker", ref: MonthPicker },
     { key: "core.LanguagePicker", ref: LanguagePicker },
     { key: "core.AuthorityPicker", ref: AuthorityPicker },
+    { key: "core.TabPanel", ref: TabPanel },
     { key: "core.route.role", ref: ROUTE_ROLE },
     // Admin refs
     { key: "admin.UserPicker", ref: UserPicker },
@@ -426,6 +428,7 @@ export {
   FatalError,
   AlertForwarder,
   WarningBox,
+  TabPanel,
   MetadataViewer,
   SelectInput,
   TextInput,

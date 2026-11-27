@@ -38,6 +38,9 @@ class LanguagePicker extends Component {
       readOnly = false,
       required = false,
       withNull = false, // , nullLabel = null
+      fetching,
+      fetched,
+      error,
     } = this.props;
     let options = !!languages ? languages.map((v) => ({ value: v.code, label: v.name })) : [];
     if (withNull) {
@@ -56,6 +59,8 @@ class LanguagePicker extends Component {
         required={required}
         withNull={withNull}
         nullLabel={this.nullDisplay}
+        // Also loading before the delayed fetch starts; an error ends it.
+        loading={fetching || (!fetched && !error)}
       />
     );
   }
@@ -65,6 +70,7 @@ const mapStateToProps = (state) => ({
   languages: state.core.languages,
   fetching: state.core.fetchingLanguages,
   fetched: state.core.fetchedLanguages,
+  error: state.core.errorLanguages,
 });
 
 const mapDispatchToProps = (dispatch) => {

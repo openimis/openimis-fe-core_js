@@ -2,7 +2,7 @@ import React, { Profiler } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import SelectInput from "./SelectInput";
-import { renderWithProviders, screen } from "../../testing";
+import { fireEvent, renderWithProviders, screen, within } from "../../testing";
 
 const OPTIONS = [1, 2, 3, 4].map((value) => ({ value, label: `Option ${value}` }));
 
@@ -44,6 +44,33 @@ describe("SelectInput", () => {
     renderInput({ value: 42 });
 
     expect(outOfRangeWarnings()).toHaveLength(0);
+  });
+
+  describe("with no options", () => {
+    const MESSAGES = { "core.pickerNoOptionsLabel": "No options available", "core.Autocomplete.loadingText": "Loading..." };
+    const openList = (props) => {
+      renderWithProviders(<SelectInput module="core" options={[]} onChange={() => {}} {...props} />, {
+        messages: MESSAGES,
+      });
+      fireEvent.mouseDown(screen.getByRole("combobox"));
+    };
+
+    // OP-3280: pickers pass [] while they fetch, and tests read the empty entry as the result.
+    it("shows Loading... while the options are loading", () => {
+      openList({ loading: true });
+
+      const option = screen.getByRole("option", { name: "Loading..." });
+      expect(within(option).getByRole("progressbar")).toBeInTheDocument();
+      expect(screen.queryByText("No options available")).not.toBeInTheDocument();
+    });
+
+    it("says there are no options once loading is over", () => {
+      openList({ loading: false });
+
+      expect(screen.getByRole("option", { name: "No options available" })).toBeInTheDocument();
+      expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+      expect(screen.queryByText("Loading...")).not.toBeInTheDocument();
+    });
   });
 
   describe("read-only", () => {

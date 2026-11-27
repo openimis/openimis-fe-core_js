@@ -34,6 +34,7 @@ import useLanguageSwitcher from "../helpers/useLanguageSwitcher";
 import FormattedMessage from "./generics/FormattedMessage";
 import MainMenuBar from "./MainMenuBar";
 import JournalDrawer, { JournalButtonTrigger } from "./JournalDrawer";
+import NotificationCenter from "./NotificationCenter";
 import { useBoolean, useAuthentication } from "../helpers/hooks";
 import LanguageQuickPicker from "../pickers/LanguageQuickPicker";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -334,6 +335,7 @@ const RequireAuth = (props) => {
                 <AppBarIconButton key={`appbar_icon_${idx}`} {...iconProps} />
               ),
             )}
+            <NotificationCenter />
             {!journalSidebar && <JournalButtonTrigger onClick={setDrawerOpen.toggle} />}
             <LogoutButton className="toolbarDrawerLogout" />
             <Help />
@@ -432,6 +434,7 @@ const RequireAuth = (props) => {
               contributionKey={ECONOMIC_UNIT_BUTTON_CONTRIBUTION_KEY}
               onEconomicDialogOpen={onEconomicDialogOpen}
             />
+            <NotificationCenter />
             {!journalSidebar && <JournalButtonTrigger onClick={setDrawerOpen.toggle} />}
             <LogoutButton />
             <Help />

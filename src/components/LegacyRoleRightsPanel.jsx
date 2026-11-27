@@ -9,7 +9,7 @@ import { formatRoleLabel } from "../helpers/role-label-formatter";
 
 const StyledPanel = styled("div")(({ theme }) => ({
   "& .paper": {
-    ...(theme.paper?.paper ?? {}),
+    ...theme.paper?.paper,
     backgroundColor: theme.palette.common.white,
   },
   "& .content": theme.paper?.item ?? { padding: theme.spacing(1.25) },

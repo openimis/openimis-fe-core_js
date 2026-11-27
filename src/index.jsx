@@ -79,6 +79,7 @@ import reducer from "./reducer";
 import ErrorBoundary from "./helpers/ErrorBoundary";
 import ConfirmDialog from "./components/dialogs/ConfirmDialog";
 import SelectDialog from "./components/dialogs/SelectDialog";
+import ResponsiveDialog from "./components/dialogs/ResponsiveDialog";
 import AdvancedFiltersDialog from "./components/dialogs/AdvancedFiltersDialog";
 import WarningBox from "./components/generics/WarningBox";
 import TabPanel from "./components/generics/TabPanel";
@@ -461,6 +462,7 @@ export {
   SearcherPane,
   Filter,
   SelectDialog,
+  ResponsiveDialog,
   ConstantBasedPicker,
   CustomFilterFieldStatusPicker,
   CustomFilterTypeStatusPicker,

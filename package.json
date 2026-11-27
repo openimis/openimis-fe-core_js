@@ -22,6 +22,7 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^9.5.0",
     "@mui/material": "^9.5.0",
+    "@mui/utils": "^9.5.0",
     "@mui/x-date-pickers": "^9.18.0",
     "@sentry/react": "^10.78.0",
     "clsx": "^2.1.1",

@@ -62,6 +62,16 @@ This created slight but noticeable color differences:
 
 Removing per-component overrides + preferring dedicated theme sections (paper, menu, table, ...) + falling back to palette colors only when needed ensures that the host app's full color scheme (including its chosen primary/secondary values or entirely custom surfaces) is respected everywhere.
 
+## Dialogs and small screens (OP-3306)
+
+A dialog must stay usable on a 1366×768 laptop, a tablet and a zoomed browser.
+
+- Build dialogs on `ResponsiveDialog` (exported from this package), not on a bare MUI `Dialog` with a styled paper. Its paper is never taller than the viewport, its `DialogContent` scrolls while `DialogTitle` / `DialogActions` stay visible, and it goes full screen below `fullScreenBelow` (default `md`).
+- Put the buttons a user must reach (Save, Cancel...) in `DialogActions`, never inside the scrolling `DialogContent`.
+- No fixed pixel `height` / `maxHeight` / `width` on a dialog paper. Use `maxWidth` ("sm" ... "xl") with `fullWidth` for the width, and `maxPaperHeight` for a height cap: it becomes `min(cap, 100% - 64px)`. A bare `maxHeight: 800` replaces MUI's viewport bound, and on a 670px-high screen the Save button ends up off screen.
+- Avoid material-table `fixedColumns`: it renders a second, clipped copy of the table. Let the table scroll horizontally.
+- A page's floating buttons (`theme.tooltipContainer`, `theme.fab`, set in the assembly) sit below dialogs (`zIndex` 1250 < MUI modal 1300), so they never cover a dialog's actions.
+
 ## Testing
 
 Vitest runs from the **assembly** (`openimis-fe_js`), not from this package — see its `AGENTS.md` for the runner, the commands and the conventions shared by all modules. This package is picked up as a Vitest project only when the assembly's `openimis.json` (or `openimis-dev.json`) declares `@openimis/fe-core` with an `@file:` spec; a `node_modules` symlink alone is not enough.

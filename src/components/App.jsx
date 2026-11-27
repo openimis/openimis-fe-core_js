@@ -155,6 +155,8 @@ const App = (props) => {
     toggleCurrentCalendarType(!isSecondaryCalendar);
   }, [isSecondaryCalendar]);
 
+  const openEconomicUnitDialog = () => setEconomicUnitDialogOpen(true);
+
   // The routes are pushed into the router through AppRoutesContext: rebuilt when App's
   // props or the state they read change, not on every render.
   const appRoutes = useMemo(
@@ -210,7 +212,7 @@ const App = (props) => {
                         {...props}
                         {...others}
                         redirectTo={"/login"}
-                        onEconomicDialogOpen={() => setEconomicUnitDialogOpen(true)}
+                        onEconomicDialogOpen={openEconomicUnitDialog}
                         isSecondaryCalendar={isSecondaryCalendar}
                         setSecondaryCalendar={setSecondaryCalendar}
                       >

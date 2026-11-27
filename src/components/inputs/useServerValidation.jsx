@@ -88,7 +88,12 @@ export const useServerValidation = ({
   useEffect(() => setPending(false), [isValid, isValidating, validationError]);
 
   // Leaving the form must not leave a verdict about a value that is no longer edited.
-  useEffect(() => () => void (!!clearAction && dispatch(clearAction())), []);
+  useEffect(
+    () => () => {
+      if (clearAction) dispatch(clearAction());
+    },
+    [],
+  );
 
   return { error, isBusy, shouldBeValidated };
 };

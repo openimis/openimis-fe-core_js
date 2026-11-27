@@ -49,6 +49,7 @@ export default defineConfig({
         'dayjs',
         'lodash',
         'lodash/debounce',
+        'lodash/merge',
         'lodash-uuid',
         'classnames',
         'clsx',

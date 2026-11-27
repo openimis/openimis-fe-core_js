@@ -1,11 +1,10 @@
 import React, { Component, Fragment } from "react";
 import clsx from "clsx";
-import _ from "lodash";
+import merge from "lodash/merge";
 import { styled } from "@mui/material/styles";
 import {
   Typography,
   Divider,
-  Box,
   IconButton,
   TableRow,
   TableCell,
@@ -22,7 +21,7 @@ const DeleteIcon = GetIconComponent("Delete");
 /*
  * What TableService and TableServiceReview have in common: the styles, the row
  * selection, the column set (hidden fields, delete action), the item cells, the
- * title, the pager and the loader. Each subclass renders its own body.
+ * title, the pager and the loader. Each renders its own body.
  */
 const StyledServiceTable = styled("div")(({ theme }) => ({
   "& .table": theme.table ?? {},
@@ -61,6 +60,10 @@ const StyledServiceTable = styled("div")(({ theme }) => ({
   },
 }));
 
+/*
+ * The row selection both tables keep: seeded from `selection`, extended by
+ * `selectAll`, emptied by `clearAll`, reported through `onChangeSelection`.
+ */
 class ServiceTableBase extends Component {
   state = {
     selection: {},
@@ -85,7 +88,7 @@ class ServiceTableBase extends Component {
     if (this.props.withSelection && prevProps.selectAll !== this.props.selectAll) {
       this.setState(
         (state, props) => ({
-          selection: _.merge(state.selection, this._atom(props.items)),
+          selection: merge(state.selection, this._atom(props.items)),
         }),
         () => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection)),
       );
@@ -98,172 +101,133 @@ class ServiceTableBase extends Component {
     }
   }
 
-  itemIdentifier = (i) => {
-    if (this.props.itemIdentifier) {
-      return this.props.itemIdentifier(i);
-    }
-    return i.uuid;
-  };
-
-  isSelected = (i) => !!this.props.withSelection && !!this.state.selection[this.itemIdentifier(i)];
-
-  select = (i) => {
-    if (!this.props.withSelection) return;
-    let s = this.state.selection;
-    const id = this.itemIdentifier(i);
-    if (s[id]) {
-      delete s[id];
-    } else if (this.props.withSelection === "multiple") {
-      s[id] = i;
-    } else {
-      s = { [id]: i };
-    }
-    this.setState(
-      { selection: s },
-      () => !!this.props.onChangeSelection && this.props.onChangeSelection(Object.values(this.state.selection)),
-    );
-  };
-
-  headerAction = (a) => (
-    <Box sx={{ flexGrow: 1 }}>
-      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>{a()}</Box>
-    </Box>
-  );
-
-  /*
-   * The columns left once the fields the modules manager hides are removed, plus the
-   * delete action. Like before, the aligns / spans arrays given as props are trimmed
-   * in place so that they stay aligned with the remaining columns.
-   */
-  columns = () => {
-    const {
-      modulesManager,
-      module,
-      preHeaders,
-      headers,
-      aligns = [],
-      headerSpans = [],
-      headerActions = [],
-      colSpans = [],
-      itemFormatters,
-      onDelete = null,
-      subServiceHeaders,
-      pageSize,
-      rowsPerPageOptions = [10, 20, 50],
-    } = this.props;
-    const localHeaders = [...(headers || [])];
-    const localPreHeaders = preHeaders ? [...preHeaders] : null;
-    const localItemFormatters = [...itemFormatters];
-    let i = !!headers && headers.length;
-    while (localHeaders && i--) {
-      if (modulesManager?.hideField(module, localHeaders[i])) {
-        if (localPreHeaders) localPreHeaders.splice(i, 1);
-        if (aligns.length > i) aligns.splice(i, 1);
-        if (headerSpans.length > i) headerSpans.splice(i, 1);
-        if (headerActions.length > i) headerActions.splice(i, 1);
-        if (colSpans.length > i) colSpans.splice(i, 1);
-        localHeaders.splice(i, 1);
-        localItemFormatters.splice(i, 1);
-      }
-    }
-    if (onDelete) {
-      if (localPreHeaders) localPreHeaders.push("");
-      localHeaders.push("");
-      localItemFormatters.push((item, idx) => (
-        <IconButton onClick={() => onDelete(idx)}>
-          <DeleteIcon />
-        </IconButton>
-      ));
-    }
-    return {
-      aligns,
-      headerSpans,
-      colSpans,
-      localHeaders,
-      localPreHeaders,
-      localItemFormatters,
-      localSubServiceHeaders: [...(subServiceHeaders || [])],
-      rowsPerPage: pageSize || rowsPerPageOptions[0],
-    };
-  };
-
-  renderItemCells = (i, iidx, formatters, aligns, colSpans) => {
-    const { rowHighlighted = null, rowHighlightedAlt = null, rowDisabled = null, rowLocked = null } = this.props;
-    return formatters.map((f, fidx) => {
-      if (colSpans.length > fidx && !colSpans[fidx]) return null;
-      return (
-        <TableCell
-          colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
-          className={clsx(
-            !!rowLocked && rowLocked(i) ? "tableLockedCell" : null,
-            !!rowHighlighted && rowHighlighted(i) ? "tableHighlightedCell" : null,
-            !!rowHighlightedAlt && rowHighlightedAlt(i) ? "tableHighlightedAltCell" : null,
-            !!rowDisabled && rowDisabled(i) ? "tableDisabledCell" : null,
-            aligns.length > fidx && aligns[fidx],
-          )}
-          key={`v-${iidx}-${fidx}`}
-        >
-          {f(i, iidx)}
-        </TableCell>
-      );
-    });
-  };
-
-  renderTitle = () =>
-    this.props.header && (
-      <Fragment>
-        <Typography className="tableTitle">{this.props.header}</Typography>
-        <Divider />
-      </Fragment>
-    );
-
-  renderPager = (colSpan, rowsPerPage) => {
-    const {
-      intl,
-      withPagination = false,
-      page = 0,
-      count,
-      rowsPerPageOptions = [10, 20, 50],
-      onChangeRowsPerPage,
-      onChangePage,
-    } = this.props;
-    return (
-      !!withPagination &&
-      !!count && (
-        <TableFooter className="tableFooter">
-          <TableRow>
-            <TablePagination
-              className="pager"
-              colSpan={colSpan}
-              labelRowsPerPage={formatMessage(intl, "core", "rowsPerPage")}
-              labelDisplayedRows={({ from, to, count }) =>
-                `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${count}`
-              }
-              count={count}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              rowsPerPageOptions={rowsPerPageOptions}
-              onRowsPerPageChange={(e) => onChangeRowsPerPage(e.target.value)}
-              onPageChange={onChangePage}
-            />
-          </TableRow>
-        </TableFooter>
-      )
-    );
-  };
-
-  renderLoader = () => {
-    const { items, fetching = null, error = null } = this.props;
-    return (
-      (fetching || error) && (
-        <Grid className="loader" container sx={{ justifyContent: "center", alignItems: "center" }}>
-          <ProgressOrError progress={items?.length && fetching} error={error} />{" "}
-          {/* We do not want to display the spinner with the empty table */}
-        </Grid>
-      )
-    );
-  };
+  itemIdentifier = (i) => (this.props.itemIdentifier ? this.props.itemIdentifier(i) : i.uuid);
 }
 
-export { StyledServiceTable };
+// Removes the columns the modules manager hides. Like before, the aligns / spans
+// arrays given as props are trimmed in place to stay aligned with the columns left.
+const withoutHiddenColumns = (props, columns) => {
+  const { modulesManager, module, aligns = [], headerSpans = [], headerActions = [], colSpans = [] } = props;
+  const { localHeaders, localPreHeaders, localItemFormatters } = columns;
+  const spans = [aligns, headerSpans, headerActions, colSpans];
+  for (let i = localHeaders.length - 1; i >= 0; i--) {
+    if (modulesManager?.hideField(module, localHeaders[i])) {
+      localPreHeaders?.splice(i, 1);
+      spans.filter((a) => a.length > i).forEach((a) => a.splice(i, 1));
+      localHeaders.splice(i, 1);
+      localItemFormatters.splice(i, 1);
+    }
+  }
+  return { aligns, headerSpans, colSpans };
+};
+
+// Adds the delete action as a last column.
+const addDeleteColumn = (onDelete, { localHeaders, localPreHeaders, localItemFormatters }) => {
+  localPreHeaders?.push("");
+  localHeaders.push("");
+  localItemFormatters.push((item, idx) => (
+    <IconButton onClick={() => onDelete(idx)}>
+      <DeleteIcon />
+    </IconButton>
+  ));
+};
+
+/* The columns to render, once the hidden ones are removed and the delete action added. */
+const serviceTableColumns = (props) => {
+  const { preHeaders, headers, itemFormatters, onDelete = null, subServiceHeaders, pageSize } = props;
+  const { rowsPerPageOptions = [10, 20, 50] } = props;
+  const columns = {
+    localHeaders: [...(headers || [])],
+    localPreHeaders: preHeaders ? [...preHeaders] : null,
+    localItemFormatters: [...itemFormatters],
+  };
+  const spans = withoutHiddenColumns(props, columns);
+  if (onDelete) addDeleteColumn(onDelete, columns);
+  return {
+    ...spans,
+    ...columns,
+    localSubServiceHeaders: [...(subServiceHeaders || [])],
+    rowsPerPage: pageSize || rowsPerPageOptions[0],
+  };
+};
+
+/* The cells of item `i`, styled after the row state predicates given as props. */
+const renderServiceItemCells = (props, i, iidx, formatters, aligns, colSpans) => {
+  const { rowHighlighted = null, rowHighlightedAlt = null, rowDisabled = null, rowLocked = null } = props;
+  return formatters.map((f, fidx) => {
+    if (colSpans.length > fidx && !colSpans[fidx]) return null;
+    return (
+      <TableCell
+        colSpan={colSpans.length > fidx ? colSpans[fidx] : 1}
+        className={clsx(
+          !!rowLocked && rowLocked(i) ? "tableLockedCell" : null,
+          !!rowHighlighted && rowHighlighted(i) ? "tableHighlightedCell" : null,
+          !!rowHighlightedAlt && rowHighlightedAlt(i) ? "tableHighlightedAltCell" : null,
+          !!rowDisabled && rowDisabled(i) ? "tableDisabledCell" : null,
+          aligns.length > fidx && aligns[fidx],
+        )}
+        key={`v-${iidx}-${fidx}`}
+      >
+        {f(i, iidx)}
+      </TableCell>
+    );
+  });
+};
+
+const ServiceTableTitle = ({ header }) =>
+  header ? (
+    <Fragment>
+      <Typography className="tableTitle">{header}</Typography>
+      <Divider />
+    </Fragment>
+  ) : null;
+
+const ServiceTablePager = ({
+  intl,
+  colSpan,
+  rowsPerPage,
+  withPagination = false,
+  page = 0,
+  count,
+  rowsPerPageOptions = [10, 20, 50],
+  onChangeRowsPerPage,
+  onChangePage,
+}) =>
+  withPagination && count ? (
+    <TableFooter className="tableFooter">
+      <TableRow>
+        <TablePagination
+          className="pager"
+          colSpan={colSpan}
+          labelRowsPerPage={formatMessage(intl, "core", "rowsPerPage")}
+          labelDisplayedRows={({ from, to, count: total }) =>
+            `${from}-${to} ${formatMessageWithValues(intl, "core", "ofPages")} ${total}`
+          }
+          count={count}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          rowsPerPageOptions={rowsPerPageOptions}
+          onRowsPerPageChange={(e) => onChangeRowsPerPage(e.target.value)}
+          onPageChange={onChangePage}
+        />
+      </TableRow>
+    </TableFooter>
+  ) : null;
+
+const ServiceTableLoader = ({ items, fetching = null, error = null }) =>
+  fetching || error ? (
+    <Grid className="loader" container sx={{ justifyContent: "center", alignItems: "center" }}>
+      <ProgressOrError progress={items?.length && fetching} error={error} />{" "}
+      {/* We do not want to display the spinner with the empty table */}
+    </Grid>
+  ) : null;
+
+export {
+  StyledServiceTable,
+  serviceTableColumns,
+  renderServiceItemCells,
+  ServiceTableTitle,
+  ServiceTablePager,
+  ServiceTableLoader,
+};
 export default ServiceTableBase;

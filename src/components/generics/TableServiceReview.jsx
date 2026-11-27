@@ -4,7 +4,14 @@ import { injectIntl } from "../../helpers/i18n";
 import { Box, Table as MUITable, TableBody, TableCell } from "@mui/material";
 import FormattedMessage from "./FormattedMessage";
 import withModulesManager from "../../helpers/modules";
-import ServiceTableBase, { StyledServiceTable } from "./ServiceTableBase";
+import ServiceTableBase, {
+  StyledServiceTable,
+  serviceTableColumns,
+  renderServiceItemCells,
+  ServiceTableTitle,
+  ServiceTablePager,
+  ServiceTableLoader,
+} from "./ServiceTableBase";
 
 const StyledTableServiceReview = StyledServiceTable;
 
@@ -23,12 +30,12 @@ class Table extends ServiceTableBase {
       localItemFormatters,
       localSubServiceHeaders,
       rowsPerPage,
-    } = this.columns();
+    } = serviceTableColumns(this.props);
     const localsubServicesItemsFormattersReview = [...subServicesItemsFormattersReview];
     return (
       <StyledTableServiceReview>
         <Box sx={{ position: "relative", overflow: "auto" }}>
-          {this.renderTitle()}
+          <ServiceTableTitle header={this.props.header} />
           <MUITable className="table" size={size}>
             {!!localPreHeaders && localPreHeaders.length > 0 && (
               <table style={{ width: "100%" }}>
@@ -84,7 +91,7 @@ class Table extends ServiceTableBase {
                             </tr>
                           )}
                           <tr>
-                            {this.renderItemCells(i, iidx, localItemFormatters, aligns, colSpans)}
+                            {renderServiceItemCells(this.props, i, iidx, localItemFormatters, aligns, colSpans)}
                           </tr>
                         </table>
                         {localItemFormatters[0](i, iidx).props.children.props.value != undefined &&
@@ -118,7 +125,7 @@ class Table extends ServiceTableBase {
                       <Box key={this.rowKey(i, iidx)} style={{ width: "100%" }}>
                         <table style={{ width: "100%" }}>
                           <tr>
-                            {this.renderItemCells(i, iidx, localItemFormatters, aligns, colSpans)}
+                            {renderServiceItemCells(this.props, i, iidx, localItemFormatters, aligns, colSpans)}
                           </tr>
                         </table>
                         {localItemFormatters[0](i, iidx).props.children.props.value != undefined &&
@@ -132,9 +139,9 @@ class Table extends ServiceTableBase {
                 })}
             </TableBody>
 
-            {this.renderPager(localItemFormatters.length, rowsPerPage)}
+            <ServiceTablePager {...this.props} colSpan={localItemFormatters.length} rowsPerPage={rowsPerPage} />
           </MUITable>
-          {this.renderLoader()}
+          <ServiceTableLoader items={items} fetching={this.props.fetching} error={this.props.error} />
         </Box>
       </StyledTableServiceReview>
     );

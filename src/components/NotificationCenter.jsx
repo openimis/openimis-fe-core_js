@@ -38,6 +38,8 @@ const MAX_DELAY = 300000;
 const MIN_RECONNECT_DELAY = 1000;
 const MAX_RECONNECT_DELAY = 30000;
 
+const nextRefreshKey = (key) => key + 1;
+
 const defaultWebSocketUrl = () => {
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
   return `${protocol}//${window.location.host}/ws/notifications/`;
@@ -61,11 +63,15 @@ const NotificationCenter = () => {
     clearTimeout(timer.current);
     if (document.hidden) return;
     const jitter = 0.9 + Math.random() * 0.2;
-    timer.current = setTimeout(() => setRefreshKey((key) => key + 1), delay.current * jitter);
+    timer.current = setTimeout(() => setRefreshKey(nextRefreshKey), delay.current * jitter);
   }, []);
 
   useEffect(() => {
-    delay.current = error ? Math.min(delay.current * 2, MAX_DELAY) : webSocketConnected ? MAX_DELAY : MIN_DELAY;
+    if (error) {
+      delay.current = Math.min(delay.current * 2, MAX_DELAY);
+    } else {
+      delay.current = webSocketConnected ? MAX_DELAY : MIN_DELAY;
+    }
     schedule();
     return () => clearTimeout(timer.current);
   }, [data, error, schedule, webSocketConnected]);
@@ -84,15 +90,15 @@ const NotificationCenter = () => {
       socket.onopen = () => {
         reconnectDelay = MIN_RECONNECT_DELAY;
         setWebSocketConnected(true);
-        setRefreshKey((key) => key + 1);
+        setRefreshKey(nextRefreshKey);
       };
       socket.onmessage = ({ data: message }) => {
         try {
           const event = JSON.parse(message);
           if (event.type === "notification.inbox.changed" && event.version === 1) {
-            setRefreshKey((key) => key + 1);
+            setRefreshKey(nextRefreshKey);
           }
-        } catch (_error) {
+        } catch {
           // Ignore unknown events. The periodic GraphQL pull remains authoritative.
         }
       };
@@ -125,7 +131,7 @@ const NotificationCenter = () => {
     const catchUp = () => {
       if (!document.hidden && navigator.onLine) {
         delay.current = MIN_DELAY;
-        setRefreshKey((key) => key + 1);
+        setRefreshKey(nextRefreshKey);
       }
     };
     document.addEventListener("visibilitychange", catchUp);
@@ -142,7 +148,7 @@ const NotificationCenter = () => {
     if (typeof notification.messageParams !== "string") return notification.messageParams || {};
     try {
       return JSON.parse(notification.messageParams);
-    } catch (_error) {
+    } catch {
       return {};
     }
   };
@@ -150,7 +156,7 @@ const NotificationCenter = () => {
   const openNotification = async (notification) => {
     if (!notification.readAt) {
       await dispatch(graphqlWithVariables(MARK_READ, { ids: [notification.uuid] }, "MARK_NOTIFICATION_READ"));
-      setRefreshKey((key) => key + 1);
+      setRefreshKey(nextRefreshKey);
     }
     const resolver = modulesManager.getRef(`core.notificationLink.${notification.entityType}`);
     const link = resolver?.(notification);

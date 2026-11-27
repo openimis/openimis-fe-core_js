@@ -118,7 +118,7 @@ const App = (props) => {
       lang = localesManager.getFileNameByLang(user.language);
     } else {
       const cookieLang = getCookie(PUBLIC_PAGE_LANGUAGE_STORAGE_KEY);
-      lang = cookieLang ? cookieLang : (localesManager.getFileNameByLang(navigator.language) ?? "en");
+      lang = cookieLang || (localesManager.getFileNameByLang(navigator.language) ?? "en");
     }
     var msgs = modulesManager
       .getContribs(TRANSLATION_CONTRIBUTION_KEY)
@@ -155,6 +155,96 @@ const App = (props) => {
     toggleCurrentCalendarType(!isSecondaryCalendar);
   }, [isSecondaryCalendar]);
 
+  // The routes are pushed into the router through AppRoutesContext: rebuilt when App's
+  // props or the state they read change, not on every render.
+  const appRoutes = useMemo(
+    () => (
+      <>
+        <AlertDialog />
+        <ConfirmDialog confirm={confirm} onConfirm={clearConfirm} />
+        {economicUnitConfig ? (
+          <Contributions
+            contributionKey={ECONOMIC_UNIT_DIALOG_CONTRIBUTION_KEY}
+            open={economicUnitDialogOpen}
+            setEconomicUnitDialogOpen={setEconomicUnitDialogOpen}
+            onLogout={onLogout}
+          />
+        ) : null}
+        <PublishedComponent
+          pubRef="grievanceSocialProtection.GrievanceConfigurationDialog"
+          rights={rights}
+        />
+        <div className="App">
+          {auth.isAuthenticated && <Contributions contributionKey={APP_BOOT_CONTRIBUTION_KEY} />}
+          <Routes>
+            <Route
+              path="/"
+              element={<PublicPageMiddleware isAuthenticated={auth.isAuthenticated} {...others} />}
+            />
+            <Route path="/login" element={<LoginPage {...others} />} />
+            <Route path="/forgot_password" element={<ForgotPasswordPage {...others} />} />
+            <Route path="/set_password" element={<SetPasswordPage {...others} />} />
+            {unauthenticatedRoutes.map((route) => (
+              <Route
+                key={route.path}
+                path={"/" + route.path}
+                element={
+                  <RouteProps
+                    path={"/" + route.path}
+                    render={(props) => (
+                      <route.component modulesManager={modulesManager} {...props} {...others} />
+                    )}
+                  />
+                }
+              />
+            ))}
+            {routes.map((route) => (
+              <Route
+                key={route.path}
+                path={"/" + route.path}
+                element={
+                  <RouteProps
+                    path={"/" + route.path}
+                    render={(props) => (
+                      <RequireAuth
+                        {...props}
+                        {...others}
+                        redirectTo={"/login"}
+                        onEconomicDialogOpen={() => setEconomicUnitDialogOpen(true)}
+                        isSecondaryCalendar={isSecondaryCalendar}
+                        setSecondaryCalendar={setSecondaryCalendar}
+                      >
+                        <PermissionCheck
+                          modulesManager={modulesManager}
+                          userRights={rights}
+                          requiredRights={route.rights}
+                          {...others}
+                        >
+                          <route.component modulesManager={modulesManager} {...props} {...others} />
+                        </PermissionCheck>
+                      </RequireAuth>
+                    )}
+                  />
+                }
+              />
+            ))}
+            <Route path="*" element={<NotFoundPage {...others} />} />
+          </Routes>
+        </div>
+      </>
+    ),
+    [
+      props,
+      auth.isAuthenticated,
+      economicUnitConfig,
+      economicUnitDialogOpen,
+      isSecondaryCalendar,
+      setSecondaryCalendar,
+      routes,
+      unauthenticatedRoutes,
+    ],
+  );
+
   if (error) {
     return (
       <IntlProvider locale={locale || "en"} messages={allMessages} onError={onIntlError}>
@@ -173,83 +263,7 @@ const App = (props) => {
           <IntlProvider locale={locale || "en"} messages={allMessages} onError={onIntlError}>
             <ToastProvider>
               {/* Everything renders inside the router: react-router 7's hooks throw outside one. */}
-              <AppRoutesContext.Provider
-                value={
-                  <>
-                    <AlertDialog />
-                    <ConfirmDialog confirm={confirm} onConfirm={clearConfirm} />
-                    {economicUnitConfig ? (
-                      <Contributions
-                        contributionKey={ECONOMIC_UNIT_DIALOG_CONTRIBUTION_KEY}
-                        open={economicUnitDialogOpen}
-                        setEconomicUnitDialogOpen={setEconomicUnitDialogOpen}
-                        onLogout={onLogout}
-                      />
-                    ) : null}
-                    <PublishedComponent
-                      pubRef="grievanceSocialProtection.GrievanceConfigurationDialog"
-                      rights={rights}
-                    />
-                    <div className="App">
-                      {auth.isAuthenticated && <Contributions contributionKey={APP_BOOT_CONTRIBUTION_KEY} />}
-                      <Routes>
-                        <Route
-                          path="/"
-                          element={<PublicPageMiddleware isAuthenticated={auth.isAuthenticated} {...others} />}
-                        />
-                        <Route path="/login" element={<LoginPage {...others} />} />
-                        <Route path="/forgot_password" element={<ForgotPasswordPage {...others} />} />
-                        <Route path="/set_password" element={<SetPasswordPage {...others} />} />
-                        {unauthenticatedRoutes.map((route) => (
-                          <Route
-                            key={route.path}
-                            path={"/" + route.path}
-                            element={
-                              <RouteProps
-                                path={"/" + route.path}
-                                render={(props) => (
-                                  <route.component modulesManager={modulesManager} {...props} {...others} />
-                                )}
-                              />
-                            }
-                          />
-                        ))}
-                        {routes.map((route) => (
-                          <Route
-                            key={route.path}
-                            path={"/" + route.path}
-                            element={
-                              <RouteProps
-                                path={"/" + route.path}
-                                render={(props) => (
-                                  <RequireAuth
-                                    {...props}
-                                    {...others}
-                                    redirectTo={"/login"}
-                                    onEconomicDialogOpen={() => setEconomicUnitDialogOpen(true)}
-                                    isSecondaryCalendar={isSecondaryCalendar}
-                                    setSecondaryCalendar={setSecondaryCalendar}
-                                  >
-                                    <PermissionCheck
-                                      modulesManager={modulesManager}
-                                      userRights={rights}
-                                      requiredRights={route.rights}
-                                      {...others}
-                                    >
-                                      <route.component modulesManager={modulesManager} {...props} {...others} />
-                                    </PermissionCheck>
-                                  </RequireAuth>
-                                )}
-                              />
-                            }
-                          />
-                        ))}
-                        <Route path="*" element={<NotFoundPage {...others} />} />
-                      </Routes>
-                    </div>
-                  </>
-                }
-              >
+              <AppRoutesContext.Provider value={appRoutes}>
                 <RouterProvider router={router} />
               </AppRoutesContext.Provider>
             </ToastProvider>

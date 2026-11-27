@@ -1,7 +1,6 @@
 import React, { Component } from "react";
-import { injectIntl } from "../helpers/i18n";
+import { injectIntl, formatMessage } from "../helpers/i18n";
 import SelectInput from "../components/inputs/SelectInput";
-import { formatMessage } from "../helpers/i18n";
 import _ from "lodash";
 
 class YearPicker extends Component {

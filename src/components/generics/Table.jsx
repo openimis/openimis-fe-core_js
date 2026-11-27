@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import clsx from "clsx";
-import { injectIntl } from "../../helpers/i18n";
+import { injectIntl, formatMessage, formatMessageWithValues } from "../../helpers/i18n";
 import _ from "lodash";
 import { connect } from "react-redux";
 import GetIconComponent from "../../helpers/icons";
@@ -27,7 +27,6 @@ import FormattedMessage from "./FormattedMessage";
 import ProgressOrError from "./ProgressOrError";
 import withModulesManager from "../../helpers/modules";
 import { DEFAULT } from "../../constants";
-import { formatMessage, formatMessageWithValues } from "../../helpers/i18n";
 import { saveCurrentUserDefaultRowsPerPage } from "../../actions";
 
 const StyledTable = styled("div")(({ theme }) => ({

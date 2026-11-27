@@ -1,8 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
-import { injectIntl } from "../helpers/i18n";
-import { formatMessage } from "../helpers/i18n";
+import { injectIntl, formatMessage } from "../helpers/i18n";
 import SelectInput from "../components/inputs/SelectInput";
 import withModulesManager from "../helpers/modules";
 import { fetchLanguages } from "../actions";

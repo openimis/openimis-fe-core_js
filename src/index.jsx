@@ -112,7 +112,6 @@ import {
   formatAmount,
   withTooltip,
   useTranslations,
-  injectIntl,
 } from "./helpers/i18n";
 import {
   decodeId,
@@ -350,8 +349,8 @@ export function combine(...hocs) {
 }
 
 export * from "./helpers/utils";
+export { injectIntl } from "./helpers/i18n";
 export {
-  injectIntl,
   Tab,
   GetIconComponent,
   Helmet,

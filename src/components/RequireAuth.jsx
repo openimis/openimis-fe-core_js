@@ -38,11 +38,10 @@ import { useBoolean, useAuthentication } from "../helpers/hooks";
 import LanguageQuickPicker from "../pickers/LanguageQuickPicker";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { Switch } from "@mui/material";
-import { useTranslations } from "../helpers/i18n";
+import { useTranslations, injectIntl } from "../helpers/i18n";
 import { DEFAULT, RIGHT_USERS } from "../admin/constants";
 import { DEFAULT as CORE_DEFAULT } from "../constants";
 import ImpersonationDialog from "./ImpersonationDialog";
-import { injectIntl } from "../helpers/i18n";
 import { classicJournalLayout, fluidPaddingX, popupJournalLayout } from "./journalLayouts";
 
 export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";

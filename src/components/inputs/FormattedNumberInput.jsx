@@ -1,8 +1,7 @@
 import React, { Component } from "react";
 import { styled } from "@mui/material/styles";
 import TextInput from "./TextInput";
-import { injectIntl } from "../../helpers/i18n";
-import { formatMessage, formatMessageWithValues } from "../../helpers/i18n";
+import { injectIntl, formatMessage, formatMessageWithValues } from "../../helpers/i18n";
 import withModulesManager from "../../helpers/modules";
 import { getDecimalPlaces, parseLocalizedNumber } from "../../helpers/utils";
 

@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react";
 import { styled } from "@mui/material/styles";
-import { injectIntl } from "../../helpers/i18n";
+import { injectIntl, formatMessage } from "../../helpers/i18n";
 import {
   Dialog,
   DialogTitle,
@@ -13,7 +13,6 @@ import {
   InputAdornment,
   IconButton,
 } from "@mui/material";
-import { formatMessage } from "../../helpers/i18n";
 import GetIconComponent from "../../helpers/icons";
 
 const ClearIcon = GetIconComponent("Clear");

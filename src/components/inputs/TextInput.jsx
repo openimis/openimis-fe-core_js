@@ -2,9 +2,8 @@ import React, { Component } from "react";
 import clsx from "clsx";
 import { connect } from "react-redux";
 import { styled } from "@mui/material/styles";
-import { injectIntl } from "../../helpers/i18n";
+import { injectIntl, formatMessage, formatMessageWithValues } from "../../helpers/i18n";
 import { TextField } from "@mui/material";
-import { formatMessage, formatMessageWithValues } from "../../helpers/i18n";
 import { DEFAULT } from "../../constants";
 import withModulesManager from "../../helpers/modules";
 

@@ -2,7 +2,7 @@ import React, { Fragment } from "react";
 import FormPanel from "./generics/FormPanel";
 import ProgressOrError from "./generics/ProgressOrError";
 import FormattedMessage from "./generics/FormattedMessage";
-import { formatMessage } from "../helpers/i18n";
+import { formatMessage, injectIntl } from "../helpers/i18n";
 import {
   Grid,
   Paper,
@@ -16,7 +16,6 @@ import {
   Tooltip,
   InputAdornment,
 } from "@mui/material";
-import { injectIntl } from "../helpers/i18n";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { styled } from "@mui/material/styles";

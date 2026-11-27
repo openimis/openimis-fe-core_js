@@ -163,15 +163,15 @@ const Autocomplete = (props) => {
                 />
               )
         }
-        slots={{
-          paper: (paperProps) => (
-            <PaperWithConfirm
-              {...paperProps}
-              multiple={multiple}
-              onConfirm={() => setOpen(false)}
-              confirmLabel={formatMessage("core.confirmSelect")}
-            />
-          )
+        // A stable slot component: an inline one would be a new type on every render
+        // and remount the listbox paper. Its own props go through slotProps.
+        slots={{ paper: PaperWithConfirm }}
+        slotProps={{
+          paper: {
+            multiple,
+            onConfirm: () => setOpen(false),
+            confirmLabel: formatMessage("core.confirmSelect"),
+          },
         }}
       />
     </StyledAutocomplete>

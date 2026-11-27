@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from "react";
-import { injectIntl } from "../../helpers/i18n";
+import { injectIntl, formatMessage } from "../../helpers/i18n";
 import _debounce from "lodash/debounce";
 
 import { Grid, Paper, Divider, Box } from "@mui/material";
@@ -10,7 +10,6 @@ const DefaultSearchIcon = GetIconComponent("Search");
 
 import SearcherActionButton from "./SearcherActionButton";
 import { DEFAULT_DEBOUNCE_TIME, ENTER_KEY } from "../../constants";
-import { formatMessage } from "../../helpers/i18n";
 import AdvancedFiltersDialog from "../dialogs/AdvancedFiltersDialog";
 import FormattedMessage from "./FormattedMessage";
 

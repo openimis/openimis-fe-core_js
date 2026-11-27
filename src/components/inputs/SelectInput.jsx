@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from "react";
-import { injectIntl } from "../../helpers/i18n";
+import { injectIntl, formatMessage } from "../../helpers/i18n";
 import _ from "lodash-uuid";
 
 import { MenuItem, IconButton, InputLabel, TextField } from "@mui/material";
@@ -9,7 +9,6 @@ import GetIconComponent from "../../helpers/icons";
 const ClearIcon = GetIconComponent("Clear");
 import FormattedMessage from "../generics/FormattedMessage";
 import TextInput from "./TextInput";
-import { formatMessage } from "../../helpers/i18n";
 import withModulesManager from "../../helpers/modules";
 import { DEFAULT } from "../../constants";
 

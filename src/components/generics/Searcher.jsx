@@ -1,5 +1,5 @@
 import React, { Component, Fragment, useContext, useEffect } from "react";
-import { injectIntl } from "../../helpers/i18n";
+import { injectIntl, formatMessage } from "../../helpers/i18n";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 
@@ -25,7 +25,6 @@ import { cacheFilters, resetCacheFilters, saveCurrentPaginationPage } from "../.
 import { isRowMutationPending, mutationStatus, MUTATION_SUCCESS } from "../../helpers/mutations";
 import { DEFAULT, ENTER_KEY, ROWS_PER_PAGE_OPTIONS } from "../../constants";
 import { formatSorter, sort } from "../../helpers/api";
-import { formatMessage } from "../../helpers/i18n";
 import withModulesManager from "../../helpers/modules";
 import Contributions from "./Contributions";
 import FormattedMessage from "./FormattedMessage";

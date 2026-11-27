@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { injectIntl } from "../../helpers/i18n";
+import { injectIntl, formatMessage } from "../../helpers/i18n";
 import { useDispatch, useSelector } from "react-redux";
 
 import { MenuItem, Tooltip, Button, Typography } from "@mui/material";
@@ -10,7 +10,6 @@ const GetAppIcon = GetIconComponent("GetApp");
 
 import { closeExportConfigDialog, openExportConfigDialog } from "../../actions";
 import { EXPORT_FILE_FORMATS } from "../../constants";
-import { formatMessage } from "../../helpers/i18n";
 import ExportConfigDialog from "../dialogs/ExportConfigDialog";
 
 const StyledSearcherExport = styled("div")(({ theme }) => ({

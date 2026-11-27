@@ -3,7 +3,15 @@ import React, { useEffect } from "react";
 import { act, render, screen } from "@testing-library/react";
 import { MemoryRouter, Routes, Route, RouterProvider, createMemoryRouter } from "react-router-dom";
 
-import withHistory, { HistoryBlocker, Redirect, RouteProps, useHistory, useLocation, useRouteMatch } from "./history";
+import withHistory, {
+  HistoryBlocker,
+  Redirect,
+  RouteProps,
+  stripTrailingSlashes,
+  useHistory,
+  useLocation,
+  useRouteMatch,
+} from "./history";
 
 // openIMIS modules were written against react-router 5: they receive history,
 // location and match as props of their route component, and push through
@@ -244,5 +252,26 @@ describe("history.block", () => {
     renderDataRouter(Page);
     await act(async () => probe.history.push("/next"));
     expect(screen.getByTestId("path").textContent).toBe("/next");
+  });
+});
+
+describe("stripTrailingSlashes", () => {
+  // The results the trailing-slash regex it replaces gave.
+  it.each([
+    ["", ""],
+    ["/", ""],
+    ["///", ""],
+    ["/front", "/front"],
+    ["/front/", "/front"],
+    ["/front///", "/front"],
+    ["/a//b/", "/a//b"],
+    ["a", "a"],
+  ])("turns %j into %j", (path, expected) => {
+    expect(stripTrailingSlashes(path)).toBe(expected);
+  });
+
+  it("stays linear on a long run of slashes that is not at the end", () => {
+    const path = `${"/".repeat(100000)}a`;
+    expect(stripTrailingSlashes(path)).toBe(path);
   });
 });

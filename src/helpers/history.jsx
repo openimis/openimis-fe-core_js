@@ -9,8 +9,6 @@
  */
 import React, { createContext, useContext, useEffect, useMemo, useRef } from "react";
 import {
-  Link,
-  NavLink,
   Navigate,
   UNSAFE_NavigationContext,
   createPath,
@@ -21,7 +19,7 @@ import {
   useParams,
 } from "react-router-dom";
 
-export { Link, NavLink, useLocation, useParams };
+export { Link, NavLink, useLocation, useParams } from "react-router-dom";
 
 // Callbacks registered through history.block(), consulted by <HistoryBlocker />.
 const blockers = new Set();
@@ -34,9 +32,17 @@ function resolveRelative(path, currentPathname) {
   return url.pathname + url.search + url.hash;
 }
 
+// Drops the trailing slashes of a path. A loop rather than /\/+$/, which backtracks
+// quadratically on a long run of slashes that is not at the end.
+export function stripTrailingSlashes(path) {
+  let end = path.length;
+  while (end > 0 && path[end - 1] === "/") end--;
+  return path.slice(0, end);
+}
+
 function joinBasename(basename, path) {
   if (!basename || basename === "/") return path;
-  return basename.replace(/\/+$/, "") + (path.startsWith("/") ? path : `/${path}`);
+  return stripTrailingSlashes(basename) + (path.startsWith("/") ? path : `/${path}`);
 }
 
 /**
@@ -128,7 +134,7 @@ export function useRouteMatch(pattern) {
         path,
         url: match.pathnameBase,
         params: { ...match.params },
-        isExact: match.pathname.replace(/\/+$/, "") === pathname.replace(/\/+$/, ""),
+        isExact: stripTrailingSlashes(match.pathname) === stripTrailingSlashes(pathname),
       };
     }
   }

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { bindActionCreators } from "redux";
-import { injectIntl } from "../../helpers/i18n";
+import { injectIntl, formatMessage } from "../../helpers/i18n";
 import { connect } from "react-redux";
 import {
   Box,
@@ -22,7 +22,6 @@ const ErrorIcon = GetIconComponent("Error");
 const WarningIcon = GetIconComponent("Warning");
 const InfoIcon = GetIconComponent("Info");
 import { clearAlert } from "../../actions";
-import { formatMessage } from "../../helpers/i18n";
 import { ensureArray } from "../../helpers/utils";
 import MetadataViewer from "../generics/MetadataViewer";
 

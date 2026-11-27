@@ -140,7 +140,7 @@ export const useGraphqlMutation = (operation, config) => {
       return;
     }
     setState({ isLoading: true, error: null });
-    return new Promise(async (resolve, reject) => {
+    return (async () => {
       try {
         const variables = {
           input,
@@ -173,23 +173,15 @@ export const useGraphqlMutation = (operation, config) => {
         }
 
         setState({ isLoading: false, error: null });
-        if (config.onSuccess) {
-          resolve(config.onSuccess(result));
-        } else {
-          resolve(result);
-        }
+        return config.onSuccess ? config.onSuccess(result) : result;
       } catch (err) {
         setState({
           isLoading: false,
           error: err,
         });
-        if (config.onError) {
-          reject(config.onError(err));
-        } else {
-          reject(err);
-        }
+        throw config.onError ? config.onError(err) : err;
       }
-    });
+    })();
   }
 
   return {

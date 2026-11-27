@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../helpers/i18n";
 import _ from "lodash";
 import ConstantBasedPicker from "../components/generics/ConstantBasedPicker";
 

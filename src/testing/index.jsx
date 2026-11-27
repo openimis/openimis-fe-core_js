@@ -69,5 +69,9 @@ export function renderWithProviders(ui, options = {}) {
 }
 
 export * from "./fixtures";
+// The real injectIntl, for vi.mock("@openimis/fe-core") factories (react-intl 10 no longer has it).
+export { injectIntl } from "../helpers/i18n";
+// The real Tab, for vi.mock("@openimis/fe-core") factories of tab label tests.
+export { default as Tab } from "../components/generics/Tab";
 export { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 export { default as userEvent } from "@testing-library/user-event";

@@ -2,7 +2,7 @@ import React, { Fragment } from "react";
 import FormPanel from "./generics/FormPanel";
 import ProgressOrError from "./generics/ProgressOrError";
 import FormattedMessage from "./generics/FormattedMessage";
-import { formatMessage } from "../helpers/i18n";
+import { formatMessage, injectIntl } from "../helpers/i18n";
 import {
   Grid,
   Paper,
@@ -16,7 +16,6 @@ import {
   Tooltip,
   InputAdornment,
 } from "@mui/material";
-import { injectIntl } from "react-intl";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { styled } from "@mui/material/styles";
@@ -176,20 +175,27 @@ class RoleRightsPanel extends FormPanel {
                       className="filter"
                       variant="outlined"
                       label={formatMessage(intl, "core", "roleManagement.role.rightsFilter")}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <SearchIcon />
-                          </InputAdornment>
-                        ),
-                      }}
                       onChange={(e) => this.setState({ filterValue: e.target.value })}
+                      slotProps={{
+                        input: {
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <SearchIcon />
+                            </InputAdornment>
+                          ),
+                        }
+                      }}
                     />
                   </Grid>
                 </Paper>
               </Grid>
             </Grid>
-            <Grid container justifyContent="space-between" alignItems="center">
+            <Grid
+              container
+              sx={{
+                justifyContent: "space-between",
+                alignItems: "center"
+              }}>
               <Grid size={6} className="item">
                 <Grid className="item">
                   <Grid className="listTitle">
@@ -220,7 +226,7 @@ class RoleRightsPanel extends FormPanel {
                               this.isFilterMatched(modulePermission.moduleName, permission.permsName),
                           )
                           .map((permission) => (
-                            <ListItem divider>
+                            <ListItem divider key={permission.permsValue}>
                               <ListItemText
                                 className="listItemText"
                                 primary={this.rightLabel(modulePermission.moduleName, permission.permsName)}
@@ -269,7 +275,7 @@ class RoleRightsPanel extends FormPanel {
                               this.isFilterMatched(modulePermission.moduleName, permission.permsName),
                           )
                           .map((permission) => (
-                            <ListItem divider>
+                            <ListItem divider key={permission.permsValue}>
                               <ListItemText
                                 className="listItemText"
                                 primary={this.rightLabel(modulePermission.moduleName, permission.permsName)}

@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import TextInput from "./TextInput";
-import { injectIntl } from "react-intl";
-import { formatMessage, formatMessageWithValues } from "../../helpers/i18n";
+import { injectIntl, formatMessage, formatMessageWithValues } from "../../helpers/i18n";
 import { getDecimalPlaces } from "../../helpers/utils";
 import { withModulesManager } from "@openimis/fe-core";
 import FormattedNumberInput from "./FormattedNumberInput";

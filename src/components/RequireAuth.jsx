@@ -38,11 +38,10 @@ import { useBoolean, useAuthentication } from "../helpers/hooks";
 import LanguageQuickPicker from "../pickers/LanguageQuickPicker";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { Switch } from "@mui/material";
-import { useTranslations } from "../helpers/i18n";
+import { useTranslations, injectIntl } from "../helpers/i18n";
 import { DEFAULT, RIGHT_USERS } from "../admin/constants";
 import { DEFAULT as CORE_DEFAULT } from "../constants";
 import ImpersonationDialog from "./ImpersonationDialog";
-import { injectIntl } from "react-intl";
 import { classicJournalLayout, fluidPaddingX, popupJournalLayout } from "./journalLayouts";
 
 export const APP_BAR_CONTRIBUTION_KEY = "core.AppBar";
@@ -373,7 +372,13 @@ const RequireAuth = (props) => {
         })}
       >
         <Toolbar className={clsx("topToolbar", { journalOpen: journalSidebar && isDrawerOpen })}>
-          <Box display="flex" alignItems="center" minWidth={0} overflow="hidden">
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              minWidth: 0,
+              overflow: "hidden"
+            }}>
             <IconButton
               color="inherit"
               onClick={setOpen.toggle}
@@ -402,7 +407,14 @@ const RequireAuth = (props) => {
             </Button>
           </Box>
 
-          <Box display="flex" alignItems="center" className="grow" minWidth={0} overflow="hidden">
+          <Box
+            className="grow"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              minWidth: 0,
+              overflow: "hidden"
+            }}>
             {
               <Contributions {...others} contributionKey={APP_BAR_CONTRIBUTION_KEY}>
                 <div className="grow" />
@@ -417,7 +429,13 @@ const RequireAuth = (props) => {
             )}
           </Box>
 
-          <Box display="flex" alignItems="center" gap={1} flexShrink={0}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              flexShrink: 0
+            }}>
             {!!calendarSwitch && (
               <FormControlLabel
                 control={
@@ -456,7 +474,9 @@ const RequireAuth = (props) => {
                 variant="persistent"
                 anchor="left"
                 open={isOpen}
-                PaperProps={{ className: "drawerPaper" }}
+                slotProps={{
+                  paper: { className: "drawerPaper" }
+                }}
               >
                 <div className="drawerHeader">
                   <IconButton color="inherit" onClick={setOpen.off} className="menuButton" aria-label="menu">

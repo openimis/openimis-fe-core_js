@@ -21,8 +21,12 @@ const Block = (props) => {
           <Typography variant={titleVariant}>{title}</Typography>
         </Box>
       )}
-      <Box overflow="auto">
-        <Box m="10px">{children}</Box>
+      <Box sx={{
+        overflow: "auto"
+      }}>
+        <Box sx={{
+          m: "10px"
+        }}>{children}</Box>
       </Box>
     </StyledPaper>
   );

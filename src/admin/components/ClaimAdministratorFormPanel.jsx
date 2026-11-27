@@ -1,16 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Grid, Typography, Paper, Switch } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Grid } from "@mui/material";
 
 import { useTranslations, withModulesManager, PublishedComponent, useGraphqlQuery } from "@openimis/fe-core";
 import { CLAIM_ADMIN_USER_TYPE, CLAIM_ADMIN_IS_SYSTEM } from "../constants";
 import { toggleUserRoles, toggleSwitchButton, setUserTypeEnabled } from "../utils";
-
-const StyledPaper = styled(Paper)(({ theme }) => ({
-  ...(theme.paper?.paper ?? {}),
-  "& .title": theme.paper?.title ?? {},
-  "& .item": theme.paper?.item ?? {},
-}));
+import UserTypeFormPanel, { StyledPaper } from "./UserTypeFormPanel";
 
 const ClaimAdministratorFormPanel = (props) => {
   const { edited, modulesManager, onEditedChanged, readOnly } = props;
@@ -60,44 +54,26 @@ const ClaimAdministratorFormPanel = (props) => {
   };
 
   return (
-    <StyledPaper>
-      <Grid size={{ xs: 12 }} className="title">
-        <Grid container justifyContent="space-between" alignItems="center">
-          <Typography variant="h6">{formatMessage("title")}</Typography>
-          {(edited || !isEnabled) && (
-            <Switch color="secondary" disabled={readOnly} checked={isEnabled} onChange={handleToggle} />
-          )}
-        </Grid>
+    <UserTypeFormPanel
+      title={formatMessage("title")}
+      edited={edited}
+      isEnabled={isEnabled}
+      readOnly={readOnly}
+      onToggle={handleToggle}
+      onEditedChanged={onEditedChanged}
+    >
+      <Grid size={{ xs: 4 }} className="item">
+        <PublishedComponent
+          pubRef="location.HealthFacilityPicker"
+          value={edited?.healthFacility}
+          district={edited?.districts}
+          required
+          module="admin"
+          readOnly={readOnly}
+          onChange={(healthFacility) => onEditedChanged({ ...edited, healthFacility })}
+        />
       </Grid>
-      {isEnabled && (
-        <Grid size={{ xs: 12 }}>
-          <Grid container>
-            <Grid size={{ xs: 4 }} className="item">
-              <PublishedComponent
-                pubRef="core.DatePicker"
-                value={edited?.birthDate}
-                module="admin"
-                label="user.dob"
-                readOnly={readOnly}
-                maxDate={new Date()}
-                onChange={(birthDate) => onEditedChanged({ ...edited, birthDate })}
-              />
-            </Grid>
-            <Grid size={{ xs: 4 }} className="item">
-              <PublishedComponent
-                pubRef="location.HealthFacilityPicker"
-                value={edited?.healthFacility}
-                district={edited?.districts}
-                required
-                module="admin"
-                readOnly={readOnly}
-                onChange={(healthFacility) => onEditedChanged({ ...edited, healthFacility })}
-              />
-            </Grid>
-          </Grid>
-        </Grid>
-      )}
-    </StyledPaper>
+    </UserTypeFormPanel>
   );
 };
 

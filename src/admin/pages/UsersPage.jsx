@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../../helpers/i18n";
 
 import { Fab } from "@mui/material";
 import GetIconComponent from "../../helpers/icons";

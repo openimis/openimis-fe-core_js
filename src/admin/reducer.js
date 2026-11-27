@@ -188,7 +188,7 @@ function reducer(
         fetchedUser: false,
         errorUser: null,
       };
-    case "ADMIN_USER_OVERVIEW_RESP":
+    case "ADMIN_USER_OVERVIEW_RESP": {
       const users = parseData(action.payload.data.users);
       let user = null;
       if (users?.length > 0) {
@@ -202,6 +202,7 @@ function reducer(
         user,
         errorUser: formatGraphQLError(action.payload),
       };
+    }
     case "ADMIN_USER_OVERVIEW_ERR":
       return {
         ...state,

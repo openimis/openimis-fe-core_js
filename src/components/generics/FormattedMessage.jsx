@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { FormattedMessage as IntlFormattedMessage } from "react-intl";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../../helpers/i18n";
 
 class FormattedMessage extends Component {
   render() {

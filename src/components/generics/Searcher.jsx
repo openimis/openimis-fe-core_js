@@ -1,5 +1,5 @@
 import React, { Component, Fragment, useContext, useEffect } from "react";
-import { injectIntl } from "react-intl";
+import { injectIntl, formatMessage } from "../../helpers/i18n";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 
@@ -14,6 +14,7 @@ import {
   Paper,
   Typography,
   Box,
+  MenuList,
 } from "@mui/material";
 import { styled, alpha } from "@mui/material/styles";
 import GetIconComponent from "../../helpers/icons";
@@ -24,7 +25,6 @@ import { cacheFilters, resetCacheFilters, saveCurrentPaginationPage } from "../.
 import { isRowMutationPending, mutationStatus, MUTATION_SUCCESS } from "../../helpers/mutations";
 import { DEFAULT, ENTER_KEY, ROWS_PER_PAGE_OPTIONS } from "../../constants";
 import { formatSorter, sort } from "../../helpers/api";
-import { formatMessage } from "../../helpers/i18n";
 import withModulesManager from "../../helpers/modules";
 import Contributions from "./Contributions";
 import FormattedMessage from "./FormattedMessage";
@@ -152,7 +152,11 @@ class SelectionMenu extends Component {
     this.setState({ anchorEl: null }, (e) => this.props.triggerAction(a));
   };
   renderButtons = (entries, contributionKey) => (
-    <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center"
+      }}>
       {entries.map((i, idx) => (
         <Box key={`selectionsButtons-${idx}`} className="paperHeaderAction">
           <Button color="inherit" onClick={(e) => this.action(i.action)}>
@@ -160,42 +164,50 @@ class SelectionMenu extends Component {
           </Button>
         </Box>
       ))}
-      {this.props.exportable && (
-        <SearcherExport
-          selection={this.props.selection}
-          selectWithCheckbox={this.props.selectWithCheckbox}
-          filters={this.props.filters}
-          exportFetch={this.props.exportFetch}
-          additionalExportFields={this.props.additionalExportFields}
-          exportFields={this.props.exportFields}
-          exportFieldsColumns={this.props.exportFieldsColumns}
-          chooseExportableColumns={this.props.chooseExportableColumns}
-          label={this.props.exportFieldLabel}
-          chooseFileFormat={this.props.chooseFileFormat}
-          exportFileFormats={this.props.exportFileFormats}
-          exportFileFormat={this.props.exportFileFormat}
-          setExportFileFormat={this.props.setExportFileFormat}
-          downloadWithIconButton={this.props.downloadWithIconButton}
-          displayClearAllColsButton={this.props.displayClearAllColsButton}
-        />
-      )}
-      {!!contributionKey && (
-        <Contributions
-          actionHandler={this.action}
-          refetch={this.props.refetch}
-          clearSelected={this.props.clearSelected}
-          withSelection={this.props.withSelection}
-          selection={this.props.selection}
-          contributionKey={contributionKey}
-          downloadWithIconButton={this.props.downloadWithIconButton}
-        />
-      )}
+      {/* Export and contributed actions are menu items: MUI 9's MenuItem needs a menu
+          around it, so the row is a horizontal MenuList, laid out like the Box it was. */}
+      <MenuList disablePadding sx={{ display: "flex", alignItems: "center" }}>
+        {this.props.exportable && (
+          <SearcherExport
+            selection={this.props.selection}
+            selectWithCheckbox={this.props.selectWithCheckbox}
+            filters={this.props.filters}
+            exportFetch={this.props.exportFetch}
+            additionalExportFields={this.props.additionalExportFields}
+            exportFields={this.props.exportFields}
+            exportFieldsColumns={this.props.exportFieldsColumns}
+            chooseExportableColumns={this.props.chooseExportableColumns}
+            label={this.props.exportFieldLabel}
+            chooseFileFormat={this.props.chooseFileFormat}
+            exportFileFormats={this.props.exportFileFormats}
+            exportFileFormat={this.props.exportFileFormat}
+            setExportFileFormat={this.props.setExportFileFormat}
+            downloadWithIconButton={this.props.downloadWithIconButton}
+            displayClearAllColsButton={this.props.displayClearAllColsButton}
+          />
+        )}
+        {!!contributionKey && (
+          <Contributions
+            actionHandler={this.action}
+            refetch={this.props.refetch}
+            clearSelected={this.props.clearSelected}
+            withSelection={this.props.withSelection}
+            selection={this.props.selection}
+            contributionKey={contributionKey}
+            downloadWithIconButton={this.props.downloadWithIconButton}
+          />
+        )}
+      </MenuList>
     </Box>
   );
 
   renderMenu = (entries, contributionKey) => {
     return (
-      <Box display="flex" alignItems="center">
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center"
+        }}>
         <Box className="paperHeaderAction">
           <IconButton onClick={this.openMenu}>
             <MoreHoriz />
@@ -599,7 +611,9 @@ class Searcher extends Component {
               color="primary"
               className="actionButton"
             >
-              <Typography variant="body2" color="inherit">{action.label}</Typography>
+              <Typography variant="body2" sx={{
+                color: "inherit"
+              }}>{action.label}</Typography>
             </Button>
           </Grid>
         ),
@@ -711,7 +725,9 @@ class Searcher extends Component {
         {!!contributionKey && <Contributions contributionKey={contributionKey} />}
         <Paper className="paper">
           {enableActionButtons && searcherActionsPosition !== "header-right" && (
-            <Grid container justifyContent="flex-end" className="searcherActions">
+            <Grid container className="searcherActions" sx={{
+              justifyContent: "flex-end"
+            }}>
               {this.renderSearcherActions()}
             </Grid>
           )}
@@ -721,8 +737,16 @@ class Searcher extends Component {
             ) : (
               <Fragment>
                 {!!errorItems && <ErrorToast error={errorItems} />}
-                <Grid container alignItems="center" className="paperHeader" wrap="nowrap">
-                  <Grid size={GRID_RESPONSIVE_FULL} className="paperHeaderTitle" display="flex" alignItems="center">
+                <Grid container className="paperHeader" wrap="nowrap" sx={{
+                  alignItems: "center"
+                }}>
+                  <Grid
+                    size={GRID_RESPONSIVE_FULL}
+                    className="paperHeaderTitle"
+                    sx={{
+                      display: "flex",
+                      alignItems: "center"
+                    }}>
                     <div className="infoSection">
                       {infoButtonContent && <InfoButton content={infoButtonContent} />}
                       <Typography variant="inherit" noWrap>
@@ -730,8 +754,16 @@ class Searcher extends Component {
                       </Typography>
                     </div>
                   </Grid>
-                  <Grid display="flex" alignItems="center" justifyContent="flex-end" sx={{ flexShrink: 0 }}>
-                    <Box className="paperHeaderMessage" px={1}>
+                  <Grid
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-end",
+                      flexShrink: 0
+                    }}>
+                    <Box className="paperHeaderMessage" sx={{
+                      px: 1
+                    }}>
                       <SelectionPane
                         module={module}
                         selectionMessage={selectionMessage}
@@ -740,7 +772,9 @@ class Searcher extends Component {
                     </Box>
                     {fetchedItems && searcherActionsPosition === "header-right" && this.renderSearcherActions()}
                     {fetchedItems && (
-                      <Box className="paperHeaderAction" px={1}>
+                      <Box className="paperHeaderAction" sx={{
+                        px: 1
+                      }}>
                         <StyledSelectionMenu
                           selectWithCheckbox={selectWithCheckbox}
                           refetch={this.applyFilters}

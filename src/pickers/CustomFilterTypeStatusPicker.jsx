@@ -1,9 +1,8 @@
 import React from "react";
-import { injectIntl } from "react-intl";
+import { injectIntl, useTranslations } from "../helpers/i18n";
 
 import SelectInput from "../components/inputs/SelectInput";
 import { MODULE_NAME } from "../constants";
-import { useTranslations } from "../helpers/i18n";
 
 const CustomFilterTypeStatusPicker = ({
   intl,

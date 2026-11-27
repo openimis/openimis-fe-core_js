@@ -238,6 +238,7 @@ Monetary amount decimal places can be controlled using the global `fe-core.numbe
 - `core.MonthPicker`, contant-based month picker. Translation keys `month.null`, `month.1`,...
 - `core.LanguagePicker`, pick from available languages
 - `core.WarningBox`, simple alert component to show warnings or messages, with options to customize its look and size.
+- `core.TabPanel`, content of one tab in a tabbed form: renders its children only when `value === index` (props `value`, `index`). Also exported as `TabPanel`. Replaces `policyHolder.TabPanel`, which fe-policyholder keeps as an alias.
 
 ## Dispatched Redux Actions
 

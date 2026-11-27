@@ -150,9 +150,13 @@ const UserPicker = (props) => {
           required={required}
           label={withLabel && (label || formatMessage("label"))}
           placeholder={placeholder}
-          inputProps={{
-            ...inputProps.inputProps,
-            readOnly: readOnly,
+          slotProps={{
+            ...inputProps.slotProps,
+
+            htmlInput: {
+              ...inputProps.slotProps.htmlInput,
+              readOnly: readOnly,
+            }
           }}
         />
       )}

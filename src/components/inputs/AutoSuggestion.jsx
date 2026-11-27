@@ -8,7 +8,7 @@ import GetIconComponent from "../../helpers/icons";
 const ClearIcon = GetIconComponent("Clear");
 const SearchIcon = GetIconComponent("Search");
 import withModulesManager from "../../helpers/modules";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../../helpers/i18n";
 import _ from "lodash";
 import { DEFAULT } from "../../constants";
 
@@ -193,24 +193,30 @@ class AutoSuggestion extends Component {
           variant={this.inputVariant}
           label={label}
           required={required}
-          InputLabelProps={inputProps.InputLabelProps}
           inputRef={inputRef}
-          InputProps={{
-            ...inputProps.InputProps,
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={this.onClear}>
-                  <ClearIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
+          // Also MUI Autocomplete's renderInput (select mode): merge its slotProps (the
+          // input's ref and handlers) rather than replacing them.
+          slotProps={{
+            ...inputProps.slotProps,
+            input: {
+              ...inputProps.slotProps?.input,
+              ...inputProps.InputProps,
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={this.onClear}>
+                    <ClearIcon />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            },
+
+            inputLabel: { ...inputProps.slotProps?.inputLabel, ...inputProps.InputLabelProps },
+          }} />
       </FormControl>
     );
   };
@@ -223,6 +229,9 @@ class AutoSuggestion extends Component {
     this.setState(
       (state, props) => ({
         selected: props.getSuggestionValue(newValue),
+        // The input shows the picked label, which also closes the list (see
+        // _shouldRenderSuggestions). MUI 9 reports input changes to "" around a pick.
+        value: props.getSuggestionValue(newValue),
       }),
       () => this.props.onSuggestionSelected(newValue),
     );
@@ -298,8 +307,14 @@ class AutoSuggestion extends Component {
         }}
         value={value || ""}
         onChange={(event, newValue) => this.onSuggestionSelected(event, { newValue })}
-        onInputChange={(event, newValue) => this.onInputChange(event, { newValue })}
-        filterOptions={(options) => options} // Custom filtering handled by _getSuggestions
+        // MUI 9 resets the input to "" when it mounts with a value: taking that emptied a
+        // picker given a value. The reset after a pick (to the picked label) still counts:
+        // it is what closes the list. Clearing by the user is reason "clear".
+        onInputChange={(event, newValue, reason) =>
+          !(reason === "reset" && newValue === "") && this.onInputChange(event, { newValue })
+        }
+        // Custom filtering handled by _getSuggestions
+        filterOptions={(options) => options}
         renderInput={(params) => this.renderInputComponent(params, required)}
         renderOption={(props, option, { selected }) => (
           <li {...props} className={selected ? "suggestionHighlighted" : "suggestion"}>
@@ -309,14 +324,17 @@ class AutoSuggestion extends Component {
         open={this._shouldRenderSuggestions(value)}
         onOpen={() => this.onSuggestionsFetchRequested({ value })}
         onClose={() => this.onSuggestionsClearRequested()}
-        disableClearable={true} // Handled by custom clear button
+        // Handled by custom clear button
+        disableClearable={true}
         disabled={disabled}
-        ListboxProps={{ className: "suggestionsList" }}
         freeSolo
         inputValue={value || ""}
-        renderTags={() => null} // Disable tags for single selection
+        // Disable tags for single selection
+        renderValue={() => null}
         {...{ title }}
-      />
+        slotProps={{
+          listbox: { className: "suggestionsList" }
+        }} />
     );
   };
 

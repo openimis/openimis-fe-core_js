@@ -34,13 +34,15 @@ const ActionMenu = ({ actions }) => {
                 anchorEl={anchorEl}
                 open={open}
                 onClose={handleClose}
-                PaperProps={{
-                    elevation: 0,
-                    sx: {
-                        border: "1px solid",
-                        borderColor: "divider",
-                        borderRadius: 1,
-                        boxShadow: "none",
+                slotProps={{
+                    paper: {
+                        elevation: 0,
+                        sx: {
+                            border: "1px solid",
+                            borderColor: "divider",
+                            borderRadius: 1,
+                            boxShadow: "none",
+                        },
                     },
                 }}
             >

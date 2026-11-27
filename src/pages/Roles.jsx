@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../helpers/i18n";
 
 import { Grid, FormControlLabel, Checkbox, Fab, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";

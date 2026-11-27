@@ -49,6 +49,7 @@ export default defineConfig({
         'dayjs',
         'lodash',
         'lodash/debounce',
+        'lodash/merge',
         'lodash-uuid',
         'classnames',
         'clsx',
@@ -58,6 +59,9 @@ export default defineConfig({
         /^@mui\/material/,
         /^@mui\/icons-material/,
         /^@mui\/x-date-pickers/,
+        // Tab.jsx shares MUI's roving tab index context: bundling a second copy of
+        // @mui/utils would give it a context the host's <Tabs> never provides.
+        /^@mui\/utils/,
         /^@emotion\/react/,
         /^@emotion\/styled/,
         /^@emotion\/cache/,

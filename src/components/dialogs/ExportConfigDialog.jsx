@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { injectIntl } from "react-intl";
+import { injectIntl, useTranslations } from "../../helpers/i18n";
 
 import {
   Button,
@@ -18,7 +18,6 @@ const RadioButtonCheckedIcon = GetIconComponent("RadioButtonChecked");
 const RadioButtonUncheckedIcon = GetIconComponent("RadioButtonUnchecked");
 
 import { useModulesManager } from "../../helpers/modules";
-import { useTranslations } from "../../helpers/i18n";
 import { isEmptyObject } from "../../helpers/utils";
 
 const StyledDialog = styled("div")(({ theme }) => ({

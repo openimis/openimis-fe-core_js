@@ -1,10 +1,9 @@
 import React from "react";
-import { injectIntl } from "react-intl";
+import { injectIntl, useTranslations } from "../../helpers/i18n";
 
 import { styled } from "@mui/material/styles";
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import { useModulesManager } from "../../helpers/modules";
-import { useTranslations } from "../../helpers/i18n";
 
 const StyledDialog = styled("div")(({ theme }) => ({
   "& .primaryButton": theme?.dialog?.primaryButton ?? {},

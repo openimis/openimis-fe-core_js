@@ -2,7 +2,7 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import AutoSuggestion from "./AutoSuggestion";
-import { renderWithProviders, screen } from "../../testing";
+import { fireEvent, renderWithProviders, screen, waitFor } from "../../testing";
 
 // Below the threshold the component renders a SelectInput; an unmatched value makes
 // MUI warn on every render, once per keystroke in the form holding the picker.
@@ -68,5 +68,48 @@ describe("AutoSuggestion marked required", () => {
 
     expect(screen.getByRole("combobox")).toHaveAttribute("aria-autocomplete");
     expect(requiredAsterisk(container)).toBeInTheDocument();
+  });
+});
+
+// A form reopened on a saved record hands the picker its value: the picker shows it, in
+// the autocomplete (an Insuree's Profession shows "Employee" again, not an empty field).
+describe("AutoSuggestion given a value", () => {
+  it("shows the value's label", () => {
+    const { container } = renderWithProviders(
+      <AutoSuggestion
+        module="insuree"
+        label="Profession"
+        items={[{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }]}
+        getSuggestionValue={(i) => `Profession ${i.id}`}
+        onSuggestionSelected={() => {}}
+        value={{ id: 2 }}
+        selectThreshold={10}
+      />,
+    );
+
+    expect(container.querySelector('input[role="combobox"]')).toHaveValue("Profession 2");
+  });
+});
+
+describe("AutoSuggestion picking a suggestion", () => {
+  it("closes the list once a suggestion is picked", async () => {
+    const onSuggestionSelected = vi.fn();
+    renderWithProviders(
+      <AutoSuggestion
+        module="location"
+        label="Region"
+        items={[1, 2, 3, 4, 5, 6, 7]}
+        getSuggestionValue={(i) => `Region ${i}`}
+        onSuggestionSelected={onSuggestionSelected}
+        selectThreshold={5}
+      />,
+    );
+
+    const input = screen.getByRole("combobox");
+    fireEvent.change(input, { target: { value: "Region 3" } });
+    fireEvent.click(await screen.findByText("Region 3", { selector: "li *, li" }));
+
+    expect(onSuggestionSelected).toHaveBeenCalled();
+    await waitFor(() => expect(screen.queryByRole("listbox")).not.toBeInTheDocument());
   });
 });

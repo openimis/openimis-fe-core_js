@@ -67,9 +67,15 @@ const ForgotPasswordPage = (props) => {
         <Helmet title={formatMessage("pageTitle")} />
         <Paper className="paper" elevation={2}>
           <form onSubmit={onSubmit}>
-            <Box p={3} width={500}>
+            <Box
+              sx={{
+                p: 3,
+                width: 500
+              }}>
               {!isDone && (
-                <Grid container spacing={2} direction="column" alignItems="stretch">
+                <Grid container spacing={2} direction="column" sx={{
+                  alignItems: "stretch"
+                }}>
                   <Grid>
                     <h1>{formatMessage("recoverTitle")}</h1>
                   </Grid>
@@ -91,7 +97,9 @@ const ForgotPasswordPage = (props) => {
                   </Grid>
                   {error && (
                     <Grid>
-                      <Box color="error.main">{error}</Box>
+                      <Box sx={{
+                        color: "error.main"
+                      }}>{error}</Box>
                     </Grid>
                   )}
                   <Grid>

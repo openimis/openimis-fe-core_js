@@ -2,9 +2,8 @@ import React, { Component } from "react";
 import clsx from "clsx";
 import { connect } from "react-redux";
 import { styled } from "@mui/material/styles";
-import { injectIntl } from "react-intl";
+import { injectIntl, formatMessage, formatMessageWithValues } from "../../helpers/i18n";
 import { TextField } from "@mui/material";
-import { formatMessage, formatMessageWithValues } from "../../helpers/i18n";
 import { DEFAULT } from "../../constants";
 import withModulesManager from "../../helpers/modules";
 
@@ -131,19 +130,18 @@ class TextInput extends Component {
       maxLengthReached = true;
     }
 
-    this.setState(
-      {
-        value,
-        maxLengthReached,
-        maxLength,
-      },
-      () => {
-        this.pendingEchoes.push(this.state.value);
-        // A caller that never feeds the value back must not grow this without bound.
-        if (this.pendingEchoes.length > MAX_PENDING_ECHOES) this.pendingEchoes.shift();
-        this.props.onChange?.(this.state.value);
-      }
-    );
+    this.setState({
+      value,
+      maxLengthReached,
+      maxLength,
+    });
+    this.pendingEchoes.push(value);
+    // A caller that never feeds the value back must not grow this without bound.
+    if (this.pendingEchoes.length > MAX_PENDING_ECHOES) this.pendingEchoes.shift();
+    // Called from the event, not from a setState callback: React then commits the caller's
+    // update together with this one. From the callback, it is a nested update of the
+    // commit, and React 19 throws after 50 of them when keystrokes come in one burst.
+    this.props.onChange?.(value);
   };
 
   render() {
@@ -188,12 +186,15 @@ class TextInput extends Component {
           fullWidth
           disabled={readOnly}
           label={!!label && formatMessage(intl, module, label)}
-          InputProps={{ inputProps: effectiveInputProps, startAdornment, endAdornment }}
           onChange={this._onChange}
           value={this.state.value}
           error={Boolean(err)}
           helperText={msg}
           type={type}
+          slotProps={{
+            ...others.slotProps,
+            input: { ...others.slotProps?.input, inputProps: effectiveInputProps, startAdornment, endAdornment },
+          }}
         />
       </StyledTextInput>
     );

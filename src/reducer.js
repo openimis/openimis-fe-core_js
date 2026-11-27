@@ -65,20 +65,22 @@ function reducer(
         ...state,
         alert: action.payload,
       };
-    case "CORE_ALERT_CLEAR":
-      var s = { ...state };
+    case "CORE_ALERT_CLEAR": {
+      const s = { ...state };
       delete s.alert;
       return s;
+    }
     case "CORE_CONFIRM":
       return {
         ...state,
         confirm: action.payload,
       };
-    case "CORE_CONFIRM_CLEAR":
+    case "CORE_CONFIRM_CLEAR": {
       // The answer goes to the asker's onConfirm/onCancel, never into the store (OP-3229).
-      var s = { ...state };
+      const s = { ...state };
       delete s.confirm;
       return s;
+    }
     case "CORE_OPEN_EXPORT_CONFIG_DIALOG":
       return {
         ...state,
@@ -145,7 +147,7 @@ function reducer(
         ...state,
         filtersCache,
       };
-    case "CORE_CACHE_FILTER_RESET":
+    case "CORE_CACHE_FILTER_RESET": {
       const key = action.payload;
       const filtersCacheCopy = { ...state.filtersCache };
       delete filtersCacheCopy[key];
@@ -153,6 +155,7 @@ function reducer(
         ...state,
         filtersCache: filtersCacheCopy,
       };
+    }
 
     case "CORE_MUTATION_RESULT":
       return {

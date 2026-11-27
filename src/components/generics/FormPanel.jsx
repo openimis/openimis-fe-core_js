@@ -6,20 +6,31 @@ class FormPanel extends Component {
     data: {},
   };
 
-  componentDidMount() {
-    this.setState((state, props) => ({ data: props.edited }));
+  // `data` follows the `edited` prop. It is derived during the render that receives a new
+  // `edited`, not set from componentDidUpdate: a setState there costs a nested commit on
+  // every keystroke, and React 19 throws "Maximum update depth exceeded" on a burst of them
+  // (a barcode scanner, or Cypress typing with no delay).
+  static getDerivedStateFromProps(props, state) {
+    const prev = state.formPanelProps;
+    if (
+      !prev ||
+      (prev.edited_id && !props.edited_id) ||
+      prev.reset !== props.reset ||
+      (prev.edited !== props.edited && !_.isEqual(prev.edited, props.edited))
+    ) {
+      return { data: props.edited, formPanelProps: props };
+    }
+    return prev === props ? null : { formPanelProps: props };
   }
 
   _componentDidUpdate(prevProps, prevState, snapshot) {
-    if (
-      (prevProps.edited_id && !this.props.edited_id) ||
+    // `data` is already up to date (see getDerivedStateFromProps): this only tells
+    // subclasses whether it was replaced.
+    return (
+      (!!prevProps.edited_id && !this.props.edited_id) ||
       prevProps.reset !== this.props.reset ||
       !_.isEqual(prevProps.edited, this.props.edited)
-    ) {
-      this.setState((state, props) => ({ data: props.edited }));
-      return true;
-    }
-    return false;
+    );
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {

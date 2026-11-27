@@ -82,17 +82,23 @@ export const useGraphqlQuery = (operation, variables, config = {}) => {
   // because the variables are deep-equal. Searcher passes its fetch token for
   // this; any caller can pass anything that changes per request.
   const prevRefreshKey = usePrevious(config.refreshKey);
+  // Answers can come back in another order than the requests went out (a picker queries
+  // when it opens, then for what is typed): only the latest request may set the state.
+  const latestRequest = useRef(0);
 
   async function fetchQuery() {
+    const request = ++latestRequest.current;
     try {
       setQueryState({ isLoading: true, data: config.keepStale ? queryState.data : null, error: null });
       const action = await dispatch(graphqlWithVariables(operation, variables, config.type, { operation, variables }));
+      if (request !== latestRequest.current) return;
       if (action.error) {
         setQueryState({ error: action.payload, isLoading: false, data: null });
       } else {
         setQueryState({ error: null, isLoading: false, data: action.payload.data });
       }
     } catch (error) {
+      if (request !== latestRequest.current) return;
       setQueryState({ error, isLoading: false, data: null });
     }
   }
@@ -134,7 +140,7 @@ export const useGraphqlMutation = (operation, config) => {
       return;
     }
     setState({ isLoading: true, error: null });
-    return new Promise(async (resolve, reject) => {
+    return (async () => {
       try {
         const variables = {
           input,
@@ -167,23 +173,15 @@ export const useGraphqlMutation = (operation, config) => {
         }
 
         setState({ isLoading: false, error: null });
-        if (config.onSuccess) {
-          resolve(config.onSuccess(result));
-        } else {
-          resolve(result);
-        }
+        return config.onSuccess ? config.onSuccess(result) : result;
       } catch (err) {
         setState({
           isLoading: false,
           error: err,
         });
-        if (config.onError) {
-          reject(config.onError(err));
-        } else {
-          reject(err);
-        }
+        throw config.onError ? config.onError(err) : err;
       }
-    });
+    })();
   }
 
   return {

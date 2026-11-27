@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react";
 import { Link } from "react-router-dom";
-import { injectIntl } from "react-intl";
+import { injectIntl } from "../../helpers/i18n";
 import PropTypes from "prop-types";
 import MuiAccordion from "@mui/material/Accordion";
 import MuiAccordionDetails from "@mui/material/AccordionDetails";
@@ -348,7 +348,11 @@ class MainMenuContribution extends Component {
       <StyledMainMenu>
         <Accordion className="panel" expanded={this.state.expanded} onChange={this.toggleExpanded}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />} id={`${this.props.header}-header`}>
-            <Box display="flex" alignItems="center">
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center"
+              }}>
               {this.props.icon && <ListItemIcon>{renderMenuIcon(this.props.icon)}</ListItemIcon>}
               <Typography className="drawerHeading">{this.props.header}</Typography>
             </Box>

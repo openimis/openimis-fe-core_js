@@ -90,7 +90,9 @@ export const removeLocalStorage = (key) => {
   try {
     window.localStorage.removeItem(key);
     window.dispatchEvent(new Event("localStorageChange"));
-  } catch (e) {}
+  } catch (e) {
+    // Storage unavailable (private mode, blocked site data): nothing to remove.
+  }
 };
 
 // SSR-safe

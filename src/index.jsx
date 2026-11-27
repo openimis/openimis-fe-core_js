@@ -28,6 +28,7 @@ import {
 import AutoSuggestion from "./components/inputs/AutoSuggestion";
 import Autocomplete from "./components/inputs/Autocomplete";
 import Contributions from "./components/generics/Contributions";
+import Tab from "./components/generics/Tab";
 import Block from "./components/generics/Block";
 import ControlledField from "./components/generics/ControlledField";
 import Error from "./components/generics/Error";
@@ -348,7 +349,9 @@ export function combine(...hocs) {
 }
 
 export * from "./helpers/utils";
+export { injectIntl } from "./helpers/i18n";
 export {
+  Tab,
   GetIconComponent,
   Helmet,
   baseApiUrl,

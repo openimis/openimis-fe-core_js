@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useState } from "react";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
@@ -22,6 +22,7 @@ import { RIGHT_ROLE_SEARCH, RIGHT_ROLE_CREATE, RIGHT_ROLE_UPDATE, QUERY_STRING_D
 import { prepareForComparison } from "../helpers/utils";
 import RoleHeadPanel from "../components/RoleHeadPanel";
 import RoleRightsPanel from "../components/RoleRightsPanel";
+import LegacyRoleRightsPanel from "../components/LegacyRoleRightsPanel";
 
 const StyledRole = styled("div")(({ theme }) => ({
   "& .page": theme.page ?? {},
@@ -155,7 +156,7 @@ class Role extends Component {
   titleParams = (role) => ({ label: !!role && !!role.name ? role.name : null });
 
   render() {
-    const { intl, rights, roleUuid } = this.props;
+    const { intl, rights, roleUuid, isLegacyView } = this.props;
     return (
       <StyledRole>
         {rights.includes(RIGHT_ROLE_SEARCH) && rights.includes(RIGHT_ROLE_CREATE) && (
@@ -178,7 +179,7 @@ class Role extends Component {
               save={this.save}
               onEditedChanged={this.onEditedChanged}
               HeadPanel={RoleHeadPanel}
-              Panels={[RoleRightsPanel]}
+              Panels={[isLegacyView ? LegacyRoleRightsPanel : RoleRightsPanel]}
               isRequiredFieldsEmpty={this.isRequiredFieldsEmpty()}
               saveTooltip={formatMessage(
                 intl,
@@ -188,6 +189,8 @@ class Role extends Component {
               isReadOnly={!!this.state.isSystemRole || !rights.includes(RIGHT_ROLE_UPDATE) || this.state.isLocked}
               reset={this.state.reset}
               roleUuid={roleUuid}
+              onToggleLegacyView={this.props.onToggleLegacyView}
+              isLegacyView={isLegacyView}
               openDirty={rights.includes(RIGHT_ROLE_UPDATE) ? this.save : null}
             />
           </div>
@@ -215,4 +218,11 @@ const mapDispatchToProps = (dispatch) => {
 };
 
 export { StyledRole };
-export default withHistory(withModulesManager(injectIntl(connect(mapStateToProps, mapDispatchToProps)(Role))));
+const ConnectedRole = withHistory(withModulesManager(injectIntl(connect(mapStateToProps, mapDispatchToProps)(Role))));
+
+const RoleRoute = (props) => {
+  const [isLegacyView, setIsLegacyView] = useState(new URLSearchParams(props.location?.search || "").get("legacy") === "1");
+  return <ConnectedRole {...props} isLegacyView={isLegacyView} onToggleLegacyView={() => setIsLegacyView((current) => !current)} />;
+};
+
+export default RoleRoute;

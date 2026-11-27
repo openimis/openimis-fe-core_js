@@ -1,7 +1,7 @@
 import React, { Fragment } from "react";
 import { connect } from "react-redux";
 
-import { Checkbox, Divider, FormControlLabel, Grid } from "@mui/material";
+import { Checkbox, Divider, FormControlLabel, Grid, Switch } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
 import {
@@ -32,6 +32,8 @@ class RoleHeadPanel extends FormPanel {
       isRoleNameValid,
       isRoleNameValidating,
       roleNameValidationError,
+      onToggleLegacyView,
+      isLegacyView,
     } = this.props;
     return (
       <StyledRoleHeadPanel>
@@ -97,6 +99,9 @@ class RoleHeadPanel extends FormPanel {
                   />
                 }
               />
+            </Grid>
+            <Grid className="item">
+              <FormControlLabel label="Legacy view" control={<Switch checked={!!isLegacyView} onChange={onToggleLegacyView} />} />
             </Grid>
           </Grid>
         </Fragment>

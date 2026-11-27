@@ -2,7 +2,7 @@ import React, { Component, Fragment } from "react";
 import { injectIntl, formatMessage } from "../../helpers/i18n";
 import _ from "lodash-uuid";
 
-import { MenuItem, IconButton, InputLabel, TextField } from "@mui/material";
+import { CircularProgress, MenuItem, IconButton, InputLabel, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import GetIconComponent from "../../helpers/icons";
 
@@ -91,6 +91,7 @@ class SelectInput extends Component {
       required = false,
       placeholder,
       title = "",
+      loading = false,
     } = this.props;
     if (!options) return null;
     let valueStr = null;
@@ -148,7 +149,15 @@ class SelectInput extends Component {
 
               {options.length === 0 && (
                 <MenuItem disabled key={`${module}-${name}-option-0`}>
-                  <FormattedMessage module={moduleProp} id="pickerNoOptionsLabel" />
+                  {/* An empty list is not "no options" while the picker is still fetching them. */}
+                  {loading ? (
+                    <>
+                      <CircularProgress size={16} color="inherit" sx={{ mr: 1 }} />
+                      <FormattedMessage module="core" id="Autocomplete.loadingText" />
+                    </>
+                  ) : (
+                    <FormattedMessage module={moduleProp} id="pickerNoOptionsLabel" />
+                  )}
                 </MenuItem>
               )}
 
